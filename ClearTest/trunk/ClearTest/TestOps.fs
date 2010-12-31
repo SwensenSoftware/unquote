@@ -7,18 +7,18 @@ module TestOps =
     open Microsoft.FSharp.Quotations.DerivedPatterns
     open Microsoft.FSharp.Linq.QuotationEvaluation
 
-    //let OpExpr =
-    //    let eq = <@ (=) @>
-    //    let lt = <@ (<) @>
-    //    let gt = <@ (>) @>
-    //    let ltEq = <@ (<=) @>
-    //    let gtEq = <@ (>=) @>
-    //    let notEq = <@ (<>) @>
+//    module OpExpr =
+//        let eq = <@ (=) @>
+//        let lt = <@ (<) @>
+//        let gt = <@ (>) @>
+//        let ltEq = <@ (<=) @>
+//        let gtEq = <@ (>=) @>
+//        let notEq = <@ (<>) @>
 
-    let rec sprintTestExpr expr =
+    //todo: expand to include +, -, *, etc.
+    let (|BinaryInfixCall|_|) expr =
         match expr with
-        | Call (_, mi, lhs::rhs::[]) ->
-            let lhsValue, rhsValue = sprintTestExpr lhs, sprintTestExpr rhs
+        | Call (_, mi, lhs::rhs::_) ->
             let opStr =
                 match mi.Name with
                 | "op_Equality" -> "="
@@ -27,15 +27,29 @@ module TestOps =
                 | "op_GreaterThanOrEqual" -> ">="
                 | "op_LessThanOrEqual" -> "<="
                 | "op_Inequality" -> "<>"
-                | _ -> failwith "invalid test expression"
+                | _ -> null
 
+            match opStr with
+            | null -> None
+            | opStr -> Some(opStr, lhs, rhs)
+        | _ -> None
+
+    let rec sprintExpr expr =
+        match expr with
+        | BinaryInfixCall (opStr, lhs, rhs) ->
+            //does it make any difference computing these upfront? or should i place them in recursive positions
+            let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
             sprintf "%s %s %s" lhsValue opStr rhsValue
-
         | _ -> sprintf "%A" (expr.EvalUntyped())
 
     let test (expr:Expr<bool>) =
         match expr.Eval() with
-        | false -> printfn "Test fails:\n\t%s" (sprintTestExpr expr)
+        | false -> 
+            #if INTERACTIVE
+                printfn "FALSE:\n\t%s" (sprintExpr expr)
+            #else
+                failwith "non-interactive test runner not yet implemented"
+            #endif
         | true -> ()
 
     let inline (=?) x y = test <@ x = y @>
