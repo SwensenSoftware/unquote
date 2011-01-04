@@ -1,21 +1,12 @@
 ﻿namespace Swensen.ClearTest
 open Microsoft.FSharp.Reflection
+open Microsoft.FSharp.Quotations
+open Microsoft.FSharp.Quotations.Patterns
+open Microsoft.FSharp.Quotations.DerivedPatterns
+open Microsoft.FSharp.Linq.QuotationEvaluation
 
 [<AutoOpen>]
 module TestOps =
-    open Microsoft.FSharp.Quotations
-    open Microsoft.FSharp.Quotations.Patterns
-    open Microsoft.FSharp.Quotations.DerivedPatterns
-    open Microsoft.FSharp.Linq.QuotationEvaluation
-
-//    module OpExpr =
-//        let eq = <@@ (=) @@>
-//        let lt = <@@ (<) @@>
-//        let gt = <@@ (>) @@>
-//        let ltEq = <@@ (<=) @@>
-//        let gtEq = <@@ (>=) @@>
-//        let notEq = <@@ (<>) @@>
-
     let binaryOps = [
         "op_Equality", "="
         "op_GreaterThan", ">"
@@ -47,20 +38,21 @@ module TestOps =
             | Some(instanceExpr) -> 
                 sprintf "%s.%s" (sprintExpr instanceExpr) pi.Name
             | None ->
-                sprintf "%s.%s" pi.DeclaringType.Name pi.Name
-        | Value(obj,_) ->
-            sprintf "%A" obj
-        | NewTuple (tupleVals) ->
-            match tupleVals with
-            | []       -> "()"
-            | hd::[]   -> sprintf "(%s)" (sprintExpr hd)
-            | hd::tail ->
-                let rec loop lst =
-                    match lst with
-                    | hd::[]   -> sprintf "%s)" (sprintExpr hd)
-                    | hd::tail -> sprintf "%s, %s" (sprintExpr hd) (loop tail)
-                sprintf "(%s, %s" (sprintExpr hd) (loop tail)
-        | NewUnionCase( _, _) | NewArray(_,_)  ->
+                if pi.DeclaringType.Name.StartsWith("FSI_") then //FSI top-level property
+                    sprintf "%s" pi.Name
+                else
+                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+        | Value(obj, typeObj) ->
+            if typeObj = typeof<Unit> then "()"
+            elif obj = null then "null"
+            else sprintf "%A" obj
+        | NewTuple (hd::tail) -> //tuples have ad least two elements
+            let rec loop lst =
+                match lst with
+                | hd::[]   -> sprintf "%s)" (sprintExpr hd)
+                | hd::tail -> sprintf "%s, %s" (sprintExpr hd) (loop tail)
+            sprintf "(%s, %s" (sprintExpr hd) (loop tail)
+        | NewUnionCase(_,_) | NewArray(_,_)  ->
             sprintf "%A" (expr.EvalUntyped())
         | _ -> 
             sprintf "%A" (expr)
@@ -83,8 +75,9 @@ module TestOps =
         printfn "\nAssertion failed:" 
         for str in reduceSteps expr do
             printfn "\t%s" str 
+        printfn ""
         
-    //should make inline?
+    //making inline ensures stacktraces originate from method called from
     let inline test (expr:Expr<bool>) =
         match expr.Eval() with
         | false -> 
@@ -102,7 +95,3 @@ module TestOps =
     let inline (<=?) x y = test <@ x <= y @>
     let inline (>=?) x y = test <@ x >= y @>
     let inline (<>?) x y = test <@ x <> y @>
-
-    //just for fun, infix op equivalent to test
-    //not worth it
-    //let inline (!?) expr = test expr
