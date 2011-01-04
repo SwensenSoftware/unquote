@@ -8,14 +8,22 @@ open Microsoft.FSharp.Linq.QuotationEvaluation
 [<AutoOpen>]
 module TestOps =
     let binaryOps = [
+        //boolean ops
         "op_Equality", "="
         "op_GreaterThan", ">"
         "op_LessThan", "<"
         "op_GreaterThanOrEqual", ">="
         "op_LessThanOrEqual", "<="
         "op_Inequality", "<>"
+        //pipe ops
         "op_PipeRight", "|>"
         "op_PipeLeft", "<|"
+        //numeric ops
+        "op_Addition", "+"
+        "op_Subtraction", "-"
+        "op_Division", "/"
+        "op_Multiply", "*"
+        "op_Modulus", "%"
     ]
 
     //todo: expand to include +, -, *, etc.
@@ -41,6 +49,18 @@ module TestOps =
             //does it make any difference computing these upfront? or should i place them in recursive positions
             let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
             sprintf "%s %s %s" lhsValue opStr rhsValue
+        | Call(calle, mi, args) ->
+            match calle with
+            | Some(instanceExpr) -> 
+                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (args |> List.map sprintExpr |> String.concat ", ")
+            | None -> //not sure how to distinguished between tupled calls and non-tupled
+                let sprintedArgs = (args |> List.map sprintExpr |> String.concat " ")
+                if mi.DeclaringType.Name.StartsWith("FSI_") then //FSI top-level property
+                    sprintf "%s %s" mi.Name sprintedArgs
+                else 
+                    //since List.map is actualy ListModule.map, etc.
+                    let moduleName = mi.DeclaringType.Name.Replace("Module","")
+                    sprintf "%s.%s %s" moduleName mi.Name sprintedArgs
         | PropertyGet(calle, pi, _) -> 
             match calle with
             | Some(instanceExpr) -> 
@@ -62,6 +82,9 @@ module TestOps =
             sprintf "(%s, %s" (sprintExpr hd) (loop tail)
         | NewUnionCase(_,_) | NewArray(_,_)  ->
             sprintf "%A" (expr.EvalUntyped())
+        | Coerce(target, _) ->
+            //don't even "mention" anything about the coersion
+            sprintExpr target
         | _ -> 
             sprintf "%A" (expr)
 
