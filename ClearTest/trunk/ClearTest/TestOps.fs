@@ -29,6 +29,14 @@ module TestOps =
 
     let rec sprintExpr expr =
         match expr with
+        | Application (curry, last) -> //not actually sure what an application is
+            sprintf "%s %s" (sprintExpr curry) (sprintExpr last)
+        | Lambda (var, lambdaOrBody) ->
+            let rec loop lambdaOrBody =
+                match lambdaOrBody with
+                | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
+                | body -> sprintf "-> %s" (sprintExpr body)
+            sprintf "(fun %s %s)" (var.Name) (loop lambdaOrBody)
         | BinaryInfixCall(opStr, lhs, rhs) ->
             //does it make any difference computing these upfront? or should i place them in recursive positions
             let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
