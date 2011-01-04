@@ -47,16 +47,23 @@ module TestOps =
             | Some(instanceExpr) -> 
                 sprintf "%s.%s" (sprintExpr instanceExpr) pi.Name
             | None ->
-                if FSharpType.IsModule(pi.DeclaringType) then
-                    sprintf "%s" pi.Name
-                else //e.g. static property?
-                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+                sprintf "%s.%s" pi.DeclaringType.Name pi.Name
         | Value(obj,_) ->
             sprintf "%A" obj
-        | NewUnionCase( _, _) ->
+        | NewTuple (tupleVals) ->
+            match tupleVals with
+            | []       -> "()"
+            | hd::[]   -> sprintf "(%s)" (sprintExpr hd)
+            | hd::tail ->
+                let rec loop lst =
+                    match lst with
+                    | hd::[]   -> sprintf "%s)" (sprintExpr hd)
+                    | hd::tail -> sprintf "%s, %s" (sprintExpr hd) (loop tail)
+                sprintf "(%s, %s" (sprintExpr hd) (loop tail)
+        | NewUnionCase( _, _) | NewArray(_,_)  ->
             sprintf "%A" (expr.EvalUntyped())
         | _ -> 
-            sprintf "%A" (expr.EvalUntyped())
+            sprintf "%A" (expr)
 
     //this should return expr, with one one reduction applied
     let rec reduce (expr:Expr) = expr.EvalUntyped()
@@ -73,12 +80,12 @@ module TestOps =
 
     
     let fsiTestFailed (expr:Expr<bool>) =
-        printfn "FALSE:" 
+        printfn "\nAssertion failed:" 
         for str in reduceSteps expr do
             printfn "\t%s" str 
         
     //should make inline?
-    let test (expr:Expr<bool>) =
+    let inline test (expr:Expr<bool>) =
         match expr.Eval() with
         | false -> 
             #if INTERACTIVE
