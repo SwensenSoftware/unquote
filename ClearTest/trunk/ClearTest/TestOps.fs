@@ -35,6 +35,14 @@ module TestOps =
             | None -> None
         | _ -> None
 
+    let (|InstanceCall|_|) expr =
+        match expr with
+        | Call(calle, mi, args) ->
+            match calle with
+            | Some(instanceExpr) -> Some(instanceExpr, mi, args)
+            | None -> None
+        | _ -> None
+
     let rec sprintExpr expr =
         match expr with
         | Application (curry, last) -> //not actually sure what an application is
@@ -50,17 +58,25 @@ module TestOps =
             let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
             sprintf "%s %s %s" lhsValue opStr rhsValue
         | Call(calle, mi, args) ->
+            let delimitTupledArgs args = args |> List.map sprintExpr |> String.concat ", "
             match calle with
             | Some(instanceExpr) -> 
-                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (args |> List.map sprintExpr |> String.concat ", ")
+                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (delimitTupledArgs args)
             | None -> //not sure how to distinguished between tupled calls and non-tupled
                 let sprintedArgs = (args |> List.map sprintExpr |> String.concat " ")
-                if mi.DeclaringType.Name.StartsWith("FSI_") then //FSI top-level property
-                    sprintf "%s %s" mi.Name sprintedArgs
-                else 
-                    //since List.map is actualy ListModule.map, etc.
-                    let moduleName = mi.DeclaringType.Name.Replace("Module","")
-                    sprintf "%s.%s %s" moduleName mi.Name sprintedArgs
+                if FSharpType.IsModule mi.DeclaringType then
+                    //all non-BinaryInfixCalls in a module are functions starting with lower case
+                    //let fName = mi.Name.ToLower() insufficient 
+                    let fName = mi.Name
+                    if mi.DeclaringType.Name.StartsWith("FSI_") then //FSI top-level property
+                        sprintf "%s %s" fName sprintedArgs
+                    else 
+                        //since List.map is actualy ListModule.map, etc.
+                        let moduleName = mi.DeclaringType.Name.Replace("Module","")
+                        sprintf "%s.%s %s" moduleName fName sprintedArgs
+                else
+                    sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (delimitTupledArgs args)
+                    
         | PropertyGet(calle, pi, _) -> 
             match calle with
             | Some(instanceExpr) -> 
