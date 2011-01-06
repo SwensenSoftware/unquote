@@ -26,18 +26,37 @@ module SprintExprTests =
     let ``literal array`` =
         sprintExpr <@ [|1;2;3;|] @> =? "[|1; 2; 3|]"
 
-    let ``lambda`` =
+    let ``lambda expression with two args`` =
         sprintExpr <@ (fun i j -> i + j)@> =? "(fun i j -> i + j)"
 
-
-    //below are failing:
-
-    let ``instance method no args`` =
-         sprintExpr <@ "hi".ToString() @> =? "hi.ToString()"
+    let ``instance call on literal string value`` =
+        sprintExpr <@ "hi".ToString() @> =? "\"hi\".ToString()"
 
     let ``module and function call with CompiledNames differing from SourceNames`` =
-        sprintExpr <@ List.map (fun i j -> i + j) [1;2;3] @> =? "List.mapi (fun i j -> i + j) [1; 2; 3]"
+        sprintExpr <@ List.mapi (fun i j -> i + j) [1;2;3] @> =? "List.mapi (fun i j -> i + j) [1; 2; 3]"
 
-    let ``partial application`` =
-        sprintExpr <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
+    let ``simple let binding`` =
+        sprintExpr <@ let x = 3 in () @> =? "let x = 3 in ()"
 
+    module Failing =
+        //not sure why failing
+        let ``FSI property (i.e. value)`` =
+            let x = "hi"
+            sprintExpr <@ x @> =? "x"        
+
+        //not sure why failing
+        let ``instance method no args`` =
+            let x = "hi"
+            sprintExpr <@ x.ToString() @> =? "x.ToString()"
+
+        let ``partial application`` =
+            sprintExpr <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
+
+        let ``pattern match let binding`` =
+            sprintExpr <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
+        
+
+
+
+let x = "hi"
+printf "%A" <@ x @>

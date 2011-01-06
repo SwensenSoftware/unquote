@@ -1,9 +1,12 @@
 ﻿namespace Swensen.ClearTest
+open System
+open System.Reflection
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Quotations.DerivedPatterns
 open Microsoft.FSharp.Linq.QuotationEvaluation
+open Microsoft.FSharp.Metadata
 
 [<AutoOpen>]
 module TestOps =
@@ -35,21 +38,29 @@ module TestOps =
             | None -> None
         | _ -> None
 
-//    let (|InstanceCall|_|) expr =
-//        match expr with
-//        | Call(calle, mi, args) ->
-//            match calle with
-//            | Some(instanceExpr) -> Some(instanceExpr, mi, args)
-//            | None -> None
-//        | _ -> None
-
-
     let rec sprintExpr expr =
+        ///e.g. "(1, 2, 3)"
         let sprintTupleArgs args =
             args
             |> List.map sprintExpr
             |> String.concat ", "
             |> sprintf "(%s)"
+
+        ///is the top-level FSI module
+        let isFsiModule (declaringType:Type) =
+            declaringType.Name.StartsWith("FSI_")
+
+        let moduleSourceName (declaringType:Type) =
+            FSharpEntity.FromType(declaringType).DisplayName
+
+        let methodSourceName (mi:MemberInfo) =
+            mi.GetCustomAttributes(true)
+            |> Array.tryPick 
+                (fun ca -> 
+                    match ca with
+                    | :? CompilationSourceNameAttribute as csna -> Some(csna)
+                    | _ -> None)
+            |> (function | Some(csna) -> csna.SourceName | None -> mi.Name)
 
         match expr with
         | Application (curry, last) -> //not actually sure what an application is
@@ -60,39 +71,37 @@ module TestOps =
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
                 | body -> sprintf "-> %s" (sprintExpr body)
             sprintf "(fun %s %s)" (var.Name) (loop lambdaOrBody)
-        | BinaryInfixCall(opStr, lhs, rhs) ->
+        | BinaryInfixCall(opStr, lhs, rhs) -> //must come before Call pattern
             //does it make any difference computing these upfront? or should i place them in recursive positions
             let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
             sprintf "%s %s %s" lhsValue opStr rhsValue
         | Call(calle, mi, args) ->
             match calle with
-            | Some(instanceExpr) -> 
+            | Some(instanceExpr) -> //instance call
                 //just assume instance members always have tupled args
                 sprintf "%s.%s%s" (sprintExpr instanceExpr) mi.Name (sprintTupleArgs args)
-            | None -> //not sure how to distinguished between tupled calls and non-tupled
-                let sprintedArgs = (args |> List.map sprintExpr |> String.concat " ")
+            | None -> //static call
                 if FSharpType.IsModule mi.DeclaringType then
-                    //all non-BinaryInfixCalls in a module are functions starting with lower case
-                    //let fName = mi.Name.ToLower() insufficient 
-                    let fName = mi.Name
-                    if mi.DeclaringType.Name.StartsWith("FSI_") then //FSI top-level property
-                        sprintf "%s %s" fName sprintedArgs
+                    let sprintedArgs = (args |> List.map sprintExpr |> String.concat " ")
+
+                    let methodName = methodSourceName mi
+                    if isFsiModule mi.DeclaringType then 
+                        sprintf "%s %s" methodName sprintedArgs
                     else 
-                        //since List.map is actualy ListModule.map, etc.
-                        let moduleName = mi.DeclaringType.Name.Replace("Module","")
-                        sprintf "%s.%s %s" moduleName fName sprintedArgs
-                else
+                        sprintf "%s.%s %s" (moduleSourceName mi.DeclaringType) methodName sprintedArgs
+                else //assume CompiledName same as SourceName for static members
                     sprintf "%s.%s%s" mi.DeclaringType.Name mi.Name (sprintTupleArgs args)
                     
         | PropertyGet(calle, pi, _) -> 
             match calle with
-            | Some(instanceExpr) -> 
+            | Some(instanceExpr) -> //instance call 
+                //todo: needs work, e.g. index notation
                 sprintf "%s.%s" (sprintExpr instanceExpr) pi.Name
-            | None ->
-                if pi.DeclaringType.Name.StartsWith("FSI_") then //FSI top-level property
+            | None -> //static call
+                if isFsiModule pi.DeclaringType then 
                     sprintf "%s" pi.Name
                 else
-                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name //static properties can't accept params
         | Value(obj, typeObj) ->
             if typeObj = typeof<Unit> then "()"
             elif obj = null then "null"
@@ -125,7 +134,7 @@ module TestOps =
 
     
     let fsiTestFailed (expr:Expr<bool>) =
-        printfn "\nAssertion failed:" 
+        printfn "\nEXPRESSION FALSE:" 
         for str in reduceSteps expr do
             printfn "\t%s" str 
         printfn ""
