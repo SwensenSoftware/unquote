@@ -29,21 +29,28 @@ module TestOps =
     //todo: expand to include +, -, *, etc.
     let (|BinaryInfixCall|_|) expr =
         match expr with
-        | Call (_, mi, lhs::rhs::_) ->
+        | Call (_, mi, args) ->
             match binaryOps |> List.tryFind (fst>>((=) mi.Name)) with
-            | Some(_,opStr) -> Some(opStr,lhs,rhs)
+            | Some(_,opStr) -> let lhs::rhs::_ = args in Some(opStr,lhs,rhs)
             | None -> None
         | _ -> None
 
-    let (|InstanceCall|_|) expr =
-        match expr with
-        | Call(calle, mi, args) ->
-            match calle with
-            | Some(instanceExpr) -> Some(instanceExpr, mi, args)
-            | None -> None
-        | _ -> None
+//    let (|InstanceCall|_|) expr =
+//        match expr with
+//        | Call(calle, mi, args) ->
+//            match calle with
+//            | Some(instanceExpr) -> Some(instanceExpr, mi, args)
+//            | None -> None
+//        | _ -> None
+
 
     let rec sprintExpr expr =
+        let sprintTupleArgs args =
+            args
+            |> List.map sprintExpr
+            |> String.concat ", "
+            |> sprintf "(%s)"
+
         match expr with
         | Application (curry, last) -> //not actually sure what an application is
             sprintf "%s %s" (sprintExpr curry) (sprintExpr last)
@@ -58,10 +65,10 @@ module TestOps =
             let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
             sprintf "%s %s %s" lhsValue opStr rhsValue
         | Call(calle, mi, args) ->
-            let delimitTupledArgs args = args |> List.map sprintExpr |> String.concat ", "
             match calle with
             | Some(instanceExpr) -> 
-                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (delimitTupledArgs args)
+                //just assume instance members always have tupled args
+                sprintf "%s.%s%s" (sprintExpr instanceExpr) mi.Name (sprintTupleArgs args)
             | None -> //not sure how to distinguished between tupled calls and non-tupled
                 let sprintedArgs = (args |> List.map sprintExpr |> String.concat " ")
                 if FSharpType.IsModule mi.DeclaringType then
@@ -75,7 +82,7 @@ module TestOps =
                         let moduleName = mi.DeclaringType.Name.Replace("Module","")
                         sprintf "%s.%s %s" moduleName fName sprintedArgs
                 else
-                    sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (delimitTupledArgs args)
+                    sprintf "%s.%s%s" mi.DeclaringType.Name mi.Name (sprintTupleArgs args)
                     
         | PropertyGet(calle, pi, _) -> 
             match calle with
@@ -90,12 +97,8 @@ module TestOps =
             if typeObj = typeof<Unit> then "()"
             elif obj = null then "null"
             else sprintf "%A" obj
-        | NewTuple (hd::tail) -> //tuples have ad least two elements
-            let rec loop lst =
-                match lst with
-                | hd::[]   -> sprintf "%s)" (sprintExpr hd)
-                | hd::tail -> sprintf "%s, %s" (sprintExpr hd) (loop tail)
-            sprintf "(%s, %s" (sprintExpr hd) (loop tail)
+        | NewTuple (args) -> //tuples have ad least two elements
+            sprintTupleArgs args
         | NewUnionCase(_,_) | NewArray(_,_)  ->
             sprintf "%A" (expr.EvalUntyped())
         | Coerce(target, _) ->
