@@ -104,6 +104,9 @@ module TestOps =
         | Coerce(target, _) ->
             //don't even "mention" anything about the coersion
             sprintExpr target
+        | Let(var, e1, e2) ->
+            //todo: this needs to be handled better for curried functions
+            sprintf "let %s = %s in %s" var.Name (e1 |> sprintExpr) (e2 |> sprintExpr)
         | _ -> 
             sprintf "%A" (expr)
 
