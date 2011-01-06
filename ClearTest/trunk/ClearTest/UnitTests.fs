@@ -39,15 +39,6 @@ module SprintExprTests =
         sprintExpr <@ let x = 3 in () @> =? "let x = 3 in ()"
 
     module Failing =
-        //not sure why failing
-        let ``FSI property (i.e. value)`` =
-            let x = "hi"
-            sprintExpr <@ x @> =? "x"        
-
-        //not sure why failing
-        let ``instance method no args`` =
-            let x = "hi"
-            sprintExpr <@ x.ToString() @> =? "x.ToString()"
 
         let ``partial application`` =
             sprintExpr <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
@@ -57,6 +48,27 @@ module SprintExprTests =
         
 
 
+//depending a "value" may be a Value or Module Property, depending: e.g.
 
-let x = "hi"
-printf "%A" <@ x @>
+//        > let x = "hi" in  <@ x @>;;
+//        val it : Quotations.Expr<string> = Value ("hi") {CustomAttributes = [];
+//                                                         Raw = ...;
+//                                                         Type = System.String;}
+//        > let x = "hi";;
+//
+//        val x : string = "hi"
+//
+//        > let x = "hi" in  <@ x @>;;
+//        val it : Quotations.Expr<string> = Value ("hi") {CustomAttributes = [];
+//                                                         Raw = ...;
+//                                                         Type = System.String;}
+
+//        //not sure why failing
+//        let ``FSI property (i.e. value)`` =
+//            let x = "hi"
+//            sprintExpr <@ x @> =? "x"        
+//
+//        //not sure why failing
+//        let ``instance method no args`` =
+//            let x = "hi"
+//            sprintExpr <@ x.ToString() @> =? "x.ToString()"

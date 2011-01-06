@@ -56,10 +56,9 @@ module TestOps =
         let methodSourceName (mi:MemberInfo) =
             mi.GetCustomAttributes(true)
             |> Array.tryPick 
-                (fun ca -> 
-                    match ca with
-                    | :? CompilationSourceNameAttribute as csna -> Some(csna)
-                    | _ -> None)
+                    (function
+                        | :? CompilationSourceNameAttribute as csna -> Some(csna)
+                        | _ -> None)
             |> (function | Some(csna) -> csna.SourceName | None -> mi.Name)
 
         match expr with
