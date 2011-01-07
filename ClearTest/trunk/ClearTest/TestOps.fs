@@ -38,27 +38,33 @@ module TestOps =
             | None -> None
         | _ -> None
 
+    //todo:
+    //  remaining binary ops
+    //  unary ops
+    //  add parens based on precedence <-- big one!
+    //  mutable let bindings
+    //  new object
+
+    //funny case: <@ "asdf".[2] @> resolves as call to
+    //Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicFunctions.GetString
+    //same with IntrinsicFunctions.GetArray
     let rec sprintExpr expr =
         
         let sprintArgs delimiter exprs =
             exprs |> List.map sprintExpr |> String.concat delimiter
 
-        let sprintTupleArgs = sprintArgs ", "
+        let sprintTupledArgs = sprintArgs ", "
         let sprintCurriedArgs = sprintArgs " "
 
         ///is the top-level FSI module
         let isFsiModule (declaringType:Type) =
             declaringType.Name.StartsWith("FSI_")
 
-        let moduleSourceName (declaringType:Type) =
-            FSharpEntity.FromType(declaringType).DisplayName
-
-        let methodSourceName (mi:MemberInfo) =
+        let sourceName (mi:MemberInfo) =
             mi.GetCustomAttributes(true)
-            |> Array.tryPick 
-                    (function
-                        | :? CompilationSourceNameAttribute as csna -> Some(csna)
-                        | _ -> None)
+            |> Array.tryPick (function 
+                                | :? CompilationSourceNameAttribute as csna -> Some(csna)
+                                | _ -> None)
             |> (function | Some(csna) -> csna.SourceName | None -> mi.Name)
 
         match expr with
@@ -78,34 +84,36 @@ module TestOps =
             match calle with
             | Some(instanceExpr) -> //instance call
                 //just assume instance members always have tupled args
-                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (sprintTupleArgs args)
+                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (sprintTupledArgs args)
             | None -> //static call
                 if FSharpType.IsModule mi.DeclaringType then
-                    let methodName = methodSourceName mi
+                    let methodName = sourceName mi
                     let sprintedArgs = sprintCurriedArgs args
                     if isFsiModule mi.DeclaringType then 
                         sprintf "%s %s" methodName sprintedArgs
                     else 
-                        sprintf "%s.%s %s" (moduleSourceName mi.DeclaringType) methodName sprintedArgs
+                        sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs
                 else //assume CompiledName same as SourceName for static members
-                    sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupleArgs args)
+                    sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args)
                     
-        | PropertyGet(calle, pi, _) -> 
+        | PropertyGet(calle, pi, args) -> 
             match calle with
             | Some(instanceExpr) -> //instance call 
-                //todo: needs work, e.g. index notation
-                sprintf "%s.%s" (sprintExpr instanceExpr) pi.Name
-            | None -> //static call
+                match pi.Name, args with
+                | _, [] -> sprintf "%s.%s" (sprintExpr instanceExpr) pi.Name
+                | "Item", _ -> sprintf "%s.[%s]" (sprintExpr instanceExpr) (sprintTupledArgs args)
+                | _, _ -> sprintf "%s.%s(%s)" (sprintExpr instanceExpr) pi.Name (sprintTupledArgs args)
+            | None -> //static call (note: can't accept params
                 if isFsiModule pi.DeclaringType then 
                     sprintf "%s" pi.Name
                 else
-                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name //static properties can't accept params
+                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
         | Value(obj, typeObj) ->
             if typeObj = typeof<Unit> then "()"
             elif obj = null then "null"
             else sprintf "%A" obj
         | NewTuple (args) -> //tuples have ad least two elements
-            args |> sprintTupleArgs |> sprintf "(%s)"
+            args |> sprintTupledArgs |> sprintf "(%s)"
         | NewUnionCase(_,_) | NewArray(_,_)  ->
             expr.EvalUntyped() |> sprintf "%A"
         | Coerce(target, _) ->

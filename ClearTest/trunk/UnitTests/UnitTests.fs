@@ -38,6 +38,15 @@ module SprintExprTests =
     let ``simple let binding`` =
         sprintExpr <@ let x = 3 in () @> =? "let x = 3 in ()"
 
+    let ``item getter with single arg`` =
+        let table = System.Collections.Generic.Dictionary<int,int>()
+        sprintExpr <@ table.[0] @> =? "table.[0]"
+
+    let ``named getter with single arg`` =
+        sprintExpr <@ "asdf".Chars(0) @> =? "\"asdf\".Chars(0)"
+
+    //need to think up some multi-arg item and named getter scenarios
+
     module Failing =
 
         let ``partial application`` =
