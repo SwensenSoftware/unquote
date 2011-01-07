@@ -39,12 +39,12 @@ module TestOps =
         | _ -> None
 
     let rec sprintExpr expr =
-        ///e.g. "(1, 2, 3)"
-        let sprintTupleArgs args =
-            args
-            |> List.map sprintExpr
-            |> String.concat ", "
-            |> sprintf "(%s)"
+        
+        let sprintArgs delimiter exprs =
+            exprs |> List.map sprintExpr |> String.concat delimiter
+
+        let sprintTupleArgs = sprintArgs ", "
+        let sprintCurriedArgs = sprintArgs " "
 
         ///is the top-level FSI module
         let isFsiModule (declaringType:Type) =
@@ -69,7 +69,7 @@ module TestOps =
                 match lambdaOrBody with
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
                 | body -> sprintf "-> %s" (sprintExpr body)
-            sprintf "(fun %s %s)" (var.Name) (loop lambdaOrBody)
+            sprintf "(fun %s %s)" (var.Name) (loop lambdaOrBody) //deal with parens latter
         | BinaryInfixCall(opStr, lhs, rhs) -> //must come before Call pattern
             //does it make any difference computing these upfront? or should i place them in recursive positions
             let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
@@ -78,18 +78,17 @@ module TestOps =
             match calle with
             | Some(instanceExpr) -> //instance call
                 //just assume instance members always have tupled args
-                sprintf "%s.%s%s" (sprintExpr instanceExpr) mi.Name (sprintTupleArgs args)
+                sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (sprintTupleArgs args)
             | None -> //static call
                 if FSharpType.IsModule mi.DeclaringType then
-                    let sprintedArgs = (args |> List.map sprintExpr |> String.concat " ")
-
                     let methodName = methodSourceName mi
+                    let sprintedArgs = sprintCurriedArgs args
                     if isFsiModule mi.DeclaringType then 
                         sprintf "%s %s" methodName sprintedArgs
                     else 
                         sprintf "%s.%s %s" (moduleSourceName mi.DeclaringType) methodName sprintedArgs
                 else //assume CompiledName same as SourceName for static members
-                    sprintf "%s.%s%s" mi.DeclaringType.Name mi.Name (sprintTupleArgs args)
+                    sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupleArgs args)
                     
         | PropertyGet(calle, pi, _) -> 
             match calle with
@@ -106,9 +105,9 @@ module TestOps =
             elif obj = null then "null"
             else sprintf "%A" obj
         | NewTuple (args) -> //tuples have ad least two elements
-            sprintTupleArgs args
+            args |> sprintTupleArgs |> sprintf "(%s)"
         | NewUnionCase(_,_) | NewArray(_,_)  ->
-            sprintf "%A" (expr.EvalUntyped())
+            expr.EvalUntyped() |> sprintf "%A"
         | Coerce(target, _) ->
             //don't even "mention" anything about the coersion
             sprintExpr target
