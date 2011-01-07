@@ -44,6 +44,7 @@ module TestOps =
     //  add parens based on precedence <-- big one!
     //  mutable let bindings
     //  new object
+    //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
 
     //funny case: <@ "asdf".[2] @> resolves as call to
     //Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicFunctions.GetString
@@ -60,12 +61,20 @@ module TestOps =
         let isFsiModule (declaringType:Type) =
             declaringType.Name.StartsWith("FSI_")
 
+        ///get the source name for the Module or F# Function represented by the given MemberInfo
         let sourceName (mi:MemberInfo) =
             mi.GetCustomAttributes(true)
-            |> Array.tryPick (function 
-                                | :? CompilationSourceNameAttribute as csna -> Some(csna)
-                                | _ -> None)
-            |> (function | Some(csna) -> csna.SourceName | None -> mi.Name)
+            |> Array.tryPick 
+                (function 
+                    | :? CompilationSourceNameAttribute as csna -> Some(csna.SourceName)
+                    | :? CompilationRepresentationAttribute as cra -> 
+                        //seems sufficient, but may not be as robust as FSharpEntity.DisplayName
+                        if cra.Flags = CompilationRepresentationFlags.ModuleSuffix then 
+                            Some(mi.Name.Substring(0, mi.Name.Length - 6))
+                        else 
+                            None
+                    | _ -> None)
+            |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
 
         match expr with
         | Application (curry, last) -> //not actually sure what an application is
@@ -108,9 +117,9 @@ module TestOps =
                     sprintf "%s" pi.Name
                 else
                     sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
+        | Unit -> "()" //must come before Value pattern
         | Value(obj, typeObj) ->
-            if typeObj = typeof<Unit> then "()"
-            elif obj = null then "null"
+            if obj = null then "null"
             else sprintf "%A" obj
         | NewTuple (args) -> //tuples have ad least two elements
             args |> sprintTupledArgs |> sprintf "(%s)"

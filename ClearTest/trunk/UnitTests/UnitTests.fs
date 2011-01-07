@@ -1,6 +1,8 @@
 ﻿module UnitTests
 open Swensen.ClearTest.TestOps
 
+//I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
+//would love to create F# specific unit testing framework.
 module SprintExprTests =
     let ``literal int`` =
         sprintExpr <@ 1 @> =? "1"
@@ -35,12 +37,18 @@ module SprintExprTests =
     let ``module and function call with CompiledNames differing from SourceNames`` =
         sprintExpr <@ List.mapi (fun i j -> i + j) [1;2;3] @> =? "List.mapi (fun i j -> i + j) [1; 2; 3]"
 
+    module NonSourceNameModule =
+        let nonSourceNameFunc (x:int) = x
+
+    let ``module and function with non-source name`` =
+        sprintExpr <@ NonSourceNameModule.nonSourceNameFunc 3  @> =? "NonSourceNameModule.nonSourceNameFunc 3"
+
     let ``simple let binding`` =
         sprintExpr <@ let x = 3 in () @> =? "let x = 3 in ()"
 
     let ``item getter with single arg`` =
         let table = System.Collections.Generic.Dictionary<int,int>()
-        sprintExpr <@ table.[0] @> =? "table.[0]"
+        sprintExpr <@ table.[0] @> =? "seq [].[0]" //might want to fix up dict value sprinting later
 
     let ``named getter with single arg`` =
         sprintExpr <@ "asdf".Chars(0) @> =? "\"asdf\".Chars(0)"
