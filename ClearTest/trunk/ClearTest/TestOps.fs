@@ -5,6 +5,7 @@ open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Quotations.DerivedPatterns
+open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
@@ -134,19 +135,100 @@ module TestOps =
         | _ -> 
             sprintf "%A" (expr)
 
+    let (|InstanceCall|_|) expr =
+        match expr with
+        | Call(obj,mi,args) ->
+            match obj with
+            | Some(instance) -> Some(instance, mi, args)
+            | None -> None
+        | _ -> None
+
+    let (|StaticCall|_|) expr =
+        match expr with
+        | Call(obj,mi,args) ->
+            match obj with
+            | Some(_) -> None
+            | None -> Some(mi,args)
+        | _ -> None
+
+    ///Construct a Value from an evaluated expression
+    let evalValue (expr:Expr) = 
+        let evaled = expr.EvalUntyped()
+        Expr.Value(evaled, evaled.GetType())
+
+//    type reduceRes =
+//        | AlreadyValue
+//        | Evaled
+//        //| CouldNotEval
+
+    let rec reduce (expr:Expr) = 
+        match expr with
+        | Value(obj,objType) ->
+            Expr.Value(obj, objType)
+        | InstanceCall(calle,mi,args) ->
+            let argValues, argExprs = 
+                args 
+                |> List.mapi (fun i arg -> (i, arg))
+                |> List.partition (function |_,Value(_,_) -> true |_,_ -> false)
+
+            match calle, argExprs with
+            | Value(_,_), [] -> //the calle and all args are Values
+                evalValue expr
+            | Value(_,_), hd::tail -> //the calle is a Value, but at least one arg is not, evaluate it
+                let hdValue = (fst hd, evalValue (snd hd))
+                Expr.Call(calle, mi, (argValues @ hdValue::tail) |> List.sortBy fst |> List.map snd)
+            | calle, _ -> //the calle is not a value
+                Expr.Call(evalValue calle, mi, args)
+//        | StaticCall(mi, args) ->
+//
+//            
+        | ShapeVar v -> 
+            Expr.Var v
+        | ShapeLambda (v,expr) -> 
+            Expr.Lambda (v, reduce expr)
+        | ShapeCombination (o, exprs) -> 
+            RebuildShapeCombination (o, List.map reduce exprs)
+
     //this should return expr, with one one reduction applied
-    let rec reduce (expr:Expr) = expr.EvalUntyped()
+//    let reduce = 
+//        let mutable complete = false
+//        let rec reduce (expr:Expr) = 
+//            match expr with
+//            | Value(obj,objType) ->
+//                Expr.Value(obj, objType)
+//            | InstanceCall(calle,mi,args) ->
+//                if complete then Expr.Call(calle, mi, args)
+//                else
+//                    match calle, args |> List.filter (function |Value(_,_) -> false | _ -> true) with
+//                    | Value(_,_), [] -> 
+//                        compete <- true
+//                        evalValue expr
+//                    | Value(_,_), nonValueArgs ->
+//                        
+//
+//            | StaticCall(mi, args) ->
+//
+//            
+//            | ShapeVar v -> 
+//                Expr.Var v
+//            | ShapeLambda (v,expr) -> 
+//                Expr.Lambda (v, reduce expr)
+//            | ShapeCombination (o, exprs) -> 
+//                RebuildShapeCombination (o, List.map (reduce>>snd) exprs)
+//        
+//        fun expr -> reduce expr false
+
         
     let reduceSteps (expr:Expr<bool>) =
         let rec loop expr acc =
-            //let next = expr |> reduce |> sprintExpr
-            let next = expr |> sprintExpr
-            match next with
-            | "true" | "false" | _ when next = List.head acc -> acc
-            | _ -> loop expr (next::acc)
+            let nextExpr = expr |> reduce 
+            let nextSprint = nextExpr |> sprintExpr
+            //let next = expr |> sprintExpr
+            match nextSprint with
+            | "true" | "false" | _ when nextSprint = List.head acc -> acc
+            | _ -> loop nextExpr (nextSprint::acc)
 
         loop expr [expr |> sprintExpr] |> List.rev
-
     
     let fsiTestFailed (expr:Expr<bool>) =
         printfn "\nEXPRESSION FALSE:" 
