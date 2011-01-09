@@ -46,7 +46,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestOps.fs" />
+    <Compile Include="Sprint.fs" />
+    <Compile Include="Reduce.fs" />
+    <Compile Include="Test.fs" />
+    <Compile Include="Ops.fs" />
     <None Include="Startup.fsx" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

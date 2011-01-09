@@ -1,4 +1,24 @@
 ﻿#r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Linq.dll"
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Metadata.dll"
-#load "TestOps.fs"
+
+#load "Sprint.fs"
 open Swensen.ClearTest
+
+#load "Reduce.fs"
+open Swensen.ClearTest
+
+#load "Test.fs"
+open Swensen.ClearTest
+
+#load "Ops.fs"
+open Swensen.ClearTest
+
+open System
+open System.Reflection
+open Microsoft.FSharp.Reflection
+open Microsoft.FSharp.Quotations
+open Microsoft.FSharp.Quotations.Patterns
+open Microsoft.FSharp.Quotations.DerivedPatterns
+open Microsoft.FSharp.Quotations.ExprShape
+open Microsoft.FSharp.Linq.QuotationEvaluation
+open Microsoft.FSharp.Metadata

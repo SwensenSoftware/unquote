@@ -1,5 +1,5 @@
 ﻿module UnitTests
-open Swensen.ClearTest.TestOps
+open Swensen.ClearTest
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.
