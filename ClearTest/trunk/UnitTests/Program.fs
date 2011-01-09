@@ -19,6 +19,6 @@ for i in 1..1000 do
 
 [<EntryPoint>]
 let main args =
-    sprintExpr <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"  
+    sprintExpr <@ snd (1,2) @> |>ignore
     0
 

@@ -41,6 +41,13 @@ let (|BinaryInfixCall|_|) expr =
 let isFsiModule (declaringType:Type) =
     declaringType.Name.StartsWith("FSI_")
 
+//best we can seem to do
+let isOpenModule (declaringType:Type) =
+    isFsiModule declaringType ||
+    declaringType.GetCustomAttributes(true)
+    |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
+    |> (function | Some(_) -> true | None -> false)
+
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
     mi.GetCustomAttributes(true)
@@ -96,7 +103,7 @@ let rec sprintExpr expr =
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
                 let sprintedArgs = sprintCurriedArgs args
-                if isFsiModule mi.DeclaringType then 
+                if isOpenModule mi.DeclaringType then 
                     sprintf "%s %s" methodName sprintedArgs
                 else 
                     sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs
@@ -111,7 +118,7 @@ let rec sprintExpr expr =
             | "Item", _ -> sprintf "%s.[%s]" (sprintExpr instanceExpr) (sprintTupledArgs args)
             | _, _ -> sprintf "%s.%s(%s)" (sprintExpr instanceExpr) pi.Name (sprintTupledArgs args)
         | None -> //static call (note: can't accept params
-            if isFsiModule pi.DeclaringType then 
+            if isOpenModule pi.DeclaringType then 
                 sprintf "%s" pi.Name
             else
                 sprintf "%s.%s" pi.DeclaringType.Name pi.Name 

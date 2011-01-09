@@ -53,6 +53,9 @@ module SprintExprTests =
     let ``named getter with single arg`` =
         sprintExpr <@ "asdf".Chars(0) @> =? "\"asdf\".Chars(0)"
 
+    let ``auto open modules are not qualified`` =
+        sprintExpr <@ snd (1, 2) @> =? "snd (1, 2)"
+
     //need to think up some multi-arg item and named getter scenarios
 
     module Failing =
