@@ -46,13 +46,14 @@ let evalValue (expr:Expr) =
     let evaled = expr.EvalUntyped()
     Expr.Value(evaled, evaled.GetType())
 
-let isValue = function
-    | Value(_,_) -> true
+let rec isValue = function
+    | Value(_,_) | NewUnionCase(_,_) | NewArray(_,_) -> true
+    | NewTuple (args) when allReduced args -> true
     | _ -> false
+and allReduced x = 
+    x |> List.filter (isValue>>not) |> List.length = 0
 
-let allValues x = 
-    x |> List.filter isValue |> List.length = List.length x
-
+//might want to consider being a little more aggressive: reduce all args / calles if any of them are not reduced
 let rec reduce (expr:Expr) = 
     ///precondition: args is non-empty
     let reduceFirstNonValueArg args =
@@ -67,7 +68,7 @@ let rec reduce (expr:Expr) =
 
     match expr with
     | InstanceCall(calle,mi,args) ->
-        match isValue calle, allValues args with
+        match isValue calle, allReduced args with
         | true, true -> //the calle and all args are Values
             evalValue expr
         | _, false -> //at least one arg is not a Value
@@ -75,11 +76,11 @@ let rec reduce (expr:Expr) =
         | false, _ -> //the calle is not a value
             Expr.Call(reduce calle, mi, args)
     | StaticCall(mi,args) ->
-        match allValues args with
+        match allReduced args with
         | true -> evalValue expr
         | false -> Expr.Call(mi, reduceFirstNonValueArg args )
     | InstancePropertyGet(calle,pi,args) ->
-        match isValue calle, allValues args with
+        match isValue calle, allReduced args with
         | true, true -> //the calle and all args are Values
             evalValue expr
         | _, false -> //at least one arg is not a Value
@@ -87,9 +88,13 @@ let rec reduce (expr:Expr) =
         | false, _ -> //the calle is not a value
             Expr.PropertyGet(reduce calle, pi, args)
     | StaticPropertyGet(pi,args) ->
-        match allValues args with
+        match allReduced args with
         | true -> evalValue expr
         | false -> Expr.PropertyGet(pi, reduceFirstNonValueArg args )
+    | NewTuple(args) ->
+        match allReduced args with
+        | true -> evalValue expr
+        | false -> Expr.NewTuple(reduceFirstNonValueArg args)
     | ShapeVar v -> 
         Expr.Var v
     | ShapeLambda (v,expr) -> 
