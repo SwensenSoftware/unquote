@@ -46,61 +46,39 @@ let evalValue (expr:Expr) =
     let evaled = expr.EvalUntyped()
     Expr.Value(evaled, evaled.GetType())
 
-let rec isValue = function
+let rec isReduced = function
     | Value(_,_) | NewUnionCase(_,_) | NewArray(_,_) -> true
     | NewTuple (args) when allReduced args -> true
     | _ -> false
 and allReduced x = 
-    x |> List.filter (isValue>>not) |> List.length = 0
+    x |> List.filter (isReduced>>not) |> List.length = 0
 
 //might want to consider being a little more aggressive: reduce all args / calles if any of them are not reduced
 let rec reduce (expr:Expr) = 
-    ///precondition: args is non-empty
-    let reduceFirstNonValueArg args =
-        let argValues, argExprs = 
-            args 
-            |> List.mapi (fun i arg -> (i, arg))
-            |> List.partition (function |_,Value(_,_) -> true |_,_ -> false)
-            
-        let hd::tail = argExprs
-        let hdReduced = (fst hd, reduce (snd hd))
-        (argValues @ hdReduced::tail) |> List.sortBy fst |> List.map snd
-
     match expr with
     | InstanceCall(calle,mi,args) ->
-        match isValue calle, allReduced args with
-        | true, true -> //the calle and all args are Values
-            evalValue expr
-        | _, false -> //at least one arg is not a Value
-            Expr.Call(calle, mi, reduceFirstNonValueArg args )
-        | false, _ -> //the calle is not a value
-            Expr.Call(reduce calle, mi, args)
+        if allReduced (calle::args) then evalValue expr
+        else Expr.Call(reduce calle, mi, reduceAll args)
     | StaticCall(mi,args) ->
-        match allReduced args with
-        | true -> evalValue expr
-        | false -> Expr.Call(mi, reduceFirstNonValueArg args )
+        if allReduced args then evalValue expr
+        else Expr.Call(mi, reduceAll args)
     | InstancePropertyGet(calle,pi,args) ->
-        match isValue calle, allReduced args with
-        | true, true -> //the calle and all args are Values
-            evalValue expr
-        | _, false -> //at least one arg is not a Value
-            Expr.PropertyGet(calle, pi, reduceFirstNonValueArg args )
-        | false, _ -> //the calle is not a value
-            Expr.PropertyGet(reduce calle, pi, args)
+        if allReduced (calle::args) then evalValue expr
+        else Expr.PropertyGet(reduce calle, pi, reduceAll args)
     | StaticPropertyGet(pi,args) ->
-        match allReduced args with
-        | true -> evalValue expr
-        | false -> Expr.PropertyGet(pi, reduceFirstNonValueArg args )
+        if allReduced args then evalValue expr
+        else Expr.PropertyGet(pi, reduceAll args)
     | NewTuple(args) ->
-        match allReduced args with
-        | true -> evalValue expr
-        | false -> Expr.NewTuple(reduceFirstNonValueArg args)
+        if allReduced args then evalValue expr
+        else Expr.NewTuple(reduceAll args)
     | ShapeVar v -> 
         Expr.Var v
     | ShapeLambda (v,expr) -> 
         Expr.Lambda (v, reduce expr)
     | ShapeCombination (o, exprs) -> 
-        RebuildShapeCombination (o, List.map reduce exprs)
+        RebuildShapeCombination (o, List.map reduce exprs) //not really sure when this matches, how it works
+and reduceAll exprList =
+    exprList |> List.map (fun x -> if isReduced x then x else reduce x)
         
 let reduceSteps =        
     let rec loop expr acc =

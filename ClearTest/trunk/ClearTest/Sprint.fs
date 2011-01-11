@@ -9,6 +9,8 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
+//precedence: http://msdn.microsoft.com/en-us/library/dd233228.aspx
+
 let binaryOps = [
     //boolean ops
     "op_Equality", "="
