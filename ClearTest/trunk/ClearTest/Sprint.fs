@@ -138,5 +138,7 @@ let rec sprintExpr expr =
     | Let(var, e1, e2) ->
         //todo: this needs to be handled better for curried functions
         sprintf "let %s = %s in %s" var.Name (e1 |> sprintExpr) (e2 |> sprintExpr)
+    | Quote(qx) -> 
+        sprintf "<@ %s @>" (sprintExpr qx)
     | _ -> 
         sprintf "%A" (expr)

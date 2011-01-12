@@ -56,7 +56,7 @@ let rec isReduced = function
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
 
-//might want to consider being a little more aggressive: reduce all args / calles if any of them are not reduced
+//reduce all args / calles if any of them are not reduced; otherwise eval
 let rec reduce (expr:Expr) = 
     match expr with
     | InstanceCall(calle,mi,args) ->
@@ -82,7 +82,7 @@ let rec reduce (expr:Expr) =
     | ShapeLambda (v,expr) -> 
         Expr.Lambda (v, reduce expr)
     | ShapeCombination (o, exprs) -> 
-        RebuildShapeCombination (o, List.map reduce exprs) //not really sure when this matches, how it works
+        RebuildShapeCombination (o, List.map reduce exprs) //should use reduceAll here?
 and reduceAll exprList =
     exprList |> List.map (fun x -> if isReduced x then x else reduce x)
         
