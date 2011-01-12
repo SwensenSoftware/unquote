@@ -46,9 +46,12 @@ let evalValue (expr:Expr) =
     let evaled = expr.EvalUntyped()
     Expr.Value(evaled, evaled.GetType())
 
+//it is that isReduce/allReduce pairs properly with reduce match (note specifically NewTuple and Coerce so far)
+//and that they are in synce with the depth of Sprinting.
 let rec isReduced = function
     | Value(_,_) | NewUnionCase(_,_) | NewArray(_,_) -> true
     | NewTuple (args) when allReduced args -> true
+    | Coerce(objExpr,_) when isReduced objExpr -> true
     | _ -> false
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
@@ -70,7 +73,10 @@ let rec reduce (expr:Expr) =
         else Expr.PropertyGet(pi, reduceAll args)
     | NewTuple(args) ->
         if allReduced args then evalValue expr
-        else Expr.NewTuple(reduceAll args)
+        else Expr.NewTuple(reduceAll args)   
+    | Coerce(objExpr,targetType) ->
+        if isReduced objExpr then evalValue expr
+        else Expr.Coerce(reduce objExpr, targetType)
     | ShapeVar v -> 
         Expr.Var v
     | ShapeLambda (v,expr) -> 
