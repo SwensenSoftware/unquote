@@ -2,6 +2,6 @@
 
 [<EntryPoint>]
 let main args =
-    let x = <@  @>
+    let x = <@ 2  @>
     0
 

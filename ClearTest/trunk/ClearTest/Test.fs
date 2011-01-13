@@ -17,6 +17,9 @@ let fsiTestFailed (expr:Expr<bool>) =
     for expr in reduceSteps expr do
         printfn "\t%s" (sprintExpr expr) 
     printfn ""
+
+let releaseTestFailed (expr:Expr<bool>) =
+    expr |> reduceSteps |> List.map sprintExpr |> String.concat "\n" |> failwith
         
 //making inline ensures stacktraces originate from method called from
 let inline test (expr:Expr<bool>) =
@@ -26,6 +29,7 @@ let inline test (expr:Expr<bool>) =
             fsiTestFailed expr
         #else
             //implement as call to testing framework assert
-            failwith "non-interactive test runner not yet implemented"
+            //failwith "non-interactive test runner not yet implemented"
+            releaseTestFailed expr
         #endif
     | true -> ()
