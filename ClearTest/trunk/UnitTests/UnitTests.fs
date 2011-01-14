@@ -72,6 +72,17 @@ module SprintExprTests =
     let ``auto open modules are not qualified`` () =
         sprintExpr <@ snd (1, 2) @> =? "snd (1, 2)"
 
+    [<Fact>]
+    let ``coerce sprints nothing`` () =
+        sprintExpr <@ Set.ofSeq [1;2;3;4] @> =? "Set.ofSeq [1; 2; 3; 4]"
+
+    //need to break up these unit tests.
+
+    [<Fact>]
+    let ``coerce reduces right`` () =
+        reduceSteps <@ Set.ofSeq [1;1;2;4] @> |> List.map sprintExpr =? 
+        ["Set.ofSeq [1; 1; 2; 4]"; "set [1; 2; 4]"]
+
     //need to think up some multi-arg item and named getter scenarios
 
     //Future features:
@@ -83,3 +94,11 @@ module SprintExprTests =
     [<Fact(Skip="Future feature")>]
     let ``pattern match let binding`` () =
         sprintExpr <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
+
+
+let inline median input = 
+    let sorted = input |> Seq.toArray |> Array.sort
+    let m1,m2 = 
+        let len = sorted.Length-1 |> float
+        len/2. |> floor |> int, len/2. |> ceil |> int 
+    (sorted.[m1] + sorted.[m2] |> float)/2.
