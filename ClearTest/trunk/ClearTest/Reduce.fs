@@ -9,37 +9,37 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-let (|InstanceCall|_|) expr =
-    match expr with
-    | Call(obj,mi,args) ->
-        match obj with
-        | Some(instance) -> Some(instance, mi, args)
-        | None -> None
-    | _ -> None
-
-let (|StaticCall|_|) expr =
-    match expr with
-    | Call(obj,mi,args) ->
-        match obj with
-        | Some(_) -> None
-        | None -> Some(mi,args)
-    | _ -> None
-
-let (|InstancePropertyGet|_|) expr =
-    match expr with
-    | PropertyGet(obj,mi,args) ->
-        match obj with
-        | Some(instance) -> Some(instance, mi, args)
-        | None -> None
-    | _ -> None
-
-let (|StaticPropertyGet|_|) expr =
-    match expr with
-    | PropertyGet(obj,mi,args) ->
-        match obj with
-        | Some(_) -> None
-        | None -> Some(mi,args)
-    | _ -> None
+//let (|InstanceCall|_|) expr =
+//    match expr with
+//    | Call(obj,mi,args) ->
+//        match obj with
+//        | Some(instance) -> Some(instance, mi, args)
+//        | None -> None
+//    | _ -> None
+//
+//let (|StaticCall|_|) expr =
+//    match expr with
+//    | Call(obj,mi,args) ->
+//        match obj with
+//        | Some(_) -> None
+//        | None -> Some(mi,args)
+//    | _ -> None
+//
+//let (|InstancePropertyGet|_|) expr =
+//    match expr with
+//    | PropertyGet(obj,mi,args) ->
+//        match obj with
+//        | Some(instance) -> Some(instance, mi, args)
+//        | None -> None
+//    | _ -> None
+//
+//let (|StaticPropertyGet|_|) expr =
+//    match expr with
+//    | PropertyGet(obj,mi,args) ->
+//        match obj with
+//        | Some(_) -> None
+//        | None -> Some(mi,args)
+//    | _ -> None
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
@@ -59,41 +59,26 @@ and allReduced x =
 //reduce all args / calles if any of them are not reduced; otherwise eval
 let rec reduce (expr:Expr) = 
     match expr with
-    | InstanceCall(calle,mi,args) ->
-        if allReduced (calle::args) then evalValue expr
-        else Expr.Call(reduce calle, mi, reduceAll args)
-    | StaticCall(mi,args) ->
-        if allReduced args then evalValue expr
-        else Expr.Call(mi, reduceAll args)
-    | InstancePropertyGet(calle,pi,args) ->
-        if allReduced (calle::args) then evalValue expr
-        else Expr.PropertyGet(reduce calle, pi, reduceAll args)
-    | StaticPropertyGet(pi,args) ->
-        if allReduced args then evalValue expr
-        else Expr.PropertyGet(pi, reduceAll args)
-    | NewTuple(args) ->
-        if allReduced args then evalValue expr
-        else Expr.NewTuple(reduceAll args)   
-    | Coerce(objExpr,targetType) ->
-        if isReduced objExpr then evalValue expr
-        else Expr.Coerce(reduce objExpr, targetType)
     | ShapeVar v -> 
         Expr.Var v
     | ShapeLambda (v,expr) -> 
         Expr.Lambda (v, reduce expr)
     | ShapeCombination (o, exprs) -> 
-        RebuildShapeCombination (o, List.map reduce exprs) //should use reduceAll here?
+        if isReduced expr then expr
+        elif allReduced exprs then evalValue expr
+        else RebuildShapeCombination(o, reduceAll exprs)
 and reduceAll exprList =
-    exprList |> List.map (fun x -> if isReduced x then x else reduce x)
+    exprList |> List.map reduce
         
 let reduceSteps =        
     let rec loop expr acc =
         let nextExpr = expr |> reduce 
-        match nextExpr with
-        | Value(_,_) when nextExpr <> List.head acc -> nextExpr::acc 
-        | Value(_,_) -> acc 
-        | _ when nextExpr = List.head acc -> (evalValue nextExpr)::acc
-        | _ -> loop nextExpr (nextExpr::acc)
+        if isReduced nextExpr then //is reduced
+            if nextExpr <> List.head acc then nextExpr::acc //different than last
+            else acc //same as last
+        elif nextExpr = List.head acc then //is not reduced and could not reduce
+            (evalValue nextExpr)::acc
+        else loop nextExpr (nextExpr::acc)
 
     fun expr -> loop expr [expr] |> List.rev
 
