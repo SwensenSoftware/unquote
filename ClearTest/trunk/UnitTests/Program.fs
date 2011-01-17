@@ -2,6 +2,6 @@
 
 [<EntryPoint>]
 let main args =
-    let x = <@ 2  @>
+    Swensen.ClearTest.Test.test <@ 2 = 3  @>
     0
 

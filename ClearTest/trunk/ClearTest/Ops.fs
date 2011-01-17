@@ -38,13 +38,6 @@ let sprintExpr = Sprint.sprintExpr
 //    static member (=?) (x:Expr<'b>, y:Expr<'b>) : unit when 'b : equality = 
 //        test <@ %x = %y @>
 
-let inline (=?) x y = test <@ x = y @>
-let inline (<?) x y = test <@ x < y @>
-let inline (>?) x y = test <@ x > y @>
-let inline (<=?) x y = test <@ x <= y @>
-let inline (>=?) x y = test <@ x >= y @>
-let inline (<>?) x y = test <@ x <> y @>
-
 //for later
 //test ops for combining expressions
 //    let inline (=?) x y = test <@ %x = %y @>

@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="XunitOps.fs" />
     <Compile Include="UnitTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

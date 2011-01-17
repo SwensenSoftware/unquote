@@ -9,38 +9,6 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-//let (|InstanceCall|_|) expr =
-//    match expr with
-//    | Call(obj,mi,args) ->
-//        match obj with
-//        | Some(instance) -> Some(instance, mi, args)
-//        | None -> None
-//    | _ -> None
-//
-//let (|StaticCall|_|) expr =
-//    match expr with
-//    | Call(obj,mi,args) ->
-//        match obj with
-//        | Some(_) -> None
-//        | None -> Some(mi,args)
-//    | _ -> None
-//
-//let (|InstancePropertyGet|_|) expr =
-//    match expr with
-//    | PropertyGet(obj,mi,args) ->
-//        match obj with
-//        | Some(instance) -> Some(instance, mi, args)
-//        | None -> None
-//    | _ -> None
-//
-//let (|StaticPropertyGet|_|) expr =
-//    match expr with
-//    | PropertyGet(obj,mi,args) ->
-//        match obj with
-//        | Some(_) -> None
-//        | None -> Some(mi,args)
-//    | _ -> None
-
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
     let evaled = expr.EvalUntyped()
