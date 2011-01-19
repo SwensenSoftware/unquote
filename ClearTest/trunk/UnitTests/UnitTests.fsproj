@@ -49,8 +49,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTests.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="SprintTests.fs" />
+    <Compile Include="ReduceTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClearTest\ClearTest.fsproj">
