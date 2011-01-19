@@ -43,24 +43,26 @@ type testFramework =
     | Xunit
     | Nunit
 
-//http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
-let nonFsiFail =
-        let tfs = seq { yield (Xunit, Type.GetType("Xunit.Assert, xunit", false))
-                        yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework", false)) }
+//cache reflected methods for near normal method performance: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
+//i had an elegant solution to retreiving these delegates, but used an anomous func which showed up in stack traces.
+let xunitDel =
+    let t = Type.GetType("Xunit.Assert, xunit", false)
+    if t <> null then
+        let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
+        Some(Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>))
+    else 
+        None
 
-        match tfs |> Seq.tryFind (fun (_, t) -> t <> null) with
-        | Some(tf, t) ->
-            match tf with
-            | Xunit -> 
-                let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
-                let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
-                fun msg -> del.Invoke(false, msg)
-            | Nunit -> 
-                let mi = t.GetMethod("IsTrue", [|typeof<bool>;typeof<string>|])
-                let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
-                fun msg -> del.Invoke(false, msg)
-        | None -> 
-            fun msg -> Diagnostics.Debug.Fail(msg)
+let nunitDel =
+    match xunitDel with
+    | Some(_) -> None
+    | None ->
+        let t = Type.GetType("NUnit.Framework.Assert, nunit.framework", false)
+        if t <> null then
+            let mi = t.GetMethod("IsTrue", [|typeof<bool>;typeof<string>|])
+            Some(Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>))
+        else
+            None
 
 //making inline ensures stacktraces originate from method called from
 let inline test (expr:Expr<bool>) =
@@ -70,7 +72,10 @@ let inline test (expr:Expr<bool>) =
             fsiFail expr
         #else
             let msg = "\n\n" + (expr |> reduceSteps |> List.map sprintExpr |> String.concat "\n") + "\n"
-            nonFsiFail msg
+            match xunitDel, nunitDel with
+            | Some(del), _ -> del.Invoke(false, msg)
+            | _, Some(del) -> del.Invoke(false, msg)
+            | _ -> Diagnostics.Debug.Fail(msg)
         #endif
     | true -> ()
 
