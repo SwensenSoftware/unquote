@@ -86,3 +86,12 @@ let inline (>?) x y = test <@ x > y @>
 let inline (<=?) x y = test <@ x <= y @>
 let inline (>=?) x y = test <@ x >= y @>
 let inline (<>?) x y = test <@ x <> y @>
+
+
+(* 
+F# Stepwise Quatation Evaluator (just "Stepwise" for short)
+
+Benifits:
+1) uses sprint instead of .ToString() which prints lists more completely.
+
+*)
