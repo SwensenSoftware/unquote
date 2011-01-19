@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="Sprint.fs" />
     <Compile Include="Reduce.fs" />
-    <Compile Include="Test.fs" />
     <Compile Include="Ops.fs" />
     <None Include="Startup.fsx" />
   </ItemGroup>

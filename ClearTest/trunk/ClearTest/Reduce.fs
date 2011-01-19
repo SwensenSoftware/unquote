@@ -49,9 +49,3 @@ let reduceSteps =
         else loop nextExpr (nextExpr::acc)
 
     fun expr -> loop expr [expr] |> List.rev
-
-let printReduceSteps expr =
-    expr 
-    |> reduceSteps 
-    |> List.map Sprint.sprintExpr 
-    |> List.iter (printfn "%s");;

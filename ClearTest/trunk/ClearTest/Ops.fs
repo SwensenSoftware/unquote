@@ -11,41 +11,73 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-//as values will these still be inline?
-let test = Test.test
+open Sprint
+open Reduce
+
+//make these instance members, except for test
 let reduce = Reduce.reduce
 let reduceSteps = Reduce.reduceSteps
-let printReduceSteps = Reduce.printReduceSteps
+let printReduceSteps (expr:Expr) = 
+    expr 
+    |> reduceSteps 
+    |> List.map Sprint.sprintExpr 
+    |> List.iter (printfn "%s")
+
 let sprintExpr = Sprint.sprintExpr
 
-//can't cast to Expr<'b> ('b becomes obj)
-//let inline (=?) (x:'a) (y:'a) = 
-//    match box x, box y with
-//    | (:? Expr<_> as xExpr), (:? Expr<_> as yExpr) -> test <@ %xExpr = %yExpr @>
-//    | _ -> test <@ x = y @>
+//hide everything with an sig. file
 
-//exception, not quite sure why: System.ArgumentException: Type mismatch when building 'fill': type of the argument doesn't match the hole type. Expected 'System.Int32', but received type 'System.Object'.
-//Parameter name: receivedType
-//let inline (=?) (x:'a) (y:'a) = 
-//    match box x, box y with
-//    | (:? Expr as xExpr), (:? Expr as yExpr) -> test <@ %%xExpr = %%yExpr @>
-//    | _ -> test <@ x = y @>
+let fsiTestFailed (expr:Expr<bool>) =
+    printfn "\nTest failed:" 
+    for expr in reduceSteps expr do
+        printfn "\t%s" (sprintExpr expr) 
+    printfn ""
 
-//let inline (=?) (x:'a) (y:'a) = 
-//    test <@ x = y @>
-//
-//type Microsoft.FSharp.Quotations.Expr<'a> with
-//    static member (=?) (x:Expr<'b>, y:Expr<'b>) : unit when 'b : equality = 
-//        test <@ %x = %y @>
+//raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
+let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
-//for later
-//test ops for combining expressions
-//    let inline (=?) x y = test <@ %x = %y @>
-//    let inline (<?) x y = test <@ %x < %y @>
-//    let inline (>?) x y = test <@ %x > %y @>
-//    let inline (<=?) x y = test <@ %x <= %y @>
-//    let inline (>=?) x y = test <@ %x >= %y @>
-//    let inline (<>?) x y = test <@ %x <> %y @>
-//
-//    let toListToExpr s =
-//        <@ List.ofSeq s @>
+open System        
+open System.Reflection
+
+type testFramework =
+    | Xunit
+    | Nunit
+
+//http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
+let nonFsiFail =
+        let tfs = seq { yield (Xunit, Type.GetType("Xunit.Assert, xunit", false))
+                        yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework", false)) }
+
+        match tfs |> Seq.tryFind (fun (_, t) -> t <> null) with
+        | Some(tf, t) ->
+            match tf with
+            | Xunit -> 
+                let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
+                let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
+                fun msg -> del.Invoke(false, msg)
+            | Nunit -> 
+                let mi = t.GetMethod("IsTrue", [|typeof<bool>;typeof<string>|])
+                let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
+                fun msg -> del.Invoke(false, msg)
+        | None -> 
+            fun msg -> Diagnostics.Debug.Fail(msg)
+
+//making inline ensures stacktraces originate from method called from
+let inline test (expr:Expr<bool>) =
+    match expr.Eval() with
+    | false -> 
+        #if INTERACTIVE
+            fsiFail expr
+        #else
+            let msg = "\n\n" + (expr |> reduceSteps |> List.map sprintExpr |> String.concat "\n") + "\n"
+            nonFsiFail msg
+        #endif
+    | true -> ()
+
+//weary of these
+let inline (=?) x y = test <@ x = y @>
+let inline (<?) x y = test <@ x < y @>
+let inline (>?) x y = test <@ x > y @>
+let inline (<=?) x y = test <@ x <= y @>
+let inline (>=?) x y = test <@ x >= y @>
+let inline (<>?) x y = test <@ x <> y @>

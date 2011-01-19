@@ -94,11 +94,3 @@ module SprintExprTests =
     [<Fact(Skip="Future feature")>]
     let ``pattern match let binding`` () =
         sprintExpr <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
-
-
-let inline median input = 
-    let sorted = input |> Seq.toArray |> Array.sort
-    let m1,m2 = 
-        let len = sorted.Length-1 |> float
-        len/2. |> floor |> int, len/2. |> ceil |> int 
-    (sorted.[m1] + sorted.[m2] |> float)/2.
