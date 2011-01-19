@@ -6,4 +6,3 @@ open Xunit
 [<Fact>]
 let testIt3 () =
     test <@ 22 + 2 = 5 @>
-

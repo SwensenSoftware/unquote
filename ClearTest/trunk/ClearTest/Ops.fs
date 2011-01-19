@@ -59,8 +59,8 @@ let nunitDel =
     | None ->
         let t = Type.GetType("NUnit.Framework.Assert, nunit.framework", false)
         if t <> null then
-            let mi = t.GetMethod("IsTrue", [|typeof<bool>;typeof<string>|])
-            Some(Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>))
+            let mi = t.GetMethod("Fail", [|typeof<string>|])
+            Some(Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>))
         else
             None
 
@@ -74,7 +74,7 @@ let inline test (expr:Expr<bool>) =
             let msg = "\n\n" + (expr |> reduceSteps |> List.map sprintExpr |> String.concat "\n") + "\n"
             match xunitDel, nunitDel with
             | Some(del), _ -> del.Invoke(false, msg)
-            | _, Some(del) -> del.Invoke(false, msg)
+            | _, Some(del) -> del.Invoke(msg)
             | _ -> Diagnostics.Debug.Fail(msg)
         #endif
     | true -> ()
