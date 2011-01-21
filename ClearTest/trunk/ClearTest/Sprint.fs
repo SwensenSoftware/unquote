@@ -1,4 +1,4 @@
-﻿module Swensen.ClearTest.Sprint
+﻿module Swensen.Unquote.Sprint
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection

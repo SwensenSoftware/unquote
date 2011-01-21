@@ -1,5 +1,5 @@
-﻿module Swensen.ClearTest.VerifyXunitSupport
-open Swensen.ClearTest
+﻿module Swensen.Unquote.VerifyXunitSupport
+open Swensen.Unquote
 open Xunit
 
 //should fail without exception

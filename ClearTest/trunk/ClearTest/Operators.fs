@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Swensen.ClearTest.Ops
+module Swensen.Unquote.Operators
 
 open System
 open System.Reflection

@@ -1,5 +1,5 @@
-﻿module Swensen.ClearTest.VerifyNunitSupport
-open Swensen.ClearTest
+﻿module Swensen.Unquote.VerifyNunitSupport
+open Swensen.Unquote
 open NUnit
 open NUnit.Framework
 

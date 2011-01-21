@@ -1,6 +1,6 @@
 ﻿module SprintTests
 open Xunit
-open Swensen.ClearTest
+open Swensen.Unquote
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.

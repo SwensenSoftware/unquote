@@ -1,4 +1,4 @@
-﻿module Swensen.ClearTest.Reduce
+﻿module Swensen.Unquote.Reduce
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection

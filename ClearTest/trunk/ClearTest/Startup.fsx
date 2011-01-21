@@ -2,16 +2,16 @@
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Metadata.dll"
 
 #load "Sprint.fs"
-open Swensen.ClearTest
+open Swensen.Unquote
 
 #load "Reduce.fs"
-open Swensen.ClearTest
+open Swensen.Unquote
 
 #load "Test.fs"
-open Swensen.ClearTest
+open Swensen.Unquote
 
 #load "Ops.fs"
-open Swensen.ClearTest
+open Swensen.Unquote
 
 open System
 open System.Reflection

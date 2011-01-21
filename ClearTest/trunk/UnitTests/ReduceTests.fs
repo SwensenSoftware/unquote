@@ -1,6 +1,6 @@
 ﻿module ReduceTests
 open Xunit
-open Swensen.ClearTest
+open Swensen.Unquote
 
 [<Fact>]
 let ``coerce reduces right`` () =
