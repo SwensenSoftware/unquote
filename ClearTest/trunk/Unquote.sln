@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ClearTest", "ClearTest\ClearTest.fsproj", "{80F427B5-3AED-4D52-BC86-850A40427ECF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote", "ClearTest\Unquote.fsproj", "{80F427B5-3AED-4D52-BC86-850A40427ECF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject

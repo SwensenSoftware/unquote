@@ -10,7 +10,7 @@
     <RootNamespace>ClearTest</RootNamespace>
     <AssemblyName>ClearTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>ClearTest</Name>
+    <Name>Unquote</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
