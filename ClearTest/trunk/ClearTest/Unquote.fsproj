@@ -48,7 +48,7 @@
   <ItemGroup>
     <Compile Include="Sprint.fs" />
     <Compile Include="Reduce.fs" />
-    <Compile Include="Ops.fs" />
+    <Compile Include="Operators.fs" />
     <None Include="Startup.fsx" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
