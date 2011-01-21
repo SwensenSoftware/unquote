@@ -76,24 +76,24 @@ let sourceName (mi:MemberInfo) =
 //funny case: <@ "asdf".[2] @> resolves as call to
 //Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicFunctions.GetString
 //same with IntrinsicFunctions.GetArray
-let rec sprintExpr expr =
+let rec sprint expr =
     match expr with
     | Application (curry, last) -> //not actually sure what an application is
-        sprintf "%s %s" (sprintExpr curry) (sprintExpr last)
+        sprintf "%s %s" (sprint curry) (sprint last)
     | Lambda (var, lambdaOrBody) ->
         let rec loop lambdaOrBody =
             match lambdaOrBody with
             | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
-            | body -> sprintf "-> %s" (sprintExpr body)
+            | body -> sprintf "-> %s" (sprint body)
         sprintf "(fun %s %s)" (var.Name) (loop lambdaOrBody) //deal with parens latter
     | BinaryInfixCall(opStr, lhs, rhs) -> //must come before Call pattern
-        let lhsValue, rhsValue = sprintExpr lhs, sprintExpr rhs
+        let lhsValue, rhsValue = sprint lhs, sprint rhs
         sprintf "%s %s %s" lhsValue opStr rhsValue
     | Call(calle, mi, args) ->
         match calle with
         | Some(instanceExpr) -> //instance call
             //just assume instance members always have tupled args
-            sprintf "%s.%s(%s)" (sprintExpr instanceExpr) mi.Name (sprintTupledArgs args)
+            sprintf "%s.%s(%s)" (sprint instanceExpr) mi.Name (sprintTupledArgs args)
         | None -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
@@ -108,9 +108,9 @@ let rec sprintExpr expr =
         match calle with
         | Some(instanceExpr) -> //instance call 
             match pi.Name, args with
-            | _, [] -> sprintf "%s.%s" (sprintExpr instanceExpr) pi.Name
-            | "Item", _ -> sprintf "%s.[%s]" (sprintExpr instanceExpr) (sprintTupledArgs args)
-            | _, _ -> sprintf "%s.%s(%s)" (sprintExpr instanceExpr) pi.Name (sprintTupledArgs args)
+            | _, [] -> sprintf "%s.%s" (sprint instanceExpr) pi.Name
+            | "Item", _ -> sprintf "%s.[%s]" (sprint instanceExpr) (sprintTupledArgs args)
+            | _, _ -> sprintf "%s.%s(%s)" (sprint instanceExpr) pi.Name (sprintTupledArgs args)
         | None -> //static call (note: can't accept params)
             if isOpenModule pi.DeclaringType then 
                 sprintf "%s" pi.Name
@@ -126,17 +126,17 @@ let rec sprintExpr expr =
         expr.EvalUntyped() |> sprintf "%A"
     | Coerce(target, _) ->
         //don't even "mention" anything about the coersion
-        sprintExpr target
+        sprint target
     | Let(var, e1, e2) ->
         //todo: this needs to be handled better for curried functions
-        sprintf "let %s = %s in %s" var.Name (e1 |> sprintExpr) (e2 |> sprintExpr)
+        sprintf "let %s = %s in %s" var.Name (e1 |> sprint) (e2 |> sprint)
     | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
-        sprintf "<@ %s @>" (sprintExpr qx)
+        sprintf "<@ %s @>" (sprint qx)
     | _ -> 
         sprintf "%A" (expr)
 
 and sprintArgs delimiter exprs =
-    exprs |> List.map sprintExpr |> String.concat delimiter
+    exprs |> List.map sprint |> String.concat delimiter
     
 and sprintTupledArgs = sprintArgs ", "
 and sprintCurriedArgs = sprintArgs " "

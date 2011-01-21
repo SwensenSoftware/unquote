@@ -20,10 +20,10 @@ let reduceSteps = Reduce.reduceSteps
 let printReduceSteps (expr:Expr) = 
     expr 
     |> reduceSteps 
-    |> List.map Sprint.sprintExpr 
+    |> List.map Sprint.sprint 
     |> List.iter (printfn "%s")
 
-let sprintExpr = Sprint.sprintExpr
+let sprintExpr = Sprint.sprint
 
 //hide everything with an sig. file
 
