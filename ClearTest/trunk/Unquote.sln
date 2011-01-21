@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote", "ClearTest\Unquote.fsproj", "{80F427B5-3AED-4D52-BC86-850A40427ECF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnitTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunitSupport", "VerifyXunitSupport\VerifyXunitSupport.fsproj", "{78942CAF-9D8D-4E44-8953-E04E58E27D51}"
 EndProject
