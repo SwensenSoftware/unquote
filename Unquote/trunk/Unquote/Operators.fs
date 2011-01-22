@@ -11,26 +11,17 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-open Sprint
-open Reduce
+open Swensen.Unquote.Ext
 
 //make these instance members, except for test
-let reduce = Reduce.reduce
-let reduceSteps = Reduce.reduceSteps
-let printReduceSteps (expr:Expr) = 
-    expr 
-    |> reduceSteps 
-    |> List.map Sprint.sprint 
-    |> List.iter (printfn "%s")
-
-let sprintExpr = Sprint.sprint
+let unquote (expr:Expr) = expr.Unquote()
 
 //hide everything with an sig. file
 
 let fsiTestFailed (expr:Expr<bool>) =
     printfn "\nTest failed:" 
-    for expr in reduceSteps expr do
-        printfn "\t%s" (sprintExpr expr) 
+    for expr in expr.ReduceSteps() do
+        printfn "\t%s" (expr.Sprint())
     printfn ""
 
 //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
@@ -69,9 +60,9 @@ let inline test (expr:Expr<bool>) =
     match expr.Eval() with
     | false -> 
         #if INTERACTIVE
-            fsiFail expr
+            fsiTestFailed expr
         #else
-            let msg = "\n\n" + (expr |> reduceSteps |> List.map sprintExpr |> String.concat "\n") + "\n"
+            let msg = "\n\n" + (expr |> Reduce.reduceSteps |> List.map Sprint.sprint |> String.concat "\n") + "\n"
             match xunitDel, nunitDel with
             | Some(del), _ -> del.Invoke(false, msg)
             | _, Some(del) -> del.Invoke(msg)

@@ -7,10 +7,10 @@ open Swensen.Unquote
 #load "Reduce.fs"
 open Swensen.Unquote
 
-#load "Test.fs"
+#load "ExprExt.fs"
 open Swensen.Unquote
 
-#load "Ops.fs"
+#load "Operators.fs"
 open Swensen.Unquote
 
 open System

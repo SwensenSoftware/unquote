@@ -1,89 +1,89 @@
-﻿module SprintTests
+﻿module Test.Swensen.Unquote.SprintTests
 open Xunit
 open Swensen.Unquote
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.
-module SprintExprTests =
-    [<Fact>]
-    let ``literal int`` () =
-        sprintExpr <@ 1 @> =? "1"
 
-    [<Fact>]
-    let ``literal long`` () =
-        sprintExpr <@ 1L @> =? "1L"
+[<Fact>]
+let ``literal int`` () =
+    Sprint.sprint <@ 1 @> =? "1"
 
-    [<Fact>]
-    let ``unit`` () =
-        sprintExpr <@ () @> =? "()"
+[<Fact>]
+let ``literal long`` () =
+    Sprint.sprint <@ 1L @> =? "1L"
 
-    [<Fact>]
-    let ``2-tuple`` () =
-        sprintExpr <@ (1,2) @> =? "(1, 2)"
+[<Fact>]
+let ``unit`` () =
+    Sprint.sprint <@ () @> =? "()"
 
-    [<Fact>]
-    let ``5-tuple`` () =
-        sprintExpr <@ (1,2,3,4,5) @> =? "(1, 2, 3, 4, 5)"
+[<Fact>]
+let ``2-tuple`` () =
+    Sprint.sprint <@ (1,2) @> =? "(1, 2)"
 
-    [<Fact>]
-    let ``tuple of tuples (i.e. tuple containing sub-expressions)`` () =
-        sprintExpr <@ ((1,2,3), (2,3)) @> =? "((1, 2, 3), (2, 3))"
+[<Fact>]
+let ``5-tuple`` () =
+    Sprint.sprint <@ (1,2,3,4,5) @> =? "(1, 2, 3, 4, 5)"
 
-    [<Fact>]
-    let ``literal list`` () =
-        sprintExpr <@ [1;2;3;] @> =? "[1; 2; 3]"
+[<Fact>]
+let ``tuple of tuples (i.e. tuple containing sub-expressions)`` () =
+    Sprint.sprint <@ ((1,2,3), (2,3)) @> =? "((1, 2, 3), (2, 3))"
 
-    [<Fact>]
-    let ``literal array`` () =
-        sprintExpr <@ [|1;2;3;|] @> =? "[|1; 2; 3|]"
+[<Fact>]
+let ``literal list`` () =
+    Sprint.sprint <@ [1;2;3;] @> =? "[1; 2; 3]"
 
-    [<Fact>]
-    let ``lambda expression with two args`` () =
-        sprintExpr <@ (fun i j -> i + j)@> =? "(fun i j -> i + j)"
+[<Fact>]
+let ``literal array`` () =
+    Sprint.sprint <@ [|1;2;3;|] @> =? "[|1; 2; 3|]"
 
-    [<Fact>]
-    let ``instance call on literal string value`` () =
-        sprintExpr <@ "hi".ToString() @> =? "\"hi\".ToString()"
+[<Fact>]
+let ``lambda expression with two args`` () =
+    Sprint.sprint <@ (fun i j -> i + j)@> =? "(fun i j -> i + j)"
 
-    [<Fact>]
-    let ``module and function call with CompiledNames differing from SourceNames`` () =
-        sprintExpr <@ List.mapi (fun i j -> i + j) [1;2;3] @> =? "List.mapi (fun i j -> i + j) [1; 2; 3]"
+[<Fact>]
+let ``instance call on literal string value`` () =
+    Sprint.sprint <@ "hi".ToString() @> =? "\"hi\".ToString()"
 
-    module NonSourceNameModule = let nonSourceNameFunc (x:int) = x
+[<Fact>]
+let ``module and function call with CompiledNames differing from SourceNames`` () =
+    Sprint.sprint <@ List.mapi (fun i j -> i + j) [1;2;3] @> =? "List.mapi (fun i j -> i + j) [1; 2; 3]"
 
-    [<Fact>]
-    let ``module and function with non-source name`` () =
-        sprintExpr <@ NonSourceNameModule.nonSourceNameFunc 3  @> =? "NonSourceNameModule.nonSourceNameFunc 3"
+module NonSourceNameModule = let nonSourceNameFunc (x:int) = x
 
-    [<Fact>]
-    let ``simple let binding`` () =
-        sprintExpr <@ let x = 3 in () @> =? "let x = 3 in ()"
+[<Fact>]
+let ``module and function with non-source name`` () =
+    Sprint.sprint <@ NonSourceNameModule.nonSourceNameFunc 3  @> =? "NonSourceNameModule.nonSourceNameFunc 3"
 
-    [<Fact>]
-    let ``item getter with single arg`` () =
-        let table = System.Collections.Generic.Dictionary<int,int>()
-        sprintExpr <@ table.[0] @> =? "seq [].[0]" //might want to fix up dict value sprinting later
+[<Fact>]
+let ``simple let binding`` () =
+    Sprint.sprint <@ let x = 3 in () @> =? "let x = 3 in ()"
 
-    [<Fact>]
-    let ``named getter with single arg`` () =
-        sprintExpr <@ "asdf".Chars(0) @> =? "\"asdf\".Chars(0)"
+[<Fact>]
+let ``item getter with single arg`` () =
+    let table = System.Collections.Generic.Dictionary<int,int>()
+    Sprint.sprint <@ table.[0] @> =? "seq [].[0]" //might want to fix up dict value sprinting later
 
-    [<Fact>]
-    let ``auto open modules are not qualified`` () =
-        sprintExpr <@ snd (1, 2) @> =? "snd (1, 2)"
+[<Fact>]
+let ``named getter with single arg`` () =
+    Sprint.sprint <@ "asdf".Chars(0) @> =? "\"asdf\".Chars(0)"
 
-    [<Fact>]
-    let ``coerce sprints nothing`` () =
-        sprintExpr <@ Set.ofSeq [1;2;3;4] @> =? "Set.ofSeq [1; 2; 3; 4]"
+[<Fact>]
+let ``auto open modules are not qualified`` () =
+    Sprint.sprint <@ snd (1, 2) @> =? "snd (1, 2)"
 
-    //need to think up some multi-arg item and named getter scenarios
+[<Fact>]
+let ``coerce sprints nothing`` () =
+    Sprint.sprint <@ Set.ofSeq [1;2;3;4] @> =? "Set.ofSeq [1; 2; 3; 4]"
 
-    //Future features:
+//need to think up some multi-arg item and named getter scenarios
 
-    [<Fact(Skip="Future feature")>]
-    let ``partial application`` () =
-        sprintExpr <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
+//Future features:
 
-    [<Fact(Skip="Future feature")>]
-    let ``pattern match let binding`` () =
-        sprintExpr <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
+[<Fact(Skip="Future feature")>]
+let ``partial application`` () =
+    Sprint.sprint <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
+
+[<Fact(Skip="Future feature")>]
+let ``pattern match let binding`` () =
+    Sprint.sprint <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
