@@ -24,9 +24,6 @@ let fsiTestFailed (expr:Expr<bool>) =
         printfn "\t%s" (expr.Sprint())
     printfn ""
 
-//raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
-let inline raise (e: System.Exception) = (# "throw" e : 'U #)
-
 open System        
 open System.Reflection
 
@@ -36,7 +33,7 @@ type testFramework =
 
 //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
 ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
-let nonFsiTestFailed =
+let outputNonFsiTestFailedMsg =
     let frameworks =
         seq { yield (Xunit, Type.GetType("Xunit.Assert, xunit", false))
               yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework", false)) }
@@ -53,6 +50,13 @@ let nonFsiTestFailed =
     | None ->
         fun msg -> Diagnostics.Debug.Fail(msg)
 
+let nonFsiTestFailed (expr:Expr<bool>) =
+    let msg = "\n\n" + (expr |> Reduce.reduceSteps |> List.map Sprint.sprint |> String.concat "\n") + "\n"
+    outputNonFsiTestFailedMsg msg
+
+//raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
+let inline raise (e: System.Exception) = (# "throw" e : 'U #)    
+
 //making inline (together with catch/raise in non fsi mode) ensures stacktraces clean in test framework output
 ///Evaluate the given boolean expression: if false output incremental eval steps using
 ///1) stdout if fsi mode
@@ -65,8 +69,7 @@ let inline test (expr:Expr<bool>) =
             fsiTestFailed expr
         #else
             try
-                let msg = "\n\n" + (expr |> Reduce.reduceSteps |> List.map Sprint.sprint |> String.concat "\n") + "\n"
-                nonFsiTestFailed msg
+                nonFsiTestFailed expr
             with 
             | e -> raise e //we catch and raise e here to hide stack traces (reraise preserves original stacktrace)
         #endif
