@@ -34,39 +34,41 @@ type testFramework =
     | Xunit
     | Nunit
 
-//cache reflected methods for near normal method performance: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
-//i had an elegant solution to retreiving these delegates, but used an anomous func which showed up in stack traces.
-let xunitDel =
-    let t = Type.GetType("Xunit.Assert, xunit", false)
-    if t <> null then
+//cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
+///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
+let nonFsiTestFailed =
+    let frameworks =
+        seq { yield (Xunit, Type.GetType("Xunit.Assert, xunit", false))
+              yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework", false)) }
+
+    match frameworks |> Seq.tryFind (fun (_, ty) -> ty <> null) with
+    | Some(Xunit, t) -> 
         let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
-        Some(Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>))
-    else 
-        None
-
-let nunitDel =
-    match xunitDel with
-    | Some(_) -> None
+        let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
+        fun msg -> del.Invoke(false, msg)
+    | Some(Nunit, t) -> 
+        let mi = t.GetMethod("Fail", [|typeof<string>|])
+        let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
+        fun msg -> del.Invoke(msg)
     | None ->
-        let t = Type.GetType("NUnit.Framework.Assert, nunit.framework", false)
-        if t <> null then
-            let mi = t.GetMethod("Fail", [|typeof<string>|])
-            Some(Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>))
-        else
-            None
+        fun msg -> Diagnostics.Debug.Fail(msg)
 
-//making inline ensures stacktraces originate from method called from
+//making inline (together with catch/raise in non fsi mode) ensures stacktraces clean in test framework output
+///Evaluate the given boolean expression: if false output incremental eval steps using
+///1) stdout if fsi mode
+///2) framework fail methods if Xunit or Nunit present
+///3) Debug.Fail
 let inline test (expr:Expr<bool>) =
     match expr.Eval() with
     | false -> 
         #if INTERACTIVE
             fsiTestFailed expr
         #else
-            let msg = "\n\n" + (expr |> Reduce.reduceSteps |> List.map Sprint.sprint |> String.concat "\n") + "\n"
-            match xunitDel, nunitDel with
-            | Some(del), _ -> del.Invoke(false, msg)
-            | _, Some(del) -> del.Invoke(msg)
-            | _ -> Diagnostics.Debug.Fail(msg)
+            try
+                let msg = "\n\n" + (expr |> Reduce.reduceSteps |> List.map Sprint.sprint |> String.concat "\n") + "\n"
+                nonFsiTestFailed msg
+            with 
+            | e -> raise e //we catch and raise e here to hide stack traces (reraise preserves original stacktrace)
         #endif
     | true -> ()
 
