@@ -11,23 +11,28 @@ open Microsoft.FSharp.Metadata
 
 //precedence: http://msdn.microsoft.com/en-us/library/dd233228.aspx
 
+type binOpAssoc =
+    | Left
+    | Right
+    | Non
+
 let binaryOps = [
     //boolean ops
-    "op_Equality", "="
-    "op_GreaterThan", ">"
-    "op_LessThan", "<"
-    "op_GreaterThanOrEqual", ">="
-    "op_LessThanOrEqual", "<="
-    "op_Inequality", "<>"
+    "op_Equality", ("=", 13, Left)
+    "op_GreaterThan", (">", 13, Left)
+    "op_LessThan", ("<", 13, Left)
+    "op_GreaterThanOrEqual", (">=", 13, Left)
+    "op_LessThanOrEqual", ("<=", 13, Left)
+    "op_Inequality", ("<>", 13, Left)
     //pipe ops
-    "op_PipeRight", "|>"
-    "op_PipeLeft", "<|"
+    "op_PipeRight", ("|>", 3, Left)
+    "op_PipeLeft", ("<|", 3, Left)
     //numeric ops
-    "op_Addition", "+"
-    "op_Subtraction", "-"
-    "op_Division", "/"
-    "op_Multiply", "*"
-    "op_Modulus", "%"
+    "op_Addition", ("+", 17, Left)
+    "op_Subtraction", ("-", 17, Left)
+    "op_Division", ("/", 18, Left)
+    "op_Multiply", ("*", 18, Left)
+    "op_Modulus", ("%", 18, Left)
 ]
 
 //todo: expand to include +, -, *, etc.
@@ -35,7 +40,7 @@ let (|BinaryInfixCall|_|) expr =
     match expr with
     | Call (_, mi, args) ->
         match binaryOps |> List.tryFind (fst>>((=) mi.Name)) with
-        | Some(_,opStr) -> let lhs::rhs::_ = args in Some(opStr,lhs,rhs)
+        | Some(_,op) -> let lhs::rhs::_ = args in Some(op,lhs,rhs)
         | None -> None
     | _ -> None
 
@@ -76,67 +81,76 @@ let sourceName (mi:MemberInfo) =
 //funny case: <@ "asdf".[2] @> resolves as call to
 //Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicFunctions.GetString
 //same with IntrinsicFunctions.GetArray
-let rec sprint expr =
-    match expr with
-    | Application (curry, last) -> //not actually sure what an application is
-        sprintf "%s %s" (sprint curry) (sprint last)
-    | Lambda (var, lambdaOrBody) ->
-        let rec loop lambdaOrBody =
-            match lambdaOrBody with
-            | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
-            | body -> sprintf "-> %s" (sprint body)
-        sprintf "(fun %s %s)" (var.Name) (loop lambdaOrBody) //deal with parens latter
-    | BinaryInfixCall(opStr, lhs, rhs) -> //must come before Call pattern
-        let lhsValue, rhsValue = sprint lhs, sprint rhs
-        sprintf "%s %s %s" lhsValue opStr rhsValue
-    | Call(calle, mi, args) ->
-        match calle with
-        | Some(instanceExpr) -> //instance call
-            //just assume instance members always have tupled args
-            sprintf "%s.%s(%s)" (sprint instanceExpr) mi.Name (sprintTupledArgs args)
-        | None -> //static call
-            if FSharpType.IsModule mi.DeclaringType then
-                let methodName = sourceName mi
-                let sprintedArgs = sprintCurriedArgs args
-                if isOpenModule mi.DeclaringType then 
-                    sprintf "%s %s" methodName sprintedArgs
-                else 
-                    sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs
-            else //assume CompiledName same as SourceName for static members
-                sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args)
-    | PropertyGet(calle, pi, args) -> 
-        match calle with
-        | Some(instanceExpr) -> //instance call 
-            match pi.Name, args with
-            | _, [] -> sprintf "%s.%s" (sprint instanceExpr) pi.Name
-            | "Item", _ -> sprintf "%s.[%s]" (sprint instanceExpr) (sprintTupledArgs args)
-            | _, _ -> sprintf "%s.%s(%s)" (sprint instanceExpr) pi.Name (sprintTupledArgs args)
-        | None -> //static call (note: can't accept params)
-            if isOpenModule pi.DeclaringType then 
-                sprintf "%s" pi.Name
-            else
-                sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
-    | Unit -> "()" //must come before Value pattern
-    | Value(obj, typeObj) ->
-        if obj = null then "null"
-        else sprintf "%A" obj
-    | NewTuple (args) -> //tuples have at least two elements
-        args |> sprintTupledArgs |> sprintf "(%s)"
-    | NewUnionCase(_,_) | NewArray(_,_)  ->
-        expr.EvalUntyped() |> sprintf "%A"
-    | Coerce(target, _) ->
-        //don't even "mention" anything about the coersion
-        sprint target
-    | Let(var, e1, e2) ->
-        //todo: this needs to be handled better for curried functions
-        sprintf "let %s = %s in %s" var.Name (e1 |> sprint) (e2 |> sprint)
-    | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
-        sprintf "<@ %s @>" (sprint qx)
-    | _ -> 
-        sprintf "%A" (expr)
+let sprint expr =
+    let rec sprint context expr =
+        let applyParens prec s = if prec > context then s else sprintf "(%s)" s
 
-and sprintArgs delimiter exprs =
-    exprs |> List.map sprint |> String.concat delimiter
+        match expr with
+        | Application (curry, last) -> //not actually sure what an application is
+            applyParens 20 (sprintf "%s %s" (sprint 20 curry) (sprint 20 last))
+        | Lambda (var, lambdaOrBody) ->
+            let rec loop lambdaOrBody =
+                match lambdaOrBody with
+                | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
+                | body -> sprintf "-> %s" (sprint 8 body)
+            applyParens 6 (sprintf "fun %s %s" (var.Name) (loop lambdaOrBody)) //deal with parens latter
+        | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
+            let lhsValue, rhsValue = 
+                match assoc with
+                | Left -> sprint (prec-1) lhs, sprint prec rhs
+                | Right -> sprint prec lhs, sprint (prec-1) rhs
+                | Non -> sprint prec lhs, sprint prec rhs
+            applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
+        | Call(calle, mi, args) ->
+            match calle with
+            | Some(instanceExpr) -> //instance call
+                //just assume instance members always have tupled args
+                applyParens 24 (sprintf "%s.%s(%s)" (sprint 23 instanceExpr) mi.Name (sprintTupledArgs args))
+            | None -> //static call
+                if FSharpType.IsModule mi.DeclaringType then
+                    let methodName = sourceName mi
+                    let sprintedArgs = sprintCurriedArgs args
+                    if isOpenModule mi.DeclaringType then 
+                        applyParens 20 (sprintf "%s %s" methodName sprintedArgs)
+                    else 
+                        applyParens 20 (sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs)
+                else //assume CompiledName same as SourceName for static members
+                    applyParens 24 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
+        | PropertyGet(calle, pi, args) -> 
+            match calle with
+            | Some(instanceExpr) -> //instance call 
+                match pi.Name, args with
+                | _, [] -> sprintf "%s.%s" (sprint 23 instanceExpr) pi.Name
+                | "Item", _ -> sprintf "%s.[%s]" (sprint 23 instanceExpr) (sprintTupledArgs args)
+                | _, _ -> sprintf "%s.%s(%s)" (sprint 23 instanceExpr) pi.Name (sprintTupledArgs args)
+            | None -> //static call (note: can't accept params)
+                if isOpenModule pi.DeclaringType then 
+                    sprintf "%s" pi.Name
+                else
+                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
+        | Unit -> "()" //must come before Value pattern
+        | Value(obj, typeObj) ->
+            if obj = null then "null"
+            else sprintf "%A" obj
+        | NewTuple (args) -> //tuples have at least two elements
+            args |> sprintTupledArgs |> sprintf "(%s)"
+        | NewUnionCase(_,_) | NewArray(_,_)  ->
+            expr.EvalUntyped() |> sprintf "%A"
+        | Coerce(target, _) ->
+            //don't even "mention" anything about the coersion
+            sprint context target
+        | Let(var, e1, e2) ->
+            //todo: this needs to be handled better for curried functions
+            applyParens 5 (sprintf "let %s = %s in %s" var.Name (e1 |> sprint 0) (e2 |> sprint 0))
+        | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
+            sprintf "<@ %s @>" (sprint 0 qx)
+        | _ -> 
+            sprintf "%A" (expr)
+    and sprintArgs prec delimiter exprs =
+        exprs |> List.map (sprint prec) |> String.concat delimiter
+    and sprintTupledArgs = 
+        sprintArgs 10 ", "
+    and sprintCurriedArgs = 
+        sprintArgs 20 " "
     
-and sprintTupledArgs = sprintArgs ", "
-and sprintCurriedArgs = sprintArgs " "
+    sprint 0 expr

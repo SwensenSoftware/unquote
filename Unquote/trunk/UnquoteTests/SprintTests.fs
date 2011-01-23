@@ -39,7 +39,7 @@ let ``literal array`` () =
 
 [<Fact>]
 let ``lambda expression with two args`` () =
-    Sprint.sprint <@ (fun i j -> i + j)@> =? "(fun i j -> i + j)"
+    Sprint.sprint <@ (fun i j -> i + j)@> =? "fun i j -> i + j"
 
 [<Fact>]
 let ``instance call on literal string value`` () =
@@ -75,6 +75,18 @@ let ``auto open modules are not qualified`` () =
 [<Fact>]
 let ``coerce sprints nothing`` () =
     Sprint.sprint <@ Set.ofSeq [1;2;3;4] @> =? "Set.ofSeq [1; 2; 3; 4]"
+
+[<Fact>]
+let ``arithmetic precedence`` () =
+     Sprint.sprint <@ 2 + 3 - 7 @> =? "2 + 3 - 7"
+     Sprint.sprint <@ 2 + (3 - 7) @> =? "2 + (3 - 7)"
+     Sprint.sprint <@ 2 + (3 - 7) * 9 @> =? "2 + (3 - 7) * 9"
+     Sprint.sprint <@ (2 + (3 - 7)) * 9 @> =? "(2 + (3 - 7)) * 9"
+
+[<Fact>]
+let ``lambda precedence`` () =
+    Sprint.sprint <@ (fun i -> i + 1) 3  @> =? "(fun i -> i + 1) 3"
+
 
 //need to think up some multi-arg item and named getter scenarios
 
