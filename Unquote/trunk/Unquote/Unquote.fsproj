@@ -8,7 +8,7 @@
     <ProjectGuid>{80f427b5-3aed-4d52-bc86-850a40427ecf}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ClearTest</RootNamespace>
-    <AssemblyName>ClearTest</AssemblyName>
+    <AssemblyName>Unquote</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>Unquote</Name>
   </PropertyGroup>
