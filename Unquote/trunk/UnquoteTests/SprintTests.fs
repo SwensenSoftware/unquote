@@ -87,6 +87,10 @@ let ``arithmetic precedence`` () =
 let ``lambda precedence`` () =
     Sprint.sprint <@ (fun i -> i + 1) 3  @> =? "(fun i -> i + 1) 3"
 
+[<Fact>]
+let ``lambda with application on lhs of + op call precedence`` () =
+    Sprint.sprint <@ (fun i j k -> i + j + k) (2+5) 3 (4+17) + 12 @> =? "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
+
 
 //need to think up some multi-arg item and named getter scenarios
 

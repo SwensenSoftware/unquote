@@ -86,8 +86,8 @@ let sprint expr =
         let applyParens prec s = if prec > context then s else sprintf "(%s)" s
 
         match expr with
-        | Application (curry, last) -> //not actually sure what an application is
-            applyParens 20 (sprintf "%s %s" (sprint 20 curry) (sprint 20 last))
+        | Application (curry, last) ->
+            applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
         | Lambda (var, lambdaOrBody) ->
             let rec loop lambdaOrBody =
                 match lambdaOrBody with

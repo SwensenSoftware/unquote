@@ -28,3 +28,11 @@ let ``arithmetic expressions`` () =
         "-2 * 9"
         "-18"
     ]
+
+[<Fact>]
+let ``lambda with application on lhs of + op call`` () =
+    sprintedReduceSteps <@ (fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> =? [
+        "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
+        "(fun i j k -> i + j + k) 7 3 21 + 12"
+        "43"
+    ]
