@@ -89,7 +89,12 @@ let ``lambda precedence`` () =
 
 [<Fact>]
 let ``lambda with application on lhs of + op call precedence`` () =
-    Sprint.sprint <@ (fun i j k -> i + j + k) (2+5) 3 (4+17) + 12 @> =? "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
+    Sprint.sprint <@ (fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> =? "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
+
+let f i j k = i + j + k
+[<Fact>]
+let ``function with curried args on lhs of + op call precedence`` () =
+    Sprint.sprint <@ f (2 + 5) 3 (4 + 17) + 12 @> =? "SprintTests.f (2 + 5) 3 (4 + 17) + 12"
 
 
 //need to think up some multi-arg item and named getter scenarios

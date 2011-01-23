@@ -73,7 +73,7 @@ let sourceName (mi:MemberInfo) =
 //todo:
 //  remaining binary ops
 //  unary ops
-//  add parens based on precedence <-- big one!
+//  CHECK add parens based on precedence <-- big one!
 //  mutable let bindings
 //  new object
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
@@ -86,7 +86,7 @@ let sprint expr =
         let applyParens prec s = if prec > context then s else sprintf "(%s)" s
 
         match expr with
-        | Application (curry, last) ->
+        | Application (curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
         | Lambda (var, lambdaOrBody) ->
             let rec loop lambdaOrBody =
@@ -129,7 +129,7 @@ let sprint expr =
                 else
                     sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
         | Unit -> "()" //must come before Value pattern
-        | Value(obj, typeObj) ->
+        | Value(obj, _) ->
             if obj = null then "null"
             else sprintf "%A" obj
         | NewTuple (args) -> //tuples have at least two elements
@@ -150,7 +150,7 @@ let sprint expr =
         exprs |> List.map (sprint prec) |> String.concat delimiter
     and sprintTupledArgs = 
         sprintArgs 10 ", "
-    and sprintCurriedArgs = 
+    and sprintCurriedArgs = //application of arguments to a function
         sprintArgs 20 " "
     
     sprint 0 expr

@@ -34,5 +34,16 @@ let ``lambda with application on lhs of + op call`` () =
     sprintedReduceSteps <@ (fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> =? [
         "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
         "(fun i j k -> i + j + k) 7 3 21 + 12"
+        "31 + 12" //failing to evaluate this
+        "43"
+    ]
+
+let f i j k = i + j + k
+[<Fact>]
+let ``function with application on lhs of + op call`` () =
+    sprintedReduceSteps <@ f (2 + 5) 3 (4 + 17) + 12 @> =? [
+        "ReduceTests.f (2 + 5) 3 (4 + 17) + 12"
+        "ReduceTests.f 7 3 21 + 12"
+        "31 + 12"
         "43"
     ]
