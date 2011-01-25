@@ -79,3 +79,10 @@ let ``function with application compared to tuple`` () =
         "true"
     ]
 
+[<Fact>]
+let ``lambdas are reduced`` () =
+    sprintedReduceSteps <@ List.map (fun i -> i + 1) [1;2;3;4] = [2;3;4;5] @> =? [
+        "List.map (fun i -> i + 1) [1; 2; 3; 4] = [2; 3; 4; 5]"
+        "[2; 3; 4; 5] = [2; 3; 4; 5]"
+        "true"
+    ]

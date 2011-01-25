@@ -18,7 +18,7 @@ let evalValue (expr:Expr) =
 //it is that isReduce/allReduce pairs properly with reduce match (note specifically NewTuple and Coerce so far)
 //and that they are in synce with the depth of Sprinting.
 let rec isReduced = function
-    | Value(_,_) | NewUnionCase(_,_) | NewArray(_,_) -> true
+    | Value(_,_) | NewUnionCase(_,_) | NewArray(_,_) | Lambda _ | Var _ -> true
     | NewTuple (args) when allReduced args -> true
     | Coerce(objExpr,_) when isReduced objExpr -> true
     | _ -> false
