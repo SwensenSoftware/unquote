@@ -120,9 +120,15 @@ let ``precedence of range expression args`` () =
     sprint <@ {1+4..-3+9..-9+1} @> =? "{1 + 4..-3 + 9..-9 + 1}"
 
 module Test = let f (i:string) (j:string) = i + j;;
-[<Fact(Skip="failing, fix soon")>]
+[<Fact>]
 let ``call precedence within function application`` () =
     sprint <@ Test.f ("hello".Substring(0,2)) "world" @> =? "Test.f (\"hello\".Substring(0, 2)) \"world\""
+
+let add x y = x + y
+let ``call precedence nested function applications`` () =
+    sprint <@ add (add 1 2) (add 3 4) @> =? "SprintTests.add (SprintTests.add 1 2) (SprintTests.add 3 4)"
+
+
 
 
 

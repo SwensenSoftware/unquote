@@ -98,7 +98,7 @@ let sprint expr =
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
-            applyParens 24 (sprintf "%s.%s(%s)" (sprint 23 target) mi.Name (sprintTupledArgs args))
+            applyParens 20 (sprintf "%s.%s(%s)" (sprint 23 target) mi.Name (sprintTupledArgs args))
         | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //precedence seems a bit off for op ranges
             sprintf "{%s..%s}" (sprint 23 a) (sprint 23 b)
         | Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" ->
@@ -114,7 +114,7 @@ let sprint expr =
                 else 
                     applyParens 20 (sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs)
             else //assume CompiledName same as SourceName for static members
-                applyParens 24 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
+                applyParens 20 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | _, [] -> sprintf "%s.%s" (sprint 23 target) pi.Name
