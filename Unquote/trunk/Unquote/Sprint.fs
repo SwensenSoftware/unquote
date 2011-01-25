@@ -38,9 +38,9 @@ let binaryOps = [
 //todo: expand to include +, -, *, etc.
 let (|BinaryInfixCall|_|) expr =
     match expr with
-    | Call (_, mi, args) ->
+    | Call (_, mi, lhs::rhs::_) ->
         match binaryOps |> List.tryFind (fst>>((=) mi.Name)) with
-        | Some(_,op) -> let lhs::rhs::_ = args in Some(op,lhs,rhs)
+        | Some(_,op) -> Some(op,lhs,rhs)
         | None -> None
     | _ -> None
 
@@ -73,14 +73,9 @@ let sourceName (mi:MemberInfo) =
 //todo:
 //  remaining binary ops
 //  unary ops
-//  CHECK add parens based on precedence <-- big one!
 //  mutable let bindings
 //  new object
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
-
-//funny case: <@ "asdf".[2] @> resolves as call to
-//Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicFunctions.GetString
-//same with IntrinsicFunctions.GetArray
 let sprint expr =
     let rec sprint context expr =
         let applyParens prec s = if prec > context then s else sprintf "(%s)" s
@@ -104,6 +99,10 @@ let sprint expr =
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
             applyParens 24 (sprintf "%s.%s(%s)" (sprint 23 target) mi.Name (sprintTupledArgs args))
+        | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //precedence seems a bit off for op ranges
+            sprintf "{%s..%s}" (sprint 23 a) (sprint 23 b)
+        | Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" ->
+            sprintf "{%s..%s..%s}" (sprint 23 a) (sprint 23 b) (sprint 23 c)
         | Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (sprint 23 target) (sprintTupledArgs args)
         | Call(None, mi, args) -> //static call

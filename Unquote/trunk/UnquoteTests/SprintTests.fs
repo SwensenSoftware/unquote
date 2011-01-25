@@ -109,6 +109,14 @@ let ``instrinsic calls`` () =
 let ``new array with arg sub expressions`` () =
     sprint <@ [|1+1;2+(3-1);3|] @> =? "[|1 + 1; 2 + (3 - 1); 3|]"
 
+[<Fact>]
+let ``seq ranges`` () =
+    sprint <@ {1..3} @> =? "{1..3}"
+    sprint <@ {1+1..3-5+6} @> =? "{(1 + 1)..(3 - 5 + 6)}" //hmm, precedence isn't right...
+    sprint <@ {1..-3..-9} @> =? "{1..-3..-9}"
+    sprint <@ {1+4..-3+9..-9+1} @> =? "{(1 + 4)..(-3 + 9)..(-9 + 1)}"
+
+
 
 //need to think up some multi-arg item and named getter scenarios
 
