@@ -101,33 +101,29 @@ let sprint expr =
                 | Right -> sprint prec lhs, sprint (prec-1) rhs
                 | Non -> sprint prec lhs, sprint prec rhs
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
-        | Call(calle, mi, args) ->
-            match calle with
-            | Some(instanceExpr) -> //instance call
-                //just assume instance members always have tupled args
-                applyParens 24 (sprintf "%s.%s(%s)" (sprint 23 instanceExpr) mi.Name (sprintTupledArgs args))
-            | None -> //static call
-                if FSharpType.IsModule mi.DeclaringType then
-                    let methodName = sourceName mi
-                    let sprintedArgs = sprintCurriedArgs args
-                    if isOpenModule mi.DeclaringType then 
-                        applyParens 20 (sprintf "%s %s" methodName sprintedArgs)
-                    else 
-                        applyParens 20 (sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs)
-                else //assume CompiledName same as SourceName for static members
-                    applyParens 24 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
-        | PropertyGet(calle, pi, args) -> 
-            match calle with
-            | Some(instanceExpr) -> //instance call 
-                match pi.Name, args with
-                | _, [] -> sprintf "%s.%s" (sprint 23 instanceExpr) pi.Name
-                | "Item", _ -> sprintf "%s.[%s]" (sprint 23 instanceExpr) (sprintTupledArgs args)
-                | _, _ -> sprintf "%s.%s(%s)" (sprint 23 instanceExpr) pi.Name (sprintTupledArgs args)
-            | None -> //static call (note: can't accept params)
-                if isOpenModule pi.DeclaringType then 
-                    sprintf "%s" pi.Name
-                else
-                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
+        | Call(Some(instanceExpr), mi, args) -> //instance call
+            //just assume instance members always have tupled args
+            applyParens 24 (sprintf "%s.%s(%s)" (sprint 23 instanceExpr) mi.Name (sprintTupledArgs args))
+        | Call(None, mi, args) -> //static call
+            if FSharpType.IsModule mi.DeclaringType then
+                let methodName = sourceName mi
+                let sprintedArgs = sprintCurriedArgs args
+                if isOpenModule mi.DeclaringType then 
+                    applyParens 20 (sprintf "%s %s" methodName sprintedArgs)
+                else 
+                    applyParens 20 (sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs)
+            else //assume CompiledName same as SourceName for static members
+                applyParens 24 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
+        | PropertyGet(Some(instanceExpr), pi, args) -> //instance call 
+            match pi.Name, args with
+            | _, [] -> sprintf "%s.%s" (sprint 23 instanceExpr) pi.Name
+            | "Item", _ -> sprintf "%s.[%s]" (sprint 23 instanceExpr) (sprintTupledArgs args)
+            | _, _ -> sprintf "%s.%s(%s)" (sprint 23 instanceExpr) pi.Name (sprintTupledArgs args)
+        | PropertyGet(None, pi, args) -> //static call (note: can't accept params)
+            if isOpenModule pi.DeclaringType then 
+                sprintf "%s" pi.Name
+            else
+                sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
         | Unit -> "()" //must come before Value pattern
         | Value(obj, _) ->
             if obj = null then "null"
