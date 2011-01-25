@@ -30,6 +30,21 @@ let ``arithmetic expressions`` () =
     ]
 
 [<Fact>]
+let ``simple lambda with application`` () =
+    sprintedReduceSteps <@ (fun i j -> i + j) 1 2 @> =? [
+        "(fun i j -> i + j) 1 2"
+        "3"
+    ]
+
+[<Fact>]
+let ``lambda with non-reduced applications`` () =
+    sprintedReduceSteps <@ (fun i j -> i + j) (1+2) 2 @> =? [
+        "(fun i j -> i + j) (1 + 2) 2"
+        "(fun i j -> i + j) 3 2"
+        "5"
+    ]
+
+[<Fact>]
 let ``lambda with application on lhs of + op call`` () =
     sprintedReduceSteps <@ (fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> =? [
         "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
@@ -47,3 +62,20 @@ let ``function with application on lhs of + op call`` () =
         "31 + 12"
         "43"
     ]
+
+let ftuple i j = (i,j)
+[<Fact>]
+let ``function with application returns tuple`` () =
+    sprintedReduceSteps <@ ftuple 1 2 @> =? [
+        "ReduceTests.ftuple 1 2"
+        "(1, 2)"
+    ]
+
+[<Fact>]
+let ``function with application compared to tuple`` () =
+    sprintedReduceSteps <@ ftuple 1 2 = (1,2) @> =? [
+        "ReduceTests.ftuple 1 2 = (1, 2)"
+        "(1, 2) = (1, 2)"
+        "true"
+    ]
+

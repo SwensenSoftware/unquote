@@ -12,7 +12,8 @@ open Microsoft.FSharp.Metadata
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
     let evaled = expr.EvalUntyped()
-    Expr.Value(evaled, evaled.GetType())
+    //note this will wrap already reduced values such as Tuples, but hasn't been an issue yet
+    Expr.Value(evaled, evaled.GetType()) 
 
 //it is that isReduce/allReduce pairs properly with reduce match (note specifically NewTuple and Coerce so far)
 //and that they are in synce with the depth of Sprinting.
@@ -24,20 +25,41 @@ let rec isReduced = function
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
 
+// need to handle nested application/lambda expr: replace lambda vars with reduced applications
+// unquote <@ ((fun i j -> i + j) 3 4) + 2 @>
+
 //reduce all args / calles if any of them are not reduced; otherwise eval
 let rec reduce (expr:Expr) = 
     match expr with
-    | ShapeVar v -> 
-        Expr.Var v
-    | ShapeLambda (v,expr) -> 
-        Expr.Lambda (v, reduce expr)
+    | Application(_,_) -> //got to work for these lambda applications (not sure whether better approach)
+        let rec allArgsReduced expr = 
+            match expr with
+            | Application(Lambda(_), rhs) ->
+                if rhs |> isReduced then true
+                else false
+            | Application(lhs,rhs) ->
+                if rhs |> isReduced then allArgsReduced lhs
+                else false
+            | _ -> failwith "wildcard case not expected"
+            
+        let rec rebuild expr =
+            match expr with
+            | Application(lhs, rhs) -> 
+                Expr.Application(rebuild lhs, reduce rhs)
+            | Lambda(_) -> expr
+            | _ -> failwith "wildcard case not expected"
+
+        if allArgsReduced expr then evalValue expr
+        else rebuild expr
+    | ShapeVar _ -> expr
+    | ShapeLambda (_,_) -> expr
     | ShapeCombination (o, exprs) -> 
         if isReduced expr then expr
         elif allReduced exprs then evalValue expr
         else RebuildShapeCombination(o, reduceAll exprs)
 and reduceAll exprList =
     exprList |> List.map reduce
-        
+    
 let reduceSteps =        
     let rec loop expr acc =
         let nextExpr = expr |> reduce 
