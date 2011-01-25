@@ -110,11 +110,19 @@ let ``new array with arg sub expressions`` () =
     sprint <@ [|1+1;2+(3-1);3|] @> =? "[|1 + 1; 2 + (3 - 1); 3|]"
 
 [<Fact>]
-let ``seq ranges`` () =
+let ``simple seq ranges`` () =
     sprint <@ {1..3} @> =? "{1..3}"
-    sprint <@ {1+1..3-5+6} @> =? "{(1 + 1)..(3 - 5 + 6)}" //hmm, precedence isn't right...
     sprint <@ {1..-3..-9} @> =? "{1..-3..-9}"
-    sprint <@ {1+4..-3+9..-9+1} @> =? "{(1 + 4)..(-3 + 9)..(-9 + 1)}"
+
+[<Fact(Skip="failing, fix soon: adding unneeded parnes")>]
+let ``precedence of range expression args`` () =
+    sprint <@ {1+1..3-5+6} @> =? "{1 + 1..3 - 5 + 6}" //hmm, precedence isn't right...
+    sprint <@ {1+4..-3+9..-9+1} @> =? "{1 + 4..-3 + 9..-9 + 1}"
+
+module Test = let f (i:string) (j:string) = i + j;;
+[<Fact(Skip="failing, fix soon")>]
+let ``call precedence within function application`` () =
+    sprint <@ Test.f ("hello".Substring(0,2)) "world" @> =? "Test.f (\"hello\".Substring(0, 2)) \"world\""
 
 
 

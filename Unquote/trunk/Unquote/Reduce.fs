@@ -71,3 +71,4 @@ let reduceSteps =
         else loop nextExpr (nextExpr::acc)
 
     fun expr -> loop expr [expr] |> List.rev
+

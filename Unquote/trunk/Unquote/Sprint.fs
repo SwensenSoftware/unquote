@@ -88,7 +88,7 @@ let sprint expr =
                 match lambdaOrBody with
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
                 | body -> sprintf "-> %s" (sprint 8 body)
-            applyParens 6 (sprintf "fun %s %s" (var.Name) (loop lambdaOrBody)) //deal with parens latter
+            applyParens 6 (sprintf "fun %s %s" (var.Name) (loop lambdaOrBody))
         | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
                 match assoc with
