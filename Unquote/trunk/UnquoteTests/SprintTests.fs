@@ -105,6 +105,10 @@ let ``instrinsic calls`` () =
     sprint <@ [|1;2;3|].[1] @> =? "[|1; 2; 3|].[1]"
     sprint <@ a2d.[0, 1] @> =? "SprintTests.a2d.[0, 1]"
 
+[<Fact>]
+let ``new array with arg sub expressions`` () =
+    sprint <@ [|1+1;2+(3-1);3|] @> =? "[|1 + 1; 2 + (3 - 1); 3|]"
+
 
 //need to think up some multi-arg item and named getter scenarios
 

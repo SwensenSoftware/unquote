@@ -132,7 +132,9 @@ let sprint expr =
             else sprintf "%A" obj
         | NewTuple (args) -> //tuples have at least two elements
             args |> sprintTupledArgs |> sprintf "(%s)"
-        | NewUnionCase(_,_) | NewArray(_,_)  ->
+        | NewArray(_,args) ->
+            args |> sprintSequencedArgs |> sprintf "[|%s|]"
+        | NewUnionCase(_,_)  ->
             expr.EvalUntyped() |> sprintf "%A"
         | Coerce(target, _) ->
             //don't even "mention" anything about the coersion
@@ -150,5 +152,7 @@ let sprint expr =
         sprintArgs 10 ", "
     and sprintCurriedArgs = //application of arguments to a function
         sprintArgs 20 " "
+    and sprintSequencedArgs = //application of arguments to a function
+        sprintArgs 4 "; "
     
     sprint 0 expr

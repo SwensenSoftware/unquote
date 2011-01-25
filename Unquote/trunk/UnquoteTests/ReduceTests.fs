@@ -86,3 +86,12 @@ let ``lambdas are reduced`` () =
         "[2; 3; 4; 5] = [2; 3; 4; 5]"
         "true"
     ]
+
+[<Fact>]
+let ``new array with arg sub expressions`` () =
+    sprintedReduceSteps <@ [|1+1;2+(3-1);3|] = [|2;4;3|] @> =? [
+        "[|1 + 1; 2 + (3 - 1); 3|] = [|2; 4; 3|]"
+        "[|2; 2 + 2; 3|] = [|2; 4; 3|]"
+        "[|2; 4; 3|] = [|2; 4; 3|]"
+        "true"
+    ]
