@@ -98,6 +98,13 @@ let f i j k = i + j + k
 let ``function with curried args on lhs of + op call precedence`` () =
     sprint <@ f (2 + 5) 3 (4 + 17) + 12 @> =? "SprintTests.f (2 + 5) 3 (4 + 17) + 12"
 
+let a2d = array2D [[1;2];[2;3]]
+[<Fact>]
+let ``instrinsic calls`` () =
+    sprint <@ "asdf".[1] @> =? "\"asdf\".[1]"
+    sprint <@ [|1;2;3|].[1] @> =? "[|1; 2; 3|].[1]"
+    sprint <@ a2d.[0, 1] @> =? "SprintTests.a2d.[0, 1]"
+
 
 //need to think up some multi-arg item and named getter scenarios
 
@@ -110,3 +117,4 @@ let ``partial application`` () =
 [<Fact(Skip="Future feature")>]
 let ``pattern match let binding`` () =
     sprint <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
+
