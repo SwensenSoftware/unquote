@@ -140,7 +140,7 @@ let sprint expr =
             sprint context target
         | Let(var, e1, e2) ->
             //todo: this needs to be handled better for curried functions
-            applyParens 5 (sprintf "let %s = %s in %s" var.Name (e1 |> sprint 0) (e2 |> sprint 0))
+            applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (e1 |> sprint 0) (e2 |> sprint 0))
         | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
             sprintf "<@ %s @>" (sprint 0 qx)
         | _ -> 

@@ -134,7 +134,9 @@ let addToString a b = a.ToString() + b.ToString()
 let ``precedence of intrinsic get within function application`` () =
     sprint <@ addToString "asdf".[1] "asdf".[2] @> =? "SprintTests.addToString \"asdf\".[1] \"asdf\".[2]"
 
-
+[<Fact>]
+let ``mutable let binding`` () =
+    sprint <@ let mutable x = 3 in x + 2 @> =? "let mutable x = 3 in x + 2"
 
 
 //need to think up some multi-arg item and named getter scenarios
