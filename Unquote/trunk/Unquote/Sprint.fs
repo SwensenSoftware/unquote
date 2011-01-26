@@ -98,13 +98,13 @@ let sprint expr =
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
-            applyParens 20 (sprintf "%s.%s(%s)" (sprint 23 target) mi.Name (sprintTupledArgs args))
-        | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //precedence seems a bit off for op ranges
-            sprintf "{%s..%s}" (sprint 23 a) (sprint 23 b)
+            applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) mi.Name (sprintTupledArgs args))
+        | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //not sure about precedence for op ranges
+            sprintf "{%s..%s}" (sprint 0 a) (sprint 0 b)
         | Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" ->
-            sprintf "{%s..%s..%s}" (sprint 23 a) (sprint 23 b) (sprint 23 c)
+            sprintf "{%s..%s..%s}" (sprint 0 a) (sprint 0 b) (sprint 0 c)
         | Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
-            sprintf "%s.[%s]" (sprint 23 target) (sprintTupledArgs args)
+            sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
         | Call(None, mi, args) -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
@@ -117,14 +117,14 @@ let sprint expr =
                 applyParens 20 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
-            | _, [] -> sprintf "%s.%s" (sprint 23 target) pi.Name
-            | "Item", _ -> sprintf "%s.[%s]" (sprint 23 target) (sprintTupledArgs args)
-            | _, _ -> sprintf "%s.%s(%s)" (sprint 23 target) pi.Name (sprintTupledArgs args)
+            | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name
+            | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
+            | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
         | PropertyGet(None, pi, args) -> //static get (note: can't accept params)
             if isOpenModule pi.DeclaringType then 
                 sprintf "%s" pi.Name
             else
-                sprintf "%s.%s" pi.DeclaringType.Name pi.Name 
+                sprintf "%s.%s" pi.DeclaringType.Name pi.Name
         | Unit -> "()" //must come before Value pattern
         | Value(obj, _) ->
             if obj = null then "null"

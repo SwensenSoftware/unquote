@@ -114,7 +114,7 @@ let ``simple seq ranges`` () =
     sprint <@ {1..3} @> =? "{1..3}"
     sprint <@ {1..-3..-9} @> =? "{1..-3..-9}"
 
-[<Fact(Skip="failing, fix soon: adding unneeded parnes")>]
+[<Fact>]
 let ``precedence of range expression args`` () =
     sprint <@ {1+1..3-5+6} @> =? "{1 + 1..3 - 5 + 6}" //hmm, precedence isn't right...
     sprint <@ {1+4..-3+9..-9+1} @> =? "{1 + 4..-3 + 9..-9 + 1}"
@@ -125,9 +125,14 @@ let ``call precedence within function application`` () =
     sprint <@ Test.f ("hello".Substring(0,2)) "world" @> =? "Test.f (\"hello\".Substring(0, 2)) \"world\""
 
 let add x y = x + y
+[<Fact>]
 let ``call precedence nested function applications`` () =
     sprint <@ add (add 1 2) (add 3 4) @> =? "SprintTests.add (SprintTests.add 1 2) (SprintTests.add 3 4)"
 
+let addToString a b = a.ToString() + b.ToString()
+[<Fact>]
+let ``precedence of intrinsic get within function application`` () =
+    sprint <@ addToString "asdf".[1] "asdf".[2] @> =? "SprintTests.addToString \"asdf\".[1] \"asdf\".[2]"
 
 
 
