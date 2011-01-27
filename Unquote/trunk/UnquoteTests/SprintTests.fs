@@ -1,4 +1,5 @@
-﻿module Test.Swensen.Unquote.sourceTests
+﻿[<AutoOpen>] //making auto open allows us not to have to fully qualify module properties
+module Test.Swensen.Unquote.SprintTests
 open Xunit
 open Swensen.Unquote
 
@@ -94,14 +95,14 @@ let ``lambda with application on lhs of + op call precedence`` () =
 let f i j k = i + j + k
 [<Fact>]
 let ``function with curried args on lhs of + op call precedence`` () =
-    source <@ f (2 + 5) 3 (4 + 17) + 12 @> =? "sourceTests.f (2 + 5) 3 (4 + 17) + 12"
+    source <@ f (2 + 5) 3 (4 + 17) + 12 @> =? "f (2 + 5) 3 (4 + 17) + 12"
 
 let a2d = array2D [[1;2];[2;3]]
 [<Fact>]
 let ``instrinsic calls`` () =
     source <@ "asdf".[1] @> =? "\"asdf\".[1]"
     source <@ [|1;2;3|].[1] @> =? "[|1; 2; 3|].[1]"
-    source <@ a2d.[0, 1] @> =? "sourceTests.a2d.[0, 1]"
+    source <@ a2d.[0, 1] @> =? "a2d.[0, 1]"
 
 [<Fact>]
 let ``new array with arg sub expressions`` () =
@@ -125,16 +126,38 @@ let ``call precedence within function application`` () =
 let add x y = x + y
 [<Fact>]
 let ``call precedence nested function applications`` () =
-    source <@ add (add 1 2) (add 3 4) @> =? "sourceTests.add (sourceTests.add 1 2) (sourceTests.add 3 4)"
+    source <@ add (add 1 2) (add 3 4) @> =? "add (add 1 2) (add 3 4)"
 
 let addToString a b = a.ToString() + b.ToString()
 [<Fact>]
 let ``precedence of intrinsic get within function application`` () =
-    source <@ addToString "asdf".[1] "asdf".[2] @> =? "sourceTests.addToString \"asdf\".[1] \"asdf\".[2]"
+    source <@ addToString "asdf".[1] "asdf".[2] @> =? "addToString \"asdf\".[1] \"asdf\".[2]"
 
 [<Fact>]
 let ``mutable let binding`` () =
     source <@ let mutable x = 3 in x + 2 @> =? "let mutable x = 3 in x + 2"
+
+[<Fact>]
+let ``if then else`` () =
+    source <@ if true then false else true @> =? "if true then false else true"
+
+[<Fact>]
+let ``precedence: if then else in lambda body`` () =
+    source <@ fun x -> if x then false else true @> =? "fun x -> if x then false else true"
+
+[<Fact>]
+let ``and also`` () =
+    source <@ true && false @> =? "true && false"
+
+[<Fact>]
+let ``or else`` () =
+    source <@ false || true @> =? "false || true"
+
+let x = 4
+[<Fact>]
+let ``and also, or else precedence`` () =
+    source <@ x = 4 || x = 3 && x >= 4 @> =? "x = 4 || x = 3 && x >= 4"
+    source <@ (x = 4 || x = 3) && x >= 4 @> =? "(x = 4 || x = 3) && x >= 4"
 
 
 //need to think up some multi-arg item and named getter scenarios

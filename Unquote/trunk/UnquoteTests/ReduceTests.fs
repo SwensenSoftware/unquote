@@ -1,4 +1,5 @@
-﻿module Test.Swensen.Unquote.ReduceTests
+﻿[<AutoOpen>]
+module Test.Swensen.Unquote.ReduceTests
 open Xunit
 open Swensen.Unquote
 
@@ -57,8 +58,8 @@ let f i j k = i + j + k
 [<Fact>]
 let ``function with application on lhs of + op call`` () =
     sprintedReduceSteps <@ f (2 + 5) 3 (4 + 17) + 12 @> =? [
-        "ReduceTests.f (2 + 5) 3 (4 + 17) + 12"
-        "ReduceTests.f 7 3 21 + 12"
+        "f (2 + 5) 3 (4 + 17) + 12"
+        "f 7 3 21 + 12"
         "31 + 12"
         "43"
     ]
@@ -67,14 +68,14 @@ let ftuple i j = (i,j)
 [<Fact>]
 let ``function with application returns tuple`` () =
     sprintedReduceSteps <@ ftuple 1 2 @> =? [
-        "ReduceTests.ftuple 1 2"
+        "ftuple 1 2"
         "(1, 2)"
     ]
 
 [<Fact>]
 let ``function with application compared to tuple`` () =
     sprintedReduceSteps <@ ftuple 1 2 = (1,2) @> =? [
-        "ReduceTests.ftuple 1 2 = (1, 2)"
+        "ftuple 1 2 = (1, 2)"
         "(1, 2) = (1, 2)"
         "true"
     ]

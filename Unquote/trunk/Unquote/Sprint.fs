@@ -9,8 +9,6 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-//precedence: http://msdn.microsoft.com/en-us/library/dd233228.aspx
-
 type binOpAssoc =
     | Left
     | Right
@@ -88,7 +86,7 @@ let sprint expr =
             let rec loop lambdaOrBody =
                 match lambdaOrBody with
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
-                | body -> sprintf "-> %s" (sprint 8 body)
+                | body -> sprintf "-> %s" (sprint 6 body)
             applyParens 6 (sprintf "fun %s %s" (var.Name) (loop lambdaOrBody))
         | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
@@ -144,6 +142,12 @@ let sprint expr =
             applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (e1 |> sprint 0) (e2 |> sprint 0))
         | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
             sprintf "<@ %s @>" (sprint 0 qx)
+        | AndAlso(a,b) ->
+            applyParens 12 (sprintf "%s && %s" (sprint 11 a) (sprint 12 b))
+        | OrElse(a,b) ->
+            applyParens 11 (sprintf "%s || %s" (sprint 10 a) (sprint 11 b))
+        | IfThenElse(a,b,c) ->
+            applyParens 7 (sprintf "if %s then %s else %s" (sprint 7 a) (sprint 7 b) (sprint 7 c))
         | _ -> 
             sprintf "%A" (expr)
     and sprintArgs prec delimiter exprs =
@@ -156,3 +160,41 @@ let sprint expr =
         sprintArgs 4 "; "
     
     sprint 0 expr
+
+//precedence: http://msdn.microsoft.com/en-us/library/dd233228.aspx
+(*
+		Operator    	Associativity
+	1	as	            Right
+	2	when	        Right
+	3	| (pipe)	    Left
+	4	;	            Right
+	5	let	            Nonassociative
+	6	function , fun, 
+        match, try	    Nonassociative
+	7	if	            Nonassociative
+	8	->	            Right
+	9	:=	            Right
+	10	,	            Nonassociative
+	11	or , ||	        Left
+	12	& , &&	        Left
+	13	< op, >op, =, 
+        |op, &op	    Left
+	14	^ op	        Right
+	15	::	            Right
+	16	:?> , :?	    Nonassociative
+	17	- op, +op, 
+        (binary)	    Left
+	18	* op, /op, %op	Left
+	19	** op	        Right
+	20	f x (function 
+        application)	Left
+	21	| (pattern 
+        match)	        Right
+	22	prefix ops 
+        (+op, -op, %, 
+        %%, &, &&, 
+        !op, ~op)	    Left
+	23	.	            Left
+	24	f(x)	        Left
+	25	f< types >	    Left
+*)
