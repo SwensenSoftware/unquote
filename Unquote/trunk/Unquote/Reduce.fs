@@ -15,8 +15,7 @@ let evalValue (expr:Expr) =
     //note this will wrap already reduced values such as Tuples, but hasn't been an issue yet
     Expr.Value(evaled, evaled.GetType()) 
 
-//it is that isReduce/allReduce pairs properly with reduce match (note specifically NewTuple and Coerce so far)
-//and that they are in synce with the depth of Sprinting.
+//need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
     | Value(_,_) | NewUnionCase(_,_) | Lambda _ | Var _ -> true
     | NewTuple(args) | NewArray(_,args) when allReduced args -> true
@@ -60,6 +59,8 @@ let rec reduce (expr:Expr) =
 and reduceAll exprList =
     exprList |> List.map reduce
     
+//note Expr uses reference equality and comparison, so have to be
+//carefule in reduce algorithm to only rebuild actually reduced parts of an expresion
 let reduceFully =        
     let rec loop expr acc =
         let nextExpr = expr |> reduce 
