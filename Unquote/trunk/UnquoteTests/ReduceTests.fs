@@ -96,3 +96,12 @@ let ``new array with arg sub expressions`` () =
         "[|2; 4; 3|] = [|2; 4; 3|]"
         "true"
     ]
+
+open System
+[<Fact>]
+let ``new object is not reduced`` () =
+    sprintedReduceSteps <@ String('c', 3) + "hello" @> =? [
+        "String('c', 3) + \"hello\""
+        "\"ccc\" + \"hello\""
+        "\"ccchello\""
+    ]

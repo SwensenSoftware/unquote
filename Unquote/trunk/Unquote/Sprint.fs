@@ -132,8 +132,10 @@ let sprint expr =
             args |> sprintTupledArgs |> sprintf "(%s)"
         | NewArray(_,args) ->
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
-        | NewUnionCase(_,_)  ->
+        | NewUnionCase(_,_)  -> //needs improvement
             expr.EvalUntyped() |> sprintf "%A"
+        | NewObject(ci, args) ->
+            applyParens 20 (sprintf "%s(%s)" ci.DeclaringType.Name (sprintTupledArgs args))
         | Coerce(target, _) ->
             //don't even "mention" anything about the coersion
             sprint context target
@@ -142,9 +144,9 @@ let sprint expr =
             applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (e1 |> sprint 0) (e2 |> sprint 0))
         | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
             sprintf "<@ %s @>" (sprint 0 qx)
-        | AndAlso(a,b) ->
+        | AndAlso(a,b) -> //must come before if then else
             applyParens 12 (sprintf "%s && %s" (sprint 11 a) (sprint 12 b))
-        | OrElse(a,b) ->
+        | OrElse(a,b) -> //must come before if then else
             applyParens 11 (sprintf "%s || %s" (sprint 10 a) (sprint 11 b))
         | IfThenElse(a,b,c) ->
             applyParens 7 (sprintf "if %s then %s else %s" (sprint 7 a) (sprint 7 b) (sprint 7 c))

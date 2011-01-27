@@ -159,6 +159,19 @@ let ``and also, or else precedence`` () =
     source <@ x = 4 || x = 3 && x >= 4 @> =? "x = 4 || x = 3 && x >= 4"
     source <@ (x = 4 || x = 3) && x >= 4 @> =? "(x = 4 || x = 3) && x >= 4"
 
+open System
+[<Fact>]
+let ``new object`` () =
+    source <@ String('c', 3) @> =? "String('c', 3)"
+
+let addStrings (a:string) (b:string) = a + b;;
+[<Fact>]
+let ``new object precedence within function application`` () =
+    source <@ addStrings (String('c', 3)) "hello" @> =? "addStrings (String('c', 3)) \"hello\""
+
+[<Fact>]
+let ``new object precedence + op expr`` () =
+    source <@ String('c', 3) + "hello" @> =? "String('c', 3) + \"hello\""
 
 //need to think up some multi-arg item and named getter scenarios
 
