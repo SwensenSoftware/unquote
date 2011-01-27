@@ -60,7 +60,7 @@ let rec reduce (expr:Expr) =
 and reduceAll exprList =
     exprList |> List.map reduce
     
-let reduceSteps =        
+let reduceFully =        
     let rec loop expr acc =
         let nextExpr = expr |> reduce 
         if isReduced nextExpr then //is reduced

@@ -45,7 +45,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Sprint.fs" />
+    <Compile Include="source.fs" />
     <Compile Include="Reduce.fs" />
     <Compile Include="ExprExt.fs" />
     <Compile Include="Operators.fs" />

@@ -15,13 +15,17 @@ open Swensen.Unquote.Ext
 
 //make these instance members, except for test
 let unquote (expr:Expr) = expr.Unquote()
+let source (expr:Expr) = expr.ToSource()
+let isReduced (expr:Expr) = expr.IsReduced()
+let reduce (expr:Expr) = expr.Reduce()
+let reduceFully (expr:Expr) = expr.ReduceFully()
 
 //hide everything with an sig. file
 
 let fsiTestFailed (expr:Expr<bool>) =
     printfn "\nTest failed:" 
-    for expr in expr.ReduceSteps() do
-        printfn "\t%s" (expr.Sprint())
+    for expr in expr.ReduceFully() do
+        printfn "\t%s" (expr.ToSource())
     printfn ""
 
 open System        
@@ -66,7 +70,7 @@ let testFailed =
                 #endif
 
         fun (expr:Expr<bool>) ->
-            let msg = "\n\n" + (expr |> Reduce.reduceSteps |> List.map Sprint.sprint |> String.concat "\n") + "\n"
+            let msg = "\n\n" + (expr |> reduceFully |> List.map source |> String.concat "\n") + "\n"
             outputNonFsiTestFailedMsg msg
     #endif
 

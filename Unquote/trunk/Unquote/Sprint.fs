@@ -73,8 +73,9 @@ let sourceName (mi:MemberInfo) =
 //todo:
 //  remaining binary ops
 //  unary ops
-//  mutable let bindings
 //  new object
+//  if then else
+//  and / or
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
 let sprint expr =
     let rec sprint context expr =

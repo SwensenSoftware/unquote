@@ -11,5 +11,5 @@ let f = fun  i j k -> i + j + k
 
 [<EntryPoint>]
 let main args = 
-    Reduce.reduce <@ (fun  i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> |> ignore
+    reduce <@ (fun  i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> |> ignore
     0

@@ -4,7 +4,7 @@ open Swensen.Unquote
 
 //we use this since expr don't support structural comparison
 let sprintedReduceSteps expr =
-    Reduce.reduceSteps expr |> List.map Sprint.sprint
+    reduceFully expr |> List.map source
 
 [<Fact>]
 let ``already reduced`` () =
