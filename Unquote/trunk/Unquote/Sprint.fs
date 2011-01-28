@@ -24,16 +24,34 @@ let binaryOps = [
     "op_Inequality", ("<>", 13, Left)
     //pipe ops
     "op_PipeRight", ("|>", 3, Left)
+    "op_PipeRight2", ("||>", 3, Left)
+    "op_PipeRight3", ("|||>", 3, Left)
     "op_PipeLeft", ("<|", 3, Left)
+    "op_PipeLeft2", ("<||", 3, Left)
+    "op_PipeLeft3", ("<|||", 3, Left)
     //numeric ops
     "op_Addition", ("+", 17, Left)
     "op_Subtraction", ("-", 17, Left)
     "op_Division", ("/", 18, Left)
     "op_Multiply", ("*", 18, Left)
     "op_Modulus", ("%", 18, Left)
+    "op_Exponentiation", ("**", 19, Left)
+    //bit operators
+    "op_BitwiseAnd", ("&&&", 13, Left)
+    "op_BitwiseOr", ("|||", 13, Left)
+    "op_ExclusiveOr", ("^^^", 14, Right)
+    "op_LeftShift", ("<<<", 13, Left)
+    "op_RightShift", (">>>", 13, Left)
+
+    //composition
+    "op_ComposeRight", (">>", 13, Left)
+    "op_ComposeLeft", ("<<", 13, Left)
+    //special
+    "op_Append", ("@", 0, Non) //not sure what precedence is
+    "op_Concatenate", ("^", 14, Right) //ocaml style string concatentation
 ]
 
-//todo: expand to include +, -, *, etc.
+//future feature, support custom ops
 let (|BinaryInfixCall|_|) expr =
     match expr with
     | Call (_, mi, lhs::rhs::_) ->
@@ -103,7 +121,7 @@ let sprint expr =
         | Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" ->
             sprintf "{%s..%s..%s}" (sprint 0 a) (sprint 0 b) (sprint 0 c)
         | Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
-            sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
+            sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args) //not sure what precedence is
         | Call(None, mi, args) -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
@@ -143,7 +161,8 @@ let sprint expr =
             //todo: this needs to be handled better for curried functions
             applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (e1 |> sprint 0) (e2 |> sprint 0))
         | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
-            sprintf "<@ %s @>" (sprint 0 qx)
+            //note, this only handles typed quotations (ops are 
+            sprintf "<@ %s @>" (sprint 0 qx) 
         | AndAlso(a,b) -> //must come before if then else
             applyParens 12 (sprintf "%s && %s" (sprint 11 a) (sprint 12 b))
         | OrElse(a,b) -> //must come before if then else
@@ -163,7 +182,11 @@ let sprint expr =
     
     sprint 0 expr
 
-//precedence: http://msdn.microsoft.com/en-us/library/dd233228.aspx
+//-----precedence-----
+//spec: http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.html
+//from spec:  Paren(token) pushed when (, begin, struct, sig, {, [, [|, or quote-op-left is encountered.
+//custom operator precedence determined by first op in sequence: http://stackoverflow.com/questions/3347972/f-custom-operators-precedence
+//precedence table: http://msdn.microsoft.com/en-us/library/dd233228.aspx
 (*
 		Operator    	Associativity
 	1	as	            Right
@@ -200,3 +223,108 @@ let sprint expr =
 	24	f(x)	        Left
 	25	f< types >	    Left
 *)
+
+
+//operator lookup (from spec)
+(*
+
+[]    op_Nil
+
+::    op_ColonColon
+
++     op_Addition
+
+-     op_Subtraction
+
+*     op_Multiply
+
+/     op_Division
+
+**    op_Exponentiation
+
+@     op_Append       
+
+^     op_Concatenate  
+
+%     op_Modulus
+
+&&&   op_BitwiseAnd
+
+|||   op_BitwiseOr
+
+^^^   op_ExclusiveOr
+
+<<<   op_LeftShift
+
+~~~   op_LogicalNot
+
+>>>   op_RightShift
+
+~+    op_UnaryPlus
+
+~-    op_UnaryNegation
+
+=     op_Equality
+
+<>    op_Inequality
+
+<=    op_LessThanOrEqual
+
+>=    op_GreaterThanOrEqual
+
+<     op_LessThan
+
+>     op_GreaterThan
+
+?     op_Dynamic
+
+?<-   op_DynamicAssignment
+
+|>    op_PipeRight
+
+||>   op_PipeRight2
+
+|||>  op_PipeRight3
+
+<|    op_PipeLeft
+
+<||   op_PipeLeft2
+
+<|||  op_PipeLeft3
+
+!     op_Dereference
+
+>>    op_ComposeRight
+
+<<    op_ComposeLeft
+
+<@ @> op_Quotation
+
+<@@ @@> op_QuotationUntyped
+
+~%    op_Splice
+
+~%%   op_SpliceUntyped
+
+~&    op_AddressOf
+
+~&&   op_IntegerAddressOf
+
+||    op_BooleanOr
+
+&&    op_BooleanAnd
+
++=    op_AdditionAssignment
+
+-=    op_SubtractionAssignment
+
+*=    op_MultiplyAssignment
+
+/=    op_DivisionAssignment
+
+..    op_Range
+
+.. .. op_RangeStep
+
+*)
+
