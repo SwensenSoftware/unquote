@@ -13,11 +13,19 @@ open Microsoft.FSharp.Metadata
 
 open Swensen.Unquote.Ext
 
-let unquote (expr:Expr) = expr.Unquote()
+///Convert given expression to it's source code representation. Sub-expressions which are
+///not currently supported will fallback on the default Expr.ToString() implementation.
 let source (expr:Expr) = expr.ToSource()
-let isReduced (expr:Expr) = expr.IsReduced()
+///Reduce by one step: convert each branch of the given expression to a Value expression of it's 
+///evaluation if each subbranch of the branch is reduced.
+///If this expression is already reduced, or cannot be reduced, returns itself.
 let reduce (expr:Expr) = expr.Reduce()
+///Convert the given expression to a list of all of it's Reduce steps.
 let reduceFully (expr:Expr) = expr.ReduceFully()
+///Determine whether the given expression is reduced.
+let isReduced (expr:Expr) = expr.IsReduced()
+///Print the newline concated source code reduce steps of the given expression to stdout.
+let unquote (expr:Expr) = expr.Unquote()
 
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
