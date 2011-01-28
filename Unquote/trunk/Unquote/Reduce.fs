@@ -1,4 +1,4 @@
-﻿module Swensen.Unquote.Reduce
+﻿module internal Swensen.Unquote.Reduce
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection

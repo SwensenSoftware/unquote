@@ -1,4 +1,4 @@
-﻿module Swensen.Unquote.Sprint
+﻿module internal Swensen.Unquote.Sprint
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection

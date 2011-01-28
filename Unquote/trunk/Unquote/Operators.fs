@@ -13,69 +13,71 @@ open Microsoft.FSharp.Metadata
 
 open Swensen.Unquote.Ext
 
-//make these instance members, except for test
 let unquote (expr:Expr) = expr.Unquote()
 let source (expr:Expr) = expr.ToSource()
 let isReduced (expr:Expr) = expr.IsReduced()
 let reduce (expr:Expr) = expr.Reduce()
 let reduceFully (expr:Expr) = expr.ReduceFully()
 
-//hide everything with an sig. file
+///Functions and values public inline Operator functions rely on (and therefore must be public,
+///even though we do not want to expose them publically).
+module Private =
+    let private fsiTestFailed (expr:Expr<bool>) =
+        printfn "\nTest failed:" 
+        for expr in expr.ReduceFully() do
+            printfn "\t%s" (expr.ToSource())
+        printfn ""
 
-let fsiTestFailed (expr:Expr<bool>) =
-    printfn "\nTest failed:" 
-    for expr in expr.ReduceFully() do
-        printfn "\t%s" (expr.ToSource())
-    printfn ""
+    open System        
+    open System.Reflection
 
-open System        
-open System.Reflection
+    type private testFramework =
+        | Xunit
+        | Nunit
 
-type testFramework =
-    | Xunit
-    | Nunit
+    let testFailed =
+        #if INTERACTIVE
+            fsiTestFailed
+        #else
+            //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
+            ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
+            let outputNonFsiTestFailedMsg =
+                let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
+                let framework = 
+                    seq { 
+                        for a in assemblies do
+                            match a.GetName().Name with
+                            | "xunit" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit"))
+                            | "nunit.framework" -> yield Some(Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
+                            | _ -> ()
+                        yield None //else none
+                    } |> Seq.head
 
-let testFailed =
-    #if INTERACTIVE
-        fsiTestFailed
-    #else
-        //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
-        ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
-        let outputNonFsiTestFailedMsg =
-            let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
-            let framework = 
-                seq { 
-                    for a in assemblies do
-                        match a.GetName().Name with
-                        | "xunit" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit"))
-                        | "nunit.framework" -> yield Some(Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
-                        | _ -> ()
-                    yield None //else none
-                } |> Seq.head
+                match framework with
+                | Some(Xunit, t) -> 
+                    let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
+                    let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
+                    fun msg -> del.Invoke(false, msg)
+                | Some(Nunit, t) -> 
+                    let mi = t.GetMethod("Fail", [|typeof<string>|])
+                    let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
+                    fun msg -> del.Invoke(msg)
+                | None ->
+                    #if DEBUG
+                        fun msg -> Diagnostics.Debug.Fail(msg)
+                    #else
+                        fun msg -> raise <| System.Exception("Test failed (but please reconsider using test in production code due to performance cost):" + msg)
+                    #endif
 
-            match framework with
-            | Some(Xunit, t) -> 
-                let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
-                let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
-                fun msg -> del.Invoke(false, msg)
-            | Some(Nunit, t) -> 
-                let mi = t.GetMethod("Fail", [|typeof<string>|])
-                let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
-                fun msg -> del.Invoke(msg)
-            | None ->
-                #if DEBUG
-                    fun msg -> Diagnostics.Debug.Fail(msg)
-                #else
-                    fun msg -> raise <| System.Exception("Test failed (but please reconsider using test in production code due to performance cost):" + msg)
-                #endif
+            fun (expr:Expr<bool>) ->
+                let msg = "\n\n" + (expr |> reduceFully |> List.map source |> String.concat "\n") + "\n"
+                outputNonFsiTestFailedMsg msg
+        #endif
 
-        fun (expr:Expr<bool>) ->
-            let msg = "\n\n" + (expr |> reduceFully |> List.map source |> String.concat "\n") + "\n"
-            outputNonFsiTestFailedMsg msg
-    #endif
+    //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
+    let inline raise (e: System.Exception) = (# "throw" e : 'U #)    
 
-//raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
-let inline raise (e: System.Exception) = (# "throw" e : 'U #)    
+open Private
 
 //making inline (together with catch/raise) ensures stacktraces clean in test framework output
 ///Evaluate the given boolean expression: if false output incremental eval steps using
