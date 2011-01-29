@@ -104,14 +104,20 @@ let lookupTypeDisplayName (t:Type) =
     | StartsWith "System.Collections.Generic.IEnumerable`1" _   -> "seq"
     | _ -> t.Name.Split([|'`'|]).[0] //short name without generic arg count
 
-let rec sprintType (t:Type) =
-    let args = t.GetGenericArguments()
-    match args.Length with
-    | 0 -> lookupTypeDisplayName t
-    | _ when t.FullName.StartsWith("System.Tuple`") -> 
-        sprintf "(%s)" (args |> Array.map sprintType |> String.concat " * ")
-    | _ -> 
-        sprintf "%s<%s>" (lookupTypeDisplayName t) (args |> Array.map sprintType |> String.concat ", ")
+//used by both sprintType and sprint
+let applyParens context prec s = if prec > context then s else sprintf "(%s)" s
+
+let sprintType (t:Type) =
+    let rec sprintType context (t:Type) =
+        let applyParens = applyParens context
+        let args = t.GetGenericArguments()
+        match args.Length with
+        | 0 -> lookupTypeDisplayName t
+        | _ when t.FullName.StartsWith("System.Tuple`") -> 
+            applyParens 2 (sprintf "%s" (args |> Array.map (sprintType 2) |> String.concat " * "))
+        | _ -> 
+            sprintf "%s<%s>" (lookupTypeDisplayName t) (args |> Array.map (sprintType 1) |> String.concat ", ")
+    sprintType 0 t
 
 //todo:
 //  unary ops
@@ -121,7 +127,7 @@ let rec sprintType (t:Type) =
 //  maybe should expand to VarSet and Sequence
 let sprint expr =
     let rec sprint context expr =
-        let applyParens prec s = if prec > context then s else sprintf "(%s)" s
+        let applyParens = applyParens context
 
         match expr with
         | Application (curry, last) -> //application of arguments to a lambda
