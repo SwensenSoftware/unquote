@@ -173,6 +173,12 @@ let ``new object precedence within function application`` () =
 let ``new object precedence + op expr`` () =
     source <@ String('c', 3) + "hello" @> =? "String('c', 3) + \"hello\""
 
+//need three tests for :? which would be typ with alias, type with no generic args, type with generic args
+//[<Fact>]
+//let ``sprintType: complex`` () =
+//    Sprint.sprintType typeof<Map<(string*(string*int)) list, string>> =? "Map<list<(string * (string * int))>, string>" 
+        
+
 //need to think up some multi-arg item and named getter scenarios
 
 //Future features:

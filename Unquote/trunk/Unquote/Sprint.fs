@@ -47,7 +47,7 @@ let binaryOps = [
     "op_ComposeRight", (">>", 13, Left)
     "op_ComposeLeft", ("<<", 13, Left)
     //special
-    "op_Append", ("@", 0, Non) //not sure what precedence is
+    "op_Append", ("@", 17, Left) //not sure what precedence, falling back on (+)
     "op_Concatenate", ("^", 14, Right) //ocaml style string concatentation
 ]
 
@@ -86,13 +86,39 @@ let sourceName (mi:MemberInfo) =
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
 
+let (|StartsWith|_|) (startStr:string) (target:string) =
+    if target.StartsWith(startStr) then Some(target)
+    else None
+
+///Get the type alias name or short name without generic arg count encoding
+let lookupTypeDisplayName (t:Type) =
+    match t.FullName with
+    | "System.String"   -> "string"
+    | "System.Int32"    -> "int"
+    | "System.Int64"    -> "int64"
+    | "System.Double"   -> "float"
+    | "System.Decimal"  -> "decimal"
+    | "System.Numerics.BigInteger" -> "bigint"
+    | StartsWith "Microsoft.FSharp.Collections.FSharpList`1" _  -> "list"
+    | StartsWith "Microsoft.FSharp.Collections.FSharpMap`2" _   -> "Map"
+    | StartsWith "System.Collections.Generic.IEnumerable`1" _   -> "seq"
+    | _ -> t.Name.Split([|'`'|]).[0] //short name without generic arg count
+
+let rec sprintType (t:Type) =
+    let args = t.GetGenericArguments()
+    match args.Length with
+    | 0 -> lookupTypeDisplayName t
+    | _ when t.FullName.StartsWith("System.Tuple`") -> 
+        sprintf "(%s)" (args |> Array.map sprintType |> String.concat " * ")
+    | _ -> 
+        sprintf "%s<%s>" (lookupTypeDisplayName t) (args |> Array.map sprintType |> String.concat ", ")
+
 //todo:
-//  remaining binary ops
 //  unary ops
-//  new object
-//  if then else
-//  and / or
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
+//  need to look into DerivedPatterns.Lambdas and DerivedPatterns.Applications
+//  implement TypeTestGeneric call handling (:?)
+//  maybe should expand to VarSet and Sequence
 let sprint expr =
     let rec sprint context expr =
         let applyParens prec s = if prec > context then s else sprintf "(%s)" s
@@ -116,6 +142,8 @@ let sprint expr =
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
             applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) mi.Name (sprintTupledArgs args))
+        | Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
+            applyParens 16 (sprintf "%s :? %s" (sprint 16 lhs) (sprintType (mi.GetGenericArguments().[0])))
         | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //not sure about precedence for op ranges
             sprintf "{%s..%s}" (sprint 0 a) (sprint 0 b)
         | Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" ->
@@ -181,7 +209,6 @@ let sprint expr =
         sprintArgs 4 "; "
     
     sprint 0 expr
-
 //-----precedence-----
 //spec: http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.html
 //from spec:  Paren(token) pushed when (, begin, struct, sig, {, [, [|, or quote-op-left is encountered.
@@ -327,4 +354,3 @@ let sprint expr =
 .. .. op_RangeStep
 
 *)
-
