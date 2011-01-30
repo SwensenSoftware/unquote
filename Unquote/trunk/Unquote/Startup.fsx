@@ -1,4 +1,5 @@
-﻿#r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Linq.dll"
+﻿#r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.dll"
+#r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Linq.dll"
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Metadata.dll"
 
 #load "Sprint.fs"
