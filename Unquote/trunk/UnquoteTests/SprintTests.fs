@@ -206,7 +206,26 @@ let ``dynamic type test: generic tuple arg`` () =
 [<Fact>]
 let ``dynamic type test with complex type: nested and tuple precedence`` () =
     source <@ boxed :? int * list<float*(int * (string * float) * int)> @> =? "boxed :? int * list<float * (int * (string * float) * int)>";
-        
+
+[<Fact>]
+let ``dynamic type test: single dimimensional array of type alias`` () =
+    source <@ boxed :? int[] @> =? "boxed :? int[]";        
+
+[<Fact>]
+let ``dynamic type test: multi dimimensional array of type alias`` () =
+    source <@ boxed :? int[,,] @> =? "boxed :? int[,,]";        
+
+[<Fact>]
+let ``dynamic type test: jagged array of type alias`` () =
+    source <@ boxed :? int[,,][][] @> =? "boxed :? int[,,][][]";
+
+[<Fact>]
+let ``dynamic type test: array of no type alias`` () =
+    source <@ boxed :? System.Text.RegularExpressions.Regex[] @> =? "boxed :? Regex[]";
+
+[<Fact>]
+let ``dynamic type test: array of generic type`` () =
+    source <@ boxed :? list<int>[] @> =? "boxed :? list<int>[]";
 
 //need to think up some multi-arg item and named getter scenarios
 

@@ -86,38 +86,58 @@ let sourceName (mi:MemberInfo) =
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
 
-let (|StartsWith|_|) (startStr:string) (target:string) =
-    if target.StartsWith(startStr) then Some(target)
-    else None
+open System.Text.RegularExpressions
 
+//let groups pattern input =
+//   let m = Regex(pattern).Match(input) //memoize patterns with compiled regex
+//   if m.Success
+//   then Some (List.tail [ for x in m.Groups -> x.Value ])
+//   else None
+
+let (|Match|_|) (pattern) str =
+   let m = Regex(pattern).Match(str) //memoize patterns with compiled regex
+   if m.Success
+   then Some (List.tail [ for x in m.Groups -> x.Value ])
+   else None
+
+//need to consider arrays: e.g. System.Int32[] through System.Int32[,,,] should be int[] through int[,,,,]
+
+//could be more efficient, but beautiful and surely efficient enough
 ///Get the type alias name or short name without generic arg count encoding
-let lookupTypeDisplayName (t:Type) =
-    match t.FullName with
+let lookupTypeDisplayName (s:string) =
+    match s with
     | "System.String"   -> "string"
     | "System.Int32"    -> "int"
     | "System.Int64"    -> "int64"
     | "System.Double"   -> "float"
     | "System.Decimal"  -> "decimal"
-    | "System.Numerics.BigInteger" -> "bigint"
-    | StartsWith "Microsoft.FSharp.Collections.FSharpList`1" _  -> "list"
-    | StartsWith "Microsoft.FSharp.Collections.FSharpMap`2" _   -> "Map"
-    | StartsWith "System.Collections.Generic.IEnumerable`1" _   -> "seq"
-    | _ -> t.Name.Split([|'`'|]).[0] //short name without generic arg count
+    | "System.Numerics.BigInteger"  -> "bigint"
+    | "Microsoft.FSharp.Collections.FSharpList" -> "list"
+    | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
+    | "System.Collections.Generic.IEnumerable"  -> "seq"
+    | Match @"\.([^\.]*)$" [name] -> name //short name
+    | _ -> s //shouldn't happen
 
 //used by both sprintType and sprint
 let applyParens context prec s = if prec > context then s else sprintf "(%s)" s
 
-let sprintType (t:Type) =
+let sprintType =
+//    let tupleRegex = Regex(@"^System\.Tuple`", RegexOptions.Compiled)
+//    let genericArgsRegex = Regex(@"^(.*)`", RegexOptions.Compiled)
+//    let arrayRegex = Regex(@"\[([\[\],]*)\]$", RegexOptions.Compiled)
+//    let basicRegex = Regex(@"^(.*)\[?`?")
     let rec sprintType context (t:Type) =
         let applyParens = applyParens context
+        let [cleanName;arrDim] = t.FullName |> function | Match @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" groups -> groups
         let args = t.GetGenericArguments()
         match args.Length with
-        | 0 -> lookupTypeDisplayName t
-        | _ when t.FullName.StartsWith("System.Tuple`") -> 
-            applyParens 2 (sprintf "%s" (args |> Array.map (sprintType 2) |> String.concat " * "))
-        | _ -> 
-            sprintf "%s<%s>" (lookupTypeDisplayName t) (args |> Array.map (sprintType 1) |> String.concat ", ")
-    sprintType 0 t
+        | 0 -> (lookupTypeDisplayName cleanName) + arrDim
+        | _ when cleanName = "System.Tuple" ->
+            (applyParens (if arrDim.Length > 0 then 0 else 2) (sprintf "%s%s" (args |> Array.map (sprintType 2) |> String.concat " * ") arrDim))
+        | _ ->
+            sprintf "%s<%s>%s" (lookupTypeDisplayName cleanName) (args |> Array.map (sprintType 1) |> String.concat ", ") arrDim
+    
+    fun t -> sprintType 0 t
 
 //todo:
 //  unary ops
@@ -149,6 +169,9 @@ let sprint expr =
             //just assume instance members always have tupled args
             applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) mi.Name (sprintTupledArgs args))
         | Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
+            //thinking about making sprint depend on Reduce.isReduced: 
+            //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
+            //but I think the sprinting of lhs it is reduced conveys type info sufficiently enough
             applyParens 16 (sprintf "%s :? %s" (sprint 16 lhs) (sprintType (mi.GetGenericArguments().[0])))
         | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //not sure about precedence for op ranges
             sprintf "{%s..%s}" (sprint 0 a) (sprint 0 b)
