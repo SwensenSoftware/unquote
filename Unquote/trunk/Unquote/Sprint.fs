@@ -86,58 +86,61 @@ let sourceName (mi:MemberInfo) =
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
 
-open System.Text.RegularExpressions
 
-//let groups pattern input =
-//   let m = Regex(pattern).Match(input) //memoize patterns with compiled regex
-//   if m.Success
-//   then Some (List.tail [ for x in m.Groups -> x.Value ])
-//   else None
+module RegexUtils =
+    open System.Text.RegularExpressions
+    //Regex.CacheSize <- (default is 15)
+    ///Match the pattern using a cached interpreted Regex
+    let (|InterpretedMatch|_|) (pattern) str =
+       let m = Regex.Match(str, pattern) //we can expect 
+       if m.Success
+       then Some ([for x in m.Groups -> x])
+       else None
+    
+    ///Match the pattern using a cached compiled Regex
+    let (|CompiledMatch|_|) (pattern) str =
+       let m = Regex.Match(str, pattern, RegexOptions.Compiled) //we can expect 
+       if m.Success
+       then Some ([for x in m.Groups -> x])
+       else None
 
-let (|Match|_|) (pattern) str =
-   let m = Regex(pattern).Match(str) //memoize patterns with compiled regex
-   if m.Success
-   then Some (List.tail [ for x in m.Groups -> x.Value ])
-   else None
+open RegexUtils
 
-//need to consider arrays: e.g. System.Int32[] through System.Int32[,,,] should be int[] through int[,,,,]
-
-//could be more efficient, but beautiful and surely efficient enough
-///Get the type alias name or short name without generic arg count encoding
-let lookupTypeDisplayName (s:string) =
-    match s with
-    | "System.String"   -> "string"
-    | "System.Int32"    -> "int"
-    | "System.Int64"    -> "int64"
-    | "System.Double"   -> "float"
-    | "System.Decimal"  -> "decimal"
-    | "System.Numerics.BigInteger"  -> "bigint"
-    | "Microsoft.FSharp.Collections.FSharpList" -> "list"
-    | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
-    | "System.Collections.Generic.IEnumerable"  -> "seq"
-    | Match @"\.([^\.]*)$" [name] -> name //short name
-    | _ -> s //shouldn't happen
-
-//used by both sprintType and sprint
+//used by both sprintSignature and sprint
 let applyParens context prec s = if prec > context then s else sprintf "(%s)" s
 
-let sprintType =
-//    let tupleRegex = Regex(@"^System\.Tuple`", RegexOptions.Compiled)
-//    let genericArgsRegex = Regex(@"^(.*)`", RegexOptions.Compiled)
-//    let arrayRegex = Regex(@"\[([\[\],]*)\]$", RegexOptions.Compiled)
-//    let basicRegex = Regex(@"^(.*)\[?`?")
-    let rec sprintType context (t:Type) =
+///Sprint the F#-style type signature of the given Type
+let sprintSignature =
+    ///Get the type alias name or short name from the "clean" name
+    let displayName = function
+        | "System.String"   -> "string"
+        | "System.Int32"    -> "int"
+        | "System.Int64"    -> "int64"
+        | "System.Double"   -> "float"
+        | "System.Decimal"  -> "decimal"
+        | "System.Numerics.BigInteger"  -> "bigint"
+        | "Microsoft.FSharp.Collections.FSharpList" -> "list"
+        | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
+        | "System.Collections.Generic.IEnumerable"  -> "seq"
+        | CompiledMatch @"\.?([^\.]*)$" [_;nameMatch] -> nameMatch.Value //short name
+        | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
+
+    let rec sprintSignature context (t:Type) =
         let applyParens = applyParens context
-        let [cleanName;arrDim] = t.FullName |> function | Match @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" groups -> groups
+        let cleanName, arrDim = 
+            match t.FullName with
+            | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrDimMatch] -> (cleanNameMatch.Value, arrDimMatch.Value)
+            | _ -> failwith "failed to parse type name: " t.FullName
+
         let args = t.GetGenericArguments()
         match args.Length with
-        | 0 -> (lookupTypeDisplayName cleanName) + arrDim
+        | 0 -> (displayName cleanName) + arrDim
         | _ when cleanName = "System.Tuple" ->
-            (applyParens (if arrDim.Length > 0 then 0 else 2) (sprintf "%s" (args |> Array.map (sprintType 2) |> String.concat " * "))) +  arrDim
+            (applyParens (if arrDim.Length > 0 then 0 else 2) (sprintf "%s" (args |> Array.map (sprintSignature 2) |> String.concat " * "))) +  arrDim
         | _ ->
-            sprintf "%s<%s>%s" (lookupTypeDisplayName cleanName) (args |> Array.map (sprintType 1) |> String.concat ", ") arrDim
+            sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSignature 1) |> String.concat ", ") arrDim
     
-    fun t -> sprintType 0 t
+    fun t -> sprintSignature 0 t
 
 //todo:
 //  unary ops
@@ -172,7 +175,7 @@ let sprint expr =
             //thinking about making sprint depend on Reduce.isReduced: 
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
             //but I think the sprinting of lhs it is reduced conveys type info sufficiently enough
-            applyParens 16 (sprintf "%s :? %s" (sprint 16 lhs) (sprintType (mi.GetGenericArguments().[0])))
+            applyParens 16 (sprintf "%s :? %s" (sprint 16 lhs) (sprintSignature (mi.GetGenericArguments().[0])))
         | Call(None, mi, a::b::_) when mi.Name = "op_Range" -> //not sure about precedence for op ranges
             sprintf "{%s..%s}" (sprint 0 a) (sprint 0 b)
         | Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" ->
