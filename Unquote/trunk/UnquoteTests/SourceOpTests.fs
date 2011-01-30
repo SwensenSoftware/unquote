@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>] //making auto open allows us not to have to fully qualify module properties
-module Test.Swensen.Unquote.SprintTests
+module Test.Swensen.Unquote.SourceOpTests
 open Xunit
 open Swensen.Unquote
 
@@ -173,66 +173,13 @@ let ``new object precedence within function application`` () =
 let ``new object precedence + op expr`` () =
     source <@ String('c', 3) + "hello" @> =? "String('c', 3) + \"hello\""
 
-//need three tests for :? which would be typ with alias, type with no generic args, type with generic args
+
 let boxed = box x
 [<Fact>]
-let ``dynamic type test: type with alias`` () =
+let ``dynamic type test`` () = //FSharpNameTests has complete testing of rhs dynamic type test scenarios
     source <@ boxed :? float @> =? "boxed :? float";
 
-[<Fact>]
-let ``dynamic type test: type with alias and generic args`` () =
-    source <@ boxed :? list<float> @> =? "boxed :? list<float>";
-
-[<Fact>]
-let ``dynamic type test: no alias with generic args`` () =
-    source <@ boxed :? System.Collections.Generic.LinkedList<string> @> =? "boxed :? LinkedList<string>";
-
-[<Fact>]
-let ``dynamic type test: no alias with no generic args`` () =
-    source <@ boxed :? System.Collections.ArrayList @> =? "boxed :? ArrayList";
-
-[<Fact>]
-let ``dynamic type test: tuple`` () =
-    source <@ boxed :? int * int @> =? "boxed :? int * int";
-
-[<Fact>]
-let ``dynamic type test: nested tuples`` () =
-    source <@ boxed :? int * (float * (string * int)) @> =? "boxed :? int * (float * (string * int))";
-
-[<Fact>]
-let ``dynamic type test: generic tuple arg`` () =
-    source <@ boxed :? list<int * int> @> =? "boxed :? list<int * int>";
-
-[<Fact>]
-let ``dynamic type test with complex type: nested and tuple precedence`` () =
-    source <@ boxed :? int * list<float*(int * (string * float) * int)> @> =? "boxed :? int * list<float * (int * (string * float) * int)>";
-
-[<Fact>]
-let ``dynamic type test: single dimimensional array of type alias`` () =
-    source <@ boxed :? int[] @> =? "boxed :? int[]";        
-
-[<Fact>]
-let ``dynamic type test: multi dimimensional array of type alias`` () =
-    source <@ boxed :? int[,,] @> =? "boxed :? int[,,]";        
-
-[<Fact>]
-let ``dynamic type test: jagged array of type alias`` () =
-    source <@ boxed :? int[,,][][] @> =? "boxed :? int[,,][][]";
-
-[<Fact>]
-let ``dynamic type test: array of no type alias`` () =
-    source <@ boxed :? System.Text.RegularExpressions.Regex[] @> =? "boxed :? Regex[]";
-
-[<Fact>]
-let ``dynamic type test: array of generic type`` () =
-    source <@ boxed :? list<int>[] @> =? "boxed :? list<int>[]";
-
-[<Fact>]
-let ``dynamic type test: tuple array is parenthisized`` () =
-    source <@ boxed :? (int * int)[] @> =? "boxed :? (int * int)[]";
-
 //need to think up some multi-arg item and named getter scenarios
-
 //Future features:
 
 [<Fact(Skip="Future feature")>]

@@ -45,8 +45,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RegexUtils.fs" />
     <Compile Include="Sprint.fs" />
     <Compile Include="Reduce.fs" />
+    <Compile Include="TypeExt.fs" />
     <Compile Include="ExprExt.fs" />
     <Compile Include="Operators.fs" />
     <None Include="Startup.fsx" />

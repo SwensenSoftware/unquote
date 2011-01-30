@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Test.Swensen.Unquote.ReduceTests
+module Test.Swensen.Unquote.ReduceFullyOpTests
 open Xunit
 open Swensen.Unquote
 

@@ -11,7 +11,7 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-open Swensen.Unquote.Ext
+open Swensen.Unquote.ExprExt
 
 ///Convert given expression to it's source code representation. Sub-expressions which are
 ///not currently supported will fallback on the default Expr.ToString() implementation.

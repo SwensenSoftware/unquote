@@ -1,5 +1,6 @@
 ﻿[<AutoOpen>]
-module Swensen.Unquote.Ext
+module Swensen.Unquote.ExprExt
+
 //note that Expr<'T> extends Expr
 type Microsoft.FSharp.Quotations.Expr with
     ///Convert this expression to it's source code representation. Sub-expressions which are
