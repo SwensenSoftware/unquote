@@ -227,6 +227,10 @@ let ``dynamic type test: array of no type alias`` () =
 let ``dynamic type test: array of generic type`` () =
     source <@ boxed :? list<int>[] @> =? "boxed :? list<int>[]";
 
+[<Fact>]
+let ``dynamic type test: tuple array is parenthisized`` () =
+    source <@ boxed :? (int * int)[] @> =? "boxed :? (int * int)[]";
+
 //need to think up some multi-arg item and named getter scenarios
 
 //Future features:

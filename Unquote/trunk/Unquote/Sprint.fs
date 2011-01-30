@@ -133,7 +133,7 @@ let sprintType =
         match args.Length with
         | 0 -> (lookupTypeDisplayName cleanName) + arrDim
         | _ when cleanName = "System.Tuple" ->
-            (applyParens (if arrDim.Length > 0 then 0 else 2) (sprintf "%s%s" (args |> Array.map (sprintType 2) |> String.concat " * ") arrDim))
+            (applyParens (if arrDim.Length > 0 then 0 else 2) (sprintf "%s" (args |> Array.map (sprintType 2) |> String.concat " * "))) +  arrDim
         | _ ->
             sprintf "%s<%s>%s" (lookupTypeDisplayName cleanName) (args |> Array.map (sprintType 1) |> String.concat ", ") arrDim
     
