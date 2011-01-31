@@ -58,3 +58,12 @@ let ``array of generic type`` () =
 [<Fact>]
 let ``tuple array is parenthisized`` () =
     typeof<(int * int)[]>.FSharpName =? "(int * int)[]";
+
+[<Fact>]
+let ``fsharp funcs`` () =
+    typeof<int -> int * int -> float>.FSharpName =? "int -> int * int -> float";
+    typeof<int -> int * int -> float[]>.FSharpName =? "int -> int * int -> float[]";
+    typeof<list<int -> int * int -> float[]>>.FSharpName =? "list<int -> int * int -> float[]>";
+    typeof<Map<int, int -> int * int -> float[]>>.FSharpName =? "Map<int, int -> int * int -> float[]>";
+    typeof<(int -> int -> int)[][][]>.FSharpName =? "(int -> int -> int)[][][]";
+    typeof<(int -> int) -> int>.FSharpName =? "(int -> int) -> int";

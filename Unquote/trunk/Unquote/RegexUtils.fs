@@ -1,4 +1,4 @@
-﻿module RegexUtils
+﻿module Swensen.RegexUtils
 open System.Text.RegularExpressions
 //Regex.CacheSize <- (default is 15)
 ///Match the pattern using a cached interpreted Regex

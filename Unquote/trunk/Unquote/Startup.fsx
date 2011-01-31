@@ -2,10 +2,16 @@
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Linq.dll"
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Metadata.dll"
 
+#load "RegexUtils.fs"
+open Swensen
+
 #load "Sprint.fs"
 open Swensen.Unquote
 
 #load "Reduce.fs"
+open Swensen.Unquote
+
+#load "TypeExt.fs"
 open Swensen.Unquote
 
 #load "ExprExt.fs"

@@ -89,7 +89,7 @@ let sourceName (mi:MemberInfo) =
 //used by both sprintSig and sprint
 let applyParens context prec s = if prec > context then s else sprintf "(%s)" s
 
-open RegexUtils
+open Swensen.RegexUtils
 //the usefullness of this function makes me think to open up Sprint module
 ///Sprint the F#-style type signature of the given Type
 let sprintSig =
@@ -143,7 +143,10 @@ let sprintSig =
         match args.Length with
         | 0 -> (displayName cleanName) + arrSig
         | _ when cleanName = "System.Tuple" ->
-            (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s" (args |> Array.map (sprintSig 2) |> String.concat " * "))) +  arrSig
+            (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+        | _ when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
+            let [|lhs;rhs|] = args
+            (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig            
         | _ ->
             sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
     
@@ -244,7 +247,7 @@ let sprint expr =
         sprintArgs 10 ", "
     and sprintCurriedArgs = //application of arguments to a function
         sprintArgs 20 " "
-    and sprintSequencedArgs = //application of arguments to a function
+    and sprintSequencedArgs =
         sprintArgs 4 "; "
     
     sprint 0 expr
