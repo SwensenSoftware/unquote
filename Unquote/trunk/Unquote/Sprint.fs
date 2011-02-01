@@ -87,7 +87,7 @@ let sourceName (mi:MemberInfo) =
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
 
 //used by both sprintSig and sprint
-let applyParens context prec s = if prec > context then s else sprintf "(%s)" s
+let applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 
 open Swensen.RegexUtils
 //the usefullness of this function makes me think to open up Sprint module
@@ -131,7 +131,7 @@ let sprintSig =
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
     let rec sprintSig context (t:Type) =
-        let applyParens = applyParens context
+        let applyParens = applyParensForPrecInContext context
         let cleanName, arrSig = 
             match t.FullName with
             | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrSigMatch] -> 
@@ -160,10 +160,14 @@ let sprintSig =
 //  maybe should expand to VarSet and Sequence
 let sprint expr =
     let rec sprint context expr =
-        let applyParens = applyParens context
-
+        let applyParens = applyParensForPrecInContext context
         match expr with
-        | Sequential(Sequential(lhs, Unit), rhs) | Sequential(lhs, rhs) -> //first case hanldes implicit Unit return value
+        | Sequential(Sequential(lhs, Unit), rhs) ->
+            //due to quirky nested structure which handles implicit unit return values
+            //need to hack precedence / application of parenthisizes.  we give
+            //lhs anecdotally higher precedence context of 10.
+            applyParens 4 (sprintf "%s; %s" (sprint 10 lhs) (sprint 3 rhs))
+        | Sequential(lhs, rhs) -> 
             applyParens 4 (sprintf "%s; %s" (sprint 4 lhs) (sprint 3 rhs))
         | Application(curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
@@ -171,7 +175,7 @@ let sprint expr =
             let rec loop lambdaOrBody =
                 match lambdaOrBody with
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
-                | body -> sprintf "-> %s" (sprint 6 body)
+                | body -> sprintf "-> %s" (sprint 0 body) //should precedence be 8?
             applyParens 6 (sprintf "fun %s %s" (var.Name) (loop lambdaOrBody))
         | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
@@ -220,12 +224,12 @@ let sprint expr =
             | null -> "null"
             | _ -> sprintf "%A" obj
         | NewTuple(args) -> //tuples have at least two elements
-            args |> sprintTupledArgs |> sprintf "(%s)"
+            args |> sprintTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | NewArray(_,args) ->
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
         | NewUnionCase(uci,_)  -> //todo: sprint recursively, so can reduce incrementally
             match uci.DeclaringType.Namespace, uci.DeclaringType.Name, uci.Name with
-            | "Microsoft.FSharp.Core","FSharpOption`1","None" -> "None" //otherwise gets sprinted as "<null>"
+            | "Microsoft.FSharp.Core", "FSharpOption`1", "None" -> "None" //otherwise gets sprinted as "<null>"
             | _ -> expr.EvalUntyped() |> sprintf "%A"
         | NewObject(ci, args) ->
             applyParens 20 (sprintf "%s(%s)" ci.DeclaringType.Name (sprintTupledArgs args))

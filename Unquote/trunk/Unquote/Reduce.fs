@@ -27,9 +27,11 @@ and allReduced x =
 // need to handle nested application/lambda expr: replace lambda vars with reduced applications
 // unquote <@ ((fun i j -> i + j) 3 4) + 2 @>
 
+//note: we are not super careful about evaluation order (expect, of course, Sequential), which may be an issue.
 //reduce all args / calles if any of them are not reduced; otherwise eval
 let rec reduce (expr:Expr) = 
     match expr with
+    //if lhs is a Application, PropertyGet, Call, or other unit returning call, may want to discard, rather than deal with null return value.
     | Sequential (Sequential(lhs, u), rhs) -> //u should be Unit (not included in match since we want to use it)
         if lhs |> isReduced then rhs
         else Expr.Sequential(Expr.Sequential(reduce lhs, u), rhs)

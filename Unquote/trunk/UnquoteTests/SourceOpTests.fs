@@ -184,12 +184,13 @@ let ``sprint None option since otherwises sprinted as "<null>"`` () =
     source <@ None @> =? "None";
     source <@ None:option<int> @> =? "None";
 
-
-
-
-
-
-
+[<Fact>]
+let ``Sequential`` () =
+    source <@ 1; 2; 3; @> =? "1; 2; 3";
+    source <@ ignore 1; ignore 2; 3 @> =? "ignore 1; ignore 2; 3"
+    source <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =? "1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2"
+    source <@ (fun x -> x + 1); 2; 3  @> =? "(fun x -> x + 1); 2; 3"
+    source <@ ignore (fun x -> x + 1); ignore 2; 3  @> =? "ignore (fun x -> x + 1); ignore 2; 3"
 
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
