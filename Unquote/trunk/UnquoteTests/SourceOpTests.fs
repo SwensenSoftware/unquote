@@ -179,6 +179,18 @@ let boxed = box x
 let ``dynamic type test`` () = //FSharpNameTests has complete testing of rhs dynamic type test scenarios
     source <@ boxed :? float @> =? "boxed :? float";
 
+[<Fact>]
+let ``sprint None option since otherwises sprinted as "<null>"`` () =
+    source <@ None @> =? "None";
+    source <@ None:option<int> @> =? "None";
+
+
+
+
+
+
+
+
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
 

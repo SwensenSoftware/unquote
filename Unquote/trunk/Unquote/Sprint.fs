@@ -216,14 +216,17 @@ let sprint expr =
                 sprintf "%s.%s" pi.DeclaringType.Name pi.Name
         | Unit -> "()" //must come before Value pattern
         | Value(obj, _) ->
-            if obj = null then "null"
-            else sprintf "%A" obj
+            match obj with
+            | null -> "null"
+            | _ -> sprintf "%A" obj
         | NewTuple(args) -> //tuples have at least two elements
             args |> sprintTupledArgs |> sprintf "(%s)"
         | NewArray(_,args) ->
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
-        | NewUnionCase(_,_)  -> //needs improvement
-            expr.EvalUntyped() |> sprintf "%A"
+        | NewUnionCase(uci,_)  -> //todo: sprint recursively, so can reduce incrementally
+            match uci.DeclaringType.Namespace, uci.DeclaringType.Name, uci.Name with
+            | "Microsoft.FSharp.Core","FSharpOption`1","None" -> "None" //otherwise gets sprinted as "<null>"
+            | _ -> expr.EvalUntyped() |> sprintf "%A"
         | NewObject(ci, args) ->
             applyParens 20 (sprintf "%s(%s)" ci.DeclaringType.Name (sprintTupledArgs args))
         | Coerce(target, _) ->
