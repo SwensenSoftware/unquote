@@ -163,9 +163,11 @@ let sprint expr =
         let applyParens = applyParens context
 
         match expr with
-        | Application (curry, last) -> //application of arguments to a lambda
+        | Sequential(Sequential(lhs, Unit), rhs) | Sequential(lhs, rhs) -> //first case hanldes implicit Unit return value
+            applyParens 4 (sprintf "%s; %s" (sprint 4 lhs) (sprint 3 rhs))
+        | Application(curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
-        | Lambda (var, lambdaOrBody) ->
+        | Lambda(var, lambdaOrBody) ->
             let rec loop lambdaOrBody =
                 match lambdaOrBody with
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
@@ -216,7 +218,7 @@ let sprint expr =
         | Value(obj, _) ->
             if obj = null then "null"
             else sprintf "%A" obj
-        | NewTuple (args) -> //tuples have at least two elements
+        | NewTuple(args) -> //tuples have at least two elements
             args |> sprintTupledArgs |> sprintf "(%s)"
         | NewArray(_,args) ->
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
@@ -398,3 +400,7 @@ let sprint expr =
 *)
 
 
+(*posts showing interest in quotations:
+http://cs.hubfs.net/forums/thread/18361.aspx
+
+*)

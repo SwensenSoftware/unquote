@@ -11,13 +11,13 @@ open Microsoft.FSharp.Metadata
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
-    let evaled = expr.EvalUntyped()
+    let evaled = expr.EvalUntyped() //todo: if expr is Call or PropertyGet, or other unit returning expression, then return Expr.Unit (or true Type otherwise!)
     //note this will wrap already reduced values such as Tuples, but hasn't been an issue yet
-    Expr.Value(evaled, evaled.GetType()) 
+    Expr.Value(evaled, if evaled = null then typeof<obj> else evaled.GetType()) //lose type info from null values (including Unit, which makes calls returning Unit print as "null"!)
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
-    | Value(_,_) | NewUnionCase(_,_) | Lambda _ | Var _ -> true
+    | Value(_,_) | NewUnionCase(_,_) | Lambda _ | Var _ | Unit -> true
     | NewTuple(args) | NewArray(_,args) when allReduced args -> true
     | Coerce(objExpr,_) when isReduced objExpr -> true
     | _ -> false
@@ -30,10 +30,16 @@ and allReduced x =
 //reduce all args / calles if any of them are not reduced; otherwise eval
 let rec reduce (expr:Expr) = 
     match expr with
-    | Application(_,_) -> //got to work for these lambda applications (not sure whether better approach)
+    | Sequential (Sequential(lhs, u), rhs) -> //u should be Unit (not included in match since we want to use it)
+        if lhs |> isReduced then rhs
+        else Expr.Sequential(Expr.Sequential(reduce lhs, u), rhs)
+    | Sequential (lhs, rhs) ->
+        if lhs |> isReduced then rhs
+        else Expr.Sequential(reduce lhs, rhs)
+    | Application _ -> //got to work for these lambda applications (not sure whether better approach)
         let rec allArgsReduced expr = 
             match expr with
-            | Application(Lambda(_), rhs) ->
+            | Application(Lambda _, rhs) ->
                 if rhs |> isReduced then true
                 else false
             | Application(lhs,rhs) ->
@@ -45,13 +51,13 @@ let rec reduce (expr:Expr) =
             match expr with
             | Application(lhs, rhs) -> 
                 Expr.Application(rebuild lhs, reduce rhs)
-            | Lambda(_) -> expr
+            | Lambda _ -> expr
             | _ -> failwith "wildcard case not expected"
 
         if allArgsReduced expr then evalValue expr
         else rebuild expr
     | ShapeVar _ -> expr
-    | ShapeLambda (_,_) -> expr
+    | ShapeLambda _ -> expr
     | ShapeCombination (o, exprs) -> 
         if isReduced expr then expr
         elif allReduced exprs then evalValue expr
