@@ -43,8 +43,7 @@ let rec reduce (expr:Expr) =
         let rec allArgsReduced expr = 
             match expr with
             | Application(Lambda _, rhs) ->
-                if rhs |> isReduced then true
-                else false
+                rhs |> isReduced
             | Application(lhs,rhs) ->
                 if rhs |> isReduced then allArgsReduced lhs
                 else false
