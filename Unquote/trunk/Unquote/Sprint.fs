@@ -14,7 +14,8 @@ type binOpAssoc =
     | Right
     | Non
 
-let binaryOps = [
+let binaryOps = 
+    [
     //boolean ops
     "op_Equality", ("=", 13, Left)
     "op_GreaterThan", (">", 13, Left)
@@ -26,7 +27,7 @@ let binaryOps = [
     "op_PipeRight", ("|>", 3, Left)
     "op_PipeRight2", ("||>", 3, Left)
     "op_PipeRight3", ("|||>", 3, Left)
-    "op_PipeLeft", ("<|", 3, Left)
+    "op_PipeLeft", ("<|", 3, Left) //not sure if all the pipe lefts should have precedence of "<" op
     "op_PipeLeft2", ("<||", 3, Left)
     "op_PipeLeft3", ("<|||", 3, Left)
     //numeric ops
@@ -49,14 +50,31 @@ let binaryOps = [
     //special
     "op_Append", ("@", 17, Left) //not sure what precedence, falling back on (+)
     "op_Concatenate", ("^", 14, Right) //ocaml style string concatentation
-]
+    //set ref cell
+    "op_ColonEquals", (":=", 9, Right)
+    ] |> Map.ofList
 
 //future feature, support custom ops
-let (|BinaryInfixCall|_|) expr =
-    match expr with
-    | Call (_, mi, lhs::rhs::_) ->
-        match binaryOps |> List.tryFind (fst>>((=) mi.Name)) with
-        | Some(_,op) -> Some(op,lhs,rhs)
+let (|BinaryInfixCall|_|) = function
+    | Call (_, mi, lhs::rhs::[]) ->
+        match binaryOps |> Map.tryFind mi.Name with
+        | Some op -> Some(op,lhs,rhs)
+        | None -> None
+    | _ -> None
+
+let unaryOps = 
+    [
+    "op_UnaryPlus", "+"
+    "op_UnaryNegation", "-"
+    "op_LogicalNot", "~~~"
+    "op_Dereference", "!"
+    ] |> Map.ofList
+
+//all unary ops have precedence of 9
+let (|UnaryPrefixCall|_|) = function
+    | Call (_, mi, arg::[]) ->
+        match unaryOps |> Map.tryFind mi.Name with
+        | Some(op) -> Some(op, arg)
         | None -> None
     | _ -> None
 
@@ -134,20 +152,19 @@ let sprintSig =
         let applyParens = applyParensForPrecInContext context
         let cleanName, arrSig = 
             match t.FullName with
-            | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrSigMatch] -> 
+            | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrSigMatch] -> //long name type encoding left of `, array encoding at end
                 cleanNameMatch.Value, arrSigMatch.Value
             | _ -> 
                 failwith "failed to parse type name: " t.FullName
 
-        let args = t.GetGenericArguments()
-        match args.Length with
-        | 0 -> (displayName cleanName) + arrSig
-        | _ when cleanName = "System.Tuple" ->
+        match t.GetGenericArguments() with
+        | args when args.Length = 0 -> 
+            (displayName cleanName) + arrSig
+        | args when cleanName = "System.Tuple" ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
-        | _ when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
-            let [|lhs;rhs|] = args
+        | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
             (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig            
-        | _ ->
+        | args ->
             sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
     
     fun t -> sprintSig 0 t
@@ -184,6 +201,8 @@ let sprint expr =
                 | Right -> sprint prec lhs, sprint (prec-1) rhs
                 | Non -> sprint prec lhs, sprint prec rhs
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
+        | UnaryPrefixCall(symbol, arg) -> //must come before Call pattern
+            applyParens 22 (sprintf "%s%s" symbol (sprint 22 arg))
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
             applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) mi.Name (sprintTupledArgs args))

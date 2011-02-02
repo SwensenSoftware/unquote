@@ -192,6 +192,13 @@ let ``Sequential`` () =
     source <@ (fun x -> x + 1); 2; 3  @> =? "(fun x -> x + 1); 2; 3"
     source <@ ignore (fun x -> x + 1); ignore 2; 3  @> =? "ignore (fun x -> x + 1); ignore 2; 3"
 
+[<Fact>]
+let ``unary ops`` () =
+    source <@ -(2 + 3) @> =? "-(2 + 3)";
+    source <@ +(2 + 3) @> =? "+(2 + 3)";
+    source <@ ~~~(2 + 3) @> =? "~~~(2 + 3)";
+    source <@ let x = ref 3 in !x @> =? "let x = ref 3 in !x";
+
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
 
