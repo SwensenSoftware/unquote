@@ -197,6 +197,8 @@ let ``unary ops`` () =
     source <@ -(2 + 3) @> =? "-(2 + 3)";
     source <@ +(2 + 3) @> =? "+(2 + 3)";
     source <@ ~~~(2 + 3) @> =? "~~~(2 + 3)";
+    source <@ ~~~(-(3 + 3)) @> =? "~~~(-(3 + 3))"
+    //source <@ ~~~(-(3)) @> =? "~~~(-(3))"; //not that -(3) is different from literal -3
     source <@ let x = ref 3 in !x @> =? "let x = ref 3 in !x";
 
 //need to think up some multi-arg item and named getter scenarios

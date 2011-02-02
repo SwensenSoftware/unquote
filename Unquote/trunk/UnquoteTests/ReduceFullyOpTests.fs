@@ -105,3 +105,36 @@ let ``new object is not reduced`` () =
         "\"ccc\" + \"hello\""
         "\"ccchello\""
     ]
+
+
+//[<Fact>]
+//let ``Sequential`` () =
+//    sprintedReduceSteps <@ 1; 2; 3; @> =? [
+//        "1; 2; 3"
+//        "2; 3"
+//        "3"
+//    ]
+//
+////    sprintedReduceSteps <@ ignore 1; ignore 2; 3 @> =? [
+////        "ignore 1; ignore 2; 3"
+////        "ignore 2; 3"
+////    ]
+////    source <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =? "1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2"
+////    source <@ (fun x -> x + 1); 2; 3  @> =? "(fun x -> x + 1); 2; 3"
+////    source <@ ignore (fun x -> x + 1); ignore 2; 3  @> =? "ignore (fun x -> x + 1); ignore 2; 3"
+//
+//[<Fact>]
+//let ``unary ops`` () =
+//    sprintedReduceSteps <@ -(2 + 3) @> =? [
+//        "-(2 + 3)"
+//        "-5"
+//    ]
+//
+//    sprintedReduceSteps <@ ~~~(2 + 3) @> =? [
+//        "~~~(2 + 3)"
+//        "~~~5"
+//
+//
+//    //source <@ +(2 + 3) @> =? "+(2 + 3)"; //Power Pack Bug!: System.NotSupportedException: Specified method is not supported.
+//    source <@ ~~~(2 + 3) @> =? "~~~(2 + 3)";
+//    source <@ let x = ref 3 in !x @> =? "let x = ref 3 in !x";

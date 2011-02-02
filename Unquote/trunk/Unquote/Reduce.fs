@@ -18,8 +18,9 @@ let evalValue (expr:Expr) =
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
     | Value(_,_) | NewUnionCase(_,_) | Lambda _ | Var _ | Unit -> true
-    | NewTuple(args) | NewArray(_,args) when allReduced args -> true
-    | Coerce(objExpr,_) when isReduced objExpr -> true
+    | NewTuple(args) | NewArray(_,args) when args |> allReduced -> true
+    | Coerce(objExpr,_) when objExpr |> isReduced -> true
+//    | Sprint.UnaryPrefixCall(_, arg) when arg |> isReduced -> true
     | _ -> false
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
