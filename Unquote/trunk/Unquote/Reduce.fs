@@ -45,8 +45,7 @@ let rec reduce (expr:Expr) =
             | Application(Lambda _, rhs) ->
                 rhs |> isReduced
             | Application(lhs,rhs) ->
-                if rhs |> isReduced then allArgsReduced lhs
-                else false
+                rhs |> isReduced && lhs |> allArgsReduced
             | _ -> failwith "wildcard case not expected"
             
         let rec rebuild expr =
