@@ -169,11 +169,28 @@ let sprintSig =
     
     fun t -> sprintSig 0 t
 
+///sprints the generic arguments of a call if definitely "required" 
+let sprintGenericArgsIfRequired (mi:MethodInfo) =
+    //won't catch a lot of cases, but will give use typeof<...> for now
+    if mi.IsGenericMethod && (mi.GetParameters().Length = 0) then 
+        sprintf "<%s>" (mi.GetGenericArguments() |> Array.map sprintSig |> String.concat ", ")
+    else ""
+
+    //not good enough!
+//    let explicitGenericArgsRequired = lazy(
+//        //note: Type does not support comparison, so need to convert to strings
+//        let needed = mi.GetGenericArguments() |> Array.map(fun arg -> arg.FullName) |> set 
+//        let given = mi.GetParameters() |> Array.map (fun p -> p.ParameterType.FullName) |> set
+//        not <| given.IsSupersetOf(needed)) //not good enough due to complexity (e.g. Set.ofList<int> [1;2;3;4])
+//
+//    if mi.IsGenericMethod && explicitGenericArgsRequired.Force() then
+//        sprintf "<%s>" (mi.GetGenericArguments() |> Array.map sprintSig |> String.concat ", ")
+//    else
+//        ""
+
 //todo:
-//  unary ops
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
 //  need to look into DerivedPatterns.Lambdas and DerivedPatterns.Applications
-//  implement TypeTestGeneric call handling (:?)
 //  maybe should expand to VarSet and Sequence
 let sprint expr =
     let rec sprint context expr =
@@ -205,7 +222,7 @@ let sprint expr =
             applyParens 22 (sprintf "%s%s" symbol (sprint 22 arg))
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
-            applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) mi.Name (sprintTupledArgs args))
+            applyParens 20 (sprintf "%s.%s%s(%s)" (sprint 22 target) mi.Name (sprintGenericArgsIfRequired mi) (sprintTupledArgs args))
         | Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
             //thinking about making sprint depend on Reduce.isReduced: 
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
@@ -220,13 +237,13 @@ let sprint expr =
         | Call(None, mi, args) -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
-                let sprintedArgs = sprintCurriedArgs args
+                let sprintedArgs = if args.Length = 0 then "" else " " + sprintCurriedArgs args
                 if isOpenModule mi.DeclaringType then 
-                    applyParens 20 (sprintf "%s %s" methodName sprintedArgs)
+                    applyParens 20 (sprintf "%s%s%s" methodName (sprintGenericArgsIfRequired mi) sprintedArgs)
                 else 
-                    applyParens 20 (sprintf "%s.%s %s" (sourceName mi.DeclaringType) methodName sprintedArgs)
+                    applyParens 20 (sprintf "%s.%s%s%s" (sourceName mi.DeclaringType) methodName (sprintGenericArgsIfRequired mi) sprintedArgs)
             else //assume CompiledName same as SourceName for static members
-                applyParens 20 (sprintf "%s.%s(%s)" mi.DeclaringType.Name mi.Name (sprintTupledArgs args))
+                applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfRequired mi) (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name

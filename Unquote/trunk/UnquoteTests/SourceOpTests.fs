@@ -201,6 +201,10 @@ let ``unary ops`` () =
     //source <@ ~~~(-(3)) @> =? "~~~(-(3))"; //not that -(3) is different from literal -3
     source <@ let x = ref 3 in !x @> =? "let x = ref 3 in !x";
 
+[<Fact>]
+let ``typeof sprints generic args`` () =
+    source <@ typeof<int> @> =? "typeof<int>"
+
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
 
