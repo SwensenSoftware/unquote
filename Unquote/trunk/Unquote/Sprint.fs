@@ -169,24 +169,29 @@ let sprintSig =
     
     fun t -> sprintSig 0 t
 
-///sprints the generic arguments of a call if definitely "required" 
-let sprintGenericArgsIfRequired (mi:MethodInfo) =
-    //won't catch a lot of cases, but will give use typeof<...> for now
-    if mi.IsGenericMethod && (mi.GetParameters().Length = 0) then 
-        sprintf "<%s>" (mi.GetGenericArguments() |> Array.map sprintSig |> String.concat ", ")
-    else ""
+///Determine whether the generic args for a call are inferable
+let genericArgsInferable (mi:MethodInfo) = 
+    (mi.IsGenericMethod |> not) ||
+        let miDefinition = mi.GetGenericMethodDefinition()
+        let needed = miDefinition.GetGenericArguments() |> Array.map(fun arg -> arg.Name) |> set 
+        let inferable = 
+            miDefinition.GetParameters() 
+            |> Seq.append (Seq.singleton miDefinition.ReturnParameter)
+            |> Seq.map 
+                (fun p -> 
+                    if p.ParameterType.IsGenericParameter then [|p.ParameterType|]
+                    elif p.ParameterType.ContainsGenericParameters then p.ParameterType.GetGenericArguments()
+                    else [||]) 
+            |> Seq.concat
+            |> Seq.map (fun t -> t.Name)
+            |> set
 
-    //not good enough!
-//    let explicitGenericArgsRequired = lazy(
-//        //note: Type does not support comparison, so need to convert to strings
-//        let needed = mi.GetGenericArguments() |> Array.map(fun arg -> arg.FullName) |> set 
-//        let given = mi.GetParameters() |> Array.map (fun p -> p.ParameterType.FullName) |> set
-//        not <| given.IsSupersetOf(needed)) //not good enough due to complexity (e.g. Set.ofList<int> [1;2;3;4])
-//
-//    if mi.IsGenericMethod && explicitGenericArgsRequired.Force() then
-//        sprintf "<%s>" (mi.GetGenericArguments() |> Array.map sprintSig |> String.concat ", ")
-//    else
-//        ""
+        inferable.IsSupersetOf(needed)
+
+///sprints the generic arguments of a call if definitely "required" 
+let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
+    if genericArgsInferable mi then ""
+    else sprintf "<%s>" (mi.GetGenericArguments() |> Array.map sprintSig |> String.concat ", ")
 
 //todo:
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
@@ -222,7 +227,7 @@ let sprint expr =
             applyParens 22 (sprintf "%s%s" symbol (sprint 22 arg))
         | Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
-            applyParens 20 (sprintf "%s.%s%s(%s)" (sprint 22 target) mi.Name (sprintGenericArgsIfRequired mi) (sprintTupledArgs args))
+            applyParens 20 (sprintf "%s.%s%s(%s)" (sprint 22 target) mi.Name (sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
         | Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
             //thinking about making sprint depend on Reduce.isReduced: 
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
@@ -239,11 +244,11 @@ let sprint expr =
                 let methodName = sourceName mi
                 let sprintedArgs = if args.Length = 0 then "" else " " + sprintCurriedArgs args
                 if isOpenModule mi.DeclaringType then 
-                    applyParens 20 (sprintf "%s%s%s" methodName (sprintGenericArgsIfRequired mi) sprintedArgs)
+                    applyParens 20 (sprintf "%s%s%s" methodName (sprintGenericArgsIfNotInferable mi) sprintedArgs)
                 else 
-                    applyParens 20 (sprintf "%s.%s%s%s" (sourceName mi.DeclaringType) methodName (sprintGenericArgsIfRequired mi) sprintedArgs)
+                    applyParens 20 (sprintf "%s.%s%s%s" (sourceName mi.DeclaringType) methodName (sprintGenericArgsIfNotInferable mi) sprintedArgs)
             else //assume CompiledName same as SourceName for static members
-                applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfRequired mi) (sprintTupledArgs args))
+                applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name

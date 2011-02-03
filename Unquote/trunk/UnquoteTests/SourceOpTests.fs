@@ -202,7 +202,7 @@ let ``unary ops`` () =
     source <@ let x = ref 3 in !x @> =? "let x = ref 3 in !x";
 
 [<Fact>]
-let ``typeof sprints generic args`` () =
+let ``call with non-inferable args`` () =
     source <@ typeof<int> @> =? "typeof<int>"
 
 //need to think up some multi-arg item and named getter scenarios
