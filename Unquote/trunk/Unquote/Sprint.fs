@@ -191,7 +191,7 @@ let genericArgsInferable (mi:MethodInfo) =
 ///sprints the generic arguments of a call if definitely "required" 
 let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     if genericArgsInferable mi then ""
-    else sprintf "<%s>" (mi.GetGenericArguments() |> Array.map sprintSig |> String.concat ", ")
+    else sprintf "<%s>" (mi.GetGenericArguments() |> Seq.map sprintSig |> String.concat ", ")
 
 //todo:
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
@@ -289,6 +289,9 @@ let sprint expr =
             applyParens 11 (sprintf "%s || %s" (sprint 10 a) (sprint 11 b))
         | IfThenElse(a,b,c) ->
             applyParens 7 (sprintf "if %s then %s else %s" (sprint 7 a) (sprint 7 b) (sprint 7 c))
+        | VarSet(v, rhs) ->
+            //not sure what precedence should be, using precedence for < op
+            applyParens 13 (sprintf "%s <- %s" v.Name (sprint 0 rhs)) //we can sprint these, but we can't eval them
         | _ -> 
             sprintf "%A" (expr)
     and sprintArgs prec delimiter exprs =
@@ -302,6 +305,7 @@ let sprint expr =
     
     sprint 0 expr
 //-----precedence-----
+//note: http://stackoverflow.com/questions/4859151/help-me-understand-lambda-expression-precedence
 //spec: http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.html
 //from spec:  Paren(token) pushed when (, begin, struct, sig, {, [, [|, or quote-op-left is encountered.
 //custom operator precedence determined by first op in sequence: http://stackoverflow.com/questions/3347972/f-custom-operators-precedence
@@ -449,6 +453,18 @@ let sprint expr =
 
 
 (*posts showing interest in quotations:
+    Unquote is a library for F# Quotation decompilation and incremental evaluation. Inspired by Groovy Power Asserts,
+    boolean Quotations may be tested within an FSI session or xUnit and NUnit tests with failing tests being explained
+    step-by-step.
+
+    Unquote is an F# Quotation decompiler and incremental evaluator combined to give 
+    step-wise insight into failing boolean expressions within interactive sessions or unit tests.
+
+    Unquote is a library consisting of a set of operators on F# Quotations providing decompilation and incremental evaluation 
+    combinted to bring step-wise insight into failing boolean expressions within interactive sessions or unit tests as 
+    inspired by Groovy Power Asserts.
+
 http://cs.hubfs.net/forums/thread/18361.aspx
 
 *)
+

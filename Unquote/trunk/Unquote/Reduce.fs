@@ -11,9 +11,22 @@ open Microsoft.FSharp.Metadata
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
-    let evaled = expr.EvalUntyped() //todo: if expr is Call or PropertyGet, or other unit returning expression, then return Expr.Unit (or true Type otherwise!...likewise consider option<'a> returning None!)
+    let evaled = expr.EvalUntyped() 
     //note this will wrap already reduced values such as Tuples, but hasn't been an issue yet
-    Expr.Value(evaled, if evaled = null then typeof<obj> else evaled.GetType()) //lose type info from null values (including Unit, which makes calls returning Unit print as "null"!... same with None!)
+    match evaled with
+    | null ->
+        //unit, void, and None are all represented as null, do a little work to get their true type
+        let t =
+            match expr with
+            | Call(_,mi,_) when mi.ReturnType = typeof<unit> || mi.ReturnType = typeof<System.Void> ->
+                typeof<unit>
+            | PropertyGet(_,pi,_) when pi.PropertyType = typeof<unit> || pi.PropertyType = typeof<System.Void> ->
+                typeof<unit>
+            | _ -> 
+                typeof<obj>
+        Expr.Value(evaled, t)
+    | _ ->
+        Expr.Value(evaled, evaled.GetType()) //lose type info from null values (including Unit, which makes calls returning Unit print as "null"!... same with None!)
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function

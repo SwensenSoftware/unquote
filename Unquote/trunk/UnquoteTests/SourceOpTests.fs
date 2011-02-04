@@ -205,6 +205,14 @@ let ``unary ops`` () =
 let ``call with non-inferable args`` () =
     source <@ typeof<int> @> =? "typeof<int>"
 
+[<Fact>]
+let ``set mutable var simple`` () =
+    source <@ let mutable x = 3 in x <- 5 @> =? "let mutable x = 3 in x <- 5"
+
+[<Fact>]
+let ``set mutable var in seq expression precedence test`` () =
+    source <@ let mutable x = 3 in x <- 4; x <- 5; x @> =? "let mutable x = 3 in x <- 4; x <- 5; x"
+
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
 

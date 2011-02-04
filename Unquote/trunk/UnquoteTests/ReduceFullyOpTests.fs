@@ -106,6 +106,47 @@ let ``new object is not reduced`` () =
         "\"ccchello\""
     ]
 
+[<Fact>]
+let ``Sequential`` () =
+    sprintedReduceSteps <@ 1; 2; 3 @> =? [
+        "1; 2; 3"
+        "2; 3"
+        "3"
+    ]
+    sprintedReduceSteps <@ ignore 1; ignore 2; 3 @> =? [
+        "ignore 1; ignore 2; 3"
+        "(); ignore 2; 3"
+        "ignore 2; 3"
+        "(); 3"
+        "3"
+    ]
+
+    sprintedReduceSteps <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =? [
+        "1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2"
+        "3 + 3 + 4; 1 + 2 + 3; 1 + 2"
+        "6 + 4; 1 + 2 + 3; 1 + 2"
+        "10; 1 + 2 + 3; 1 + 2"
+        "1 + 2 + 3; 1 + 2"
+        "3 + 3; 1 + 2"
+        "6; 1 + 2"
+        "1 + 2"
+        "3"
+    ]
+    
+    sprintedReduceSteps <@ (fun x -> x + 1); 2; 3 @> =? [
+        "(fun x -> x + 1); 2; 3"
+        "2; 3"
+        "3"
+    ]
+    
+    sprintedReduceSteps <@ ignore (fun x -> x + 1); ignore 2; 3 @> =? [
+        "ignore (fun x -> x + 1); ignore 2; 3"
+        "(); ignore 2; 3"
+        "ignore 2; 3"
+        "(); 3"
+        "3"
+     ]
+
 
 //[<Fact>]
 //let ``Sequential`` () =
