@@ -108,8 +108,10 @@ let sourceName (mi:MemberInfo) =
 let applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 
 open Swensen.RegexUtils
-//the usefullness of this function makes me think to open up Sprint module
-///Sprint the F#-style type signature of the given Type
+//the usefullness of this function makes me think to open up Sprint module (currently just added TypeExt with this feature)
+///Sprint the F#-style type signature of the given Type.  Handles known type abbreviations,
+///simple types, arbitrarily complex generic types (multiple parameters and nesting),
+///lambdas, tuples, and arrays.
 let sprintSig =
     //list of F# type abbrs: http://207.46.16.248/en-us/library/ee353649.aspx
     ///Get the type abbr name or short name from the "clean" name
@@ -169,6 +171,9 @@ let sprintSig =
     
     fun t -> sprintSig 0 t
 
+//If the method is not generic, returns true. If the function is generic,
+//the current algorithm tests whether the type parameters are a subset of those
+//type parameters which are supplied by method parameters or method return type.
 ///Determine whether the generic args for a call are inferable
 let genericArgsInferable (mi:MethodInfo) = 
     (mi.IsGenericMethod |> not) ||
@@ -188,7 +193,7 @@ let genericArgsInferable (mi:MethodInfo) =
 
         inferable.IsSupersetOf(needed)
 
-///sprints the generic arguments of a call if definitely "required" 
+///sprints the generic arguments of a call if definitely not inferable.
 let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     if genericArgsInferable mi then ""
     else sprintf "<%s>" (mi.GetGenericArguments() |> Seq.map sprintSig |> String.concat ", ")
@@ -196,7 +201,6 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 //todo:
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
 //  need to look into DerivedPatterns.Lambdas and DerivedPatterns.Applications
-//  maybe should expand to VarSet and Sequence
 let sprint expr =
     let rec sprint context expr =
         let applyParens = applyParensForPrecInContext context
