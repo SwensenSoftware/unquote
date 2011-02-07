@@ -13,8 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 *)
+
 [<AutoOpen>]
 module Swensen.Unquote.Operators
+
+#nowarn "39"
 
 open System
 open System.Reflection
