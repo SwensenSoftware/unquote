@@ -8,7 +8,7 @@
     <ProjectGuid>{110fe67e-4603-4905-8ba0-8b043aac2677}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>UnitTests</RootNamespace>
-    <AssemblyName>UnitTests</AssemblyName>
+    <AssemblyName>Unquote.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
