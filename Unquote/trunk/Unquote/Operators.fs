@@ -89,11 +89,7 @@ module Private =
                     let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
                     fun msg -> del.Invoke(msg)
                 | None ->
-                    #if DEBUG
-                        fun msg -> Diagnostics.Debug.Fail(msg)
-                    #else
-                        fun msg -> raise <| System.Exception("Test failed (but please reconsider using test in production code due to performance cost):" + msg)
-                    #endif
+                    fun msg -> raise <| System.Exception("Test failed:" + msg)
 
             fun (expr:Expr<bool>) ->
                 let msg = "\n\n" + (expr |> reduceFully |> List.map source |> String.concat "\n") + "\n"
