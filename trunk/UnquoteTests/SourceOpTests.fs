@@ -229,6 +229,36 @@ let ``set mutable var simple`` () =
 let ``set mutable var in seq expression precedence test`` () =
     source <@ let mutable x = 3 in x <- 4; x <- 5; x @> =? "let mutable x = 3 in x <- 4; x <- 5; x"
 
+type Foo() =
+    [<DefaultValue>] val mutable public X:int
+    with
+    member this.Add(other:Foo) =
+        let f = Foo()
+        f.X <- this.X + other.X
+        f
+    override this.ToString() =
+            sprintf "(Foo: X=%i)" this.X
+
+let foo1 = Foo()
+let foo2 = Foo()
+
+[<Fact>]
+let ``set instance field`` () =
+    source <@ foo1.X <- 5 @> =? "foo1.X <- 5"
+
+[<Fact>]
+let ``get instace field`` () =
+    source <@ foo1.X @> =? "foo1.X"
+
+[<Fact>]
+let ``get static field`` () =
+    source <@ String.Empty @> =? "String.Empty"
+
+//don't have any ready
+//[<Fact>]
+//let ``set static field`` () =
+//    source <@  @> =? "String.Empty"
+
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
 
@@ -240,3 +270,8 @@ let ``partial application`` () =
 let ``pattern match let binding`` () =
     source <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
 
+[<Fact(Skip="Precedence left of . operator wrong for applications")>]
+let ``set instance field on constructed object`` () =
+    source <@ Foo().X <- 5 @> =? "Foo().X <- 5"
+    source <@ (Foo().Add(Foo())).X <- 5 @> =? "(Foo().Add(Foo())).X <- 5"
+    source <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =? "\"abcdefg\".Substring(0, 5).Substring(0, 2)"

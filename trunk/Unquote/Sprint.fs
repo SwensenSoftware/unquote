@@ -215,6 +215,7 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     else sprintf "<%s>" (mi.GetGenericArguments() |> Seq.map sprintSig |> String.concat ", ")
 
 //todo:
+//  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
 //  need to look into DerivedPatterns.Lambdas and DerivedPatterns.Applications
 let sprint expr =
@@ -279,6 +280,10 @@ let sprint expr =
                 sprintf "%s" pi.Name
             else
                 sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+        | FieldGet(Some(target), fi) ->
+            sprintf "%s.%s" (sprint 22 target) fi.Name
+        | FieldGet(None, fi) ->
+            sprintf "%s.%s" fi.DeclaringType.Name fi.Name
         | Unit -> "()" //must come before Value pattern
         | Value(obj, _) ->
             match obj with
@@ -309,9 +314,14 @@ let sprint expr =
             applyParens 11 (sprintf "%s || %s" (sprint 10 a) (sprint 11 b))
         | IfThenElse(a,b,c) ->
             applyParens 7 (sprintf "if %s then %s else %s" (sprint 7 a) (sprint 7 b) (sprint 7 c))
-        | VarSet(v, rhs) ->
+        //we can't reduce any XXXSet expressions due to limitations of Expr.Eval()
+        | VarSet(v, arg) ->
             //not sure what precedence should be, using precedence for < op
-            applyParens 13 (sprintf "%s <- %s" v.Name (sprint 0 rhs)) //we can sprint these, but we can't eval them
+            applyParens 13 (sprintf "%s <- %s" v.Name (sprint 0 arg)) 
+        | FieldSet(Some(target), fi, arg) ->
+            applyParens 13 (sprintf "%s.%s <- %s" (sprint 22 target) fi.Name (sprint 0 arg))
+        | FieldSet(None, fi, arg) ->
+            applyParens 13 (sprintf "%s.%s <- %s" fi.DeclaringType.Name fi.Name (sprint 0 arg))
         | _ -> 
             sprintf "%A" (expr)
     and sprintArgs prec delimiter exprs =
