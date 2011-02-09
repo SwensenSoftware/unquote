@@ -275,7 +275,7 @@ let sprint expr =
             | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name
             | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
             | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
-        | PropertyGet(None, pi, args) -> //static get (note: can't accept params)
+        | PropertyGet(None, pi, _) -> //static get (note: can't accept params)
             if isOpenModule pi.DeclaringType then 
                 sprintf "%s" pi.Name
             else
@@ -483,18 +483,6 @@ let sprint expr =
 
 
 (*posts showing interest in quotations:
-    Unquote is a library for F# Quotation decompilation and incremental evaluation. Inspired by Groovy Power Asserts,
-    boolean Quotations may be tested within an FSI session or xUnit and NUnit tests with failing tests being explained
-    step-by-step.
-
-    Unquote is an F# Quotation decompiler and incremental evaluator combined to give 
-    step-wise insight into failing boolean expressions within interactive sessions or unit tests.
-
-    Unquote is a library consisting of a set of operators on F# Quotations providing decompilation and incremental evaluation 
-    combinted to bring step-wise insight into failing boolean expressions within interactive sessions or unit tests as 
-    inspired by Groovy Power Asserts.
-
 http://cs.hubfs.net/forums/thread/18361.aspx
-
 *)
 

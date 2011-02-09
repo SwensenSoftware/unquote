@@ -122,16 +122,3 @@ let inline (>?) x y = test <@ x > y @>
 let inline (<=?) x y = test <@ x <= y @>
 let inline (>=?) x y = test <@ x >= y @>
 let inline (<>?) x y = test <@ x <> y @>
-
-
-(* 
-F# Stepwise Quatation Evaluator (just "Stepwise" for short)
-
-Benifits:
-1) uses sprint instead of .ToString() which prints lists more completely.
-
-
-Instructions to use:
-    reference: Unquote.dll, and FSharp.PowerPack.Linq (for eval engine), and of course FSharp.Core
-
-*)

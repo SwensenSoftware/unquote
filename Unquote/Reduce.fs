@@ -48,7 +48,6 @@ let rec isReduced = function
     | Value _ | NewUnionCase _ | Lambda _ | Var _ | Unit -> true
     | NewTuple(args) | NewArray(_,args) when args |> allReduced -> true
     | Coerce(objExpr,_) when objExpr |> isReduced -> true
-//    | Sprint.UnaryPrefixCall(_, arg) when arg |> isReduced -> true
     | _ -> false
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
