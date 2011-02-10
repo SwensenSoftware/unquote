@@ -103,7 +103,7 @@ let isOpenModule (declaringType:Type) =
     isFsiModule declaringType ||
     declaringType.GetCustomAttributes(true)
     |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
-    |> (function | Some(_) -> true | None -> false)
+    |> (function | Some _ -> true | None -> false)
 
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
@@ -306,7 +306,7 @@ let sprint expr =
             //todo: this needs to be handled better for curried functions
             applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (e1 |> sprint 0) (e2 |> sprint 0))
         | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
-            //note, this only handles typed quotations (ops are 
+            //note, this only handles typed quotations
             sprintf "<@ %s @>" (sprint 0 qx) 
         | AndAlso(a,b) -> //must come before if then else
             applyParens 12 (sprintf "%s && %s" (sprint 11 a) (sprint 12 b))
