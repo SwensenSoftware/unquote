@@ -263,6 +263,7 @@ let sprint expr =
         | Call(None, mi, args) -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
+                //functions which take explicit type arguments do not need normal arguments, e.g. typeof<int>
                 let sprintedArgs = if args.Length = 0 then "" else " " + sprintCurriedArgs args
                 if isOpenModule mi.DeclaringType then 
                     applyParens 20 (sprintf "%s%s%s" methodName (sprintGenericArgsIfNotInferable mi) sprintedArgs)
@@ -288,6 +289,7 @@ let sprint expr =
         | Value(obj, _) ->
             match obj with
             | null -> "null"
+//            | :? Exception as ex -> sprintf "%s(%s)" (ex.GetType().Name) ex.Message
             | _ -> sprintf "%A" obj
         | NewTuple(args) -> //tuples have at least two elements
             args |> sprintTupledArgs |> sprintf "(%s)" //what is precedence? 10?

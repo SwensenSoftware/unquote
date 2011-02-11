@@ -30,16 +30,17 @@ let evalValue (expr:Expr) =
     //note this will wrap already reduced values such as Tuples, but hasn't been an issue yet
     match evaled with
     | null ->
-        //unit, void, and None are all represented as null, do a little work to get their true type
-        let t =
+        //need to preserve type information of Calls / PropertyGet which return null or
+        // 1) type mismatch when rebuilding expression
+        // 2) unit / Void sprinted as "null"
+        let rtype =
             match expr with
-            | Call(_,mi,_) when mi.ReturnType = typeof<unit> || mi.ReturnType = typeof<System.Void> ->
-                typeof<unit>
-            | PropertyGet(_,pi,_) when pi.PropertyType = typeof<unit> || pi.PropertyType = typeof<System.Void> ->
-                typeof<unit>
-            | _ -> 
-                typeof<obj>
-        Expr.Value(evaled, t)
+            | Call(_,mi,_) -> mi.ReturnType
+            | PropertyGet(_,pi,_) -> pi.PropertyType
+            | _ -> typeof<obj> //probably need to do better than this
+
+        //Void return type needs treated as unit to be sprinted correctly (might want to do this in Sprint instead though)
+        Expr.Value(evaled, if rtype = typeof<Void> then typeof<unit> else rtype)
     | _ ->
         Expr.Value(evaled, evaled.GetType()) //lose type info from null values (including Unit, which makes calls returning Unit print as "null"!... same with None!)
 
@@ -95,15 +96,29 @@ and reduceAll exprList =
     
 //note Expr uses reference equality and comparison, so have to be
 //carefule in reduce algorithm to only rebuild actually reduced parts of an expresion
-let reduceFully =        
+let reduceFully =
     let rec loop expr acc =
-        let nextExpr = expr |> reduce 
-        if isReduced nextExpr then //is reduced
-            if nextExpr <> List.head acc then nextExpr::acc //different than last
-            else acc //same as last
-        elif nextExpr = List.head acc then //is not reduced and could not reduce
-            (evalValue nextExpr)::acc
-        else loop nextExpr (nextExpr::acc)
+        try
+            let nextExpr = expr |> reduce 
+            if isReduced nextExpr then //is reduced
+                if nextExpr <> List.head acc then nextExpr::acc //different than last
+                else acc //same as last
+            elif nextExpr = List.head acc then //is not reduced and could not reduce
+                (evalValue nextExpr)::acc
+            else loop nextExpr (nextExpr::acc)
+        with
+        | ex -> 
+            Expr.Value(ex)::acc
 
     fun expr -> loop expr [expr] |> List.rev
 
+//let rec reduceFullySeq expr = seq {
+//    yield expr
+//    let nextExpr = expr |> reduce
+//    if nextExpr |> isReduced && nextExpr <> expr then 
+//        yield nextExpr
+//    elif nextExpr = expr then
+//        yield nextExpr |> evalValue
+//    else
+//        yield! nextExpr |> reduceFully
+//}
