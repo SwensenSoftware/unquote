@@ -39,7 +39,7 @@ let evalValue (expr:Expr) =
             | PropertyGet(_,pi,_) -> pi.PropertyType
             | _ -> typeof<obj> //probably need to do better than this
 
-        //Void return type needs treated as unit to be sprinted correctly (might want to do this in Sprint instead though)
+        //Void return type needs to be treated as unit to be sprinted correctly (might want to do this in Sprint instead though)
         Expr.Value(evaled, if rtype = typeof<Void> then typeof<unit> else rtype)
     | _ ->
         Expr.Value(evaled, evaled.GetType()) //lose type info from null values (including Unit, which makes calls returning Unit print as "null"!... same with None!)
@@ -68,20 +68,20 @@ let rec reduce (expr:Expr) =
         if lhs |> isReduced then rhs
         else Expr.Sequential(reduce lhs, rhs)
     | Application _ -> //got to work for these lambda applications (not sure whether better approach)
-        let rec allArgsReduced expr = 
-            match expr with
+        let rec allArgsReduced subexpr = 
+            match subexpr with
             | Application(Lambda _, rhs) ->
                 rhs |> isReduced
             | Application(lhs,rhs) ->
                 rhs |> isReduced && lhs |> allArgsReduced
-            | _ -> failwith "wildcard case not expected"
+            | _ -> failwith (sprintf "expected Application(Lambda(),) or Application(,), got \n\n%A\n\nwithin%A\n" subexpr expr)
             
-        let rec rebuild expr =
-            match expr with
+        let rec rebuild subexpr =
+            match subexpr with
             | Application(lhs, rhs) -> 
                 Expr.Application(rebuild lhs, reduce rhs)
-            | Lambda _ -> expr
-            | _ -> failwith "wildcard case not expected"
+            | Lambda _ -> subexpr
+            | _ -> failwith (sprintf "expected Application(,) or Lambda(), got \n\n%A\n\nwithin%A\n" subexpr expr)
 
         if allArgsReduced expr then evalValue expr
         else rebuild expr

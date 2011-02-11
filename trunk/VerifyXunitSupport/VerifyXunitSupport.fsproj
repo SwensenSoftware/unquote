@@ -51,7 +51,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="xunit">
-      <HintPath>..\..\..\..\..\..\..\xunit-1.6.1\xunit.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\xunit-1.7\xunit.dll</HintPath>
     </Reference>
     <ProjectReference Include="..\Unquote\Unquote.fsproj">
       <Name>Unquote</Name>
