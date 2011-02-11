@@ -108,7 +108,13 @@ open Private
 ///3) Debug.Fail if debug mode
 ///4) System.Exception if release mode (which is discouraged due to performance cost)
 let inline test (expr:Expr<bool>) =
-    match expr.Eval() with
+    let passes = 
+        try
+            expr.Eval()
+        with
+        | _ -> false
+
+    match passes with
     | false -> 
         try
             testFailed expr
