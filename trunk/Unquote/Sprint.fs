@@ -497,3 +497,10 @@ let sprint expr =
 http://cs.hubfs.net/forums/thread/18361.aspx
 *)
 
+let simpleMatch =
+    <@
+        match true with
+        | true -> "true"
+        | _ -> "false"
+    @>
+
