@@ -166,11 +166,31 @@ let ``Sequential`` () =
 let doit (x:string) = (null:string)
 [<Fact>]
 let ``null reference exception`` () =
-    let [step1; step2; step3] = sprintedReduceSteps <@ 3 = (doit null).Length @>
+    let steps = sprintedReduceSteps <@ 3 = (doit null).Length @>
+    test <@ steps.Length = 3 @>
+    let [step1; step2; step3] = steps
     step1 =? "3 = (doit null).Length"
     step2 =? "3 = null.Length"
     test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
 
+open Swensen.RegexUtils
+[<Fact>]
+let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
+    let doit (x:string) = (null:string)
+    
+    let steps = sprintedReduceSteps <@ null = doit "asdf" @>
+    
+    test <@ steps.Length = 3 @>
+    
+    let [step1; step2; step3] = steps
+    test 
+        <@ 
+            match step1 with
+            | InterpretedMatch @"^null = <.*> ""asdf""$" _ -> true
+            | _ -> false
+        @>
+    step2 =? "null = null"
+    step3 =? "true"
 
 //[<Fact>]
 //let ``Sequential`` () =

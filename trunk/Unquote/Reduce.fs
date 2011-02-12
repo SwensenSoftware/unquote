@@ -27,22 +27,7 @@ open Microsoft.FSharp.Metadata
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
     let evaled = expr.EvalUntyped() 
-    //note this will wrap already reduced values such as Tuples, but hasn't been an issue yet
-    match evaled with
-    | null ->
-        //need to preserve type information of Calls / PropertyGet which return null or
-        // 1) type mismatch when rebuilding expression
-        // 2) unit / Void sprinted as "null"
-        let rtype =
-            match expr with
-            | Call(_,mi,_) -> mi.ReturnType
-            | PropertyGet(_,pi,_) -> pi.PropertyType
-            | _ -> typeof<obj> //probably need to do better than this
-
-        //Void return type needs to be treated as unit to be sprinted correctly (might want to do this in Sprint instead though)
-        Expr.Value(evaled, if rtype = typeof<Void> then typeof<unit> else rtype)
-    | _ ->
-        Expr.Value(evaled, evaled.GetType()) //lose type info from null values (including Unit, which makes calls returning Unit print as "null"!... same with None!)
+    Expr.Value(evaled, expr.Type)
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
@@ -70,7 +55,7 @@ let rec reduce (expr:Expr) =
     | Application _ -> //got to work for these lambda applications (not sure whether better approach)
         let rec allArgsReduced subexpr = 
             match subexpr with
-            | Application(Lambda _, rhs) ->
+            | Application((Lambda _ | Value _), rhs) ->
                 rhs |> isReduced
             | Application(lhs,rhs) ->
                 rhs |> isReduced && lhs |> allArgsReduced
