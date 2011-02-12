@@ -197,6 +197,14 @@ let ``nested lambda Value applications don't throw`` () =
     let doit (x:string) = (null:string)
     reduceFully <@ doit (doit (doit "asdf")) @>
     
+let takesNoArgs() = (null:string)
+[<Fact>]
+let ``function with no regular args and no type args`` () =
+    sprintedReduceSteps <@ takesNoArgs() @> =? [
+        "takesNoArgs()"
+        "null"
+    ]
+
 
 //[<Fact>]
 //let ``Sequential`` () =

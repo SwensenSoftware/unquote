@@ -209,10 +209,13 @@ let genericArgsInferable (mi:MethodInfo) =
 
         inferable.IsSupersetOf(needed)
 
+let sprintGenericArgs (mi:MethodInfo) =
+    sprintf "<%s>" (mi.GetGenericArguments() |> Seq.map sprintSig |> String.concat ", ")
+
 ///sprints the generic arguments of a call if definitely not inferable.
 let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     if genericArgsInferable mi then ""
-    else sprintf "<%s>" (mi.GetGenericArguments() |> Seq.map sprintSig |> String.concat ", ")
+    else sprintGenericArgs mi
 
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
@@ -263,12 +266,18 @@ let sprint expr =
         | Call(None, mi, args) -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
-                //functions which take explicit type arguments do not need normal arguments, e.g. typeof<int>
-                let sprintedArgs = if args.Length = 0 then "" else " " + sprintCurriedArgs args
+                //functions which take explicit type arguments but only single unit normal arg look like typeof<int>
+                //functions which do not take explit type arguments but only single unit normal arg look like doit()
+                let sprintedArgs = 
+                    if genericArgsInferable mi then
+                        if args.Length = 0 then "()" else " " + sprintCurriedArgs args
+                    else
+                        sprintf "%s%s" (sprintGenericArgs mi) (if args.Length = 0 then "" else " " + sprintCurriedArgs args)
+                
                 if isOpenModule mi.DeclaringType then 
-                    applyParens 20 (sprintf "%s%s%s" methodName (sprintGenericArgsIfNotInferable mi) sprintedArgs)
+                    applyParens 20 (sprintf "%s%s" methodName sprintedArgs)
                 else 
-                    applyParens 20 (sprintf "%s.%s%s%s" (sourceName mi.DeclaringType) methodName (sprintGenericArgsIfNotInferable mi) sprintedArgs)
+                    applyParens 20 (sprintf "%s.%s%s" (sourceName mi.DeclaringType) methodName sprintedArgs)
             else //assume CompiledName same as SourceName for static members
                 applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
