@@ -49,9 +49,9 @@ let unquote (expr:Expr) = expr.Unquote()
 ///even though we do not want to expose them publically).
 module Private =
     let private fsiTestFailed (expr:Expr<bool>) =
-        printfn "\nTest failed:" 
+        printfn "\nTest failed:\n" 
         for expr in expr.ReduceFully() do
-            printfn "\t%s" (expr.ToSource())
+            printfn "%s" (expr.ToSource())
         printfn ""
 
     open System        
