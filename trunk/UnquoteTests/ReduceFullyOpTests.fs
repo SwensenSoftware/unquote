@@ -192,6 +192,12 @@ let ``property get returns null but preserves ret type info and doesnt throw eve
     step2 =? "null = null"
     step3 =? "true"
 
+[<Fact>]
+let ``nested lambda Value applications don't throw`` () =
+    let doit (x:string) = (null:string)
+    reduceFully <@ doit (doit (doit "asdf")) @>
+    
+
 //[<Fact>]
 //let ``Sequential`` () =
 //    sprintedReduceSteps <@ 1; 2; 3; @> =? [
