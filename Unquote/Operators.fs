@@ -48,7 +48,7 @@ let unquote (expr:Expr) = expr.Unquote()
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
 module Private =
-    let private fsiTestFailed (expr:Expr<bool>) =
+    let private fsiTestFailed (expr:Expr) =
         printfn "\nTest failed:\n" 
         for expr in expr.ReduceFully() do
             printfn "%s" (expr.ToSource())
@@ -91,7 +91,7 @@ module Private =
                 | None ->
                     fun msg -> raise <| System.Exception("Test failed:" + msg)
 
-            fun (expr:Expr<bool>) ->
+            fun (expr:Expr) ->
                 let msg = "\n\n" + (expr |> reduceFully |> List.map source |> String.concat "\n") + "\n"
                 outputNonFsiTestFailedMsg msg
         #endif
@@ -121,6 +121,34 @@ let inline test (expr:Expr<bool>) =
         with 
         | e -> raise e //we catch and raise e here to hide stack traces (reraise preserves original stacktrace)
     | true -> ()
+
+type raiseResult =
+    | DoesNotRaise
+    | RaisesWrongType of Type
+    | RaisesRightType
+
+///Test wether the given expr fails with the given expected exception (need to refactor delegates and so forth
+let inline raises<'a when 'a :> exn> (expr:Expr) = 
+    let result = 
+        try
+            ignore <| expr.EvalUntyped()
+            DoesNotRaise
+        with
+        | :? 'a -> RaisesRightType
+        | e -> RaisesWrongType(e.GetType())
+
+    match result with
+    | DoesNotRaise ->
+        try
+            testFailed expr
+        with 
+        | e -> raise e //we catch and raise e here to hide stack traces (reraise preserves original stacktrace)    
+    | RaisesWrongType e -> 
+        try
+            testFailed expr
+        with 
+        | e -> raise e //we catch and raise e here to hide stack traces (reraise preserves original stacktrace)
+    | RaisesRightType -> ()    
 
 let inline (=?) x y = test <@ x = y @>
 let inline (<?) x y = test <@ x < y @>
