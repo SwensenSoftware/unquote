@@ -23,9 +23,14 @@ open Xunit
 let ``test xunit support, this should fail with clean stack trace`` () =
     test <@ 22 + 2 = 5 @>
 
-//let f = fun  i j k -> i + j + k
-//
-//[<EntryPoint>]
-//let main args = 
-//    reduce <@ (fun  i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> |> ignore
-//    0
+let f = fun  i j k -> i + j + k
+
+let sprintedReduceSteps expr =
+    reduceFully expr |> List.map source
+
+let retNull x = (null:string) + x
+
+[<EntryPoint>]
+let main args = 
+    sprintedReduceSteps <@ null = retNull "asdf" @>
+    0
