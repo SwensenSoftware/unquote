@@ -17,7 +17,7 @@ limitations under the License.
 [<AutoOpen>]
 module Swensen.Unquote.Operators
 
-#nowarn "39" //turn off warning for use of inline IL feature
+#nowarn "42" //turn off warning for use of inline IL feature
 
 open System
 open System.Reflection
