@@ -41,6 +41,7 @@
     <Compile Include="FSharpNameTests.fs" />
     <Compile Include="SourceOpTests.fs" />
     <Compile Include="ReduceFullyOpTests.fs" />
+    <Compile Include="TestOpTests.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
