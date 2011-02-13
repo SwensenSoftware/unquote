@@ -106,6 +106,11 @@ module Private =
     //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
     let inline raise (e: System.Exception) = (# "throw" e : 'U #)    
 
+    type raisesResult<'a when 'a :> exn> =
+        | NoException
+        | WrongException of 'a
+        | RightException
+
 open Private
 
 //making inline (together with catch/raise) ensures stacktraces clean in test framework output
@@ -129,13 +134,7 @@ let inline test (expr:Expr<bool>) =
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
     | true -> ()
 
-type raiseResult<'a when 'a :> exn> =
-    | NoException
-    | WrongException of 'a
-    | RightException
-
-
-///Test wether the given expr fails with the given expected exception (need to refactor delegates and so forth
+///Test wether the given expr fails with the given expected exception
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let result =
         try
