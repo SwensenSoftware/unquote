@@ -185,7 +185,7 @@ let sprintSig =
         | args ->
             sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
     
-    sprintSig 0
+    fun t -> sprintSig 0 t
 
 //If the method is not generic, returns true. If the function is generic,
 //the current algorithm tests whether the type parameters are a subset of those
