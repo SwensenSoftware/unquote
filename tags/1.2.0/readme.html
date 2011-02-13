@@ -1,0 +1,154 @@
+<html>
+<head>
+	<title>Unquote Readme</title>
+	<style type="text/css">
+	</style>
+</head>
+<body>
+<h1> Using Unquote </h1>
+<ul>
+	<li>Reference appropriate binaries
+		<ul>
+			<li>Reference Unquote.dll, and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project)</li>
+			<li>To use with NUnit, add static reference to nunit.framework in test project (automatically detected by Unquote)</li>
+			<li>To use with xUnit, add static reference to xunit.dll in test project (automatically detected by Unquote)</li>
+		</ul>
+	</li>
+	<li>
+		Open Swensen.Unquote within FSI session or top of unit test file, this will automatically open Swensen.Unquote.Operators. The <code>test</code> operator and <code>xx?</code> series binary infix operators can be used within FSI sessions or within supported unit testing framework test methods to perform boolean assertions (if INTERACTIVE compiler symbol defined, then output to FSI; else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods; else throw Exception).
+		<ul>
+			<li><pre>val source : Quotations.Expr -&gt; string</pre>
+				<p>
+<pre>
+&gt; source &lt;@ (1+2)/3 @&gt;;;
+val it : string = "(1 + 2) / 3"
+</pre>
+				</p>
+			</li>
+			<li><pre>val reduce : Quotations.Expr -&gt; Quotations.Expr</pre>
+				<p>
+<pre>
+&gt; &lt;@ (1+2)/3 @&gt; |&gt; reduce |&gt; source;;
+val it : string = "3 / 3"
+</pre>
+				</p>
+			</li>
+			<li><pre>val reduceFully : Quotations.Expr -&gt; Quotations.Expr list</pre>
+				<p>
+<pre>
+&gt; &lt;@ (1+2)/3 @&gt; |&gt; reduceFully |&gt; List.map source;;
+val it : string list = ["(1 + 2) / 3"; "3 / 3"; "1"]
+</pre>
+				</p>
+			</li>
+			<li><pre>val isReduced : Quotations.Expr -&gt; bool</pre>
+				<p>
+<pre>
+&gt; &lt;@ (1+2)/3 @&gt; |&gt; isReduced;;
+val it : bool = false
+&gt; &lt;@ 1 @&gt; |&gt; isReduced;;
+val it : bool = true
+</pre>
+				</p>
+			</li>
+			<li><pre>val unquote : Quotations.Expr -&gt; unit</pre>
+				<p>
+<pre>
+&gt; unquote &lt;@ (1+2)/3 @&gt;;;
+
+(1 + 2) / 3
+3 / 3
+1
+
+val it : unit = ()
+</pre>
+				</p>
+			</li>
+			<li><pre>val inline test : Quotations.Expr&lt;bool&gt; -&gt; unit</pre>
+				<p>
+<pre>
+&gt; test &lt;@ (1+2)/3 = 1 @&gt;;;
+val it : unit = ()
+&gt; test &lt;@ (1+2)/3 = 2 @&gt;;;
+
+Test failed:
+	
+(1 + 2) / 3 = 2
+3 / 3 = 2
+1 = 2
+false
+
+val it : unit = ()
+</pre>
+				</p>
+			</li>
+			<li><pre>val inline ( =? ) : 'a -&gt; 'a -&gt; unit when 'a : equality</pre>
+				<p>
+<pre>
+&gt; [1;2;3;4] =? [4;3;2;1];;
+
+Test failed:
+
+[1; 2; 3; 4] = [4; 3; 2; 1]
+false
+
+val it : unit = ()
+</pre>
+				</p>
+			</li>
+			<li><pre>val inline ( &lt;? ) : 'a -&gt; 'a -&gt; unit when 'a : comparison</pre></li>
+			<li><pre>val inline ( &gt;? ) : 'a -&gt; 'a -&gt; unit when 'a : comparison</pre></li>
+			<li><pre>val inline ( &lt;=? ) : 'a -&gt; 'a -&gt; unit when 'a : comparison</pre></li>
+			<li><pre>val inline ( &gt;=? ) : 'a -&gt; 'a -&gt; unit when 'a : comparison</pre></li>
+			<li><pre>val inline ( &lt;&gt;? ) : 'a -&gt; 'a -&gt; unit when 'a : equality</pre></li>
+			<li><pre>val inline raises&lt;'a when 'a :&gt; exn&gt; : Quotations.Expr -&gt; unit</pre>
+				<p>
+<pre>
+&gt; raises&lt;exn&gt; &lt;@ (null:string).Length @&gt;;;
+val it : unit = ()
+&gt; raises&lt;NullReferenceException&gt; &lt;@ (null:string).Length @&gt;;;
+val it : unit = ()
+&gt; raises&lt;System.ArgumentException&gt; &lt;@ (null:string).Length @&gt;;;
+
+Test failed:
+
+Expected ArgumentException but got NullReferenceException
+
+null.Length
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+val it : unit = ()
+&gt; raises&lt;exn&gt; &lt;@ 3 @&gt;;;
+
+Test failed:
+
+Expected Exception but got nothing
+
+3
+
+val it : unit = ()
+</pre>
+				</p>
+			</li>
+		</ul>
+	</li>
+</ul>
+<h1>Release Notes</h1>
+
+<h2>v1.2.0, 2/13/11</h2>
+Added <code>raises<'a when 'a :> exn> : Quotations.Expr -> unit</code> for testing expected exceptions.
+
+<h2>v1.1.0, 2/11/11</h2>
+Better support for exceptions within tests, expand support for more expressions
+<ul>
+	<li>Better support for exceptions within tests: print printable lines up until the exception, then print the exception (before only printed the exception)</li>
+	<li>Support applications of lambda values (e.g. local function vs. module property)</li>
+	<li>Better preservation of type information for reduction evaluations which return null</li>
+	<li>Print "()" for function calls which 1) do not need explit type arguments 2) take only single unit arg</li>
+	<li>Changed FSI-mode Operator.test output to be more like unit test mode output; no longer uses tabs</li>
+</ul>
+
+<h2>v1.0.0, 2/08/11</h2>
+Initial release
+</body>
+</html>
