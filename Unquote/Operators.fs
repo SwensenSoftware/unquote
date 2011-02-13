@@ -48,14 +48,10 @@ let unquote (expr:Expr) = expr.Unquote()
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
 module Private =
-    let private fsiTestFailed (expr:Expr) additionalInfo =
+    let private fsiTestFailed (expr:Expr<bool>) =
         printfn "\nTest failed:\n" 
-        if additionalInfo |> String.IsNullOrWhiteSpace |> not then
-             printfn "%s\n" additionalInfo
-
         for expr in expr.ReduceFully() do
             printfn "%s" (expr.ToSource())
-        
         printfn ""
 
     open System        
@@ -95,11 +91,8 @@ module Private =
                 | None ->
                     fun msg -> raise <| System.Exception("Test failed:" + msg)
 
-            fun (expr:Expr) additionalInfo ->
-                let msg = 
-                    sprintf "\n%s\n%s\n"
-                        (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
-                        (expr |> reduceFully |> List.map source |> String.concat "\n")    
+            fun (expr:Expr<bool>) ->
+                let msg = "\n\n" + (expr |> reduceFully |> List.map source |> String.concat "\n") + "\n"
                 outputNonFsiTestFailedMsg msg
         #endif
 
@@ -119,44 +112,15 @@ let inline test (expr:Expr<bool>) =
         try
             expr.Eval()
         with
-        | _ -> false //testFailed output will contain exception info
+        | _ -> false
 
     match passes with
     | false -> 
         try
-            testFailed expr ""
+            testFailed expr
         with 
-        | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
+        | e -> raise e //we catch and raise e here to hide stack traces (reraise preserves original stacktrace)
     | true -> ()
-
-type raiseResult<'a when 'a :> exn> =
-    | NoException
-    | WrongException of 'a
-    | RightException
-
-
-///Test wether the given expr fails with the given expected exception (need to refactor delegates and so forth
-let inline raises<'a when 'a :> exn> (expr:Expr) = 
-    let result =
-        try
-            ignore <| expr.EvalUntyped()
-            NoException
-        with
-        | :? 'a -> RightException
-        | actual -> WrongException actual
-
-    match result with
-    | RightException -> ()
-    | WrongException actual ->
-        try
-            testFailed expr (sprintf "Expected %s but got %s" typeof<'a>.Name (actual.GetType().Name))
-        with 
-        | e -> raise e
-    | NoException ->
-        try
-            testFailed expr (sprintf "Expected %s but got nothing" typeof<'a>.Name)
-        with 
-        | e -> raise e        
 
 let inline (=?) x y = test <@ x = y @>
 let inline (<?) x y = test <@ x < y @>
