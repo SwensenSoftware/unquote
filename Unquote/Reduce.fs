@@ -55,18 +55,18 @@ let rec reduce (expr:Expr) =
     | Application _ -> //got to work for these lambda applications (not sure whether better approach)
         let rec allArgsReduced subexpr = 
             match subexpr with
-            | Application((Lambda _ | Value _), rhs) ->
+            | Application((Lambda _ | Value _), rhs) -> //local lambdas are represented as Values
                 rhs |> isReduced
             | Application(lhs,rhs) ->
                 rhs |> isReduced && lhs |> allArgsReduced
-            | _ -> failwith (sprintf "expected Application(Lambda(),) or Application(,), got \n\n%A\n\nwithin%A\n" subexpr expr)
+            | _ -> failwith (sprintf "Expected Application((Lambda _ | Value _), rhs) or Application(lhs,rhs), got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
             
         let rec rebuild subexpr =
             match subexpr with
             | Application(lhs, rhs) -> 
                 Expr.Application(rebuild lhs, reduce rhs)
-            | Lambda _ -> subexpr
-            | _ -> failwith (sprintf "expected Application(,) or Lambda(), got \n\n%A\n\nwithin%A\n" subexpr expr)
+            | Lambda _ | Value _ -> subexpr //local lambdas are represented as Values
+            | _ -> failwith (sprintf "Expected Application(lhs, rhs) or Lambda _, got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
 
         if allArgsReduced expr then evalValue expr
         else rebuild expr
