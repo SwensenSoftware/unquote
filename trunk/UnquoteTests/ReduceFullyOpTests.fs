@@ -174,6 +174,7 @@ let ``null reference exception`` () =
     test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
 
 open Swensen.RegexUtils
+
 [<Fact>]
 let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
     let doit (x:string) = (null:string)
@@ -183,12 +184,7 @@ let ``property get returns null but preserves ret type info and doesnt throw eve
     test <@ steps.Length = 3 @>
     
     let [step1; step2; step3] = steps
-    test 
-        <@ 
-            match step1 with
-            | InterpretedMatch @"^null = <.*> ""asdf""$" _ -> true
-            | _ -> false
-        @>
+    test <@ step1 =~ @"^null = <fun:doit@\d*> ""asdf""$"@>
     step2 =? "null = null"
     step3 =? "true"
 
@@ -196,6 +192,25 @@ let ``property get returns null but preserves ret type info and doesnt throw eve
 let ``nested lambda Value applications don't throw`` () =
     let doit (x:string) = (null:string)
     reduceFully <@ doit (doit (doit "asdf")) @>
+
+[<Fact>]
+let ``multi-var Value lambda application doesn't throw`` () =
+    let doit1 (x:string) = (null:string)
+    let doit2 (x:string) (y:string) = x + y
+    let testExpr = <@ doit2 (doit1 "asdf") ("asdf" + "asdf")  @>
+    
+    reduceFully testExpr //shouldn't throw
+    
+    //assert expected sprinted reductions while we are at it
+    let [step1; step2; step3] = sprintedReduceSteps testExpr
+    test <@ step1 =~ @"^<fun:doit2@\d*> \(<fun:doit1@\d*> ""asdf""\) \(""asdf"" \+ ""asdf""\)$" @>
+    test <@ step2 =~ @"^<fun:doit2@\d*> null ""asdfasdf""$" @>
+    test <@ step3 =~ @"^""asdfasdf""$" @>
+
+[<Fact>]
+let ``multi-var lambda let binding application doesn't throw`` () =
+    let doit2 (x:string) (y:string) = x + y
+    reduceFully <@ doit2 (let x = "asdf" in x) ("asdf" + "asdf")  @>
     
 let takesNoArgs() = (null:string)
 [<Fact>]

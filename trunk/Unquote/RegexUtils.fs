@@ -29,3 +29,5 @@ let (|CompiledMatch|_|) pattern str =
     if m.Success then Some [for x in m.Groups -> x]
     else None
 
+//http://stackoverflow.com/questions/833180/handy-f-snippets/1477188#1477188
+let (=~) input pattern = System.Text.RegularExpressions.Regex.IsMatch(input, pattern)
