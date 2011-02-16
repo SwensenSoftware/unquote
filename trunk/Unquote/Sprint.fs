@@ -333,6 +333,16 @@ let sprint expr =
             applyParens 13 (sprintf "%s.%s <- %s" (sprint 22 target) fi.Name (sprint 0 arg))
         | FieldSet(None, fi, arg) ->
             applyParens 13 (sprintf "%s.%s <- %s" fi.DeclaringType.Name fi.Name (sprint 0 arg))
+        | TupleGet(tup, index) ->
+            let tupleMatch =
+                Seq.init 
+                    (tup.Type.GetGenericArguments().Length) 
+                    (fun i -> if i=index then (sprintf "index%i" index) else "_") 
+
+            sprintf "(let %s = %s in %s)"
+                (tupleMatch |> String.concat ",")
+                (sprint 0 tup)
+                (sprintf "index%i" index)
         | _ -> 
             sprintf "%A" (expr)
     and sprintArgs prec delimiter exprs =

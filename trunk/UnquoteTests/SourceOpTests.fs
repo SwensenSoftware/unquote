@@ -18,6 +18,7 @@ limitations under the License.
 module Test.Swensen.Unquote.SourceOpTests
 open Xunit
 open Swensen.Unquote
+open Microsoft.FSharp.Linq.QuotationEvaluation
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.
@@ -254,6 +255,17 @@ let ``get instace field`` () =
 let ``get static field`` () =
     source <@ String.Empty @> =? "String.Empty"
 
+[<Fact>]
+let ``tuple get variation 1`` () =
+    source <@ let a,b = (1,2) in a,b @> =? 
+        "let patternInput = (1, 2) in let b = (let _,index1 = patternInput in index1) in let a = (let index0,_ = patternInput in index0) in (a, b)"
+
+let t = (1,2)
+[<Fact>]
+let ``tuple get variation 2`` () =
+    source <@ let a,b = t in a,b @> =? 
+        "let b = (let _,index1 = t in index1) in let a = (let index0,_ = t in index0) in (a, b)"
+
 //don't have any ready
 //[<Fact>]
 //let ``set static field`` () =
@@ -275,3 +287,4 @@ let ``set instance field on constructed object`` () =
     source <@ Foo().X <- 5 @> =? "Foo().X <- 5"
     source <@ (Foo().Add(Foo())).X <- 5 @> =? "(Foo().Add(Foo())).X <- 5"
     source <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =? "\"abcdefg\".Substring(0, 5).Substring(0, 2)"
+
