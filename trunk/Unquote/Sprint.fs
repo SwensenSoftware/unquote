@@ -491,16 +491,3 @@ let sprint expr =
 .. .. op_RangeStep
 
 *)
-
-
-(*posts showing interest in quotations:
-http://cs.hubfs.net/forums/thread/18361.aspx
-*)
-
-let simpleMatch =
-    <@
-        match true with
-        | true -> "true"
-        | _ -> "false"
-    @>
-
