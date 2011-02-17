@@ -304,10 +304,16 @@ let sprint expr =
             args |> sprintTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | NewArray(_,args) ->
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
-        | NewUnionCase(uci,_)  -> //todo: sprint recursively, so can reduce incrementally
-            match uci.DeclaringType.Namespace, uci.DeclaringType.Name, uci.Name with
-            | "Microsoft.FSharp.Core", "FSharpOption`1", "None" -> "None" //otherwise gets sprinted as "<null>"
-            | _ -> expr.EvalUntyped() |> sprintf "%A"
+        | NewUnionCase(uci,args)  -> //todo: sprint recursively, so can reduce incrementally
+            if uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>> then
+                match args with
+                | [] -> "[]"
+                | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
+                | _ -> failwith "unexpected list union case"
+            else
+                match args with
+                | [] -> uci.Name
+                | _ -> sprintf "%s(%s)" uci.Name (sprintTupledArgs args)
         | NewObject(ci, args) ->
             applyParens 20 (sprintf "%s(%s)" ci.DeclaringType.Name (sprintTupledArgs args))
         | Coerce(target, _) ->
@@ -343,6 +349,9 @@ let sprint expr =
                 (tupleMatch |> String.concat ",")
                 (sprint 0 tup)
                 (sprintf "index%i" index)
+        //too funky to even be worth while
+//        | UnionCaseTest(expr, uci) ->
+//            sprintf "%s = %s.%s" (sprint 0 expr) (sprintSig uci.DeclaringType) uci.Name
         | _ -> 
             sprintf "%A" (expr)
     and sprintArgs prec delimiter exprs =

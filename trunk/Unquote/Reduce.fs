@@ -31,8 +31,8 @@ let evalValue (expr:Expr) =
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
-    | Value _ | NewUnionCase _ | Lambda _ | Var _ | Unit -> true
-    | NewTuple(args) | NewArray(_,args) when args |> allReduced -> true
+    | Value _ | Lambda _ | Var _ | Unit -> true
+    | NewUnionCase(_,args) | NewTuple(args) | NewArray(_,args) when args |> allReduced -> true
     | Coerce(objExpr,_) when objExpr |> isReduced -> true
     | _ -> false
 and allReduced x = 
