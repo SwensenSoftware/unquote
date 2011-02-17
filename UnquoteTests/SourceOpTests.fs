@@ -267,6 +267,7 @@ let ``tuple get variation 2`` () =
         "let b = (let _,index1 = t in index1) in let a = (let index0,_ = t in index0) in (a, b)"
 
 let namedList = [1; 2; 3]
+let namedListOfList = [[1]]
 let ``new union case lists`` () =
     source <@ [1; 2; 3] @> =? "[1; 2; 3]"
     source <@ 5::[1; 2; 3] @> =? "[5; 1; 2; 3]" //this we consider acceptable
@@ -278,6 +279,8 @@ let ``new union case lists`` () =
     source <@ 6::5::namedList @> =? "6::5::namedList"
     source <@ 7::5 + 1::5::namedList @> =? "7::5 + 1::5::namedList"
     source <@ (7::5 + 1::5::namedList).Length @> =? "(7::5 + 1::5::namedList).Length"
+
+    source <@ (1::3::[])::namedListOfList @> =? "[1; 3]::namedListOfList"
 
 type du =
     | A

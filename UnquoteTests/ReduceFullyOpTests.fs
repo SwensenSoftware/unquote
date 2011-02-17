@@ -221,6 +221,28 @@ let ``function with no regular args and no type args`` () =
     ]
 
 
+let namedList = [1; 2; 3]
+[<Fact>]
+let ``new union case lists`` () =
+    sprintedReduceSteps <@ [1; 2 + 3; 4] @> =? [
+        "[1; 2 + 3; 4]"
+        "[1; 5; 4]"
+    ]
+
+    sprintedReduceSteps <@ [1; 2; 3]  = namedList @> =? [
+        "[1; 2; 3] = namedList"
+        "[1; 2; 3] = [1; 2; 3]"
+        "true"
+    ]
+
+
+
+//    sprintedReduceSteps <@ [1; 2 + 3; 4] @> =? [
+//        "[1; 2 + 3; 4]"
+//        "[1; 5; 4]"
+//    ]
+
+
 //[<Fact>]
 //let ``Sequential`` () =
 //    sprintedReduceSteps <@ 1; 2; 3; @> =? [
