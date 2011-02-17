@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
+//todo: if input is null, return false / None: see Issue #6
 module Swensen.RegexUtils
 open System.Text.RegularExpressions
 //Regex.CacheSize <- (default is 15)
