@@ -304,16 +304,34 @@ let sprint expr =
             args |> sprintTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | NewArray(_,args) ->
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
-        | NewUnionCase(uci,args)  -> //todo: sprint recursively, so can reduce incrementally
-            if uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>> then
+        //list union cases more complex than normal union cases since need to consider
+        //both cons infix operator and literal list constructions.
+        | NewUnionCase(uci,args) 
+            when uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>> ->
+            let rec isLiteralConstruction = function
+                | NewUnionCase(_, lhs::(NewUnionCase(_, []))::[]) -> true //e.g. _::_::...::[]
+                | NewUnionCase(_, lhs::rhs::[]) ->
+                    match rhs with
+                    | NewUnionCase _ -> isLiteralConstruction rhs //e.g. _::_::...
+                    | _ -> false //e.g. _::_::x
+                | _ -> failwith "unexpected list union case"
+
+            if expr |> isLiteralConstruction then
+                let rec sprintLiteralConstructionArgs = function
+                    | NewUnionCase(_, lhs::(NewUnionCase(_, []))::[]) -> sprint 4 lhs
+                    | NewUnionCase(_, lhs::rhs::[]) ->
+                        sprintf "%s; %s" (sprint 4 lhs) (sprintLiteralConstructionArgs rhs)
+                    | _ -> failwith "unexpected list union case"
+                sprintf "[%s]" (sprintLiteralConstructionArgs expr)
+            else //should do local recursion bellow for better efficiency
                 match args with
                 | [] -> "[]"
                 | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
                 | _ -> failwith "unexpected list union case"
-            else
-                match args with
-                | [] -> uci.Name
-                | _ -> sprintf "%s(%s)" uci.Name (sprintTupledArgs args)
+        | NewUnionCase(uci,args) -> //"typical union case construction"
+            match args with
+            | [] -> uci.Name
+            | _ -> sprintf "%s(%s)" uci.Name (sprintTupledArgs args)
         | NewObject(ci, args) ->
             applyParens 20 (sprintf "%s(%s)" ci.DeclaringType.Name (sprintTupledArgs args))
         | Coerce(target, _) ->
@@ -339,6 +357,7 @@ let sprint expr =
             applyParens 13 (sprintf "%s.%s <- %s" (sprint 22 target) fi.Name (sprint 0 arg))
         | FieldSet(None, fi, arg) ->
             applyParens 13 (sprintf "%s.%s <- %s" fi.DeclaringType.Name fi.Name (sprint 0 arg))
+        //extremely verbose
         | TupleGet(tup, index) ->
             let tupleMatch =
                 Seq.init 

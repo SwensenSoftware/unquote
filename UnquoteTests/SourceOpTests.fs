@@ -266,6 +266,32 @@ let ``tuple get variation 2`` () =
     source <@ let a,b = t in a,b @> =? 
         "let b = (let _,index1 = t in index1) in let a = (let index0,_ = t in index0) in (a, b)"
 
+let namedList = [1; 2; 3]
+let ``new union case lists`` () =
+    source <@ [1; 2; 3] @> =? "[1; 2; 3]"
+    source <@ 5::[1; 2; 3] @> =? "[5; 1; 2; 3]" //this we consider acceptable
+    
+    let x = [1;2;3]
+    source <@ 5::x @> =? "5::[1; 2; 3]" //fair enough
+
+    source <@ 5::namedList @> =? "5::namedList"
+    source <@ 6::5::namedList @> =? "6::5::namedList"
+    source <@ 7::5 + 1::5::namedList @> =? "7::5 + 1::5::namedList"
+    source <@ (7::5 + 1::5::namedList).Length @> =? "(7::5 + 1::5::namedList).Length"
+
+type du =
+    | A
+    | B of int
+    | C of du
+    | D of du * du
+
+[<Fact>]
+let ``new union case typical`` () =
+    source <@ A @> =? "A"
+    source <@ B(3) @> =? "B(3)"
+    source <@ C(B(4)) @> =? "C(B(4))"
+    source <@ D(C(A), D(A, B(2))) @> =? "D(C(A), D(A, B(2)))"
+
 //don't have any ready
 //[<Fact>]
 //let ``set static field`` () =
