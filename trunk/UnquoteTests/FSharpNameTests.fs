@@ -83,3 +83,11 @@ let ``fsharp funcs`` () =
     typeof<Map<int, int -> int * int -> float[]>>.FSharpName =? "Map<int, int -> int * int -> float[]>";
     typeof<(int -> int -> int)[][][]>.FSharpName =? "(int -> int -> int)[][][]";
     typeof<(int -> int) -> int>.FSharpName =? "(int -> int) -> int";
+
+[<Fact>]
+let ``generic type definitions`` () =
+    typedefof<int -> (int * int)>.FSharpName =? "T -> TResult"
+    typedefof<int * int>.FSharpName =? "T1 * T2"
+    typedefof<list<_>>.FSharpName =? "list<T>"
+    typedefof<seq<list<_>>>.FSharpName =? "seq<T>"
+    typedefof<_[]>.FSharpName =? "obj[]"

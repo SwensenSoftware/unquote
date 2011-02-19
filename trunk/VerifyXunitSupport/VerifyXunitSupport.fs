@@ -18,19 +18,21 @@ module Test.Swensen.Unquote.VerifyXunitSupport
 open Swensen.Unquote
 open Xunit
 
-//should fail without exception
-[<Fact>]
-let ``test xunit support, this should fail with clean stack trace`` () =
-    test <@ 22 + 2 = 5 @>
-
-let f = fun  i j k -> i + j + k
-
-let sprintedReduceSteps expr =
-    reduceFully expr |> List.map source
-
-let retNull x = (null:string) + x
+////should fail without exception
+//[<Fact>]
+//let ``test xunit support, this should fail with clean stack trace`` () =
+//    test <@ 22 + 2 = 5 @>
+//
+//let f = fun  i j k -> i + j + k
+//
+//let sprintedReduceSteps expr =
+//    reduceFully expr |> List.map source
+//
+//let retNull x = (null:string) + x
 
 [<EntryPoint>]
 let main args = 
-    sprintedReduceSteps <@ null = retNull "asdf" @>
+    stdout.WriteLine "fuck"
+    ignore <| typedefof<list<_>>.FSharpName
+    ignore <| stdin.ReadLine()
     0

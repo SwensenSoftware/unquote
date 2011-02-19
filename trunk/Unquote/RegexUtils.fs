@@ -19,16 +19,21 @@ module Swensen.RegexUtils
 open System.Text.RegularExpressions
 //Regex.CacheSize <- (default is 15)
 ///Match the pattern using a cached interpreted Regex
-let (|InterpretedMatch|_|) pattern str =
-    let m = Regex.Match(str, pattern) //we can expect 
-    if m.Success then Some [for x in m.Groups -> x]
-    else None
+let (|InterpretedMatch|_|) pattern input =
+    if input = null then None
+    else
+        let m = Regex.Match(input, pattern) //we can expect 
+        if m.Success then Some [for x in m.Groups -> x]
+        else None
     
 ///Match the pattern using a cached compiled Regex
-let (|CompiledMatch|_|) pattern str =
-    let m = Regex.Match(str, pattern, RegexOptions.Compiled) //we can expect 
-    if m.Success then Some [for x in m.Groups -> x]
-    else None
+let (|CompiledMatch|_|) pattern input =
+    if input = null then None
+    else
+        let m = Regex.Match(input, pattern, RegexOptions.Compiled) //we can expect 
+        if m.Success then Some [for x in m.Groups -> x]
+        else None
 
 //http://stackoverflow.com/questions/833180/handy-f-snippets/1477188#1477188
-let (=~) input pattern = System.Text.RegularExpressions.Regex.IsMatch(input, pattern)
+let (=~) input pattern = 
+    if input = null then false else Regex.IsMatch(input, pattern)
