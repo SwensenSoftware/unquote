@@ -53,6 +53,8 @@
     <Reference Include="xunit">
       <HintPath>..\..\..\..\..\..\..\xunit-1.7\xunit.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Unquote\Unquote.fsproj">
       <Name>Unquote</Name>
       <Project>{80f427b5-3aed-4d52-bc86-850a40427ecf}</Project>

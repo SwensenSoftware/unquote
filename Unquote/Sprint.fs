@@ -169,11 +169,12 @@ let sprintSig =
     let rec sprintSig context (t:Type) =
         let applyParens = applyParensForPrecInContext context
         let cleanName, arrSig = 
-            match t.FullName with
+            //if is generic type, then doesn't have FullName, need to use just Name
+            match (if String.IsNullOrEmpty(t.FullName) then t.Name else t.FullName) with
             | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrSigMatch] -> //long name type encoding left of `, array encoding at end
                 cleanNameMatch.Value, arrSigMatch.Value
             | _ -> 
-                failwith "failed to parse type name: " t.FullName
+                failwith ("failed to parse type name: " + t.FullName)
 
         match t.GetGenericArguments() with
         | args when args.Length = 0 -> 
