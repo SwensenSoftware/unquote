@@ -302,6 +302,7 @@ let ``new union case typical`` () =
 type genericDu<'a> =
   | Hello of 'a
   | World of genericDu<'a>
+  | Hello2 of 'a * bool
 
 [<Fact>]
 let ``new union case generic du`` () =

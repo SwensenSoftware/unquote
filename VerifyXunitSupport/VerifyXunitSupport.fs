@@ -30,9 +30,13 @@ let ``test xunit support, this should fail with clean stack trace`` () =
 //
 //let retNull x = (null:string) + x
 
+type genericDu<'a> =
+  | Hello of 'a
+  | World of genericDu<'a>
+
+let h = Hello 3
+
 [<EntryPoint>]
 let main args = 
-    stdout.WriteLine "fuck"
-    ignore <| typedefof<list<_>>.FSharpName
-    ignore <| stdin.ReadLine()
+    <@ match h with Hello 3 -> "yes" | _ -> "no" @> |> source
     0
