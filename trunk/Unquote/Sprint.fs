@@ -218,6 +218,9 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     if genericArgsInferable mi then ""
     else sprintGenericArgs mi
 
+let isListUnionCase (uci:UnionCaseInfo) = 
+    uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
+
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
@@ -283,6 +286,8 @@ let sprint expr =
                 applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
+            //| "Item", [] when need to handle union cases with one non-tuple arg
+            //| "ItemXX", [] when need to handle union cases with one tupled args
             | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name
             | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
             | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
@@ -307,7 +312,7 @@ let sprint expr =
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.
-        | NewUnionCase(uci,args) when uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>> ->
+        | NewUnionCase(uci,args) when uci |> isListUnionCase ->
             if args = [] then
                 "[]"
             else
@@ -380,9 +385,16 @@ let sprint expr =
                 (tupleMatch |> String.concat ",")
                 (sprint 0 tup)
                 (sprintf "index%i" index)
-        //too funky to even be worth while
-//        | UnionCaseTest(expr, uci) ->
-//            sprintf "%s = %s.%s" (sprint 0 expr) (sprintSig uci.DeclaringType) uci.Name
+        | UnionCaseTest(target, uci) ->
+            let ucMatch =
+                if uci |> isListUnionCase then
+                    if uci.Name = "Empty" then "[]"
+                    else "_::_" //"Cons"
+                else
+                    sprintf "%s(%s)" uci.Name ((Array.create (uci.GetFields().Length) "_") |> String.concat ",")
+
+            //using same precedence as if, 7, for match xxx with
+            applyParens 7 (sprintf "match %s with | %s -> true | _ -> false" (sprint 7 target) ucMatch)
         | _ -> 
             sprintf "%A" (expr)
     and sprintArgs prec delimiter exprs =
@@ -395,6 +407,10 @@ let sprint expr =
         sprintArgs 4 "; "
     
     sprint 0 expr
+
+open Microsoft.FSharp.Core
+open Microsoft.FSharp.Reflection
+
 //-----precedence-----
 //note: http://stackoverflow.com/questions/4859151/help-me-understand-lambda-expression-precedence
 //spec: http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.html
@@ -541,3 +557,11 @@ let sprint expr =
 .. .. op_RangeStep
 
 *)
+
+//let inline (?) (obj: 'a) (propName: string) : 'b =
+//    let propInfo = typeof<'a>.GetProperty(propName)
+//    propInfo.GetValue(obj, null) :?> 'b
+//
+//let inline (?<-) (obj: 'a) (propName: string) (value: 'b) =
+//    let propInfo = typeof<'a>.GetProperty(propName)
+//    propInfo.SetValue(obj, value, null)
