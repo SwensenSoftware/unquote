@@ -282,6 +282,10 @@ let ``new union case lists`` () =
 
     source <@ (1::3::[])::namedListOfList @> =? "[1; 3]::namedListOfList"
 
+[<Fact>]
+let ``new union case empty list`` () =
+    source <@ []:list<int> @> =? "[]"
+
 type du =
     | A
     | B of int

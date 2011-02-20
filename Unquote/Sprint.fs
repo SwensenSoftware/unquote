@@ -307,37 +307,39 @@ let sprint expr =
             args |> sprintSequencedArgs |> sprintf "[|%s|]"
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.
-        | NewUnionCase(uci,args) 
-            when uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>> ->
-            let rec isLiteralConstruction = function
-                | NewUnionCase(_, lhs::(NewUnionCase(_, []))::[]) -> true //e.g. _::_::...::[]
-                | NewUnionCase(_, lhs::rhs::[]) ->
-                    match rhs with
-                    | NewUnionCase _ -> isLiteralConstruction rhs //e.g. _::_::...
-                    | _ -> false //e.g. _::_::x
-                | _ -> failwith "unexpected list union case"
-
-            if expr |> isLiteralConstruction then
-                let rec sprintLiteralConstructionArgs = function
-                    | NewUnionCase(_, lhs::(NewUnionCase(_, []))::[]) -> sprint 4 lhs
+        | NewUnionCase(uci,args) when uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>> ->
+            if args = [] then
+                "[]"
+            else
+                let rec isLiteralConstruction = function
+                    | NewUnionCase(_, lhs::(NewUnionCase(_, []))::[]) -> true //e.g. _::_::...::[]
                     | NewUnionCase(_, lhs::rhs::[]) ->
-                        sprintf "%s; %s" (sprint 4 lhs) (sprintLiteralConstructionArgs rhs)
+                        match rhs with
+                        | NewUnionCase _ -> isLiteralConstruction rhs //e.g. _::_::...
+                        | _ -> false //e.g. _::_::x
                     | _ -> failwith "unexpected list union case"
-                sprintf "[%s]" (sprintLiteralConstructionArgs expr)
-            else 
-                //local sprint is optimization so that isLiteralConstruction is not called for
-                //every cons recursive print
-                let rec sprint context expr =
-                    let applyParens = applyParensForPrecInContext context
-                    match expr with
-                    | NewUnionCase(_,args) ->
-                        match args with
-                        | [] -> "[]"
-                        | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
-                        | _ -> failwith "unexpected list union case"
-                    | _ -> failwith "local list cons case not expected"
 
-                sprint 15 expr
+                if expr |> isLiteralConstruction then
+                    let rec sprintLiteralConstructionArgs = function
+                        | NewUnionCase(_, lhs::(NewUnionCase(_, []))::[]) -> sprint 4 lhs
+                        | NewUnionCase(_, lhs::rhs::[]) ->
+                            sprintf "%s; %s" (sprint 4 lhs) (sprintLiteralConstructionArgs rhs)
+                        | _ -> failwith "unexpected list union case"
+                    sprintf "[%s]" (sprintLiteralConstructionArgs expr)
+                else 
+                    //local sprint is optimization so that isLiteralConstruction is not called for
+                    //every cons recursive print
+                    let rec sprint context expr =
+                        let applyParens = applyParensForPrecInContext context
+                        match expr with
+                        | NewUnionCase(_,args) ->
+                            match args with
+                            | [] -> "[]"
+                            | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
+                            | _ -> failwith "unexpected list union case"
+                        | _ -> failwith "local list cons case not expected"
+
+                    sprint 15 expr
         | NewUnionCase(uci,args) -> //"typical union case construction"
             match args with
             | [] -> uci.Name
