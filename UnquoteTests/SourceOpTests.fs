@@ -299,6 +299,15 @@ let ``new union case typical`` () =
     source <@ C(B(4)) @> =? "C(B(4))"
     source <@ D(C(A), D(A, B(2))) @> =? "D(C(A), D(A, B(2)))"
 
+type genericDu<'a> =
+  | Hello of 'a
+  | World of genericDu<'a>
+
+[<Fact>]
+let ``new union case generic du`` () =
+    source <@ Hello 3 @> =? "Hello(3)"
+    source <@ World(Hello(3)) @> =? "World(Hello(3))"
+
 //don't have any ready
 //[<Fact>]
 //let ``set static field`` () =
