@@ -91,3 +91,11 @@ let ``generic type definitions`` () =
     typedefof<list<_>>.FSharpName =? "list<T>"
     typedefof<seq<list<_>>>.FSharpName =? "seq<T>"
     typedefof<_[]>.FSharpName =? "obj[]"
+
+module Module = 
+    type Hello(x:int) = 
+        let x = x
+
+[<Fact>] //issue #10 
+let ``types in modules`` () =
+    typeof<Module.Hello>.FSharpName =? "Hello"

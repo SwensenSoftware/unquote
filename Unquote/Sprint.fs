@@ -163,7 +163,7 @@ let sprintSig =
         | "Microsoft.FSharp.Collections.FSharpList" -> "list"
         | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
         | "System.Collections.Generic.IEnumerable"  -> "seq"
-        | CompiledMatch @"\.?([^\.]*)$" [_;nameMatch] -> nameMatch.Value //short name
+        | CompiledMatch @"[\.\+]?([^\.\+]*)$" [_;nameMatch] -> nameMatch.Value //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
     let rec sprintSig context (t:Type) =
@@ -286,9 +286,17 @@ let sprint expr =
                 applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
-            //| "Item", [] when need to handle union cases with one non-tuple arg
-            //| "ItemXX", [] when need to handle union cases with one tupled args
-            | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name
+            | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
+                //for UnionCaseTypeTests, require a op_Dynamic implementation
+                sprintf "(%s?%s : %s)" (sprint 22 target) pi.Name (pi.PropertyType |> sprintSig)
+//            | CompiledMatch(@"^Item(\d*)?$") [_;posMatch], _ when pi.DeclaringType |> FSharpType.IsUnion ->
+//                if posMatch.Success then
+//                    FSharpType.getun
+//                    applyParens 7 (sprintf "match %s with | %s -> true | _ -> false" (sprint 7 target) ucMatch)
+//                    "(match sprint 22 "
+//                else
+//                    ""
+            | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name //also includes "Item" with zero args
             | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
             | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
         | PropertyGet(None, pi, _) -> //static get (note: can't accept params)
@@ -557,11 +565,3 @@ open Microsoft.FSharp.Reflection
 .. .. op_RangeStep
 
 *)
-
-//let inline (?) (obj: 'a) (propName: string) : 'b =
-//    let propInfo = typeof<'a>.GetProperty(propName)
-//    propInfo.GetValue(obj, null) :?> 'b
-//
-//let inline (?<-) (obj: 'a) (propName: string) (value: 'b) =
-//    let propInfo = typeof<'a>.GetProperty(propName)
-//    propInfo.SetValue(obj, value, null)

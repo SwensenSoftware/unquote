@@ -300,14 +300,43 @@ let ``new union case typical`` () =
     source <@ D(C(A), D(A, B(2))) @> =? "D(C(A), D(A, B(2)))"
 
 type genericDu<'a> =
-  | Hello of 'a
-  | World of genericDu<'a>
-  | Hello2 of 'a * bool
+    | Hello of 'a
+    | World of genericDu<'a>
+    | Hello2 of 'a * bool
 
 [<Fact>]
 let ``new union case generic du`` () =
     source <@ Hello 3 @> =? "Hello(3)"
     source <@ World(Hello(3)) @> =? "World(Hello(3))"
+
+//issue #3 -- UnionCaseTests
+//these tests are not as thorough as would like: can't verify op_Dynamic works right
+[<Fact>] 
+let ``union case test list not requiring op_Dynamic`` () = //this test is a little fragile (see sf use; using regex would be too much), but not too fragile
+    let sf = System.Diagnostics.StackFrame(true)
+    source <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (MatchFailureException(""{0}"", {1}, {2}))) else raise (MatchFailureException(""{0}"", {1}, {2}))) else raise (MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 1, 18)
+
+let h = World (Hello2(Hello 3, true))
+[<Fact>] //issue #3
+let ``union case test requiring op_Dynamic`` () =
+    source <@ match h with | World (Hello2(Hello 3, true)) -> true | _ -> false @> =? @"(match h with | World(_) -> true | _ -> false) && ((match (h?Item : genericDu<genericDu<int>>) with | Hello2(_,_) -> true | _ -> false) && ((match ((h?Item : genericDu<genericDu<int>>)?Item1 : genericDu<int>) with | Hello(_) -> true | _ -> false) && ((((h?Item : genericDu<genericDu<int>>)?Item1 : genericDu<int>)?Item : int) = 3 && (((h?Item : genericDu<genericDu<int>>)?Item2 : bool) && true))))"
+
+open Swensen.RegexUtils
+[<Fact(Skip="Active patterns too much to include in issue #3 for now")>] //issue #3
+let ``union case test active pattern`` () =
+    source 
+        <@  
+            match "hello world" with
+            | InterpretedMatch @"llo" _ -> true
+            | _ -> false
+        @> |> ignore
+
+let (?) (target: obj) (lookup: string): 'TResult =
+     failwith "dummy"
+  
+[<Fact>]
+let ``op_Dynamic is not treated as binary infix op`` () =
+    source <@ let x : string = "asdf"?Substring(0,2) in x @> =? @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun tupledArg -> let arg20 = (let index0,_ = tupledArg in index0) in let arg21 = (let _,index1 = tupledArg in index1) in clo2 (arg20, arg21)) (0, 2) in x"
 
 //don't have any ready
 //[<Fact>]
