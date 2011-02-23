@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-//todo: if input is null, return false / None: see Issue #6
+//todo: consider returning list of match groups, rather than just groups
 module Swensen.RegexUtils
 open System.Text.RegularExpressions
 //Regex.CacheSize <- (default is 15)
@@ -36,4 +36,4 @@ let (|CompiledMatch|_|) pattern input =
 
 //http://stackoverflow.com/questions/833180/handy-f-snippets/1477188#1477188
 let (=~) input pattern = 
-    if input = null then false else Regex.IsMatch(input, pattern)
+    input <> null && Regex.IsMatch(input, pattern)

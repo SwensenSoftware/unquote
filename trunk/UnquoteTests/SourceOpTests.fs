@@ -359,4 +359,3 @@ let ``set instance field on constructed object`` () =
     source <@ Foo().X <- 5 @> =? "Foo().X <- 5"
     source <@ (Foo().Add(Foo())).X <- 5 @> =? "(Foo().Add(Foo())).X <- 5"
     source <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =? "\"abcdefg\".Substring(0, 5).Substring(0, 2)"
-
