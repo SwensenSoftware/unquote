@@ -29,6 +29,7 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
+open Swensen.Printf
 open Swensen.Unquote.ExprExt
 
 ///Convert given expression to it's source code representation. Sub-expressions which are
@@ -43,15 +44,20 @@ let reduceFully (expr:Expr) = expr.ReduceFully()
 ///Determine whether the given expression is reduced.
 let isReduced (expr:Expr) = expr.IsReduced()
 ///Print the newline concated source code reduce steps of the given expression to stdout.
-let unquote (expr:Expr) = expr.Unquote()
+let unquote expr =
+    expr
+    |> Reduce.reduceFully
+    |> List.map Sprint.sprint 
+    |> String.concat "\n" //don't use Environment.NewLine since nprintfn will replace \n with Environment.NewLine already
+    |> nprintfn "\n%s\n"
 
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
 module Private =
     let private fsiTestFailed (expr:Expr) additionalInfo =
-        printfn "\nTest failed:\n" 
+        nprintfn "\nTest failed:\n" 
         if additionalInfo |> String.IsNullOrWhiteSpace |> not then
-             printfn "%s\n" additionalInfo
+             nprintfn "%s\n" additionalInfo
 
         for expr in expr.ReduceFully() do
             printfn "%s" (expr.ToSource())
@@ -97,7 +103,7 @@ module Private =
 
             fun (expr:Expr) additionalInfo ->
                 let msg = 
-                    sprintf "\n%s\n%s\n"
+                    nsprintf "\n%s\n%s\n"
                         (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
                         (expr |> reduceFully |> List.map source |> String.concat "\n")    
                 outputNonFsiTestFailedMsg msg

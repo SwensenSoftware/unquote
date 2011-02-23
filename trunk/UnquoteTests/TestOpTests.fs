@@ -21,7 +21,7 @@ open Swensen.Unquote
 
 [<Fact>]
 let ``expect exception`` () =
-    raises<System.NullReferenceException> <@ (null:string).Length @>
+    raises<System.NullReferenceException> <@ ("hasdf":string).Length @>
 
 [<Fact>]
 let ``expect base exception`` () =
