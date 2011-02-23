@@ -416,9 +416,6 @@ let sprint expr =
     
     sprint 0 expr
 
-open Microsoft.FSharp.Core
-open Microsoft.FSharp.Reflection
-
 //-----precedence-----
 //note: http://stackoverflow.com/questions/4859151/help-me-understand-lambda-expression-precedence
 //spec: http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.html

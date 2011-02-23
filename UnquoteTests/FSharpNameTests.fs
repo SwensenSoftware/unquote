@@ -86,7 +86,7 @@ let ``fsharp funcs`` () =
 
 [<Fact>]
 let ``generic type definitions`` () =
-    typedefof<int -> (int * int)>.FSharpName =? "T -> TResul"
+    typedefof<int -> (int * int)>.FSharpName =? "T -> TResult"
     typedefof<int * int>.FSharpName =? "T1 * T2"
     typedefof<list<_>>.FSharpName =? "list<T>"
     typedefof<seq<list<_>>>.FSharpName =? "seq<T>"
