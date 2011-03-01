@@ -399,7 +399,11 @@ let sprint expr =
                     if uci.Name = "Empty" then "[]"
                     else "_::_" //"Cons"
                 else
-                    sprintf "%s(%s)" uci.Name ((Array.create (uci.GetFields().Length) "_") |> String.concat ",")
+                    let len = uci.GetFields().Length
+                    if len = 0 then
+                        sprintf "%s" uci.Name
+                    else
+                        sprintf "%s(%s)" uci.Name ("_" |> Array.create len |> String.concat ",")
 
             //using same precedence as if, 7, for match xxx with
             applyParens 7 (sprintf "match %s with | %s -> true | _ -> false" (sprint 7 target) ucMatch)
