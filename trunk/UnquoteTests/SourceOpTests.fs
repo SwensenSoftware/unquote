@@ -321,6 +321,10 @@ let h = World (Hello2(Hello 3, true))
 let ``union case test requiring op_Dynamic`` () =
     source <@ match h with | World (Hello2(Hello 3, true)) -> true | _ -> false @> =? @"(match h with | World(_) -> true | _ -> false) && ((match (h?Item : genericDu<genericDu<int>>) with | Hello2(_,_) -> true | _ -> false) && ((match ((h?Item : genericDu<genericDu<int>>)?Item1 : genericDu<int>) with | Hello(_) -> true | _ -> false) && ((((h?Item : genericDu<genericDu<int>>)?Item1 : genericDu<int>)?Item : int) = 3 && (((h?Item : genericDu<genericDu<int>>)?Item2 : bool) && true))))"
 
+[<Fact>] //issue #14
+let ``union case test zero arg union`` () =
+    source <@ match None with | None -> true | _ -> false @> =? "let matchValue = None in (match matchValue with | None -> true | _ -> false) && true"
+
 open Swensen.RegexUtils
 [<Fact(Skip="Active patterns too much to include in issue #3 for now")>] //issue #3
 let ``union case test active pattern`` () =
