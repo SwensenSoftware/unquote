@@ -24,6 +24,8 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
+open Swensen.Printf
+
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
     let evaled = expr.EvalUntyped() 
@@ -59,14 +61,14 @@ let rec reduce (expr:Expr) =
                 rhs |> isReduced
             | Application(lhs,rhs) ->
                 rhs |> isReduced && lhs |> allArgsReduced
-            | _ -> failwith (sprintf "Expected Application((Lambda _ | Value _), rhs) or Application(lhs,rhs), got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
+            | _ -> failwith (nsprintf "Expected Application((Lambda _ | Value _), rhs) or Application(lhs,rhs), got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
             
         let rec rebuild subexpr =
             match subexpr with
             | Application(lhs, rhs) -> 
                 Expr.Application(rebuild lhs, reduce rhs)
             | Lambda _ | Value _ -> subexpr //local lambdas are represented as Values
-            | _ -> failwith (sprintf "Expected Application(lhs, rhs) or Lambda _, got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
+            | _ -> failwith (nsprintf "Expected Application(lhs, rhs) or Lambda _, got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
 
         if allArgsReduced expr then evalValue expr
         else rebuild expr
