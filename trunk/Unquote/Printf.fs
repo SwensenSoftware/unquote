@@ -17,32 +17,47 @@ limitations under the License.
 nxxxf functions originally based on Mauricio Scheffer's answer at http://stackoverflow.com/questions/5087029/newlines-and-formatters/5087218#5087218
 *)
 
-module Swensen.Printf //should make as extension to Microsoft.FSharp.Core.Printf?
+module internal Swensen.Printf //should make as extension to Microsoft.FSharp.Core.Printf?
 open System
 open System.Text.RegularExpressions
 
-//use regex to ensure don't replace such "\r\n" -> "\r\n\n"
-let private r = Regex(@"(?<!\r)\n", RegexOptions.Compiled)
+///Matches "\n", but not "\r\n"
+let private lfButNotCrLf = Regex(@"(?<!\r)\n", RegexOptions.Compiled)
 
+///Normalize newlines to Environment.NewLine: if Environment.NewLine = "\n", then do nothing.
+///If Environment.NewLine = "\r\n", then replace all occurences of "\n", but not "\r\n", with "\r\n".
+///This allows "\n" to be used as an environment safe newline character, which may be mixed 
+///with uses of Environment.NewLine.
 let nsprintf fmt = 
     //Environment.NewLine is a constant, either \r\n or \n
     if Environment.NewLine = "\n" then
         sprintf fmt
     else
-        Printf.ksprintf (fun s -> r.Replace(s, "\r\n") |> sprintf "%s") fmt
+        Printf.ksprintf (fun s -> lfButNotCrLf.Replace(s, "\r\n") |> sprintf "%s") fmt
 
-let private nprintfBuilder fmt newlineOrEmpty = 
+///Normalize newlines to stdout.NewLine: if stdout.NewLine = "\n", then do nothing.
+///Otherwise replace all occurences of "\n", but not "\r\n", with "\r\n" and then replace
+///all occurences of "\r\n" with stdout.NewLine.
+let private nprintfBuilder fmt appendLf = 
     Printf.kprintf 
         (fun s -> 
-            let s = s + newlineOrEmpty
-            //Out.NewLine can change during runtime, should be \n or \r\n, default is \r\n
-            if System.Console.Out.NewLine = "\n" then
+            let s = if appendLf then s + "\n" else s
+            //Out.NewLine can change during runtime, usually same as Environment.NewLine, but can be any string
+            if stdout.NewLine = "\n" then
                 s |> printf "%s"
             else
-                r.Replace(s, "\r\n") |> printf "%s")
+                let s = lfButNotCrLf.Replace(s, "\r\n")
+                if System.Console.Out.NewLine <> "\r\n" then //NewLine can be something else
+                     s.Replace("\r\n", stdout.NewLine) |> printf "%s"
+                else
+                    s |> printf "%s")
         fmt
 
-let nprintf fmt = nprintfBuilder fmt ""
-//haven't been able to determine example how printfn represents newlines.
-let nprintfn fmt = nprintfBuilder fmt "\n"
+let nprintf fmt = nprintfBuilder fmt false
 
+let nprintfn fmt = nprintfBuilder fmt true
+
+//N.B.: FSI appears to accept either "\r\n", "\r", or "\n" as newlines (so "\r\n" is treated as 
+//single newline). 
+
+//N.B.: printf prints to stdout
