@@ -28,8 +28,7 @@ open Swensen.Printf
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
-    let evaled = expr.EvalUntyped() 
-    Expr.Value(evaled, expr.Type)
+    Expr.Value(expr.EvalUntyped(), expr.Type)
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
