@@ -7,13 +7,13 @@
 
 Reference appropriate binaries
 
-  *  Reference Unquote.dll, and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project)
+  *  Reference Unquote.dll, and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project).
   * To use with NUnit, add static reference to nunit.framework in test project (automatically detected by Unquote)
   * To use with xUnit, add static reference to xunit.dll in test project (automatically detected by Unquote)
 
 == Using ==
 
-Open `Swensen.Unquote` within FSI session or top of unit test file, this will automatically open `Swensen.Unquote.Operators`. The `test` operator and `xx?` series binary infix operators can be used within FSI sessions or within supported unit testing framework test methods to perform boolean assertions (if INTERACTIVE compiler symbol defined, then output to FSI; else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods; else throw Exception).
+Open `Swensen.Unquote` within FSI session or top of unit test file, this will automatically open `Swensen.Unquote.Operators`. The `test` and `raises` operators and the `xx?` series binary infix operators can be used within FSI sessions or within supported unit testing framework test methods to perform boolean assertions (if INTERACTIVE compiler symbol defined, then output to FSI; else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods; else throw Exception).
 
   * `val source : Quotations.Expr -> string`
 {{{
