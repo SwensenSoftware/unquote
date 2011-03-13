@@ -1,0 +1,112 @@
+#summary Quick steps for installing and using Unquote.
+#labels Featured
+
+= Getting Started =
+
+== Installing == 
+
+Reference appropriate binaries
+
+  *  Reference Unquote.dll, and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project)
+  * To use with NUnit, add static reference to nunit.framework in test project (automatically detected by Unquote)
+  * To use with xUnit, add static reference to xunit.dll in test project (automatically detected by Unquote)
+
+== Using ==
+
+Open `Swensen.Unquote` within FSI session or top of unit test file, this will automatically open `Swensen.Unquote.Operators`. The `test` operator and `xx?` series binary infix operators can be used within FSI sessions or within supported unit testing framework test methods to perform boolean assertions (if INTERACTIVE compiler symbol defined, then output to FSI; else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods; else throw Exception).
+
+  * `val source : Quotations.Expr -> string`
+{{{
+> source <@ (1+2)/3 @>;;
+val it : string = "(1 + 2) / 3"
+}}}
+
+  * `val reduce : Quotations.Expr -> Quotations.Expr`
+{{{
+> <@ (1+2)/3 @> |> reduce |> source;;
+val it : string = "3 / 3"
+}}}
+
+  * `val reduceFully : Quotations.Expr -> Quotations.Expr list`
+{{{
+> <@ (1+2)/3 @> |> reduceFully |> List.map source;;
+val it : string list = ["(1 + 2) / 3"; "3 / 3"; "1"]
+}}}
+
+  * `val isReduced : Quotations.Expr -> bool`
+{{{
+> <@ (1+2)/3 @> |> isReduced;;
+val it : bool = false
+> <@ 1 @> |> isReduced;;
+val it : bool = true
+}}}
+
+  * `val unquote : Quotations.Expr -> unit`
+{{{
+> unquote <@ (1+2)/3 @>;;
+
+(1 + 2) / 3
+3 / 3
+1
+
+val it : unit = ()
+}}}
+
+  * `val inline test : Quotations.Expr<bool> -> unit`
+{{{
+> test <@ (1+2)/3 = 1 @>;;
+val it : unit = ()
+> test <@ (1+2)/3 = 2 @>;;
+
+Test failed:
+	
+(1 + 2) / 3 = 2
+3 / 3 = 2
+1 = 2
+false
+
+val it : unit = ()
+}}}
+
+  * `val inline ( =? ) : 'a -> 'a -> unit when 'a : equality`
+{{{
+> [1;2;3;4] =? [4;3;2;1];;
+
+Test failed:
+
+[1; 2; 3; 4] = [4; 3; 2; 1]
+false
+
+val it : unit = ()
+}}}
+  * `val inline ( <? ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( >? ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( <=? ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( >=? ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( <>? ) : 'a -> 'a -> unit when 'a : equality`
+  * `val inline raises<'a when 'a :> exn> : Quotations.Expr -> unit`
+{{{
+> raises<exn> <@ (null:string).Length @>;;
+val it : unit = ()
+> raises<NullReferenceException> <@ (null:string).Length @>;;
+val it : unit = ()
+> raises<System.ArgumentException> <@ (null:string).Length @>;;
+
+Test failed:
+
+Expected ArgumentException but got NullReferenceException
+
+null.Length
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+val it : unit = ()
+> raises<exn> <@ 3 @>;;
+
+Test failed:
+
+Expected Exception but got nothing
+
+3
+
+val it : unit = ()
+}}}
