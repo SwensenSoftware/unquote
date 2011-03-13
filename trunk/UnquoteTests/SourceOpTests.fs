@@ -262,19 +262,19 @@ let ``get static field`` () =
 [<Fact>]
 let ``TupleGet variation 1`` () =
     source <@ let a,b = (1,2) in a,b @> =? 
-        "let patternInput = (1, 2) in let b = (let _,index1 = patternInput in index1) in let a = (let index0,_ = patternInput in index0) in (a, b)"
+        "let patternInput = (1, 2) in let b = (let _,item2 = patternInput in item2) in let a = (let item1,_ = patternInput in item1) in (a, b)"
 
 let t = (1,2)
 [<Fact>]
 let ``TupleGet variation 2`` () =
     source <@ let a,b = t in a,b @> =? 
-        "let b = (let _,index1 = t in index1) in let a = (let index0,_ = t in index0) in (a, b)"
+        "let b = (let _,item2 = t in item2) in let a = (let item1,_ = t in item1) in (a, b)"
 
 let longTuple = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)
 [<Fact>] //issue 19
 let ``TupleGet with greater than length 8 tuple`` () =
     source <@ let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,a,_,_ = longTuple in a @> =?
-        "let a = (let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,index15,_,_ = longTuple in index15) in a"
+        "let a = (let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,item16,_,_ = longTuple in item16) in a"
 
 let namedList = [1; 2; 3]
 let namedListOfList = [[1]]
@@ -350,7 +350,7 @@ let (?) (target: obj) (lookup: string): 'TResult =
   
 [<Fact>]
 let ``op_Dynamic is not treated as binary infix op`` () =
-    source <@ let x : string = "asdf"?Substring(0,2) in x @> =? @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun tupledArg -> let arg20 = (let index0,_ = tupledArg in index0) in let arg21 = (let _,index1 = tupledArg in index1) in clo2 (arg20, arg21)) (0, 2) in x"
+    source <@ let x : string = "asdf"?Substring(0,2) in x @> =? @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun tupledArg -> let arg20 = (let item1,_ = tupledArg in item1) in let arg21 = (let _,item2 = tupledArg in item2) in clo2 (arg20, arg21)) (0, 2) in x"
 
 //don't have any ready
 //[<Fact>]

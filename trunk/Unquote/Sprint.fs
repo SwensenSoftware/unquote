@@ -387,12 +387,12 @@ let sprint expr =
             let tupleMatch =
                 Seq.init 
                     (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length) 
-                    (fun i -> if i=index then (sprintf "index%i" index) else "_") 
+                    (fun i -> if i=index then (sprintf "item%i" (index+1)) else "_") 
 
             sprintf "(let %s = %s in %s)"
                 (tupleMatch |> String.concat ",")
                 (sprint 0 tup)
-                (sprintf "index%i" index)
+                (sprintf "item%i" (index+1))
         | UnionCaseTest(target, uci) ->
             let ucMatch =
                 if uci |> isListUnionCase then
