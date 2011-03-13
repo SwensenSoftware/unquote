@@ -272,6 +272,7 @@ let sprint expr =
                 let methodName = sourceName mi
                 //functions which take explicit type arguments but only single unit normal arg look like typeof<int>
                 //functions which do not take explit type arguments but only single unit normal arg look like doit()
+                //IS THE ABOVE ACTUALLY TRUE, OR JUST A SPECIAL CASE OF TYPEOF?
                 let sprintedArgs = 
                     if genericArgsInferable mi then
                         if args.Length = 0 then "()" else " " + sprintCurriedArgs args
@@ -309,11 +310,10 @@ let sprint expr =
         | FieldGet(None, fi) ->
             sprintf "%s.%s" fi.DeclaringType.Name fi.Name
         | Unit -> "()" //must come before Value pattern
-        | Value(obj, _) ->
-            match obj with
+        | Value(o, _) ->
+            match o with
             | null -> "null"
-//            | :? Exception as ex -> sprintf "%s(%s)" (ex.GetType().Name) ex.Message
-            | _ -> sprintf "%A" obj
+            | _ -> sprintf "%A" o
         | NewTuple(args) -> //tuples have at least two elements
             args |> sprintTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | NewArray(_,args) ->
@@ -358,7 +358,7 @@ let sprint expr =
             | [] -> uci.Name
             | _ -> sprintf "%s(%s)" uci.Name (sprintTupledArgs args)
         | NewObject(ci, args) ->
-            applyParens 20 (sprintf "%s(%s)" ci.DeclaringType.Name (sprintTupledArgs args))
+            applyParens 20 (sprintf "new %s(%s)" (sprintSig ci.DeclaringType) (sprintTupledArgs args))
         | Coerce(target, _) ->
             //don't even "mention" anything about the coersion
             sprint context target

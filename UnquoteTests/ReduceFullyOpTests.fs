@@ -116,8 +116,8 @@ let ``new array with arg sub expressions`` () =
 open System
 [<Fact>]
 let ``new object is not reduced`` () =
-    sprintedReduceSteps <@ String('c', 3) + "hello" @> =? [
-        "String('c', 3) + \"hello\""
+    sprintedReduceSteps <@ new string('c', 3) + "hello" @> =? [
+        "new string('c', 3) + \"hello\""
         "\"ccc\" + \"hello\""
         "\"ccchello\""
     ]
