@@ -179,16 +179,20 @@ let ``and also, or else precedence`` () =
 open System
 [<Fact>]
 let ``new object`` () =
-    source <@ String('c', 3) @> =? "String('c', 3)"
+    source <@ new string('c', 3) @> =? "new string('c', 3)"
+
+[<Fact>] //issue #18
+let ``generic NewObject`` () =
+    source <@ new System.Collections.Generic.Dictionary<string,int>() @> =? "new Dictionary<string, int>()"
 
 let addStrings (a:string) (b:string) = a + b;;
 [<Fact>]
 let ``new object precedence within function application`` () =
-    source <@ addStrings (String('c', 3)) "hello" @> =? "addStrings (String('c', 3)) \"hello\""
+    source <@ addStrings (new string('c', 3)) "hello" @> =? "addStrings (new string('c', 3)) \"hello\""
 
 [<Fact>]
 let ``new object precedence + op expr`` () =
-    source <@ String('c', 3) + "hello" @> =? "String('c', 3) + \"hello\""
+    source <@ new string('c', 3) + "hello" @> =? "new string('c', 3) + \"hello\""
 
 
 let boxed = box x
@@ -314,7 +318,7 @@ let ``new union case generic du`` () =
 [<Fact>] 
 let ``union case test list not requiring op_Dynamic`` () = //this test is a little fragile (see sf use; using regex would be too much), but not too fragile
     let sf = System.Diagnostics.StackFrame(true)
-    source <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (MatchFailureException(""{0}"", {1}, {2}))) else raise (MatchFailureException(""{0}"", {1}, {2}))) else raise (MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 1, 18)
+    source <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 1, 18)
 
 let h = World (Hello2(Hello 3, true))
 [<Fact>] //issue #3
