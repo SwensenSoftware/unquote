@@ -352,6 +352,15 @@ let (?) (target: obj) (lookup: string): 'TResult =
 let ``op_Dynamic is not treated as binary infix op`` () =
     source <@ let x : string = "asdf"?Substring(0,2) in x @> =? @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun tupledArg -> let arg20 = (let item1,_ = tupledArg in item1) in let arg21 = (let _,item2 = tupledArg in item2) in clo2 (arg20, arg21)) (0, 2) in x"
 
+
+let g<'a,'b> = typeof<'a>.Name, typeof<'b>.Name
+let g'<'a,'b>() = typeof<'a>.Name, typeof<'b>.Name
+[<Fact>]
+let ``Call distinguishes between generic value Call and unit function Call`` () =    
+    source <@ g<int, string> @> =? "g<int, string>"
+    source <@ g'<int, string>() @> =? "g'<int, string>()"
+
+
 //don't have any ready
 //[<Fact>]
 //let ``set static field`` () =

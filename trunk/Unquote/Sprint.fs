@@ -221,6 +221,19 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 let isListUnionCase (uci:UnionCaseInfo) = 
     uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
 
+open Swensen.Utils
+let isGenericValue =
+    memoize //performance testing shows about 10% performance increase in SourceOpTests.``Call distinguishes between generic value Call and unit function Call`` using memoization 
+        (fun (mi:MemberInfo) ->
+            try
+                let mOrV =
+                    FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
+                    |> Seq.find (fun mOrV -> mOrV.CompiledName = mi.Name)
+
+                not mOrV.Type.IsFunction
+            with
+            | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
+
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
@@ -270,14 +283,19 @@ let sprint expr =
         | Call(None, mi, args) -> //static call
             if FSharpType.IsModule mi.DeclaringType then
                 let methodName = sourceName mi
-                //functions which take explicit type arguments but only single unit normal arg look like typeof<int>
+                                
+                //functions which take explicit type arguments but only single unit normal arg look like xxx<int> or xxx<int>() depending on F# metadata
                 //functions which do not take explit type arguments but only single unit normal arg look like doit()
-                //IS THE ABOVE ACTUALLY TRUE, OR JUST A SPECIAL CASE OF TYPEOF?
                 let sprintedArgs = 
                     if genericArgsInferable mi then
                         if args.Length = 0 then "()" else " " + sprintCurriedArgs args
                     else
-                        sprintf "%s%s" (sprintGenericArgs mi) (if args.Length = 0 then "" else " " + sprintCurriedArgs args)
+                        sprintf "%s%s" 
+                            (sprintGenericArgs mi) 
+                            (if args.Length = 0 then 
+                                if isGenericValue(mi) then ""
+                                else "()"
+                             else " " + sprintCurriedArgs args)
                 
                 if isOpenModule mi.DeclaringType then 
                     applyParens 20 (sprintf "%s%s" methodName sprintedArgs)
@@ -290,13 +308,6 @@ let sprint expr =
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
                 //for UnionCaseTypeTests, require a op_Dynamic implementation
                 sprintf "(%s?%s : %s)" (sprint 22 target) pi.Name (pi.PropertyType |> sprintSig)
-//            | CompiledMatch(@"^Item(\d*)?$") [_;posMatch], _ when pi.DeclaringType |> FSharpType.IsUnion ->
-//                if posMatch.Success then
-//                    FSharpType.getun
-//                    applyParens 7 (sprintf "match %s with | %s -> true | _ -> false" (sprint 7 target) ucMatch)
-//                    "(match sprint 22 "
-//                else
-//                    ""
             | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name //also includes "Item" with zero args
             | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
             | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
