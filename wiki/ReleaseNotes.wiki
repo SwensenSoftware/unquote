@@ -12,7 +12,6 @@ Several bug fixes and feature enhancements.
   * Issue 4: Reduction Feature Request: support NewUnionCase subexpressions
   * Issue 6: Type.FSharpName bug: can't handle generic type definiations
   * Issue 8: Decompiler Bug: empty list error
-  * Issue 8: Decompiler Bug: empty list error
   * Issue 10: Type.FSharpName bug: can't handle types in modules
   * Issue 12: xunit.gui.exe Output: bad newlines
 
