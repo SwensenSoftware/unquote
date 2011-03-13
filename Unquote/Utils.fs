@@ -14,12 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-module Test.Swensen.Unquote.VerifyNonFrameworkSupport
-open Swensen.Unquote
+///General utility functions
+module Swensen.Utils
 
+//based on http://stackoverflow.com/questions/833180/handy-f-snippets/851449#851449
+let memoize f = 
+    let cache = System.Collections.Generic.Dictionary<_,_>(HashIdentity.Structural)
+    fun x ->
+        match cache.TryGetValue(x) with
+        | true, res -> res
+        | _ -> 
+            let res = f x
+            cache.[x] <- res
+            res
 
-
-[<EntryPoint>]
-let main args = 
-    test <@ 22 + 2 = 5 @>
-    0
