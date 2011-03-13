@@ -386,7 +386,7 @@ let sprint expr =
         | TupleGet(tup, index) ->
             let tupleMatch =
                 Seq.init 
-                    (tup.Type.GetGenericArguments().Length) 
+                    (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length) 
                     (fun i -> if i=index then (sprintf "index%i" index) else "_") 
 
             sprintf "(let %s = %s in %s)"
