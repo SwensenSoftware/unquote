@@ -260,15 +260,21 @@ let ``get static field`` () =
     source <@ String.Empty @> =? "String.Empty"
 
 [<Fact>]
-let ``tuple get variation 1`` () =
+let ``TupleGet variation 1`` () =
     source <@ let a,b = (1,2) in a,b @> =? 
         "let patternInput = (1, 2) in let b = (let _,index1 = patternInput in index1) in let a = (let index0,_ = patternInput in index0) in (a, b)"
 
 let t = (1,2)
 [<Fact>]
-let ``tuple get variation 2`` () =
+let ``TupleGet variation 2`` () =
     source <@ let a,b = t in a,b @> =? 
         "let b = (let _,index1 = t in index1) in let a = (let index0,_ = t in index0) in (a, b)"
+
+let longTuple = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)
+[<Fact>] //issue 19
+let ``TupleGet with greater than length 8 tuple`` () =
+    source <@ let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,a,_,_ = longTuple in a @> =?
+        "let a = (let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,index15,_,_ = longTuple in index15) in a"
 
 let namedList = [1; 2; 3]
 let namedListOfList = [[1]]
