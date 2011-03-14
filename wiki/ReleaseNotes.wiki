@@ -3,6 +3,15 @@
 
 = Release Notes =
 
+== v1.2.3, 3/13/11 ==
+
+Incremental release: bug fixes and feature enhancements.
+
+  * Issue 14: Decompiler Bug, UnionCaseTest: zero arg unions sprinted with "()"
+  * Issue 18: Decompiler Bug: generic object constructions are sprinted with reflected name instead of generic args
+  * Issue 19: Decompiler Bug: TupleGet expressions involving tuples of length > 7 not handled correctly
+  * Issue 20: Decompiler Feature Request: name TupleGet pattern match value using "itemX" instead of "indexX"
+
 == v1.2.2, 2/23/11 ==
 
 Several bug fixes and feature enhancements.
