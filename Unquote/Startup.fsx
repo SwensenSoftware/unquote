@@ -20,6 +20,9 @@ limitations under the License.
 #load "Printf.fs"
 open Swensen
 
+#load "Utils.fs"
+open Swensen
+
 #load "RegexUtils.fs"
 open Swensen
 
