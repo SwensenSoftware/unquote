@@ -364,6 +364,9 @@ let ``Call distinguishes between generic value Call and unit function Call`` () 
     source <@ g<int, string> @> =? "g<int, string>"
     source <@ g'<int, string>() @> =? "g'<int, string>()"
 
+[<Fact>] //issue 21
+let ``sprint Lambda Unit vars literally`` () =
+    source <@ fun () -> 3 @> =? "fun () -> 3"
 
 //don't have any ready
 //[<Fact>]

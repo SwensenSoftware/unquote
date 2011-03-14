@@ -256,7 +256,7 @@ let sprint expr =
                 match lambdaOrBody with
                 | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
                 | body -> sprintf "-> %s" (sprint 0 body) //should precedence be 8?
-            applyParens 6 (sprintf "fun %s %s" (var.Name) (loop lambdaOrBody))
+            applyParens 6 (sprintf "fun %s %s" (if var.Type = typeof<Unit> then "()" else var.Name) (loop lambdaOrBody))
         | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
                 match assoc with
