@@ -368,6 +368,16 @@ let ``Call distinguishes between generic value Call and unit function Call`` () 
 let ``sprint Lambda Unit vars literally`` () =
     source <@ fun () -> 3 @> =? "fun () -> 3"
 
+[<Fact>] //issue 22 (ignore the fact that lambdas resulting from partial application are undesirable).
+let ``backwards pipe precedence`` () =
+    <@ List.sum <| (List.map id <| [1;2;3;]) @> |> source =?
+        "(fun list -> List.sum list) <| ((let mapping = fun x -> id x in fun list -> List.map mapping list) <| [1; 2; 3])"
+
+[<Fact>]
+let ``forward pipe precedence`` () =
+    <@ [1;2;3] |> List.map id |> List.sum @> |> source =?
+        "[1; 2; 3] |> let mapping = fun x -> id x in fun list -> List.map mapping list |> fun list -> List.sum list"
+
 //don't have any ready
 //[<Fact>]
 //let ``set static field`` () =

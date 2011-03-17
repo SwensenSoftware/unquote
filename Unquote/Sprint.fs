@@ -43,9 +43,9 @@ let binaryOps =
     "op_PipeRight", ("|>", 3, Left)
     "op_PipeRight2", ("||>", 3, Left)
     "op_PipeRight3", ("|||>", 3, Left)
-    "op_PipeLeft", ("<|", 3, Left) //not sure if all the pipe lefts should have precedence of "<" op
-    "op_PipeLeft2", ("<||", 3, Left)
-    "op_PipeLeft3", ("<|||", 3, Left)
+    "op_PipeLeft", ("<|", 13, Left)
+    "op_PipeLeft2", ("<||", 13, Left)
+    "op_PipeLeft3", ("<|||", 13, Left)
     //numeric ops
     "op_Addition", ("+", 17, Left)
     "op_Subtraction", ("-", 17, Left)
