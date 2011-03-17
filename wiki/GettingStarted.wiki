@@ -110,3 +110,41 @@ Expected Exception but got nothing
 
 val it : unit = ()
 }}}
+
+Some Unquote operators are also available as `Expr` extensions:
+{{{
+  type Expr with
+    member ToSource : unit -> string
+  type Expr with
+    member Reduce : unit -> Quotations.Expr
+  type Expr with
+    member ReduceFully : unit -> Quotations.Expr list
+  type Expr with
+    member IsReduced : unit -> bool
+}}}
+
+Opening Swensen.Unquote also makes a `System.Type` extension available for printing F# style type signatures:
+
+{{{
+type Type with
+  member FSharpName : string
+
+> typeof<int>.FSharpName;;
+val it : string = "int"
+> typeof<int[]>.FSharpName;;
+val it : string = "int[]"
+> typeof<int[,,,]>.FSharpName;;
+val it : string = "int[,,,]"
+> typeof<System.Collections.Generic.Dictionary<string, float>>.FSharpName;;
+val it : string = "Dictionary<string, float>"
+> typeof<unit -> int -> string>.FSharpName;;
+val it : string = "unit -> int -> string"
+> typeof<unit -> (float -> int) -> string>.FSharpName;;
+val it : string = "unit -> (float -> int) -> string"
+> typeof<int * float * string>.FSharpName;;
+val it : string = "int * float * string"
+> typeof<int * (bool * float) * string>.FSharpName;;
+val it : string = "int * (bool * float) * string"
+> typeof<int -> (list<(int * (int -> string))[]> * string[,,])>.FSharpName;;
+val it : string = "int -> list<(int * (int -> string))[]> * string[,,]"
+}}}
