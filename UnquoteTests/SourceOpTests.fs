@@ -378,6 +378,12 @@ let ``forward pipe precedence`` () =
     <@ [1;2;3] |> List.map id |> List.sum @> |> source =?
         "[1; 2; 3] |> let mapping = fun x -> id x in fun list -> List.map mapping list |> fun list -> List.sum list"
 
+let glv = []
+[<Fact>] //isssue 9
+let ``generic list value`` () =
+    <@ glv @> |> source =? "glv"
+    <@ [] @> |> source =? "[]"
+
 //don't have any ready
 //[<Fact>]
 //let ``set static field`` () =
