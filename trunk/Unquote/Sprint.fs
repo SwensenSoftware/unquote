@@ -242,6 +242,10 @@ let sprint expr =
     let rec sprint context expr =
         let applyParens = applyParensForPrecInContext context
         match expr with
+//        | Applications(a, b) ->
+//            sprintf "Applications: %A %A" a b
+//        | Lambdas(a, b) ->
+//            sprintf "Lambdas: %A %A" a b
         | Sequential(Sequential(lhs, Unit), rhs) ->
             //due to quirky nested structure which handles implicit unit return values
             //need to hack precedence / application of parenthisizes.  we give
@@ -251,6 +255,8 @@ let sprint expr =
             applyParens 4 (sprintf "%s; %s" (sprint 4 lhs) (sprint 3 rhs))
         | Application(curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
+//        | Lambda(var, Call(None, mi, [arg])) ->
+//            sourceName mi
         | Lambda(var, lambdaOrBody) ->
             let rec loop lambdaOrBody =
                 match lambdaOrBody with
@@ -280,28 +286,25 @@ let sprint expr =
             sprintf "{%s..%s..%s}" (sprint 0 a) (sprint 0 b) (sprint 0 c)
         | Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args) //not sure what precedence is
-        | Call(None, mi, args) -> //static call
-            if FSharpType.IsModule mi.DeclaringType then
+        | Call(None, mi, args) -> //static call (we assume F# functions are always static calls for simplicity)
+            if FSharpType.IsModule mi.DeclaringType then //we assume static calls in modules are functions, for simplicity
                 let methodName = sourceName mi
                                 
-                //functions which take explicit type arguments but only single unit normal arg look like xxx<int> or xxx<int>() depending on F# metadata
-                //functions which do not take explit type arguments but only single unit normal arg look like doit()
+                //if mi has generic args which can't be infered, need to sprint them.
+                //if mi takes no arguments, then need to sprint "()", unless mi is an F# value, in which case we omit ()
                 let sprintedArgs = 
-                    if genericArgsInferable mi then
-                        if args.Length = 0 then "()" else " " + sprintCurriedArgs args
-                    else
-                        sprintf "%s%s" 
-                            (sprintGenericArgs mi) 
-                            (if args.Length = 0 then 
-                                if isGenericValue(mi) then ""
-                                else "()"
-                             else " " + sprintCurriedArgs args)
+                    sprintf "%s%s"
+                        (if genericArgsInferable mi then "" else sprintGenericArgs mi) 
+                        (if args.Length = 0 then 
+                            if isGenericValue(mi) then ""
+                            else "()"
+                         else " " + sprintCurriedArgs args)
                 
                 if isOpenModule mi.DeclaringType then 
                     applyParens 20 (sprintf "%s%s" methodName sprintedArgs)
                 else 
                     applyParens 20 (sprintf "%s.%s%s" (sourceName mi.DeclaringType) methodName sprintedArgs)
-            else //assume CompiledName same as SourceName for static members
+            else //assume static calls in non-modules are members for simplicity, also CompiledName same as SourceName
                 applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
         | PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
