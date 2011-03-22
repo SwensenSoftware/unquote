@@ -235,6 +235,24 @@ let ``new union case lists`` () =
         "true"
     ]
 
+[<Fact>] //issue 24, as part of effort for issue 23
+let ``Let expression with Lambda as body and binding expression reduced is reduced`` () =
+    <@ [1;2;3;] |> List.map (fun i -> i+1) @> |> sprintedReduceSteps =? [
+        "[1; 2; 3] |> let mapping = fun i -> i + 1 in fun list -> List.map mapping list";
+        "[2; 3; 4]"
+    ]
+
+    <@ let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
+        "let x = 2 + 3 in fun j -> j + x"
+        "let x = 5 in fun j -> j + x"
+    ]
+
+    <@ 23 + 3 + 4 + 1, let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
+        "(23 + 3 + 4 + 1, (let x = 2 + 3 in fun j -> j + x))"
+        "(26 + 4 + 1, (let x = 5 in fun j -> j + x))"
+        "(30 + 1, (let x = 5 in fun j -> j + x))"
+        "(31, (let x = 5 in fun j -> j + x))"
+    ]
 
 
 //    sprintedReduceSteps <@ [1; 2 + 3; 4] @> =? [
