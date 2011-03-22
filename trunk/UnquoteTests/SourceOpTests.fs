@@ -379,7 +379,7 @@ let ``forward pipe precedence`` () =
         "[1; 2; 3] |> let mapping = fun x -> id x in fun list -> List.map mapping list |> fun list -> List.sum list"
 
 let glv = []
-[<Fact>] //isssue 9
+[<Fact>] //issue 9
 let ``generic list value`` () =
     <@ glv @> |> source =? "glv"
     <@ [] @> |> source =? "[]"
