@@ -255,8 +255,22 @@ let sprint expr =
             applyParens 4 (sprintf "%s; %s" (sprint 4 lhs) (sprint 3 rhs))
         | Application(curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
-//        | Lambda(var, Call(None, mi, [arg])) ->
-//            sourceName mi
+        //issue 25, sub-issue of issue 23: the following "re-sugars" unapplied lambda expressions
+        | Lambdas(vars, (Call(None, mi, args) as x)) //assume lambdas are only part of modules. be warned not full proof.
+            //need to check all args are reduced?
+            when (vars |> List.concat |> List.map (fun v -> v.Name, v.Type)) = (mi.GetParameters() |> Seq.map (fun pi -> pi.Name, pi.ParameterType) |> Seq.toList) ->
+                //oppurtunity to use "maybe" monad?
+                match binaryOps |> Map.tryFind mi.Name with
+                | Some(symbol,_,_) -> sprintf "(%s)" symbol
+                | None ->
+                    match unaryOps |> Map.tryFind mi.Name with
+                    | Some(symbol) -> sprintf "(~%s)" symbol
+                    | None ->
+                        //not sure what precedence should be
+                        if isOpenModule mi.DeclaringType then
+                            sourceName mi
+                        else
+                            sprintf "%s.%s" (sourceName mi.DeclaringType) (sourceName mi)
         | Lambda(var, lambdaOrBody) ->
             let rec loop lambdaOrBody =
                 match lambdaOrBody with
