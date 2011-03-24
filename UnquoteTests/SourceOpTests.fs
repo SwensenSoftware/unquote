@@ -384,6 +384,29 @@ let ``generic list value`` () =
     <@ glv @> |> source =? "glv"
     <@ [] @> |> source =? "[]"
 
+//xunit respects nested inner classes, and so does TestDriven when you run the entire test project,
+//but TestDriven cannot run a single teste in a nested module.
+//module UnappliedLambdaResugaring = 
+[<Fact>] //issue25
+let ``re-sugar unapplied lambda: built-in binary op`` () =
+    <@ (+) @> |> source =? "(+)"
+
+[<Fact>] //issue25
+let ``re-sugar unapplied lambda: built-in unary op`` () =
+    <@ (~-) @> |> source =? "(~-)"
+
+[<Fact>] //issue25
+let ``re-sugar unapplied lambda: module qualified`` () =
+    <@ List.map @> |> source =? "List.map"
+
+[<Fact>] //issue25
+let ``re-sugar unapplied lambda: open module`` () =
+    <@ id @> |> source =? "id"
+
+[<Fact>] //issue25
+let ``re-sugar unapplied lambda: complex`` () =
+    <@ not >> (=) @> |> source =? "not >> (=)"
+
 type ObjWithStaticProperty =
     static member StaticProperty
         with get () = 3
