@@ -256,7 +256,7 @@ let sprint expr =
         | Application(curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
         //issue 25, sub-issue of issue 23: the following "re-sugars" unapplied lambda expressions
-        | Lambdas(vars, (Call(None, mi, args) as x)) //assume lambdas are only part of modules. be warned not full proof.
+        | Lambdas(vars, Call(None, mi, args)) //assume lambdas are only part of modules. be warned not full proof.
             //need to check all args are reduced?
             when (vars |> List.concat |> List.map (fun v -> v.Name, v.Type)) = (mi.GetParameters() |> Seq.map (fun pi -> pi.Name, pi.ParameterType) |> Seq.toList) ->
                 //oppurtunity to use "maybe" monad?
@@ -271,12 +271,17 @@ let sprint expr =
                             sourceName mi
                         else
                             sprintf "%s.%s" (sourceName mi.DeclaringType) (sourceName mi)
-        | Lambda(var, lambdaOrBody) ->
-            let rec loop lambdaOrBody =
-                match lambdaOrBody with
-                | Lambda(var, lambdaOrBody) -> sprintf "%s %s" var.Name (loop lambdaOrBody)
-                | body -> sprintf "-> %s" (sprint 0 body) //should precedence be 8?
-            applyParens 6 (sprintf "fun %s %s" (if var.Type = typeof<Unit> then "()" else var.Name) (loop lambdaOrBody))
+        | Lambdas(vars, body) -> //addresses issue 27
+            let sprintSingleVar (var:Var) = if var.Type = typeof<Unit> then "()" else var.Name
+            let sprintedVars =
+                vars
+                |> List.map  
+                    (function 
+                        | [var] -> sprintSingleVar var 
+                        | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
+                |> String.concat " "
+
+            applyParens 6 (sprintf "fun %s -> %s" sprintedVars (sprint 0 body))
         | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
                 match assoc with
