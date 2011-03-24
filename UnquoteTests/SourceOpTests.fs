@@ -354,8 +354,7 @@ let (?) (target: obj) (lookup: string): 'TResult =
   
 [<Fact>]
 let ``op_Dynamic is not treated as binary infix op`` () =
-    source <@ let x : string = "asdf"?Substring(0,2) in x @> =? @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun tupledArg -> let arg20 = (let item1,_ = tupledArg in item1) in let arg21 = (let _,item2 = tupledArg in item2) in clo2 (arg20, arg21)) (0, 2) in x"
-
+    source <@ let x : string = "asdf"?Substring(0,2) in x @> =? @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun (arg20, arg21) -> clo2 (arg20, arg21)) (0, 2) in x"
 
 let g<'a,'b> = typeof<'a>.Name, typeof<'b>.Name
 let g'<'a,'b>() = typeof<'a>.Name, typeof<'b>.Name
@@ -387,25 +386,35 @@ let ``generic list value`` () =
 //xunit respects nested inner classes, and so does TestDriven when you run the entire test project,
 //but TestDriven cannot run a single teste in a nested module.
 //module UnappliedLambdaResugaring = 
-[<Fact>] //issue25
+[<Fact>] //issue 25
 let ``re-sugar unapplied lambda: built-in binary op`` () =
     <@ (+) @> |> source =? "(+)"
 
-[<Fact>] //issue25
+[<Fact>] //issue 25
 let ``re-sugar unapplied lambda: built-in unary op`` () =
     <@ (~-) @> |> source =? "(~-)"
 
-[<Fact>] //issue25
+[<Fact>] //issue 25
 let ``re-sugar unapplied lambda: module qualified`` () =
     <@ List.map @> |> source =? "List.map"
 
-[<Fact>] //issue25
+[<Fact>] //issue 25
 let ``re-sugar unapplied lambda: open module`` () =
     <@ id @> |> source =? "id"
 
-[<Fact>] //issue25
+[<Fact>] //issue 25
 let ``re-sugar unapplied lambda: complex`` () =
     <@ not >> (=) @> |> source =? "not >> (=)"
+
+[<Fact>] //issue 27
+let ``re-sugar lambda with single tupled arg`` () =
+    <@ fun (g, f) -> g + f @> |> source =? "fun (g, f) -> g + f"
+
+[<Fact>] //issue 27
+let ``re-sugar labda with tupled and non-tupled args`` () =
+    <@ fun a (g, f) b -> a + g + f + b @> |> source =? "fun a (g, f) b -> a + g + f + b"
+
+
 
 type ObjWithStaticProperty =
     static member StaticProperty
