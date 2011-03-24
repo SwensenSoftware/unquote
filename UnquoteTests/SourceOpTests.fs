@@ -82,12 +82,12 @@ let ``simple let binding`` () =
     source <@ let x = 3 in () @> =? "let x = 3 in ()"
 
 [<Fact>]
-let ``item getter with single arg`` () =
+let ``PropertyGet: instance Item getter with single arg`` () =
     let table = System.Collections.Generic.Dictionary<int,int>()
     source <@ table.[0] @> =? "seq [].[0]" //might want to fix up dict value sourceing later
 
 [<Fact>]
-let ``named getter with single arg`` () =
+let ``PropertyGet: named instace getter with single arg`` () =
     source <@ "asdf".Chars(0) @> =? "\"asdf\".Chars(0)"
 
 [<Fact>]
@@ -252,15 +252,15 @@ let foo1 = Foo()
 let foo2 = Foo()
 
 [<Fact>]
-let ``set instance field`` () =
+let ``instance FieldSet`` () =
     source <@ foo1.X <- 5 @> =? "foo1.X <- 5"
 
 [<Fact>]
-let ``get instace field`` () =
+let ``instace FieldGet`` () =
     source <@ foo1.X @> =? "foo1.X"
 
-[<Fact>]
-let ``get static field`` () =
+[<Fact>] //note: there is no public static fields in F#
+let ``static FieldGet`` () =
     source <@ String.Empty @> =? "String.Empty"
 
 [<Fact>]
@@ -371,12 +371,12 @@ let ``sprint Lambda Unit vars literally`` () =
 [<Fact>] //issue 22 (ignore the fact that lambdas resulting from partial application are undesirable).
 let ``backwards pipe precedence`` () =
     <@ List.sum <| (List.map id <| [1;2;3;]) @> |> source =?
-        "(fun list -> List.sum list) <| ((let mapping = fun x -> id x in fun list -> List.map mapping list) <| [1; 2; 3])"
+        "List.sum <| ((let mapping = id in fun list -> List.map mapping list) <| [1; 2; 3])"
 
 [<Fact>]
 let ``forward pipe precedence`` () =
     <@ [1;2;3] |> List.map id |> List.sum @> |> source =?
-        "[1; 2; 3] |> let mapping = fun x -> id x in fun list -> List.map mapping list |> fun list -> List.sum list"
+        "[1; 2; 3] |> let mapping = id in fun list -> List.map mapping list |> List.sum"
 
 let glv = []
 [<Fact>] //issue 9
@@ -384,10 +384,24 @@ let ``generic list value`` () =
     <@ glv @> |> source =? "glv"
     <@ [] @> |> source =? "[]"
 
-//don't have any ready
-//[<Fact>]
-//let ``set static field`` () =
-//    source <@  @> =? "String.Empty"
+type ObjWithStaticProperty =
+    static member StaticProperty
+        with get () = 3
+        and  set (value:int) = ()
+
+    static member StaticPropertyIndexed1
+        with get (x:int) = 3
+        and  set (x:int) (value:int) = ()
+
+    static member StaticPropertyIndexed2
+        with get (x:int,y:int) = 3
+        and  set (x:int,y:int) (value:int) = ()
+
+[<Fact(Skip="future feature")>]
+let ``set static field`` () =
+    source <@ ObjWithStaticProperty.StaticProperty <- 3  @> =? "ObjWithStaticProperty.StaticProperty <- 3"
+//    source <@ ObjWithStaticProperty.StaticPropertyIndexed1.[1] <- 3  @> =? "ObjWithStaticProperty.StaticPropertyIndexed1[1] <- 3"
+//    source <@ ObjWithStaticProperty.StaticPropertyIndexed2.[1,2] <- 3  @> =? "ObjWithStaticProperty.StaticPropertyIndexed1[1,2] <- 3"
 
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
