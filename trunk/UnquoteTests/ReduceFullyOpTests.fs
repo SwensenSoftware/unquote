@@ -220,15 +220,16 @@ let ``function with no regular args and no type args`` () =
         "null"
     ]
 
-
-let namedList = [1; 2; 3]
 [<Fact>]
-let ``new union case lists`` () =
+let ``new union case list with sequenced arg`` () =
     sprintedReduceSteps <@ [1; 2 + 3; 4] @> =? [
         "[1; 2 + 3; 4]"
         "[1; 5; 4]"
     ]
 
+let namedList = [1; 2; 3]
+[<Fact>]
+let ``new union case list compared to named list`` () =
     sprintedReduceSteps <@ [1; 2; 3]  = namedList @> =? [
         "[1; 2; 3] = namedList"
         "[1; 2; 3] = [1; 2; 3]"
@@ -236,23 +237,43 @@ let ``new union case lists`` () =
     ]
 
 [<Fact>] //issue 24, as part of effort for issue 23
-let ``Let expression with Lambda as body and binding expression reduced is reduced`` () =
+let ``incomplete lambda call is not reduced`` () =
+    <@ List.map (fun i -> i + 1) @> |> sprintedReduceSteps =? [
+      "List.map (fun i -> i + 1)";
+    ]
+
+[<Fact>] //issue 24, as part of effort for issue 23
+let ``incomplete lambda call on right hand side of pipe is not reduced`` () =
     <@ [1; 2; 3] |> List.map (fun i -> i + 1) @> |> sprintedReduceSteps =? [
       "[1; 2; 3] |> List.map (fun i -> i + 1)";
       "[2; 3; 4]"
     ]
 
-    <@ let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
-        "let x = 2 + 3 in fun j -> j + x"
-        "let x = 5 in fun j -> j + x"
+let f2 a b c d = a + b + c + d
+
+[<Fact>] //issue 24, as part of effort for issue 23
+let ``multi-arg totally incomplete lambda call is not reduced`` () =
+    <@ f2 @> |> sprintedReduceSteps =? [
+      "f2";
     ]
 
-    <@ 23 + 3 + 4 + 1, let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
-        "(23 + 3 + 4 + 1, (let x = 2 + 3 in fun j -> j + x))"
-        "(26 + 4 + 1, (let x = 5 in fun j -> j + x))"
-        "(30 + 1, (let x = 5 in fun j -> j + x))"
-        "(31, (let x = 5 in fun j -> j + x))"
+[<Fact>] //issue 24, as part of effort for issue 23
+let ``multi-arg partially incomplete lambda call is not reduced`` () =
+    <@ f2 1 2 @> |> sprintedReduceSteps =? [
+      "f2 1 2";
     ]
+
+//    <@ let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
+//        "let x = 2 + 3 in fun j -> j + x"
+//        "let x = 5 in fun j -> j + x"
+//    ]
+//
+//    <@ 23 + 3 + 4 + 1, let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
+//        "(23 + 3 + 4 + 1, (let x = 2 + 3 in fun j -> j + x))"
+//        "(26 + 4 + 1, (let x = 5 in fun j -> j + x))"
+//        "(30 + 1, (let x = 5 in fun j -> j + x))"
+//        "(31, (let x = 5 in fun j -> j + x))"
+//    ]
 
 
 //    sprintedReduceSteps <@ [1; 2 + 3; 4] @> =? [
