@@ -236,6 +236,8 @@ let isGenericValue =
 
 ////need to check all args are reduced?
 ///Partial application and zero application of Lambda call (e.g. List.map (+), or id)
+///cases: 1) Let .. Lambdas .. Call
+///       2) Lambdas .. Call
 let (|IncompleteLambdaCall|_|) x =
     match x with
     | (Let _ | Lambda _) -> //this is definately not a complete lambda call

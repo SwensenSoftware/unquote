@@ -35,7 +35,7 @@ let rec isReduced = function
     | Value _ | Lambda _ | Var _ | Unit -> true
     | NewUnionCase(_,args) | NewTuple(args) | NewArray(_,args) when args |> allReduced -> true
     | Coerce(objExpr,_) when objExpr |> isReduced -> true
-    | Let(_,x,Lambda(_)) when x |> isReduced -> true //issue 24, as part of effort for issue 23
+    | Let(_,x,Lambda(_)) when x |> isReduced -> true //issue 24, as part of effort for issue 23.  but need to get more general than this.
     | _ -> false
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
