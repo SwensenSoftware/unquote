@@ -411,8 +411,13 @@ let ``re-sugar lambda with single tupled arg`` () =
     <@ fun (g, f) -> g + f @> |> source =? "fun (g, f) -> g + f"
 
 [<Fact>] //issue 27
-let ``re-sugar labda with tupled and non-tupled args`` () =
+let ``re-sugar lambda with tupled and non-tupled args`` () =
     <@ fun a (g, f) b -> a + g + f + b @> |> source =? "fun a (g, f) b -> a + g + f + b"
+
+[<Fact>] //issue 23
+let ``re-sugar lambda call`` () =
+    source <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
+
 
 
 
@@ -437,10 +442,6 @@ let ``set static field`` () =
 
 //need to think up some multi-arg item and named getter scenarios
 //Future features:
-
-[<Fact(Skip="Future feature")>]
-let ``partial application`` () =
-    source <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
 
 [<Fact(Skip="Future feature")>]
 let ``pattern match let binding`` () =
