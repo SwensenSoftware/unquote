@@ -369,13 +369,13 @@ let ``sprint Lambda Unit vars literally`` () =
 
 [<Fact>] //issue 22 (ignore the fact that lambdas resulting from partial application are undesirable).
 let ``backwards pipe precedence`` () =
-    <@ List.sum <| (List.map id <| [1;2;3;]) @> |> source =?
-        "List.sum <| ((let mapping = id in fun list -> List.map mapping list) <| [1; 2; 3])"
+    <@ List.sum <| (List.map id <| [1; 2; 3]) @> |> source =?
+      "List.sum <| (List.map id <| [1; 2; 3])"
 
 [<Fact>]
 let ``forward pipe precedence`` () =
-    <@ [1;2;3] |> List.map id |> List.sum @> |> source =?
-        "[1; 2; 3] |> let mapping = id in fun list -> List.map mapping list |> List.sum"
+    <@ [1; 2; 3] |> List.map id |> List.sum @> |> source =?
+      "[1; 2; 3] |> List.map id |> List.sum"
 
 let glv = []
 [<Fact>] //issue 9
