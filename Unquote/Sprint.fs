@@ -234,18 +234,33 @@ let isGenericValue =
             with
             | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
 
+////need to check all args are reduced?
+///Partial application and zero application of Lambda call (e.g. List.map (+), or id)
+let (|IncompleteLambdaCall|_|) x =
+    match x with
+    | (Let _ | Lambda _) -> //this is definately not a complete lambda call
+        let rec gather vars bindings = function
+            | Let(var, binding, body) -> //the applied args
+                gather ((var.Name, var.Type)::vars) (binding::bindings) body
+            | Lambda(var, body) -> //the unapplied args
+                gather ((var.Name, var.Type)::vars) bindings body
+            | Call(None, mi, args) -> //the partially applied lambda call
+                if List.rev vars = (mi.GetParameters() |> Seq.map (fun pi -> pi.Name, pi.ParameterType) |> Seq.toList) then 
+                    Some(mi, List.rev bindings)
+                else None
+            | _ ->
+                None
+        gather [] [] x
+    | _ -> None
+                
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
-//  need to look into DerivedPatterns.Lambdas and DerivedPatterns.Applications
+//  need to look into DerivedPatterns.Applications
 let sprint expr =
     let rec sprint context expr =
         let applyParens = applyParensForPrecInContext context
         match expr with
-//        | Applications(a, b) ->
-//            sprintf "Applications: %A %A" a b
-//        | Lambdas(a, b) ->
-//            sprintf "Lambdas: %A %A" a b
         | Sequential(Sequential(lhs, Unit), rhs) ->
             //due to quirky nested structure which handles implicit unit return values
             //need to hack precedence / application of parenthisizes.  we give
@@ -255,22 +270,20 @@ let sprint expr =
             applyParens 4 (sprintf "%s; %s" (sprint 4 lhs) (sprint 3 rhs))
         | Application(curry, last) -> //application of arguments to a lambda
             applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
-        //issue 25, sub-issue of issue 23: the following "re-sugars" unapplied lambda expressions
-        | Lambdas(vars, Call(None, mi, args)) //assume lambdas are only part of modules. be warned not full proof.
-            //need to check all args are reduced?
-            when (vars |> List.concat |> List.map (fun v -> v.Name, v.Type)) = (mi.GetParameters() |> Seq.map (fun pi -> pi.Name, pi.ParameterType) |> Seq.toList) ->
-                //oppurtunity to use "maybe" monad?
-                match binaryOps |> Map.tryFind mi.Name with
+        //issue 25 and issue 23: the following "re-sugars" both partially applied and unapplied lambda call expressions
+        //must come before Lambdas
+        | IncompleteLambdaCall(mi, args) -> //assume lambdas are only part of modules.
+            match binaryOps |> Map.tryFind mi.Name with
                 | Some(symbol,_,_) -> sprintf "(%s)" symbol
                 | None ->
                     match unaryOps |> Map.tryFind mi.Name with
                     | Some(symbol) -> sprintf "(~%s)" symbol
-                    | None ->
-                        //not sure what precedence should be
-                        if isOpenModule mi.DeclaringType then
-                            sourceName mi
-                        else
-                            sprintf "%s.%s" (sourceName mi.DeclaringType) (sourceName mi)
+                    | None -> 
+                        let sprintFunction (mi:MethodInfo) =
+                            if isOpenModule mi.DeclaringType then sourceName mi
+                            else sprintf "%s.%s" (sourceName mi.DeclaringType) (sourceName mi)
+                        if args.Length = 0 then sprintFunction mi //not sure what precedence should be
+                        else applyParens 20 (sprintf "%s %s" (sprintFunction mi) (sprintCurriedArgs args))
         | Lambdas(vars, body) -> //addresses issue 27
             let sprintSingleVar (var:Var) = if var.Type = typeof<Unit> then "()" else var.Name
             let sprintedVars =
@@ -280,7 +293,6 @@ let sprint expr =
                         | [var] -> sprintSingleVar var 
                         | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
                 |> String.concat " "
-
             applyParens 6 (sprintf "fun %s -> %s" sprintedVars (sprint 0 body))
         | BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
