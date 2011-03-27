@@ -387,19 +387,11 @@ let sprint expr =
                         | _ -> failwith "unexpected list union case"
                     sprintf "[%s]" (sprintLiteralConstructionArgs expr)
                 else 
-                    //local sprint is optimization so that isLiteralConstruction is not called for
-                    //every cons recursive print
-                    let rec sprint context expr =
-                        let applyParens = applyParensForPrecInContext context
-                        match expr with
-                        | NewUnionCase(_,args) ->
-                            match args with
-                            | [] -> "[]"
-                            | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
-                            | _ -> failwith "unexpected list union case"
-                        | _ -> failwithf "local list cons case not expected: %A" expr
-
-                    sprint 15 expr
+                    //would like to optimize somehow so isLiteralConstruction is not called with every recursive 
+                    //sprint of non literal constructions.
+                    match args with
+                    | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
+                    | _ -> failwithf "unexpected list union case: %A" expr
         | NewUnionCase(uci,args) -> //"typical union case construction"
             match args with
             | [] -> uci.Name
