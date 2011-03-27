@@ -280,30 +280,39 @@ let ``TupleGet with greater than length 8 tuple`` () =
     source <@ let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,a,_,_ = longTuple in a @> =?
         "let a = (let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,item16,_,_ = longTuple in item16) in a"
 
+[<Fact>]
 let ``NewUnionCase literal list from literal list`` () =
     source <@ [1; 2; 3] @> =? "[1; 2; 3]"
 
+[<Fact>]
 let ``NewUnionCase literal list from literal list mixed with cons at construction point`` () =
     source <@ 5::[1; 2; 3] @> =? "[5; 1; 2; 3]" //this we consider acceptable
 
+[<Fact>]
 let ``NewUnionCase literal list from literal list mixed with cons local value`` () =    
     let x = [1;2;3]
     source <@ 5::x @> =? "5::[1; 2; 3]" //fair enough
 
 let namedList = [1; 2; 3]
+[<Fact>]
 let ``NewUnionCase Value cons list property`` () =    
     source <@ 5::namedList @> =? "5::namedList"
 
+[<Fact>]
 let ``NewUnionCase Value cons Value cons list property`` () =    
     source <@ 6::5::namedList @> =? "6::5::namedList"
 
+[<Fact>]
 let ``NewUnionCase Value cons Expression cons list property`` () =    
     source <@ 7::5 + 1::5::namedList @> =? "7::5 + 1::5::namedList"
 
+[<Fact>]
 let ``PropertyGet on NewUnionCase Value cons Expression cons list property`` () =    
     source <@ (7::5 + 1::5::namedList).Length @> =? "(7::5 + 1::5::namedList).Length"
 
 let namedListOfList = [[1]]
+
+[<Fact>]
 let ``NewUnionCase literal list cons list of lists property`` () =
     source <@ (1::3::[])::namedListOfList @> =? "[1; 3]::namedListOfList"
 
