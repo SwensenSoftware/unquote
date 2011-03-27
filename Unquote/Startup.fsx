@@ -23,9 +23,6 @@ open Swensen
 #load "Utils.fs"
 open Swensen
 
-#load "RegexUtils.fs"
-open Swensen
-
 #load "Sprint.fs"
 open Swensen.Unquote
 

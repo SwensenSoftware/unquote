@@ -24,6 +24,7 @@ open Microsoft.FSharp.Quotations.DerivedPatterns
 open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
+open Swensen.Utils
 
 type binOpAssoc =
     | Left
@@ -123,7 +124,6 @@ let sourceName (mi:MemberInfo) =
 //used by both sprintSig and sprint
 let applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 
-open Swensen.RegexUtils
 //the usefullness of this function makes me think to open up Sprint module (currently just added TypeExt with this feature)
 ///Sprint the F#-style type signature of the given Type.  Handles known type abbreviations,
 ///simple types, arbitrarily complex generic types (multiple parameters and nesting),
@@ -233,6 +233,43 @@ let isGenericValue =
                 not mOrV.Type.IsFunction
             with
             | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
+
+open Swensen.Utils
+let (|TupleLet|_|) x =
+    match x with
+    //two variations:
+    //  1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
+    //  2) let patternInput = expression in let a = TupleGet(patternInput, index) in ...
+    | (Let(_,TupleGet(body, _),_) as start) | Let(_, body, (Let(_,TupleGet(_),_) as start)) ->
+        let rec gather varIndexList = function
+            | Let(var,TupleGet(_,index),next) ->
+                gather ((var,index)::varIndexList) next
+            | final -> varIndexList, final
+        
+        let varIndexList, final = gather [] start
+
+        let tupleLength =  
+            let rec calcTupleLength (ty:Type) = 
+                match ty.Name with
+                | CompiledMatch(@"Tuple`([1-8])") [_;g] ->
+                    match g.Value with
+                    | Int(8) -> 7 + (calcTupleLength (ty.GetProperty("Rest").PropertyType))
+                    | Int(len) -> len
+                    | _ -> failwithf "unexpected match: %A" g.Value
+                | _ -> failwithf "unexcepted Type Name: %s" ty.Name
+            calcTupleLength body.Type
+
+        let varList = 
+            let rec fillInGaps i input output =
+                match input with
+                | [] -> (List.init (tupleLength - i) (fun _ -> None)) @ output //pad output with None when there are "_" bindings extending past length of input
+                | (var,index)::tail -> 
+                    if index = i then fillInGaps (i+1) tail (Some(var)::output)
+                    else fillInGaps (i+1) input (None::output)
+            fillInGaps 0 varIndexList [] |> List.rev
+
+        Some(varList, body, final)
+    | _ -> None
 
 ////need to check all args are reduced?
 ///Partial application and zero application of Lambda call (e.g. List.map (+), or id)
@@ -401,9 +438,14 @@ let sprint expr =
         | Coerce(target, _) ->
             //don't even "mention" anything about the coersion
             sprint context target
+        | TupleLet(vars, e1, e2) ->
+            //if any are mutable, they are all mutable
+            let anyMutable = vars |> List.exists (function | Some(v) -> v.IsMutable | None -> false)
+            let varNames = vars |> List.map (function | Some(v) -> v.Name | None -> "_")
+            applyParens 5 (sprintf "let%s%s = %s in %s" (if anyMutable then " mutable " else " ") (varNames |> String.concat ", ") (sprint 0 e1) (sprint 0 e2))
         | Let(var, e1, e2) ->
             //todo: this needs to be handled better for curried functions
-            applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (e1 |> sprint 0) (e2 |> sprint 0))
+            applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (sprint 0 e1) (sprint 0 e2))
         | Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
             //note, this only handles typed quotations
             sprintf "<@ %s @>" (sprint 0 qx) 
@@ -422,16 +464,16 @@ let sprint expr =
         | FieldSet(None, fi, arg) ->
             applyParens 13 (sprintf "%s.%s <- %s" fi.DeclaringType.Name fi.Name (sprint 0 arg))
         //extremely verbose
-        | TupleGet(tup, index) ->
-            let tupleMatch =
-                Seq.init 
-                    (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length) 
-                    (fun i -> if i=index then (sprintf "item%i" (index+1)) else "_") 
-
-            sprintf "(let %s = %s in %s)"
-                (tupleMatch |> String.concat ",")
-                (sprint 0 tup)
-                (sprintf "item%i" (index+1))
+//        | TupleGet(tup, index) ->
+//            let tupleMatch =
+//                Seq.init 
+//                    (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length) 
+//                    (fun i -> if i=index then (sprintf "item%i" (index+1)) else "_") 
+//
+//            sprintf "(let %s = %s in %s)"
+//                (tupleMatch |> String.concat ",")
+//                (sprint 0 tup)
+//                (sprintf "item%i" (index+1))
         | UnionCaseTest(target, uci) ->
             let ucMatch =
                 if uci |> isListUnionCase then

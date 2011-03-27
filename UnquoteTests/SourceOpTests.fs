@@ -19,6 +19,7 @@ module Test.Swensen.Unquote.SourceOpTests
 open Xunit
 open Swensen.Unquote
 open Microsoft.FSharp.Linq.QuotationEvaluation
+open Swensen.Utils
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.
@@ -263,22 +264,27 @@ let ``instace FieldGet`` () =
 let ``static FieldGet`` () =
     source <@ String.Empty @> =? "String.Empty"
 
-[<Fact>]
-let ``TupleGet variation 1`` () =
-    source <@ let a,b = (1,2) in a,b @> =? 
-        "let patternInput = (1, 2) in let b = (let _,item2 = patternInput in item2) in let a = (let item1,_ = patternInput in item1) in (a, b)"
-
 let t = (1,2)
 [<Fact>]
-let ``TupleGet variation 2`` () =
+let ``TupleLet variation 1`` () =
     source <@ let a,b = t in a,b @> =? 
-        "let b = (let _,item2 = t in item2) in let a = (let item1,_ = t in item1) in (a, b)"
+        "let a, b = t in (a, b)"
+
+[<Fact>]
+let ``TupleLet variation 2`` () =
+    source <@ let a,b = (1,2) in a,b @> =? 
+        "let a, b = (1, 2) in (a, b)"
+
+[<Fact>]
+let ``mutable TupleLet`` () =
+    source <@ let mutable a,b = (1,2) in a,b @> =? 
+        "let mutable a, b = (1, 2) in (a, b)"
 
 let longTuple = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)
 [<Fact>] //issue 19
-let ``TupleGet with greater than length 8 tuple`` () =
+let ``TupleLet with greater than length 8 tuple`` () =
     source <@ let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,a,_,_ = longTuple in a @> =?
-        "let a = (let _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,item16,_,_ = longTuple in item16) in a"
+        "let _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, a, _, _ = longTuple in a"
 
 [<Fact>]
 let ``NewUnionCase literal list from literal list`` () =
@@ -371,7 +377,6 @@ let ``union case test requiring op_Dynamic`` () =
 let ``union case test zero arg union`` () =
     source <@ match None with | None -> true | _ -> false @> =? "let matchValue = None in (match matchValue with | None -> true | _ -> false) && true"
 
-open Swensen.RegexUtils
 [<Fact(Skip="Active patterns too much to include in issue #3 for now")>] //issue #3
 let ``union case test active pattern`` () =
     source 
