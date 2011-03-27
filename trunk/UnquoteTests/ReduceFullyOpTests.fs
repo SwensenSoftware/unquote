@@ -18,6 +18,7 @@ limitations under the License.
 module Test.Swensen.Unquote.ReduceFullyOpTests
 open Xunit
 open Swensen.Unquote
+open Swensen.Utils
 
 //we use this since expr don't support structural comparison
 let sprintedReduceSteps expr =
@@ -173,8 +174,6 @@ let ``null reference exception`` () =
     step2 =? "3 = null.Length"
     test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
 
-open Swensen.RegexUtils
-
 [<Fact>]
 let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
     let doit (x:string) = (null:string)
@@ -237,7 +236,7 @@ let ``new union case list compared to named list`` () =
     ]
 
 [<Fact>] //issue 24, as part of effort for issue 23
-let ``incomplete lambda call is not reduced`` () =
+let ``incomplete lambda call is reduced`` () =
     <@ List.map (fun i -> i + 1) @> |> sprintedReduceSteps =? [
       "List.map (fun i -> i + 1)";
     ]
@@ -245,22 +244,75 @@ let ``incomplete lambda call is not reduced`` () =
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``incomplete lambda call on right hand side of pipe is not reduced`` () =
     <@ [1; 2; 3] |> List.map (fun i -> i + 1) @> |> sprintedReduceSteps =? [
-      "[1; 2; 3] |> List.map (fun i -> i + 1)";
+      "[1; 2; 3] |> List.map (fun i -> i + 1)"
       "[2; 3; 4]"
     ]
 
 let f2 a b c d = a + b + c + d
 
 [<Fact>] //issue 24, as part of effort for issue 23
-let ``multi-arg totally incomplete lambda call is not reduced`` () =
+let ``multi-arg totally incomplete lambda call is reduced`` () =
     <@ f2 @> |> sprintedReduceSteps =? [
-      "f2";
+      "f2"
     ]
 
 [<Fact>] //issue 24, as part of effort for issue 23
-let ``multi-arg partially incomplete lambda call is not reduced`` () =
+let ``multi-arg partially incomplete lambda call is reduced`` () =
     <@ f2 1 2 @> |> sprintedReduceSteps =? [
-      "f2 1 2";
+      "f2 1 2"
+    ]
+
+[<Fact>] //issue 24, as part of effort for issue 23
+let ``multi-arg incomplete lambda call has single not reduced arg`` () =
+    <@ f2 (1 + 2) @> |> sprintedReduceSteps =? [
+      "f2 (1 + 2)"
+      "f2 3"
+    ]
+
+[<Fact(Skip="not working right")>] //issue 24, as part of effort for issue 23
+let ``multi-arg incomplete lambda call has two not reduced args`` () =
+    <@ f2 (1 + 2) (3 + 4) @> |> sprintedReduceSteps =? [
+      "f2 (1 + 2) (3 + 4)"
+      "f2 3 7"
+    ]
+
+[<Fact(Skip="not working right")>] //issue 24, as part of effort for issue 23
+let ``multi-arg incomplete lambda call second arg is not reduced`` () =
+    <@ f2 3 (3 + 4) @> |> sprintedReduceSteps =? [
+      "f2 3 (3 + 4)"
+      "f2 3 7"
+    ]
+
+let arg2 = 5
+[<Fact(Skip="Not working")>] //issue 24, as part of effort for issue 23
+let ``multi-arg incomplete lambda call has two not reduced args, one is a property`` () =
+    <@ f2 (1 + 1) arg2 @> |> sprintedReduceSteps =? [
+      "f2 (1 + 2) 5"
+      "f2 3 5"
+    ]
+
+let t = (1,2)
+[<Fact>]
+let ``TupleLet variation 1`` () =
+    <@ let a, b = t in (a, b) @> |> sprintedReduceSteps =? [
+      "let a, b = t in (a, b)"
+      "let a, b = (1, 2) in (a, b)"
+      "(1, 2)"
+    ]
+
+[<Fact>]
+let ``TupleLet variation 2`` () =
+    <@ let a,b = (1,2) in a,b @> |> sprintedReduceSteps =? [
+      "let a, b = (1, 2) in (a, b)"
+      "(1, 2)"
+    ]
+
+[<Fact>]
+let ``TupleLet variation 2 multiple unreduced sub exprs`` () =
+    <@ let (x,y,z) = (1 + 3, 2, 3 + 4) in (x, z) @> |> sprintedReduceSteps =? [
+      "let x, y, z = (1 + 3, 2, 3 + 4) in (x, z)"
+      "let x, y, z = (4, 2, 7) in (x, z)"
+      "(4, 7)"
     ]
 
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [

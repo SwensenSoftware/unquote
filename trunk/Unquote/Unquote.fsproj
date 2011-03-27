@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="Printf.fs" />
     <Compile Include="Utils.fs" />
-    <Compile Include="RegexUtils.fs" />
     <Compile Include="Sprint.fs" />
     <Compile Include="Reduce.fs" />
     <Compile Include="TypeExt.fs" />

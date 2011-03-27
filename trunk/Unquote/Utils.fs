@@ -15,7 +15,9 @@ limitations under the License.
 *)
 
 ///General utility functions
-module Swensen.Utils
+//[<AutoOpen>]
+module Swensen.Utils //want to make this internal, but also use in tests.
+open System
 
 //based on http://stackoverflow.com/questions/833180/handy-f-snippets/851449#851449
 let memoize f = 
@@ -28,3 +30,29 @@ let memoize f =
             cache.[x] <- res
             res
 
+open System.Text.RegularExpressions
+//Regex.CacheSize <- (default is 15)
+///Match the pattern using a cached interpreted Regex
+let (|InterpretedMatch|_|) pattern input =
+    if input = null then None
+    else
+        let m = Regex.Match(input, pattern) //we can expect 
+        if m.Success then Some [for x in m.Groups -> x]
+        else None
+    
+///Match the pattern using a cached compiled Regex
+let (|CompiledMatch|_|) pattern input =
+    if input = null then None
+    else
+        let m = Regex.Match(input, pattern, RegexOptions.Compiled) //we can expect 
+        if m.Success then Some [for x in m.Groups -> x]
+        else None
+
+//http://stackoverflow.com/questions/833180/handy-f-snippets/1477188#1477188
+let (=~) input pattern = 
+    input <> null && Regex.IsMatch(input, pattern)
+
+let (|Int|_|) str =
+    match Int32.TryParse(str) with
+    | true, result -> Some(result)
+    | _ -> None
