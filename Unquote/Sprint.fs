@@ -397,7 +397,7 @@ let sprint expr =
                             | [] -> "[]"
                             | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
                             | _ -> failwith "unexpected list union case"
-                        | _ -> failwith "local list cons case not expected"
+                        | _ -> failwithf "local list cons case not expected: %A" expr
 
                     sprint 15 expr
         | NewUnionCase(uci,args) -> //"typical union case construction"
