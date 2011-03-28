@@ -45,8 +45,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Printf.fs" />
-    <Compile Include="Utils.fs" />
+    <Compile Include="Utils\Misc.fs" />
+    <Compile Include="Utils\Regex.fs" />
+    <Compile Include="Utils\Printf.fs" />
     <Compile Include="Sprint.fs" />
     <Compile Include="Reduce.fs" />
     <Compile Include="TypeExt.fs" />

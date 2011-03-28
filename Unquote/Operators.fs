@@ -29,8 +29,8 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-open Swensen.Printf
-open Swensen.Unquote.ExprExt
+open Swensen
+open Swensen.Unquote
 
 ///Convert given expression to it's source code representation. Sub-expressions which are
 ///not currently supported will fallback on the default Expr.ToString() implementation.

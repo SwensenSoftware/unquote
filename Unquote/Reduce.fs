@@ -24,7 +24,7 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-open Swensen.Printf
+open Swensen
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 

@@ -19,7 +19,7 @@ module Test.Swensen.Unquote.SourceOpTests
 open Xunit
 open Swensen.Unquote
 open Microsoft.FSharp.Linq.QuotationEvaluation
-open Swensen.Utils
+open Swensen
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.

@@ -17,7 +17,9 @@ limitations under the License.
 nxxxf functions originally based on Mauricio Scheffer's answer at http://stackoverflow.com/questions/5087029/newlines-and-formatters/5087218#5087218
 *)
 
-module internal Swensen.Printf //should make as extension to Microsoft.FSharp.Core.Printf?
+[<AutoOpen>]
+module Swensen.PrintfUtils  //should make as extension to Microsoft.FSharp.Core.Printf?
+
 open System
 open System.Text.RegularExpressions
 
@@ -48,7 +50,7 @@ let private nprintfBuilder fmt appendLf =
             else
                 let s = lfButNotCrLf.Replace(s, "\r\n")
                 if System.Console.Out.NewLine <> "\r\n" then //NewLine can be something else
-                     s.Replace("\r\n", stdout.NewLine) |> printf "%s"
+                        s.Replace("\r\n", stdout.NewLine) |> printf "%s"
                 else
                     s |> printf "%s")
         fmt
