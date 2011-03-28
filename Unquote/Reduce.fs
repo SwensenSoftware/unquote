@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 *)
+
 module internal Swensen.Unquote.Reduce
 open System
 open System.Reflection
@@ -82,14 +83,3 @@ let reduceFully =
             Expr.Value(ex)::acc
 
     fun expr -> loop expr [expr] |> List.rev
-
-//let rec reduceFullySeq expr = seq {
-//    yield expr
-//    let nextExpr = expr |> reduce
-//    if nextExpr |> isReduced && nextExpr <> expr then 
-//        yield nextExpr
-//    elif nextExpr = expr then
-//        yield nextExpr |> evalValue
-//    else
-//        yield! nextExpr |> reduceFully
-//}
