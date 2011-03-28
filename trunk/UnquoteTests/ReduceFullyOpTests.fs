@@ -18,7 +18,7 @@ limitations under the License.
 module Test.Swensen.Unquote.ReduceFullyOpTests
 open Xunit
 open Swensen.Unquote
-open Swensen.Utils
+open Swensen
 
 //we use this since expr don't support structural comparison
 let sprintedReduceSteps expr =

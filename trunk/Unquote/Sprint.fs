@@ -24,7 +24,7 @@ open Microsoft.FSharp.Quotations.DerivedPatterns
 open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
-open Swensen.Utils
+open Swensen
 
 type binOpAssoc =
     | Left
@@ -221,7 +221,6 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 let isListUnionCase (uci:UnionCaseInfo) = 
     uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
 
-open Swensen.Utils
 let isGenericValue =
     memoize //performance testing shows about 10% performance increase in SourceOpTests.``Call distinguishes between generic value Call and unit function Call`` using memoization 
         (fun (mi:MemberInfo) ->
@@ -234,7 +233,6 @@ let isGenericValue =
             with
             | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
 
-open Swensen.Utils
 let (|TupleLet|_|) x =
     match x with
     //two variations:
