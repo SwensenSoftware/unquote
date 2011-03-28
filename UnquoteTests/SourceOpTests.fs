@@ -414,11 +414,14 @@ let ``forward pipe precedence`` () =
     <@ [1; 2; 3] |> List.map id |> List.sum @> |> source =?
       "[1; 2; 3] |> List.map id |> List.sum"
 
+[<Fact>] //issue 9
+let ``generic list value literal`` () =
+    <@ [] @> |> source =? "[]"
+
 let glv = []
 [<Fact>] //issue 9
-let ``generic list value`` () =
+let ``generic list value property`` () =
     <@ glv @> |> source =? "glv"
-    <@ [] @> |> source =? "[]"
 
 //xunit respects nested inner classes, and so does TestDriven when you run the entire test project,
 //but TestDriven cannot run a single teste in a nested module.
