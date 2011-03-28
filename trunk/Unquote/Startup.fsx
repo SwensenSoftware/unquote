@@ -17,10 +17,13 @@ limitations under the License.
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Linq.dll"
 #r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Metadata.dll"
 
-#load "Printf.fs"
+#load "Utils\Misc.fs"
 open Swensen
 
-#load "Utils.fs"
+#load @"Utils\Printf.fs"
+open Swensen
+
+#load @"Utils\Regex.fs"
 open Swensen
 
 #load "Sprint.fs"

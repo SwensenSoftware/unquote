@@ -53,24 +53,9 @@ let rec reduce (expr:Expr) =
     | Sequential (lhs, rhs) ->
         if lhs |> isReduced then rhs
         else Expr.Sequential(reduce lhs, rhs)
-    | Application _ -> //got to work for these lambda applications (not sure whether better approach)
-        let rec allArgsReduced subexpr = 
-            match subexpr with
-            | Application((Lambda _ | Value _), rhs) -> //local lambdas are represented as Values
-                rhs |> isReduced
-            | Application(lhs,rhs) ->
-                rhs |> isReduced && lhs |> allArgsReduced
-            | _ -> failwith (nsprintf "Expected Application((Lambda _ | Value _), rhs) or Application(lhs,rhs), got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
-            
-        let rec rebuild subexpr =
-            match subexpr with
-            | Application(lhs, rhs) -> 
-                Expr.Application(rebuild lhs, reduce rhs)
-            | Lambda _ | Value _ -> subexpr //local lambdas are represented as Values
-            | _ -> failwith (nsprintf "Expected Application(lhs, rhs) or Lambda _, got \n\n%A\n\nwithin\n\n%A\n" subexpr expr)
-
-        if allArgsReduced expr then evalValue expr
-        else rebuild expr
+    | Applications(fExpr,args) ->
+        if args |> List.concat |> allReduced then evalValue expr
+        else Expr.Applications(fExpr, args |> List.map reduceAll)
     | ShapeVar _ -> expr
     | ShapeLambda _ -> expr
     | ShapeCombination (o, exprs) -> 
