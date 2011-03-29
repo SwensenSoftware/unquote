@@ -283,27 +283,17 @@ let (|IncompleteLambdaCall|_|) x =
 
         let varsList, bindingList, final = gatherLetBindings [] [] x
 
-//        let lambdaVarsListEqualToCallArgsTail lambdaVarsList (callArgs:Expr list) =
-//            let lambdaVarsList = List.concat lambdaVarsList
-//            let callArgsTail = callArgs |> Seq.skip (callArgs.Length - lambdaVarsList.Length) |> Seq.toList
-//            List.zip lambdaVarsList callArgsTail
-//            |> List.forall 
-//                (fun (v:Var,a) -> 
-//                    match a with
-//                    | Var(av) when v.Name = av.Name && v.Type = av.Type -> true
-//                    | _ -> false)
-
-        let rec comparVarLists (xl:Var list) (yl:Var list) =
-            match xl, yl with
-            | [], [] -> true
-            | [], _ -> false
-            | _, [] -> false
-            | xh::xt, yh::yt -> if xh.Name = yh.Name && xh.Type = yh.Type then comparVarLists xt yt else false
+        let rec comparVarLists =
+            List.equalsWith
+                (fun (x:Var) y ->
+                    match y with
+                    | Var y -> x.Name = y.Name && x.Type = y.Type
+                    | _ -> false)
 
         match final with
         | Lambdas(lambdaVarsList, Call(None, mi, callArgs)) 
-            //forall is temp cheat till we know how to deal with properties in call args
-            when (callArgs |> List.forall (function Var _ -> true | _ -> false)) && comparVarLists ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) (callArgs |> List.choose(|Var|_|)) -> 
+            //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args
+            when comparVarLists ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
                 Some(mi, bindingList)
         | _ -> None
     | _ -> None
