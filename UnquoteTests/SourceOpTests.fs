@@ -62,7 +62,7 @@ let ``literal array`` () =
 
 [<Fact>]
 let ``lambda expression with two args`` () =
-    source <@ (fun i j -> i + j)@> =? "fun i j -> i + j"
+    source <@ (fun i j -> i + j + 1)@> =? "fun i j -> i + j + 1"
 
 [<Fact>]
 let ``instance call on literal string value`` () =
@@ -70,7 +70,7 @@ let ``instance call on literal string value`` () =
 
 [<Fact>]
 let ``module and function call with CompiledNames differing from SourceNames`` () =
-    source <@ List.mapi (fun i j -> i + j) [1;2;3] @> =? "List.mapi (fun i j -> i + j) [1; 2; 3]"
+    source <@ List.mapi (fun i j -> i + j + 1) [1;2;3] @> =? "List.mapi (fun i j -> i + j + 1) [1; 2; 3]"
 
 module NonSourceNameModule = let nonSourceNameFunc (x:int) = x
 
@@ -448,7 +448,11 @@ let ``re-sugar unapplied lambda: complex`` () =
 
 [<Fact>] //issue 27
 let ``re-sugar lambda with single tupled arg`` () =
-    <@ fun (g, f) -> g + f @> |> source =? "fun (g, f) -> g + f"
+    <@ fun (g, f) -> g + f + 1 @> |> source =? "fun (g, f) -> g + f + 1"
+
+[<Fact(Skip="currently unable to distinguish lambda call args which are tupled vs those which are not")>] //issue 27
+let ``re-sugared superfluouse lambda with single tupled arg is distinguishable from from non-tupled lambda call`` () =
+    <@ fun (g, f) -> g + f + 1 @> |> source =? "fun (g, f) -> g + f"
 
 [<Fact>] //issue 27
 let ``re-sugar lambda with tupled and non-tupled args`` () =
@@ -456,7 +460,55 @@ let ``re-sugar lambda with tupled and non-tupled args`` () =
 
 [<Fact>] //issue 23
 let ``re-sugar lambda call`` () =
-    source <@  List.mapi (fun i j -> i + j) @> =? "List.mapi (fun i j -> i + j)"
+    source <@  List.mapi (fun i j -> i + j + 1) @> =? "List.mapi (fun i j -> i + j + 1)"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of binary op`` () =
+    <@ (+) 5 @> |> source =? "(+) 5"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of binary op with unreduced arg`` () =
+    <@ (+) (5 + 1) @> |> source =? "(+) (5 + 1)"
+
+let f3 a b c = a + b + c
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with no args`` () =
+    <@ f3 @> |> source =? "f3"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with one arg`` () =
+    <@ f3 1 @> |> source =? "f3 1"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with one arg not reduced`` () =
+    <@ f3 (1 + 1) @> |> source =? "f3 (1 + 1)"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with two args`` () =
+    <@ f3 1 2 @> |> source =? "f3 1 2"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with two args the second not reduced`` () =
+    <@ f3 1 (2 + 3) @> |> source =? "f3 1 (2 + 3)"
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with two args both not reduced`` () =
+    <@ f3 (1 + 2) (2 + 3) @> |> source =? "f3 (1 + 2) (2 + 3)"
+
+[<Fact(Skip="cant do right now")>] //issue 23
+let ``would like to be able to distinguish between superfluous lambda expression and unapplied lambda call`` () =
+    <@ (fun x y -> x + y) @> |> source <>? "(+)" 
+    <@ (fun x y -> x + y) @> |> source =? "(fun x y -> x + y)" 
+
+[<Fact(Skip="cant do right now")>] //issue 23
+let ``would like to be able to distinguish between superfluous lambda expression and partially applied lambda call`` () =
+    <@ (fun x y -> x + y) 1 @> |> source <>? "(+) 1" 
+    <@ (fun x y -> x + y) 1 @> |> source =? "(fun x y -> x + y) 1" 
+
+[<Fact(Skip="cant do right now")>] //issue 23
+let ``would like to be able to distinguish between superfluous lambda expression and fully applied lambda call`` () =
+    <@ (fun x y -> x + y) 1 2 @> |> source <>? "(+) 1 2" 
+    <@ (fun x y -> x + y) 1 2 @> |> source =? "(fun x y -> x + y) 1 2" 
 
 
 

@@ -49,17 +49,17 @@ let ``arithmetic expressions`` () =
 
 [<Fact>]
 let ``simple lambda with application`` () =
-    sprintedReduceSteps <@ (fun i j -> i + j) 1 2 @> =? [
-        "(fun i j -> i + j) 1 2"
-        "3"
+    sprintedReduceSteps <@ (fun i j -> i + j + 1) 1 2 @> =? [
+        "(fun i j -> i + j + 1) 1 2"
+        "4"
     ]
 
 [<Fact>]
 let ``lambda with non-reduced applications`` () =
-    sprintedReduceSteps <@ (fun i j -> i + j) (1+2) 2 @> =? [
-        "(fun i j -> i + j) (1 + 2) 2"
-        "(fun i j -> i + j) 3 2"
-        "5"
+    sprintedReduceSteps <@ (fun i j -> i + j + 1) (1 + 2) 2 @> =? [
+        "(fun i j -> i + j + 1) (1 + 2) 2"
+        "(fun i j -> i + j + 1) 3 2"
+        "6"
     ]
 
 [<Fact>]
@@ -314,6 +314,44 @@ let ``TupleLet variation 2 multiple unreduced sub exprs`` () =
       "let x, y, z = (4, 2, 7) in (x, z)"
       "(4, 7)"
     ]
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of binary op`` () =
+    <@ (+) 5 @> |> sprintedReduceSteps =? [
+      "(+) 5"
+    ]
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of binary op with unreduced arg`` () =
+    <@ (+) (5 + 1) @> |> sprintedReduceSteps =? [
+      "(+) (5 + 1)"
+      "(+) 6"
+    ]
+
+let f3 a b c = a + b + c
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with no args`` () =
+    <@ f3 @> |> sprintedReduceSteps =? ["f3"]
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with one arg`` () =
+    <@ f3 1 @> |> sprintedReduceSteps =? ["f3 1"]
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with one arg not reduced`` () =
+    <@ f3 (1 + 1) @> |> sprintedReduceSteps =? ["f3 (1 + 1)"; "f3 2"]
+
+[<Fact>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with two args`` () =
+    <@ f3 1 2 @> |> sprintedReduceSteps =? ["f3 1 2"]
+
+[<Fact(Skip="cant do right now")>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with two args the second not reduced`` () =
+    <@ f3 1 (2 + 3) @> |> sprintedReduceSteps =? ["f3 1 (2 + 3)"; "f3 1 5"]
+
+[<Fact(Skip="cant do right now")>] //issue 23
+let ``re-sugar partial application of 3 arg lambda call with two args both not reduced`` () =
+    <@ f3 (1 + 2) (2 + 3) @> |> sprintedReduceSteps =? ["f3 (1 + 2) (2 + 3)"; "f3 3 5"]
 
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
 //        "let x = 2 + 3 in fun j -> j + x"
