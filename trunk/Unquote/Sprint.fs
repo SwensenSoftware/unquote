@@ -276,18 +276,36 @@ let (|TupleLet|_|) x =
 let (|IncompleteLambdaCall|_|) x =
     match x with
     | (Let _ | Lambda _) -> //this is definately not a complete lambda call
-        let rec gather vars bindings = function
-            | Let(var, binding, body) -> //the applied args
-                gather ((var.Name, var.Type)::vars) (binding::bindings) body
-            | Lambda(var, body) -> //the unapplied args
-                gather ((var.Name, var.Type)::vars) bindings body
-            | Call(None, mi, args) -> //the partially applied lambda call
-                if List.rev vars = (mi.GetParameters() |> Seq.map (fun pi -> pi.Name, pi.ParameterType) |> Seq.toList) then 
-                    Some(mi, List.rev bindings)
-                else None
-            | _ ->
-                None
-        gather [] [] x
+        let rec gatherLetBindings varsList bindingList = function
+            | TupleLet(vars, binding, body) -> gatherLetBindings ((vars |> List.choose id)::varsList) (binding::bindingList) body
+            | Let(var, binding, body) -> gatherLetBindings ([var]::varsList) (binding::bindingList) body
+            | final -> varsList |> List.rev, bindingList |> List.rev, final
+
+        let varsList, bindingList, final = gatherLetBindings [] [] x
+
+//        let lambdaVarsListEqualToCallArgsTail lambdaVarsList (callArgs:Expr list) =
+//            let lambdaVarsList = List.concat lambdaVarsList
+//            let callArgsTail = callArgs |> Seq.skip (callArgs.Length - lambdaVarsList.Length) |> Seq.toList
+//            List.zip lambdaVarsList callArgsTail
+//            |> List.forall 
+//                (fun (v:Var,a) -> 
+//                    match a with
+//                    | Var(av) when v.Name = av.Name && v.Type = av.Type -> true
+//                    | _ -> false)
+
+        let rec comparVarLists (xl:Var list) (yl:Var list) =
+            match xl, yl with
+            | [], [] -> true
+            | [], _ -> false
+            | _, [] -> false
+            | xh::xt, yh::yt -> if xh.Name = yh.Name && xh.Type = yh.Type then comparVarLists xt yt else false
+
+        match final with
+        | Lambdas(lambdaVarsList, Call(None, mi, callArgs)) 
+            //forall is temp cheat till we know how to deal with properties in call args
+            when (callArgs |> List.forall (function Var _ -> true | _ -> false)) && comparVarLists ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) (callArgs |> List.choose(|Var|_|)) -> 
+                Some(mi, bindingList)
+        | _ -> None
     | _ -> None
                 
 //todo:
@@ -311,7 +329,12 @@ let sprint expr =
         //must come before Lambdas
         | IncompleteLambdaCall(mi, args) -> //assume lambdas are only part of modules.
             match binaryOps |> Map.tryFind mi.Name with
-                | Some(symbol,_,_) -> sprintf "(%s)" symbol
+                | Some(symbol,_,_) -> 
+                    let sprintedSymbol = sprintf "(%s)" symbol
+                    match args.Length with
+                    | 1 -> applyParens 20 (sprintf "%s %s" sprintedSymbol (sprintCurriedArgs args))
+                    | 0 -> sprintedSymbol
+                    | _ -> failwithf "partial applied binary op should only have 0 or 1 args but has more: %A" args
                 | None ->
                     match unaryOps |> Map.tryFind mi.Name with
                     | Some(symbol) -> sprintf "(~%s)" symbol

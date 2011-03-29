@@ -35,7 +35,7 @@ let evalValue (expr:Expr) =
 let rec isReduced = function
     | Value _ | Lambda _ | Var _ | Unit -> true
     | NewUnionCase(_,args) | NewTuple(args) | NewArray(_,args) | Sprint.IncompleteLambdaCall(_,args) when args |> allReduced -> true
-    | Coerce(arg,_) | TupleGet(arg, _) when arg |> isReduced -> true
+    | Coerce(arg,_) | TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
     | _ -> false
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
