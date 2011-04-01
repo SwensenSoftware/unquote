@@ -233,12 +233,29 @@ let isGenericValue =
             with
             | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
 
+//suprisingly, this is actually used twice.
+///test whether the Expr is a Var and equals the given Var property-wise
+let varEqualsExpr (x:Var) = function
+    | Var y -> x.Name = y.Name && x.Type = y.Type && x.IsMutable = y.IsMutable
+    | _ -> false
+
 let (|TupleLet|_|) x =
+    ///TupleLet start variation 1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
+    let (|TupleLetStart1|_|) = function
+        | (Let(_,TupleGet(body, _),_) as start) ->
+            Some(start, body)
+        | _ -> None
+
+    ///TupleLet start variation 2) let patternInput = expression in let a = TupleGet(patternInput, index) in ...
+    let (|TupleLetStart2|_|) = function
+        //this is getting a little crazy, but it is the observed pattern, and pi = piAgain is a necessary restriction
+        //so as to not have too wide a net.
+        | Let(var, body, (Let(_,TupleGet(varAgain,_),_) as start)) when varEqualsExpr var varAgain ->
+            Some(start,body)
+        | _ -> None
+
     match x with
-    //two variations:
-    //  1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
-    //  2) let patternInput = expression in let a = TupleGet(patternInput, index) in ...
-    | (Let(_,TupleGet(body, _),_) as start) | Let(_, body, (Let(_,TupleGet(_),_) as start)) ->
+    | TupleLetStart1(start,body) | TupleLetStart2(start,body) ->
         let rec gather varIndexList = function
             | Let(var,TupleGet(_,index),next) ->
                 gather ((var,index)::varIndexList) next
@@ -292,17 +309,10 @@ let (|IncompleteLambdaCall|_|) x =
 
         let varsList, bindingList, final = gatherLetBindings [] [] x
 
-        let rec comparVarLists =
-            List.equalsWith
-                (fun (x:Var) y ->
-                    match y with
-                    | Var y -> x.Name = y.Name && x.Type = y.Type
-                    | _ -> false)
-
         match final with
         | Lambdas(lambdaVarsList, Call(None, mi, callArgs)) 
             //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args
-            when comparVarLists ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
+            when List.equalsWith varEqualsExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
                 Some(mi, bindingList)
         | _ -> None
     | _ -> None
