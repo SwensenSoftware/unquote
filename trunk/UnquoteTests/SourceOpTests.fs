@@ -495,6 +495,11 @@ let ``re-sugar partial application of 3 arg lambda call with two args the second
 let ``re-sugar partial application of 3 arg lambda call with two args both not reduced`` () =
     <@ f3 (1 + 2) (2 + 3) @> |> source =? "f3 (1 + 2) (2 + 3)"
 
+let ftupled (a,b) c = a + b + c + 1
+[<Fact>] //issue 23
+let ``re-sugar partial application with first, single tuple arg applied`` () =
+    <@ ftupled (1,2) @> |> source =? "ftupled (1, 2)"
+
 [<Fact(Skip="cant do right now")>] //issue 23
 let ``would like to be able to distinguish between superfluous lambda expression and unapplied lambda call`` () =
     <@ (fun x y -> x + y) @> |> source <>? "(+)" 

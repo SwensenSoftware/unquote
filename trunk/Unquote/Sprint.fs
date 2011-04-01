@@ -242,7 +242,10 @@ let (|TupleLet|_|) x =
         let rec gather varIndexList = function
             | Let(var,TupleGet(_,index),next) ->
                 gather ((var,index)::varIndexList) next
-            | final -> varIndexList, final
+            | final -> 
+                 //need to sort varIndexList since tuple let bindings in lambda expressions
+                 //are order in forward order, but normal tuple let bindings in reverse order.
+                (varIndexList |> List.sortBy snd), final
         
         let varIndexList, final = gather [] start
 
@@ -260,10 +263,13 @@ let (|TupleLet|_|) x =
         let varList = 
             let rec fillInGaps i input output =
                 match input with
-                | [] -> (List.init (tupleLength - i) (fun _ -> None)) @ output //pad output with None when there are "_" bindings extending past length of input
+                | [] -> 
+                    (List.init (tupleLength - i) (fun _ -> None)) @ output //pad output with None when there are "_" bindings extending past length of input
                 | (var,index)::tail -> 
-                    if index = i then fillInGaps (i+1) tail (Some(var)::output)
-                    else fillInGaps (i+1) input (None::output)
+                    if index = i then 
+                        fillInGaps (i+1) tail (Some(var)::output)
+                    else 
+                        fillInGaps (i+1) input (None::output)
             fillInGaps 0 varIndexList [] |> List.rev
 
         Some(varList, body, final)
@@ -277,9 +283,12 @@ let (|IncompleteLambdaCall|_|) x =
     match x with
     | (Let _ | Lambda _) -> //this is definately not a complete lambda call
         let rec gatherLetBindings varsList bindingList = function
-            | TupleLet(vars, binding, body) -> gatherLetBindings ((vars |> List.choose id)::varsList) (binding::bindingList) body
-            | Let(var, binding, body) -> gatherLetBindings ([var]::varsList) (binding::bindingList) body
-            | final -> varsList |> List.rev, bindingList |> List.rev, final
+            | TupleLet(vars, binding, body) -> 
+                gatherLetBindings ((vars |> List.choose id)::varsList) (binding::bindingList) body
+            | Let(var, binding, body) -> 
+                gatherLetBindings ([var]::varsList) (binding::bindingList) body
+            | final -> 
+                varsList |> List.rev, bindingList |> List.rev, final
 
         let varsList, bindingList, final = gatherLetBindings [] [] x
 
