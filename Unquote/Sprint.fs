@@ -246,6 +246,8 @@ let varEqualsExpr (x:Var) = function
 ///Test whether the given expression represents a tuple let binding: e.g. let x,y = 1,2.
 ///Must come before Let pattern and after IncompleteLambdaCall pattern.
 let (|TupleLet|_|) x =
+    //N.B. breaking out the two TupleLetStart variations allows us to using | pattern match with start and body binding.
+
     ///TupleLet start variation 1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
     let (|TupleLetStart1|_|) = function
         | (Let(_,TupleGet(body, _),_) as start) ->
