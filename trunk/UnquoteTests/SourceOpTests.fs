@@ -277,8 +277,18 @@ let ``TupleLet variation 2`` () =
 
 [<Fact>]
 let ``mutable TupleLet`` () =
-    source <@ let mutable a,b = (1,2) in a,b @> =? 
+    source <@ let mutable a, b = (1,2) in a,b @> =? 
         "let mutable a, b = (1, 2) in (a, b)"
+
+[<Fact>]
+let ``TupleLet variation 1 preceded and followed by non-tupled let`` () =
+    source <@ let j = 3 in let a, b = t in let k = 2 in () @> =? 
+        "let j = 3 in let a, b = t in let k = 2 in ()"
+
+[<Fact>]
+let ``TupleLet variation 2 preceded and followed by non-tupled let`` () =
+    source <@ let j = 3 in let a, b = (1, 2) in let k = 2 in () @> =? 
+        "let j = 3 in let a, b = (1, 2) in let k = 2 in ()"
 
 let longTuple = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)
 [<Fact>] //issue 19
@@ -499,6 +509,11 @@ let ftupled (a,b) c d = a + b + c + d + 1
 [<Fact>] //issue 23
 let ``re-sugar partial application with first, single tuple arg applied`` () =
     <@ ftupled (1,2) @> |> source =? "ftupled (1, 2)"
+
+let ftupled2 j (a,b) c d = j + a + b + c + d + 1
+[<Fact>] //issue 23
+let ``re-sugar partial application with first single arg applied and second tuple arg applied`` () =
+    <@ ftupled2 3 (1,2) @> |> source =? "ftupled2 3 (1, 2)"
 
 [<Fact(Skip="too crazy to deal with right now")>] //issue 23
 let ``re-sugar partial application with first tuple arg applied and second non-tuple arg applied`` () =
