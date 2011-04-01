@@ -72,6 +72,8 @@ let binaryOps =
     ] |> Map.ofList
 
 //future feature, support custom ops
+///Match non-custom binary infix Call patterns.
+///Must come before Call pattern.
 let (|BinaryInfixCall|_|) = function
     | Call (_, mi, lhs::rhs::[]) ->
         match binaryOps |> Map.tryFind mi.Name with
@@ -221,6 +223,8 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 let isListUnionCase (uci:UnionCaseInfo) = 
     uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
 
+///Test whether the given MemberInfo instance represents an F# Generic Value rather than 
+///a Unit argument function.  Assumes that the MemberInfo instance is for a .NET member taking zero arguments.
 let isGenericValue =
     memoize //performance testing shows about 10% performance increase in SourceOpTests.``Call distinguishes between generic value Call and unit function Call`` using memoization 
         (fun (mi:MemberInfo) ->
@@ -234,11 +238,13 @@ let isGenericValue =
             | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
 
 //suprisingly, this is actually used twice.
-///test whether the Expr is a Var and equals the given Var property-wise
+///Test whether the Expr is a Var and equals the given Var property-wise
 let varEqualsExpr (x:Var) = function
     | Var y -> x.Name = y.Name && x.Type = y.Type && x.IsMutable = y.IsMutable
     | _ -> false
 
+///Test whether the given expression represents a tuple let binding: e.g. let x,y = 1,2.
+///Must come before Let pattern and after IncompleteLambdaCall pattern.
 let (|TupleLet|_|) x =
     ///TupleLet start variation 1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
     let (|TupleLetStart1|_|) = function
@@ -293,8 +299,9 @@ let (|TupleLet|_|) x =
     | _ -> None
 
 ////need to check all args are reduced?
-///Partial application and zero application of Lambda call (e.g. List.map (+), or id)
-///cases: 1) Let .. Lambdas .. Call
+///Partial application and zero application of Lambda call (e.g. List.map (+), or id).
+///Must come before Let and Lambdas patterns.
+///Cases: 1) Let .. Lambdas .. Call
 ///       2) Lambdas .. Call
 let (|IncompleteLambdaCall|_|) x =
     match x with
@@ -320,7 +327,6 @@ let (|IncompleteLambdaCall|_|) x =
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
-//  need to look into DerivedPatterns.Applications
 let sprint expr =
     let rec sprint context expr =
         let applyParens = applyParensForPrecInContext context
