@@ -57,6 +57,10 @@ let rec reduce (expr:Expr) =
     | Applications(fExpr,args) ->
         if args |> List.concat |> allReduced then evalValue expr
         else Expr.Applications(fExpr, args |> List.map reduceAll)
+    | Sprint.Range(_,_,a,b) when [a;b] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
+        evalValue expr
+    | Sprint.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
+        evalValue expr
     | ShapeVar _ -> expr
     | ShapeLambda _ -> expr
     | ShapeCombination (o, exprs) -> 

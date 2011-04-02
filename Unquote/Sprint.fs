@@ -326,8 +326,6 @@ let (|IncompleteLambdaCall|_|) x =
         | _ -> None
     | _ -> None
 
-type RangeKind = | SeqRange | ListRange | ArrayRange
-
 //only used by Range and RangeStep
 let rangeOuterInnerMethodInfos (miOuter:MethodInfo) (miInner:MethodInfo) conversionMiName =
     miInner.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" && miInner.Name = "CreateSequence" 
@@ -341,11 +339,11 @@ let (|Range|_|) x =
     
     match x with 
     | RangeOp(a,b) -> 
-        Some(SeqRange, "{","}",a,b)
+        Some("{","}",a,b)
     | Call(None, miOuter, [Call(None, miInner, [RangeOp(a,b)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToList" -> 
-        Some(ListRange, "[","]",a,b)
+        Some("[","]",a,b)
     | Call(None, miOuter, [Call(None, miInner, [RangeOp(a,b)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
-        Some(ArrayRange, "[|", "|]", a,b)
+        Some("[|", "|]", a,b)
     | _ -> None
 
 ///Match a sequence, list, or array op_RangeStep expression, return (startToken, endToken, startExpression, stepExpression, endExpression). Must come before Call patterns.
@@ -356,11 +354,11 @@ let (|RangeStep|_|) x =
 
     match x with
     | RangeStepOp(a,b,c) -> 
-        Some(SeqRange, "{","}",a,b,c)
+        Some("{","}",a,b,c)
     | Call(None, miOuter, [Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToList" -> 
-        Some(ListRange, "[","]",a,b,c)
+        Some("[","]",a,b,c)
     | Call(None, miOuter, [Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
-        Some(ArrayRange, "[|", "|]", a,b,c)
+        Some("[|", "|]", a,b,c)
     | _ -> None
                 
 //todo:
@@ -425,9 +423,9 @@ let sprint expr =
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
             //but I think the sprinting of lhs it is reduced conveys type info sufficiently enough
             applyParens 16 (sprintf "%s :? %s" (sprint 16 lhs) (sprintSig (mi.GetGenericArguments().[0])))
-        | Range(_,startToken,endToken,a,b) -> //not sure about precedence for op ranges
+        | Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges
             sprintf "%s%s..%s%s" startToken (sprint 0 a) (sprint 0 b) endToken
-        | RangeStep(_,startToken,endToken,a,b,c) ->
+        | RangeStep(startToken,endToken,a,b,c) ->
             sprintf "%s%s..%s..%s%s" startToken (sprint 0 a) (sprint 0 b) (sprint 0 c) endToken
         | Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args) //not sure what precedence is
