@@ -353,6 +353,67 @@ let ``re-sugar partial application of 3 arg lambda call with two args the second
 let ``re-sugar partial application of 3 arg lambda call with two args both not reduced`` () =
     <@ f3 (1 + 2) (2 + 3) @> |> sprintedReduceSteps =? ["f3 (1 + 2) (2 + 3)"; "f3 3 5"]
 
+[<Fact>] //issue 30
+let ``list range`` () =
+    <@ [1..3] @> |> sprintedReduceSteps =? [
+      "[1..3]"
+      "[1; 2; 3]"
+    ]
+
+[<Fact>] //issue 30
+let ``list range step`` () =
+    <@ [1..3..9] @> |> sprintedReduceSteps =? [
+      "[1..3..9]"
+      "[1; 4; 7]"
+    ]
+
+[<Fact>] //issue 30
+let ``array range`` () =
+    <@ [|1..3|] @> |> sprintedReduceSteps =? [
+      "[|1..3|]"
+      "[|1; 2; 3|]"
+    ]
+
+[<Fact>] //issue 30
+let ``array range step`` () =
+    <@ [|1..3..9|] @> |> sprintedReduceSteps =? [
+      "[|1..3..9|]"
+      "[|1; 4; 7|]"
+    ]
+
+
+[<Fact>] //issue 30
+let ``list range with sub expr`` () =
+    <@ [0 + 1..0 + 3] @> |> sprintedReduceSteps =? [
+      "[0 + 1..0 + 3]"
+      "[1..3]"
+      "[1; 2; 3]"
+    ]
+
+[<Fact>] //issue 30
+let ``list range step with sub expr`` () =
+    <@ [0 + 1..0 + 3..0 + 9] @> |> sprintedReduceSteps =? [
+      "[0 + 1..0 + 3..0 + 9]"
+      "[1..3..9]"
+      "[1; 4; 7]"
+    ]
+
+[<Fact>] //issue 30
+let ``array range with sub expr`` () =
+    <@ [|0 + 1..0 + 3|] @> |> sprintedReduceSteps =? [
+      "[|0 + 1..0 + 3|]"
+      "[|1..3|]"
+      "[|1; 2; 3|]"
+    ]
+
+[<Fact>] //issue 30
+let ``array range step with sub expr`` () =
+    <@ [|0 + 1..0 + 3..0 + 9|] @> |> sprintedReduceSteps =? [
+      "[|0 + 1..0 + 3..0 + 9|]"
+      "[|1..3..9|]"
+      "[|1; 4; 7|]"
+    ]
+
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> sprintedReduceSteps =? [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"
