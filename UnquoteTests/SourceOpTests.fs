@@ -264,6 +264,12 @@ let ``instace FieldGet`` () =
 let ``static FieldGet`` () =
     source <@ String.Empty @> =? "String.Empty"
 
+[<Fact(Skip="Precedence left of . operator wrong for applications")>]
+let ``set instance field on constructed object`` () =
+    source <@ Foo().X <- 5 @> =? "Foo().X <- 5"
+    source <@ (Foo().Add(Foo())).X <- 5 @> =? "(Foo().Add(Foo())).X <- 5"
+    source <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =? "\"abcdefg\".Substring(0, 5).Substring(0, 2)"
+
 let t = (1,2)
 [<Fact>]
 let ``TupleLet variation 1`` () =
@@ -534,6 +540,7 @@ let ``would like to be able to distinguish between superfluous lambda expression
     <@ (fun x y -> x + y) 1 2 @> |> source <>? "(+) 1 2" 
     <@ (fun x y -> x + y) 1 2 @> |> source =? "(fun x y -> x + y) 1 2" 
 
+//--- List and Array Range and RangeSet
 
 [<Fact>] //issue 30
 let ``list range`` () =
@@ -551,35 +558,114 @@ let ``array range`` () =
 let ``array range step`` () =
     <@ [|1..5..10|] @> |> source =? "[|1..5..10|]"
 
+//--- PropertyGet and PropertySet
 
-type ObjWithStaticProperty =
-    static member StaticProperty
+type PropType() = 
+    member this.Item
+        with get(index) = 3
+        and set index value = ()
+     member this.InstancePropOneArg
+        with get(index) = 3
+        and set index value = ()
+     member this.InstancePropTwoArgs
+        with get(i1,i2) = 3
+        and set (i1,i2) value = ()
+
+    static member StaticPropNoArgs
         with get () = 3
-        and  set (value:int) = ()
+        and  set (value:int) = ()    
 
-    static member StaticPropertyIndexed1
+    static member StaticPropOneArg
         with get (x:int) = 3
         and  set (x:int) (value:int) = ()
 
-    static member StaticPropertyIndexed2
+    static member StaticPropTwoArgs
         with get (x:int,y:int) = 3
         and  set (x:int,y:int) (value:int) = ()
 
-[<Fact(Skip="future feature")>]
-let ``set static field`` () =
-    source <@ ObjWithStaticProperty.StaticProperty <- 3  @> =? "ObjWithStaticProperty.StaticProperty <- 3"
-//    source <@ ObjWithStaticProperty.StaticPropertyIndexed1.[1] <- 3  @> =? "ObjWithStaticProperty.StaticPropertyIndexed1[1] <- 3"
-//    source <@ ObjWithStaticProperty.StaticPropertyIndexed2.[1,2] <- 3  @> =? "ObjWithStaticProperty.StaticPropertyIndexed1[1,2] <- 3"
 
-//need to think up some multi-arg item and named getter scenarios
-//Future features:
+let pt = new PropType()
 
-[<Fact(Skip="Future feature")>]
-let ``pattern match let binding`` () =
-    source <@  let (x,y) = 2,3 in () @> =? "let (x, y) = (2, 3)"
+//--- PropertyGet
 
-[<Fact(Skip="Precedence left of . operator wrong for applications")>]
-let ``set instance field on constructed object`` () =
-    source <@ Foo().X <- 5 @> =? "Foo().X <- 5"
-    source <@ (Foo().Add(Foo())).X <- 5 @> =? "(Foo().Add(Foo())).X <- 5"
-    source <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =? "\"abcdefg\".Substring(0, 5).Substring(0, 2)"
+[<Fact>] //issue 31
+let ``PropertyGet indexed instance`` () =
+    <@ pt.[1] @> |> source =? "pt.[1]"
+
+[<Fact>] //issue 31
+let ``PropertyGet indexed instance, arg not reduced`` () =
+    <@ pt.[1 + 2] @> |> source =? "pt.[1 + 2]"
+
+[<Fact>] //issue 31
+let ``PropertyGet instance one arg`` () =
+    <@ pt.InstancePropOneArg(1) @> |> source =? "pt.InstancePropOneArg(1)"
+
+[<Fact>] //issue 31
+let ``PropertyGet instance one arg, arg not reduced`` () =
+    <@ pt.InstancePropOneArg(1 + 2) @> |> source =? "pt.InstancePropOneArg(1 + 2)"
+
+[<Fact>] //issue 31
+let ``PropertyGet instance two args`` () =
+    <@ pt.InstancePropTwoArgs(1, 2) @> |> source =? "pt.InstancePropTwoArgs(1, 2)"
+
+[<Fact>] //issue 31
+let ``PropertyGet instance two args, args not reduced`` () =
+    <@ pt.InstancePropTwoArgs(1 + 1, 2 + 1) @> |> source =? "pt.InstancePropTwoArgs(1 + 1, 2 + 1)"
+
+[<Fact>] //issue 31
+let ``PropertyGet Static one arg`` () =
+    <@ PropType.StaticPropOneArg(1) @> |> source =? "PropType.StaticPropOneArg(1)"
+
+[<Fact>] //issue 31
+let ``PropertyGet Static one arg, arg not reduced`` () =
+    <@ PropType.StaticPropOneArg(1 + 2) @> |> source =? "PropType.StaticPropOneArg(1 + 2)"
+
+[<Fact>] //issue 31
+let ``PropertyGet Static two args`` () =
+    <@ PropType.StaticPropTwoArgs(1, 2) @> |> source =? "PropType.StaticPropTwoArgs(1, 2)"
+
+[<Fact>] //issue 31
+let ``PropertyGet Static two args, args not reduced`` () =
+    <@ PropType.StaticPropTwoArgs(1 + 1, 2 + 1) @> |> source =? "PropType.StaticPropTwoArgs(1 + 1, 2 + 1)"
+
+//---- PropertySet
+
+[<Fact>] //issue 31
+let ``PropertySet indexed instance`` () =
+    <@ pt.[1] <- 3 @> |> source =? "pt.[1] <- 3"
+
+[<Fact>] //issue 31
+let ``PropertySet indexed instance, arg not reduced`` () =
+    <@ pt.[1 + 2] <- (3 + 1) @> |> source =? "pt.[1 + 2] <- 3 + 1"
+
+[<Fact>] //issue 31
+let ``PropertySet instance one arg`` () =
+    <@ pt.InstancePropOneArg(1) <- 3 @> |> source =? "pt.InstancePropOneArg(1) <- 3"
+
+[<Fact>] //issue 31
+let ``PropertySet instance one arg, arg not reduced`` () =
+    <@ pt.InstancePropOneArg(1 + 2) <- (3 + 1) @> |> source =? "pt.InstancePropOneArg(1 + 2) <- 3 + 1"
+
+[<Fact>] //issue 31
+let ``PropertySet instance two args`` () =
+    <@ pt.InstancePropTwoArgs(1, 2) <- 3 @> |> source =? "pt.InstancePropTwoArgs(1, 2) <- 3"
+
+[<Fact>] //issue 31
+let ``PropertySet instance two args, args not reduced`` () =
+    <@ pt.InstancePropTwoArgs(1 + 1, 2 + 1) <- 3 @> |> source =? "pt.InstancePropTwoArgs(1 + 1, 2 + 1) <- 3"
+
+[<Fact>] //issue 31
+let ``PropertySet Static one arg`` () =
+    <@ PropType.StaticPropOneArg(1) <- 3 @> |> source =? "PropType.StaticPropOneArg(1) <- 3"
+
+[<Fact>] //issue 31
+let ``PropertySet Static one arg, arg not reduced`` () =
+    <@ PropType.StaticPropOneArg(1 + 2) <- (3 + 1) @> |> source =? "PropType.StaticPropOneArg(1 + 2) <- 3 + 1"
+
+[<Fact>] //issue 31
+let ``PropertySet Static two args`` () =
+    <@ PropType.StaticPropTwoArgs(1, 2) <- 3 @> |> source =? "PropType.StaticPropTwoArgs(1, 2) <- 3"
+
+[<Fact>] //issue 31
+let ``PropertySet Static two args, args not reduced`` () =
+    <@ PropType.StaticPropTwoArgs(1 + 1, 2 + 1) <- (3 + 1) @> |> source =? "PropType.StaticPropTwoArgs(1 + 1, 2 + 1) <- 3 + 1"

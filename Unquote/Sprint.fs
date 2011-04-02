@@ -124,15 +124,33 @@ let sprint expr =
             | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name //also includes "Item" with zero args
             | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
             | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
-        | P.PropertyGet(None, pi, _) -> //static get (note: can't accept params)
-            if ER.isOpenModule pi.DeclaringType then 
-                sprintf "%s" pi.Name
-            else
-                sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+        | P.PropertyGet(None, pi, args) -> //static get (note: can't accept params)
+            let sprintedName =
+                if ER.isOpenModule pi.DeclaringType then 
+                    sprintf "%s" pi.Name
+                else
+                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+
+            if args.Length = 0 then sprintedName
+            else applyParens 20 (sprintf "%s(%s)" sprintedName (sprintTupledArgs args))
+        | P.PropertySet(target, pi, piArgs, rhs) ->
+            let lhs = //leverage PropertyGet sprinting
+                match target with
+                | Some(instance) -> Expr.PropertyGet(instance, pi, piArgs)
+                | None -> Expr.PropertyGet(pi, piArgs)
+            //don't know what precedence is
+            applyParens 13 (sprintf "%s <- %s" (sprint 0 lhs) (sprint 0 rhs))
         | P.FieldGet(Some(target), fi) ->
             sprintf "%s.%s" (sprint 22 target) fi.Name
         | P.FieldGet(None, fi) ->
             sprintf "%s.%s" fi.DeclaringType.Name fi.Name
+        | P.FieldSet(target, fi, rhs) ->
+            let lhs = //leverage FieldGet sprinting
+                match target with
+                | Some(instance) -> Expr.FieldGet(instance, fi) 
+                | None -> Expr.FieldGet(fi)
+            //don't know what precedence is
+            applyParens 13 (sprintf "%s <- %s" (sprint 0 lhs) (sprint 0 rhs))
         | DP.Unit -> "()" //must come before Value pattern
         | P.Value(o, _) ->
             match o with
@@ -199,10 +217,6 @@ let sprint expr =
         | P.VarSet(v, arg) ->
             //not sure what precedence should be, using precedence for < op
             applyParens 13 (sprintf "%s <- %s" v.Name (sprint 0 arg)) 
-        | P.FieldSet(Some(target), fi, arg) ->
-            applyParens 13 (sprintf "%s.%s <- %s" (sprint 22 target) fi.Name (sprint 0 arg))
-        | P.FieldSet(None, fi, arg) ->
-            applyParens 13 (sprintf "%s.%s <- %s" fi.DeclaringType.Name fi.Name (sprint 0 arg))
         //extremely verbose
         | P.UnionCaseTest(target, uci) ->
             let ucMatch =
