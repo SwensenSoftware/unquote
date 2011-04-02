@@ -535,6 +535,21 @@ let ``would like to be able to distinguish between superfluous lambda expression
     <@ (fun x y -> x + y) 1 2 @> |> source =? "(fun x y -> x + y) 1 2" 
 
 
+[<Fact>] //issue 30
+let ``list range`` () =
+    <@ [1..5] @> |> source =? "[1..5]"
+
+[<Fact>] //issue 30
+let ``list range step`` () =
+    <@ [1..5..10] @> |> source =? "[1..5..10]"
+
+[<Fact>] //issue 30
+let ``array range`` () =
+    <@ [|1..5|] @> |> source =? "[|1..5|]"
+
+[<Fact>] //issue 30
+let ``array range step`` () =
+    <@ [|1..5..10|] @> |> source =? "[|1..5..10|]"
 
 
 type ObjWithStaticProperty =
