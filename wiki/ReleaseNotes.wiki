@@ -3,6 +3,24 @@
 
 = Release Notes =
 
+== v1.3.0, 4/2/11 ==
+
+Significant release: many bug fixes and feature enhancements especially in the area of re-sugaring complex expressions.
+
+  * Issue 9: Decompiler Bug or F# Quotation Bug: generic empty list treated as call
+  * Issue 15: Reduction Bug: error reducing sprintf Application; lhs match of Application needs to be loosened
+  * Issue 21: Decompiler Feature Request: sprint Lambda Unit vars literally
+  * Issue 22: Decompiler Bug: backwards pipe precedence incorrect
+  * Issue 23: Decompiler Feature Request: re-sugar partially applied lambda expressions
+  * Issue 24: Reduction Feature Request: do not reduce expressions which return Lambda Values
+  * Issue 25: Decompiler Feature Request: re-sugar unapplied lambda expressions
+  * Issue 26: Decompiler Feature Request: support PropertySet expressions
+  * Issue 27: Decompiler Feature Request: re-sugar Lambdas with tupled args
+  * Issue 28: Decompiler Bug or F# Quotation Bug: exception with certain list NewUnionCases
+  * Issue 29: Decompiler Enhancement: re-sugar tuple let expressions
+  * Issue 30: Decompiler Feature Request: re-sugar list and array range expressions
+  * Issue 31: Decompiler Bug: static PropetyGet expressions with args not sprinting args
+
 == v1.2.3, 3/13/11 ==
 
 Incremental release: bug fixes and feature enhancements.
