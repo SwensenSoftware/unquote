@@ -19,13 +19,15 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Quotations.Patterns
-open Microsoft.FSharp.Quotations.DerivedPatterns
-open Microsoft.FSharp.Quotations.ExprShape
 open Microsoft.FSharp.Linq.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
+module P = Microsoft.FSharp.Quotations.Patterns
+module DP = Microsoft.FSharp.Quotations.DerivedPatterns
+module ES = Microsoft.FSharp.Quotations.ExprShape
+
 open Swensen
+module EP = Swensen.Unquote.ExtraPatterns
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
@@ -33,9 +35,9 @@ let evalValue (expr:Expr) =
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
-    | Value _ | Lambda _ | Var _ | Unit -> true
-    | NewUnionCase(_,args) | NewTuple(args) | NewArray(_,args) | Sprint.IncompleteLambdaCall(_,args) when args |> allReduced -> true
-    | Coerce(arg,_) | TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
+    | P.Value _ | P.Lambda _ | P.Var _ | DP.Unit -> true
+    | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced -> true
+    | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
     | _ -> false
 and allReduced x = 
     x |> List.filter (isReduced>>not) |> List.length = 0
@@ -48,25 +50,25 @@ and allReduced x =
 let rec reduce (expr:Expr) = 
     match expr with
     //if lhs is a Application, PropertyGet, Call, or other unit returning call, may want to discard, rather than deal with null return value.
-    | Sequential (Sequential(lhs, u), rhs) -> //u should be Unit (not included in match since we want to use it)
+    | P.Sequential (P.Sequential(lhs, u), rhs) -> //u should be Unit (not included in match since we want to use it)
         if lhs |> isReduced then rhs
         else Expr.Sequential(Expr.Sequential(reduce lhs, u), rhs)
-    | Sequential (lhs, rhs) ->
+    | P.Sequential (lhs, rhs) ->
         if lhs |> isReduced then rhs
         else Expr.Sequential(reduce lhs, rhs)
-    | Applications(fExpr,args) ->
+    | DP.Applications(fExpr,args) ->
         if args |> List.concat |> allReduced then evalValue expr
         else Expr.Applications(fExpr, args |> List.map reduceAll)
-    | Sprint.Range(_,_,a,b) when [a;b] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
+    | EP.Range(_,_,a,b) when [a;b] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
         evalValue expr
-    | Sprint.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
+    | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
         evalValue expr
-    | ShapeVar _ -> expr
-    | ShapeLambda _ -> expr
-    | ShapeCombination (o, exprs) -> 
+    | ES.ShapeVar _ -> expr
+    | ES.ShapeLambda _ -> expr
+    | ES.ShapeCombination (o, exprs) -> 
         if isReduced expr then expr
         elif allReduced exprs then evalValue expr
-        else RebuildShapeCombination(o, reduceAll exprs)
+        else ES.RebuildShapeCombination(o, reduceAll exprs)
 and reduceAll exprList =
     exprList |> List.map reduce
     

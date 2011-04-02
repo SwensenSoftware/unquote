@@ -49,6 +49,8 @@
     <Compile Include="Utils\Regex.fs" />
     <Compile Include="Utils\Printf.fs" />
     <Compile Include="Utils\ListExt.fs" />
+    <Compile Include="ExtraReflection.fs" />
+    <Compile Include="ExtraPatterns.fs" />
     <Compile Include="Sprint.fs" />
     <Compile Include="Reduce.fs" />
     <Compile Include="TypeExt.fs" />
