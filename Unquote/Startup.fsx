@@ -29,6 +29,12 @@ open Swensen
 #load @"Utils\ListExt.fs"
 open Swensen
 
+#load "ExtraReflection.fs"
+open Swensen.Unquote
+
+#load "ExtraPatterns.fs"
+open Swensen.Unquote
+
 #load "Sprint.fs"
 open Swensen.Unquote
 
