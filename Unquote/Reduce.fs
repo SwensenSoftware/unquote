@@ -50,7 +50,7 @@ and allReduced x =
 let rec reduce (expr:Expr) = 
     match expr with
     //if lhs is a Application, PropertyGet, Call, or other unit returning call, may want to discard, rather than deal with null return value.
-    | P.Sequential (P.Sequential(lhs, u), rhs) -> //u should be Unit (not included in match since we want to use it)
+    | P.Sequential (P.Sequential(lhs, (DP.Unit as u)), rhs) -> //u should be Unit (not included in match since we want to use it)
         if lhs |> isReduced then rhs
         else Expr.Sequential(Expr.Sequential(reduce lhs, u), rhs)
     | P.Sequential (lhs, rhs) ->
