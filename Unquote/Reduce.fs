@@ -40,7 +40,7 @@ let rec isReduced = function
     | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
     | _ -> false
 and allReduced x = 
-    x |> List.filter (isReduced>>not) |> List.length = 0
+    x |> List.forall isReduced
 
 // need to handle nested application/lambda expr: replace lambda vars with reduced applications
 // unquote <@ ((fun i j -> i + j) 3 4) + 2 @>
