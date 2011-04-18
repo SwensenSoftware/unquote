@@ -23,7 +23,7 @@ open System.Text.RegularExpressions
 let (|InterpretedMatch|_|) pattern input =
     if input = null then None
     else
-        let m = Regex.Match(input, pattern) //we can expect 
+        let m = Regex.Match(input, pattern)
         if m.Success then Some [for x in m.Groups -> x]
         else None
     
@@ -31,7 +31,7 @@ let (|InterpretedMatch|_|) pattern input =
 let (|CompiledMatch|_|) pattern input =
     if input = null then None
     else
-        let m = Regex.Match(input, pattern, RegexOptions.Compiled) //we can expect 
+        let m = Regex.Match(input, pattern, RegexOptions.Compiled)
         if m.Success then Some [for x in m.Groups -> x]
         else None
 
