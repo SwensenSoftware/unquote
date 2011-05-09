@@ -94,6 +94,9 @@ let sprint expr =
             sprintf "%s%s..%s%s" startToken (sprint 0 a) (sprint 0 b) endToken
         | EP.RangeStep(startToken,endToken,a,b,c) ->
             sprintf "%s%s..%s..%s%s" startToken (sprint 0 a) (sprint 0 b) (sprint 0 c) endToken
+        | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && mi.Name = "UnboxGeneric" -> //i.e. :?>
+            let ty = mi.GetGenericArguments().[0]
+            applyParens 16 (sprintf "%s :?> %s" (sprint 16 target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args) //not sure what precedence is
         | P.Call(None, mi, args) -> //static call (we assume F# functions are always static calls for simplicity)

@@ -669,3 +669,21 @@ let ``PropertySet Static two args`` () =
 [<Fact>] //issue 31
 let ``PropertySet Static two args, args not reduced`` () =
     <@ PropType.StaticPropTwoArgs(1 + 1, 2 + 1) <- (3 + 1) @> |> source =? "PropType.StaticPropTwoArgs(1 + 1, 2 + 1) <- 3 + 1"
+
+let xx = box 3
+[<Fact>] //issue 33
+let ``GenericUnbox Intrinsic function`` () =
+    <@ xx :?> int @> |> source =? "xx :?> int"
+
+[<Fact>]//issue 33
+let ``GenericUnbox Intrinsic function, precedence of left hand side`` () =
+    <@ box 3 :?> int @> |> source =? "box 3 :?> int"
+
+[<Fact>]//issue 33
+let ``GenericUnbox Intrinsic function, precedence of overall expression weaker than function application`` () =
+    <@ box (box 3 :?> int) @> |> source =? "box (box 3 :?> int)"
+
+[<Fact>]//issue 33
+let ``GenericUnbox Intrinsic function, precedence of overall expression stronger than right pipe`` () =
+    <@ box 3 :?> int |> box @> |> source =? "box 3 :?> int |> box"
+
