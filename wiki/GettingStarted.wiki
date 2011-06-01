@@ -7,7 +7,7 @@
 
 Reference appropriate binaries
 
-  *  Reference Unquote.dll, and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project).
+  *  Reference Unquote.dll (which targets .NET 4.0), and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project).
   * To use with NUnit, add static reference to nunit.framework in test project (automatically detected by Unquote)
   * To use with xUnit, add static reference to xunit.dll in test project (automatically detected by Unquote)
 
