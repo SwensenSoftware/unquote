@@ -3,13 +3,14 @@
 
 = Getting Started =
 
-== Installing == 
+== Installation == 
 
-Reference appropriate binaries
+Note: Unquote targets the .NET 4.0 runtime and depends on FSharp.Core (version 2.0.0.0, .NET 4.0 build) and FSharp.PowerPack.Linq (version 2.0.0.0, .NET 3.5 build).
 
-  *  Reference Unquote.dll (which targets .NET 4.0), and it's dependencies, FSharp.Core (2.0.0.0 / v4.0) and FSharp.PowerPack.Linq (2.0.0.0). (using #r in FSI, or through project references in unit test project).
-  * To use with NUnit, add static reference to nunit.framework in test project (automatically detected by Unquote)
-  * To use with xUnit, add static reference to xunit.dll in test project (automatically detected by Unquote)
+  * Download and unzip featured release of Unquote from the [http://code.google.com/p/unquote/downloads/list Downloads] page OR install the latest version of the [http://www.nuget.org/List/Packages/Unquote Unquote NuGet package].
+  * If not installed already, install the [http://fsharppowerpack.codeplex.com/ F# PowerPack] May 2010 release which includes the FSharp.PowerPack.Linq dependency.
+  * To use within FSI, locate and add references to Unquote.dll and FSharp.PowerPack.Linq.dll using the `#r` directive. Make sure you are running build 4.0 or greater of FSI.
+  * To use within an F# test project, first locate and add a reference to Unquote.dll OR install the package via NuGet which will add the reference itself. Next add a GAC reference to FSharp.PowerPack.Linq (note: the Unquote NuGet package does not currently enforce this dependency). Finally, add a reference to xUnit.net or NUnit or whichever unit testing framework assemblies you choose. Make sure the test project targets the .NET 4.0 runtime.
 
 == Using ==
 
