@@ -7,7 +7,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNunitSupport", "Verif
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote", "Unquote\Unquote.fsproj", "{80F427B5-3AED-4D52-BC86-850A40427ECF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test.Unquote", "UnquoteTests\Test.Unquote.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport", "VerifyNonFrameworkSupport\VerifyNonFrameworkSupport.fsproj", "{96699208-E64B-4EDF-95B8-78001CEBC7F8}"
 EndProject
