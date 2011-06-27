@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Ops.fs" />
     <Compile Include="Eval.fs" />
-    <Compile Include="ExprEx.fs" />
+    <Compile Include="ExprExt.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
