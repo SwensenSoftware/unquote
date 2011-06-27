@@ -17,8 +17,6 @@ limitations under the License.
 [<AutoOpen>]
 module Swensen.Unquote.Operators
 
-#nowarn "42" //turn off warning for use of inline IL feature
-
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
@@ -29,7 +27,7 @@ open Microsoft.FSharp.Quotations.ExprShape
 open Swensen.Unquote.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
-open Swensen
+open Swensen //auto opens Swensen.MiscUtils which includes inline IL raises operator for clean stack traces
 open Swensen.Unquote
 
 ///Convert given expression to it's source code representation. Sub-expressions which are
@@ -108,9 +106,6 @@ module Private =
                         (expr |> reduceFully |> List.map source |> String.concat "\n")    
                 outputNonFsiTestFailedMsg msg
         #endif
-
-    //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
-    let inline raise (e: System.Exception) = (# "throw" e : 'U #)    
 
     type raisesResult<'a when 'a :> exn> =
         | NoException

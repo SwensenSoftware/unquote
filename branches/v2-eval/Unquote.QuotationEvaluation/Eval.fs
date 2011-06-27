@@ -15,6 +15,7 @@ limitations under the License.
 *)
 module Swensen.Unquote.QuotationEvaluation.Eval
 
+open Swensen
 open Microsoft.FSharp.Quotations
 open System.Reflection
 open Microsoft.FSharp.Reflection
@@ -33,9 +34,6 @@ module DP = DerivedPatterns
 //two questions:
 // 1) why no dynamic table impls for (-), (/), (%), ...
 // 2) why does SpecificCall(|||) _ return only one Type in the param ty list?
-
-///raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
-let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
 //translated from C# to F# from Stephen Cleary's answer on StackOverflow: http://stackoverflow.com/questions/4555599/how-to-rethrow-the-inner-exception-of-a-targetinvocationexception-without-losing/4557183#4557183
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
