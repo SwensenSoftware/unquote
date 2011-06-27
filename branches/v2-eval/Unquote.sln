@@ -11,6 +11,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test.Unquote", "UnquoteTest
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport", "VerifyNonFrameworkSupport\VerifyNonFrameworkSupport.fsproj", "{96699208-E64B-4EDF-95B8-78001CEBC7F8}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils", "Utils\Utils.fsproj", "{56F71A1E-1A42-4F00-AB55-5971386668B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,16 @@ Global
 		{96699208-E64B-4EDF-95B8-78001CEBC7F8}.Release|Mixed Platforms.Build.0 = Release|x86
 		{96699208-E64B-4EDF-95B8-78001CEBC7F8}.Release|x86.ActiveCfg = Release|x86
 		{96699208-E64B-4EDF-95B8-78001CEBC7F8}.Release|x86.Build.0 = Release|x86
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{56F71A1E-1A42-4F00-AB55-5971386668B0}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
