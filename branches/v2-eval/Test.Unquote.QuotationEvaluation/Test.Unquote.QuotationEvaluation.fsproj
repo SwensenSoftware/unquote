@@ -34,15 +34,11 @@
   <ItemGroup>
     <Reference Include="Accessibility" />
     <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="FSharp.PowerPack.Linq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Unquote">
-      <HintPath>C:\Unquote\Unquote.dll</HintPath>
-    </Reference>
     <Reference Include="xunit">
       <HintPath>C:\xunit\xunit.dll</HintPath>
     </Reference>
@@ -60,6 +56,11 @@
     <ProjectReference Include="..\Unquote.QuotationEvaluation\Unquote.QuotationEvaluation.fsproj">
       <Name>Unquote.QuotationEvaluation</Name>
       <Project>{2024659e-c258-496c-b3e3-2ff2f56ee35d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Unquote\Unquote.fsproj">
+      <Name>Unquote</Name>
+      <Project>{80f427b5-3aed-4d52-bc86-850a40427ecf}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

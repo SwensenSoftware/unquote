@@ -18,7 +18,7 @@ limitations under the License.
 module SourceOpTests
 open Xunit
 open Swensen.Unquote
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open Swensen.Unquote.QuotationEvaluation
 open Swensen
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.

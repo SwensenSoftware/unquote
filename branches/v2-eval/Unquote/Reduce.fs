@@ -19,7 +19,7 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open Swensen.Unquote.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
 module P = Microsoft.FSharp.Quotations.Patterns

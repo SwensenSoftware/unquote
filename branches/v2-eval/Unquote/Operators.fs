@@ -26,7 +26,7 @@ open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Quotations.DerivedPatterns
 open Microsoft.FSharp.Quotations.ExprShape
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open Swensen.Unquote.QuotationEvaluation
 open Microsoft.FSharp.Metadata
 
 open Swensen

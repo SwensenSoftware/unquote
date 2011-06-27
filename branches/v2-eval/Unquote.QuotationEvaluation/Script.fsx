@@ -11,7 +11,7 @@ open Swensen.Unquote.QuotationEvaluation.Eval
 open System
 
 #r @"FSharp.PowerPack.Linq.dll"
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open Swensen.Unquote.QuotationEvaluation
 #r @"C:\Unquote\Unquote.dll"
 open Swensen.Unquote
 
