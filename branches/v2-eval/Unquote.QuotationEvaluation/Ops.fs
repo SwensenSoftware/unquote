@@ -1,4 +1,20 @@
-﻿//based on Microsoft's Apache licensed F# 2.0 Operators.fs code
+﻿(*
+Copyright 2011 Stephen Swensen
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*)
+
+//Based on Microsoft's FSharp.Core\prim-types.fs, Apache License, Version 2.0
 
 ///The purpose of these operator implementations is two fold 1) many F# operators do not include dynamic impls,
 ///so we must give them. 2) even those operators which are given dynamic impls do not perform well since they
