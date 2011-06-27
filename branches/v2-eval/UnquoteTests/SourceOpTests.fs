@@ -15,7 +15,7 @@ limitations under the License.
 *)
 
 [<AutoOpen>] //making auto open allows us not to have to fully qualify module properties
-module Test.Swensen.Unquote.SourceOpTests
+module SourceOpTests
 open Xunit
 open Swensen.Unquote
 open Microsoft.FSharp.Linq.QuotationEvaluation
