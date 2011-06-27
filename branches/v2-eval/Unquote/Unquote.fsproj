@@ -44,6 +44,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ExtraReflection.fs" />
     <Compile Include="ExtraPatterns.fs" />
     <Compile Include="Sprint.fs" />
