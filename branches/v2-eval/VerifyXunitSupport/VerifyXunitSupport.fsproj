@@ -50,7 +50,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="xunit">
-      <HintPath>..\..\..\..\..\..\..\xunit-1.7\xunit.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\xunit\xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
