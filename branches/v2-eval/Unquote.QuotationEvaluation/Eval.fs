@@ -1,4 +1,4 @@
-﻿module Swensen.QuotationEvaluation.Eval
+﻿module Swensen.Unquote.QuotationEvaluation.Eval
 
 open Microsoft.FSharp.Quotations
 open System.Reflection

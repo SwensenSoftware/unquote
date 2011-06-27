@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Swensen.QuotationEvaluation.ExprExtensions
+module Swensen.Unquote.QuotationEvaluation.ExprExtensions
 
 open Microsoft.FSharp.Quotations
 

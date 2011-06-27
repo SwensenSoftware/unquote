@@ -3,10 +3,10 @@
 // Note that script files will not be part of the project build.
 
 #load "Ops.fs"
-open Swensen.QuotationEvaluation
+open Swensen.Unquote.QuotationEvaluation
 #load "Eval.fs"
-open Swensen.QuotationEvaluation
-open Swensen.QuotationEvaluation.Eval
+open Swensen.Unquote.QuotationEvaluation
+open Swensen.Unquote.QuotationEvaluation.Eval
 
 open System
 

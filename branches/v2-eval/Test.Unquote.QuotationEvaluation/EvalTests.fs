@@ -2,7 +2,7 @@
 
 open Xunit
 open Swensen.Unquote
-open Swensen.QuotationEvaluation.Eval
+open Swensen.Unquote.QuotationEvaluation.Eval
 open System
 
 let inline testEval expr expected =
