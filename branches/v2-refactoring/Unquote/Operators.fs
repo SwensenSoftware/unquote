@@ -19,17 +19,15 @@ module Swensen.Unquote.Operators
 
 open System
 open System.Reflection
-open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Quotations.Patterns
-open Microsoft.FSharp.Quotations.DerivedPatterns
-open Microsoft.FSharp.Quotations.ExprShape
-open Swensen.Unquote.QuotationEvaluation
-open Microsoft.FSharp.Metadata
 
 open Swensen //auto opens Swensen.MiscUtils which includes inline IL raises operator for clean stack traces
 open Swensen.Unquote
 
+///Evaluation the given typed expression.
+let eval (expr:Expr<'a>) = expr.Eval()
+///Evaluation the given untyped expression.
+let evalUntyped (expr:Expr) = expr.EvalUntyped()
 ///Convert given expression to it's source code representation. Sub-expressions which are
 ///not currently supported will fallback on the default Expr.ToString() implementation.
 let source (expr:Expr) = expr.ToSource()

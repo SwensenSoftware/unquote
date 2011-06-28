@@ -16,7 +16,8 @@ limitations under the License.
 [<AutoOpen>]
 module Swensen.Unquote.Extensions
 
-//note that Expr<'T> extends Expr
+//N.B. Expr<'T> extends Expr
+
 type Microsoft.FSharp.Quotations.Expr with
     ///Convert this expression to it's source code representation. Sub-expressions which are
     ///not currently supported will fallback on the default Expr.ToString() implementation.
@@ -29,6 +30,12 @@ type Microsoft.FSharp.Quotations.Expr with
     member this.ReduceFully() = Reduce.reduceFully this
     ///Determine whether this expression is reduced.
     member this.IsReduced() = Reduce.isReduced this
+    ///Evaluation this untyped expression.
+    member this.EvalUntyped() = Eval.evalUntyped this
+
+type Microsoft.FSharp.Quotations.Expr<'a> with
+    ///Evaluation this typed expression.
+    member this.Eval() = Eval.eval this
 
 type System.Type with
     ///The F#-style signature
