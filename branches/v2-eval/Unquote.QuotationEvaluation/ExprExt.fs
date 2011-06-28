@@ -19,10 +19,12 @@ module Swensen.Unquote.QuotationEvaluation.ExprExt
 open Microsoft.FSharp.Quotations
 
 type Expr with
+    ///Evaluate this untyped (raw) expression
     member this.EvalUntyped() =
         Eval.evalUntyped this
 
 type Expr<'T> with
+    ///Evaluate this typed expression
     member this.Eval() =
         Eval.eval this
 

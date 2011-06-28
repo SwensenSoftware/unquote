@@ -19,7 +19,7 @@ limitations under the License.
 ///The purpose of these operator implementations is two fold 1) many F# operators do not include dynamic impls,
 ///so we must give them. 2) even those operators which are given dynamic impls do not perform well since they
 ///need to be accessed via reflection, so we give "native" impls here.
-module internal Swensen.Unquote.QuotationEvaluation.Ops
+module internal Swensen.Unquote.QuotationEvaluation.DynamicOperators
 open System
 open System.Reflection
 

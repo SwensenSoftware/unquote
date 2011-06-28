@@ -37,7 +37,7 @@ module DP = DerivedPatterns
 
 //translated from C# to F# from Stephen Cleary's answer on StackOverflow: http://stackoverflow.com/questions/4555599/how-to-rethrow-the-inner-exception-of-a-targetinvocationexception-without-losing/4557183#4557183
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
-let inline reraisePreserveStackTrace(ex:Exception) =
+let inline private reraisePreserveStackTrace(ex:Exception) =
     typeof<Exception>.GetMethod("PrepForRemoting", BindingFlags.NonPublic ||| BindingFlags.Instance).Invoke(ex, [||]) |> ignore
     raise ex
 
@@ -72,7 +72,7 @@ open System.Collections.Generic
 //is about 4 times faster
 let (|BinOp|_|) = function
     |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> 
-        match Ops.binOpLookup.TryGetValue mi.Name with
+        match DynamicOperators.binOpLookup.TryGetValue mi.Name with
         | true, op -> 
             let [|aty;bty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType) //using lhs.Type, rhs.Type has no perf. impact
             let cty = mi.ReturnType
@@ -82,7 +82,7 @@ let (|BinOp|_|) = function
 
 let (|UnaryOp|_|) = function
     |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> 
-        match Ops.unaryOpLookup.TryGetValue mi.Name with
+        match DynamicOperators.unaryOpLookup.TryGetValue mi.Name with
         | true, op -> 
             let [|aty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
             let bty = mi.ReturnType
@@ -92,7 +92,7 @@ let (|UnaryOp|_|) = function
 
 let (|CheckedBinOp|_|) = function
     |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" -> 
-        match Ops.Checked.binOpLookup.TryGetValue mi.Name with
+        match DynamicOperators.Checked.binOpLookup.TryGetValue mi.Name with
         | true, op -> 
             let [|aty;bty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
             let cty = mi.ReturnType
@@ -102,7 +102,7 @@ let (|CheckedBinOp|_|) = function
 
 let (|CheckedUnaryOp|_|) = function
     |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" -> 
-        match Ops.Checked.unaryOpLookup.TryGetValue mi.Name with
+        match DynamicOperators.Checked.unaryOpLookup.TryGetValue mi.Name with
         | true, op -> 
             let [|aty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
             let bty = mi.ReturnType
