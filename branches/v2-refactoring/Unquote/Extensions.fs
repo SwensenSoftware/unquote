@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 [<AutoOpen>]
-module Swensen.Unquote.ExprExt
+module Swensen.Unquote.Extensions
 
 //note that Expr<'T> extends Expr
 type Microsoft.FSharp.Quotations.Expr with
@@ -29,3 +29,8 @@ type Microsoft.FSharp.Quotations.Expr with
     member this.ReduceFully() = Reduce.reduceFully this
     ///Determine whether this expression is reduced.
     member this.IsReduced() = Reduce.isReduced this
+
+type System.Type with
+    ///The F#-style signature
+    member this.FSharpName =
+        ExtraReflection.sprintSig this
