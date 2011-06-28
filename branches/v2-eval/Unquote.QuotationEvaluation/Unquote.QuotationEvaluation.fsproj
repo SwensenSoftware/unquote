@@ -40,7 +40,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ops.fs" />
+    <Compile Include="DynamicOperators.fs" />
     <Compile Include="Eval.fs" />
     <Compile Include="ExprExt.fs" />
     <None Include="Script.fsx" />
