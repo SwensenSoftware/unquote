@@ -38,6 +38,9 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
+    <Compile Include="EvalTests.fs" />
+    <Compile Include="EvalOpTests.fs" />
+    <Compile Include="EvalCheckedOpTests.fs" />
     <Compile Include="FSharpNameTests.fs" />
     <Compile Include="SourceOpTests.fs" />
     <Compile Include="ReduceFullyOpTests.fs" />
@@ -47,21 +50,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="xunit">
-      <HintPath>..\..\..\..\..\..\..\xunit\xunit.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\xunit\xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Unquote.QuotationEvaluation\Unquote.QuotationEvaluation.fsproj">
-      <Name>Unquote.QuotationEvaluation</Name>
-      <Project>{2024659e-c258-496c-b3e3-2ff2f56ee35d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Unquote\Unquote.fsproj">
       <Name>Unquote</Name>
       <Project>{80f427b5-3aed-4d52-bc86-850a40427ecf}</Project>
