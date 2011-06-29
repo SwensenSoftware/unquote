@@ -29,8 +29,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Release\Unquote.XML</DocumentationFile>
     <OtherFlags>--staticlink:FSharp.PowerPack.Metadata --staticlink:Utils</OtherFlags>
   </PropertyGroup>
   <ItemGroup>
