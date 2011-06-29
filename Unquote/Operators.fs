@@ -19,25 +19,23 @@ module Swensen.Unquote.Operators
 
 open System
 open System.Reflection
-open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Quotations.Patterns
-open Microsoft.FSharp.Quotations.DerivedPatterns
-open Microsoft.FSharp.Quotations.ExprShape
-open Swensen.Unquote.QuotationEvaluation
-open Microsoft.FSharp.Metadata
 
 open Swensen //auto opens Swensen.MiscUtils which includes inline IL raises operator for clean stack traces
 open Swensen.Unquote
 
-///Convert given expression to it's source code representation. Sub-expressions which are
+///Evaluate the given typed expression.
+let eval (expr:Expr<'a>) = expr.Eval()
+///Evaluate the given untyped expression.
+let evalUntyped (expr:Expr) = expr.EvalUntyped()
+///Convert given expression to its source code representation. Sub-expressions which are
 ///not currently supported will fallback on the default Expr.ToString() implementation.
 let source (expr:Expr) = expr.ToSource()
-///Reduce by one step: convert each branch of the given expression to a Value expression of it's 
-///evaluation if each subbranch of the branch is reduced.
+///Reduce by one step: convert each branch of the given expression to a Value expression of its 
+///evaluation if each sub-branch of the branch is reduced.
 ///If this expression is already reduced, or cannot be reduced, returns itself.
 let reduce (expr:Expr) = expr.Reduce()
-///Convert the given expression to a list of all of it's Reduce steps.
+///Convert the given expression to a list of all of its Reduce steps in order.
 let reduceFully (expr:Expr) = expr.ReduceFully()
 ///Determine whether the given expression is reduced.
 let isReduced (expr:Expr) = expr.IsReduced()

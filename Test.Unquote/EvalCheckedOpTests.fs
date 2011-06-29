@@ -2,7 +2,6 @@
 
 open Xunit
 open Swensen.Unquote
-open Swensen.Unquote.QuotationEvaluation.Eval
 open System
 open System.Reflection
 

@@ -16,11 +16,7 @@ limitations under the License.
 
 module internal Swensen.Unquote.Reduce
 open System
-open System.Reflection
-open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
-open Swensen.Unquote.QuotationEvaluation
-open Microsoft.FSharp.Metadata
 
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
@@ -31,7 +27,7 @@ module EP = Swensen.Unquote.ExtraPatterns
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
-    Expr.Value(expr.EvalUntyped(), expr.Type)
+    Expr.Value(Eval.evalUntyped expr, expr.Type)
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function

@@ -3,7 +3,6 @@ module EvalDynamicOpTests
 
 open Xunit
 open Swensen.Unquote
-open Swensen.Unquote.QuotationEvaluation.Eval
 open System
 open Microsoft.FSharp.Math
 
