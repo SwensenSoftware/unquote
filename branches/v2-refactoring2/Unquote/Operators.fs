@@ -28,9 +28,9 @@ open Swensen.Unquote
 let eval (expr:Expr<'a>) = expr.Eval()
 ///Evaluate the given untyped expression.
 let evalUntyped (expr:Expr) = expr.EvalUntyped()
-///Convert given expression to its source code representation. Sub-expressions which are
+///Decompile given expression to its source code representation. Sub-expressions which are
 ///not currently supported will fallback on the default Expr.ToString() implementation.
-let source (expr:Expr) = expr.ToSource()
+let decompile (expr:Expr) = expr.Decompile()
 ///Reduce by one step: convert each branch of the given expression to a Value expression of its 
 ///evaluation if each sub-branch of the branch is reduced.
 ///If this expression is already reduced, or cannot be reduced, returns itself.
@@ -42,8 +42,8 @@ let isReduced (expr:Expr) = expr.IsReduced()
 ///Print the newline concated source code reduce steps of the given expression to stdout.
 let unquote expr =
     expr
-    |> Reduce.reduceFully
-    |> List.map Sprint.sprint 
+    |> reduceFully
+    |> List.map decompile 
     |> String.concat "\n" //don't use Environment.NewLine since nprintfn will replace \n with Environment.NewLine already
     |> nprintfn "\n%s\n"
 
@@ -57,8 +57,8 @@ module Internal =
         if additionalInfo |> String.IsNullOrWhiteSpace |> not then
              nprintfn "%s\n" additionalInfo
 
-        for expr in expr.ReduceFully() do
-            printfn "%s" (expr.ToSource())
+        for expr in expr |> reduceFully do
+            printfn "%s" (expr |> decompile)
         
         printfn ""
 
@@ -103,7 +103,7 @@ module Internal =
                 let msg = 
                     nsprintf "\n%s\n%s\n"
                         (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
-                        (expr |> reduceFully |> List.map source |> String.concat "\n")    
+                        (expr |> reduceFully |> List.map decompile |> String.concat "\n")    
                 outputNonFsiTestFailedMsg msg
         #endif
 
