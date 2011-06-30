@@ -468,10 +468,6 @@ let ``re-sugar unapplied lambda: complex`` () =
 let ``re-sugar lambda with single tupled arg`` () =
     <@ fun (g, f) -> g + f + 1 @> |> decompile =? "fun (g, f) -> g + f + 1"
 
-[<Fact(Skip="currently unable to distinguish lambda call args which are tupled vs those which are not")>] //issue 27
-let ``re-sugared superfluouse lambda with single tupled arg is distinguishable from from non-tupled lambda call`` () =
-    <@ fun (g, f) -> g + f + 1 @> |> decompile =? "fun (g, f) -> g + f"
-
 [<Fact>] //issue 27
 let ``re-sugar lambda with tupled and non-tupled args`` () =
     <@ fun a (g, f) b -> a + g + f + b @> |> decompile =? "fun a (g, f) b -> a + g + f + b"
