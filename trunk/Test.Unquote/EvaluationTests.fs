@@ -1,4 +1,4 @@
-﻿module EvalTests
+﻿module EvaluationTests
 
 open Xunit
 open Swensen.Unquote

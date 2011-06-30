@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-module internal Swensen.Unquote.Reduce
+module internal Swensen.Unquote.Reduction
 open System
 open Microsoft.FSharp.Quotations
 
@@ -27,7 +27,7 @@ module EP = Swensen.Unquote.ExtraPatterns
 
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
-    Expr.Value(Eval.evalUntyped expr, expr.Type)
+    Expr.Value(Evaluation.evalUntyped expr, expr.Type)
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function

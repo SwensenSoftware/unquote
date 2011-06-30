@@ -1,4 +1,4 @@
-﻿module EvalCheckedDynamicOpTests
+﻿module CheckedDynamicOperatorsEvaluationTests
 
 open Xunit
 open Swensen.Unquote

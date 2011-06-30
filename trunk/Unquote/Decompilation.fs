@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-module internal Swensen.Unquote.Sprint
+module internal Swensen.Unquote.Decompilation
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
@@ -31,19 +31,19 @@ module ER = Swensen.Unquote.ExtraReflection
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
-let sprint expr =
-    let rec sprint context expr =
+let decompile expr =
+    let rec decompile context expr =
         let applyParens = ER.applyParensForPrecInContext context
         match expr with
         | P.Sequential(P.Sequential(lhs, DP.Unit), rhs) ->
             //due to quirky nested structure which handles implicit unit return values
             //need to hack precedence / application of parenthisizes.  we give
             //lhs anecdotally higher precedence context of 10.
-            applyParens 4 (sprintf "%s; %s" (sprint 10 lhs) (sprint 3 rhs))
+            applyParens 4 (sprintf "%s; %s" (decompile 10 lhs) (decompile 3 rhs))
         | P.Sequential(lhs, rhs) -> 
-            applyParens 4 (sprintf "%s; %s" (sprint 4 lhs) (sprint 3 rhs))
+            applyParens 4 (sprintf "%s; %s" (decompile 4 lhs) (decompile 3 rhs))
         | P.Application(curry, last) -> //application of arguments to a lambda
-            applyParens 20 (sprintf "%s %s" (sprint 19 curry) (sprint 20 last))
+            applyParens 20 (sprintf "%s %s" (decompile 19 curry) (decompile 20 last))
         //issue 25 and issue 23: the following "re-sugars" both partially applied and unapplied lambda call expressions
         //must come before Lambdas
         | EP.IncompleteLambdaCall(mi, args) -> //assume lambdas are only part of modules.
@@ -51,7 +51,7 @@ let sprint expr =
                 | Some(symbol,_,_) -> 
                     let sprintedSymbol = sprintf "(%s)" symbol
                     match args.Length with
-                    | 1 -> applyParens 20 (sprintf "%s %s" sprintedSymbol (sprintCurriedArgs args))
+                    | 1 -> applyParens 20 (sprintf "%s %s" sprintedSymbol (decompileCurriedArgs args))
                     | 0 -> sprintedSymbol
                     | _ -> failwithf "partial applied binary op should only have 0 or 1 args but has more: %A" args
                 | None ->
@@ -62,7 +62,7 @@ let sprint expr =
                             if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
                             else sprintf "%s.%s" (ER.sourceName mi.DeclaringType) (ER.sourceName mi)
                         if args.Length = 0 then sprintFunction mi //not sure what precedence should be
-                        else applyParens 20 (sprintf "%s %s" (sprintFunction mi) (sprintCurriedArgs args))
+                        else applyParens 20 (sprintf "%s %s" (sprintFunction mi) (decompileCurriedArgs args))
         | DP.Lambdas(vars, body) -> //addresses issue 27
             let sprintSingleVar (var:Var) = if var.Type = typeof<Unit> then "()" else var.Name
             let sprintedVars =
@@ -72,61 +72,61 @@ let sprint expr =
                         | [var] -> sprintSingleVar var 
                         | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
                 |> String.concat " "
-            applyParens 6 (sprintf "fun %s -> %s" sprintedVars (sprint 0 body))
+            applyParens 6 (sprintf "fun %s -> %s" sprintedVars (decompile 0 body))
         | EP.BinaryInfixCall((symbol, prec, assoc), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = 
                 match assoc with
-                | EP.Left -> sprint (prec-1) lhs, sprint prec rhs
-                | EP.Right -> sprint prec lhs, sprint (prec-1) rhs
-                | EP.Non -> sprint prec lhs, sprint prec rhs
+                | EP.Left -> decompile (prec-1) lhs, decompile prec rhs
+                | EP.Right -> decompile prec lhs, decompile (prec-1) rhs
+                | EP.Non -> decompile prec lhs, decompile prec rhs
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
         | EP.UnaryPrefixCall(symbol, arg) -> //must come before Call pattern
-            applyParens 22 (sprintf "%s%s" symbol (sprint 22 arg))
+            applyParens 22 (sprintf "%s%s" symbol (decompile 22 arg))
         | P.Call(Some(target), mi, args) -> //instance call
             //just assume instance members always have tupled args
-            applyParens 20 (sprintf "%s.%s%s(%s)" (sprint 22 target) mi.Name (ER.sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
+            applyParens 20 (sprintf "%s.%s%s(%s)" (decompile 22 target) mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
-            //thinking about making sprint depend on Reduce.isReduced: 
+            //thinking about making decompile depend on Reduce.isReduced: 
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
             //but I think the sprinting of lhs it is reduced conveys type info sufficiently enough
-            applyParens 16 (sprintf "%s :? %s" (sprint 16 lhs) (ER.sprintSig (mi.GetGenericArguments().[0])))
+            applyParens 16 (sprintf "%s :? %s" (decompile 16 lhs) (ER.sprintSig (mi.GetGenericArguments().[0])))
         | EP.Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges
-            sprintf "%s%s..%s%s" startToken (sprint 0 a) (sprint 0 b) endToken
+            sprintf "%s%s..%s%s" startToken (decompile 0 a) (decompile 0 b) endToken
         | EP.RangeStep(startToken,endToken,a,b,c) ->
-            sprintf "%s%s..%s..%s%s" startToken (sprint 0 a) (sprint 0 b) (sprint 0 c) endToken
+            sprintf "%s%s..%s..%s%s" startToken (decompile 0 a) (decompile 0 b) (decompile 0 c) endToken
         | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && mi.Name = "UnboxGeneric" -> //i.e. :?>
             let ty = mi.GetGenericArguments().[0]
-            applyParens 16 (sprintf "%s :?> %s" (sprint 16 target) (ER.sprintSig ty))
+            applyParens 16 (sprintf "%s :?> %s" (decompile 16 target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
-            sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args) //not sure what precedence is
+            sprintf "%s.[%s]" (decompile 22 target) (decompileTupledArgs args) //not sure what precedence is
         | P.Call(None, mi, args) -> //static call (we assume F# functions are always static calls for simplicity)
             if FSharpType.IsModule mi.DeclaringType then //we assume static calls in modules are functions, for simplicity
                 let methodName = ER.sourceName mi
                                 
-                //if mi has generic args which can't be infered, need to sprint them.
-                //if mi takes no arguments, then need to sprint "()", unless mi is an F# value, in which case we omit ()
+                //if mi has generic args which can't be infered, need to decompile them.
+                //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
                 let sprintedArgs = 
                     sprintf "%s%s"
                         (if ER.genericArgsInferable mi then "" else ER.sprintGenericArgs mi) 
                         (if args.Length = 0 then 
                             if ER.isGenericValue(mi) then ""
                             else "()"
-                         else " " + sprintCurriedArgs args)
+                         else " " + decompileCurriedArgs args)
                 
                 if ER.isOpenModule mi.DeclaringType then 
                     applyParens 20 (sprintf "%s%s" methodName sprintedArgs)
                 else 
                     applyParens 20 (sprintf "%s.%s%s" (ER.sourceName mi.DeclaringType) methodName sprintedArgs)
             else //assume static calls in non-modules are members for simplicity, also CompiledName same as SourceName
-                applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (ER.sprintGenericArgsIfNotInferable mi) (sprintTupledArgs args))
+                applyParens 20 (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
                 //for UnionCaseTypeTests, require a op_Dynamic implementation
-                sprintf "(%s?%s : %s)" (sprint 22 target) pi.Name (pi.PropertyType |> ER.sprintSig)
-            | _, [] -> sprintf "%s.%s" (sprint 22 target) pi.Name //also includes "Item" with zero args
-            | "Item", _ -> sprintf "%s.[%s]" (sprint 22 target) (sprintTupledArgs args)
-            | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (sprint 22 target) pi.Name (sprintTupledArgs args))
+                sprintf "(%s?%s : %s)" (decompile 22 target) pi.Name (pi.PropertyType |> ER.sprintSig)
+            | _, [] -> sprintf "%s.%s" (decompile 22 target) pi.Name //also includes "Item" with zero args
+            | "Item", _ -> sprintf "%s.[%s]" (decompile 22 target) (decompileTupledArgs args)
+            | _, _ -> applyParens 20 (sprintf "%s.%s(%s)" (decompile 22 target) pi.Name (decompileTupledArgs args))
         | P.PropertyGet(None, pi, args) -> //static get (note: can't accept params)
             let sprintedName =
                 if ER.isOpenModule pi.DeclaringType then 
@@ -135,16 +135,16 @@ let sprint expr =
                     sprintf "%s.%s" pi.DeclaringType.Name pi.Name
 
             if args.Length = 0 then sprintedName
-            else applyParens 20 (sprintf "%s(%s)" sprintedName (sprintTupledArgs args))
+            else applyParens 20 (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
         | P.PropertySet(target, pi, piArgs, rhs) ->
             let lhs = //leverage PropertyGet sprinting
                 match target with
                 | Some(instance) -> Expr.PropertyGet(instance, pi, piArgs)
                 | None -> Expr.PropertyGet(pi, piArgs)
             //don't know what precedence is
-            applyParens 13 (sprintf "%s <- %s" (sprint 0 lhs) (sprint 0 rhs))
+            applyParens 13 (sprintf "%s <- %s" (decompile 0 lhs) (decompile 0 rhs))
         | P.FieldGet(Some(target), fi) ->
-            sprintf "%s.%s" (sprint 22 target) fi.Name
+            sprintf "%s.%s" (decompile 22 target) fi.Name
         | P.FieldGet(None, fi) ->
             sprintf "%s.%s" fi.DeclaringType.Name fi.Name
         | P.FieldSet(target, fi, rhs) ->
@@ -153,16 +153,16 @@ let sprint expr =
                 | Some(instance) -> Expr.FieldGet(instance, fi) 
                 | None -> Expr.FieldGet(fi)
             //don't know what precedence is
-            applyParens 13 (sprintf "%s <- %s" (sprint 0 lhs) (sprint 0 rhs))
+            applyParens 13 (sprintf "%s <- %s" (decompile 0 lhs) (decompile 0 rhs))
         | DP.Unit -> "()" //must come before Value pattern
         | P.Value(o, _) ->
             match o with
             | null -> "null"
             | _ -> sprintf "%A" o
         | P.NewTuple(args) -> //tuples have at least two elements
-            args |> sprintTupledArgs |> sprintf "(%s)" //what is precedence? 10?
+            args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
-            args |> sprintSequencedArgs |> sprintf "[|%s|]"
+            args |> decompileSequencedArgs |> sprintf "[|%s|]"
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.
         | P.NewUnionCase(uci,args) when uci |> ER.isListUnionCase ->
@@ -179,47 +179,47 @@ let sprint expr =
 
                 if expr |> isLiteralConstruction then
                     let rec sprintLiteralConstructionArgs = function
-                        | P.NewUnionCase(_, lhs::(P.NewUnionCase(_, []))::[]) -> sprint 4 lhs
+                        | P.NewUnionCase(_, lhs::(P.NewUnionCase(_, []))::[]) -> decompile 4 lhs
                         | P.NewUnionCase(_, lhs::rhs::[]) ->
-                            sprintf "%s; %s" (sprint 4 lhs) (sprintLiteralConstructionArgs rhs)
+                            sprintf "%s; %s" (decompile 4 lhs) (sprintLiteralConstructionArgs rhs)
                         | _ -> failwith "unexpected list union case"
                     sprintf "[%s]" (sprintLiteralConstructionArgs expr)
                 else 
                     //would like to optimize somehow so isLiteralConstruction is not called with every recursive 
-                    //sprint of non literal constructions.
+                    //decompile of non literal constructions.
                     match args with
-                    | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (sprint 15 lhs) (sprint 14 rhs))
+                    | lhs::rhs::[] -> applyParens 15 (sprintf "%s::%s" (decompile 15 lhs) (decompile 14 rhs))
                     | _ -> failwithf "unexpected list union case: %A" expr
         | P.NewUnionCase(uci,args) -> //"typical union case construction"
             match args with
             | [] -> uci.Name
-            | _ -> sprintf "%s(%s)" uci.Name (sprintTupledArgs args)
+            | _ -> sprintf "%s(%s)" uci.Name (decompileTupledArgs args)
         | P.NewObject(ci, args) ->
-            applyParens 20 (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (sprintTupledArgs args))
+            applyParens 20 (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
         | P.Coerce(target, _) ->
             //don't even "mention" anything about the coersion
-            sprint context target
+            decompile context target
         | EP.TupleLet(vars, e1, e2) ->
             //if any are mutable, they are all mutable
             let anyMutable = vars |> List.exists (function | Some(v) -> v.IsMutable | None -> false)
             let varNames = vars |> List.map (function | Some(v) -> v.Name | None -> "_")
-            applyParens 5 (sprintf "let%s%s = %s in %s" (if anyMutable then " mutable " else " ") (varNames |> String.concat ", ") (sprint 0 e1) (sprint 0 e2))
+            applyParens 5 (sprintf "let%s%s = %s in %s" (if anyMutable then " mutable " else " ") (varNames |> String.concat ", ") (decompile 0 e1) (decompile 0 e2))
         | P.Let(var, e1, e2) ->
             //todo: this needs to be handled better for curried functions
-            applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (sprint 0 e1) (sprint 0 e2))
+            applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (decompile 0 e1) (decompile 0 e2))
         | P.Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
             //note, this only handles typed quotations
-            sprintf "<@ %s @>" (sprint 0 qx) 
+            sprintf "<@ %s @>" (decompile 0 qx) 
         | DP.AndAlso(a,b) -> //must come before if then else
-            applyParens 12 (sprintf "%s && %s" (sprint 11 a) (sprint 12 b))
+            applyParens 12 (sprintf "%s && %s" (decompile 11 a) (decompile 12 b))
         | DP.OrElse(a,b) -> //must come before if then else
-            applyParens 11 (sprintf "%s || %s" (sprint 10 a) (sprint 11 b))
+            applyParens 11 (sprintf "%s || %s" (decompile 10 a) (decompile 11 b))
         | P.IfThenElse(a,b,c) ->
-            applyParens 7 (sprintf "if %s then %s else %s" (sprint 7 a) (sprint 7 b) (sprint 7 c))
+            applyParens 7 (sprintf "if %s then %s else %s" (decompile 7 a) (decompile 7 b) (decompile 7 c))
         //we can't reduce any XXXSet expressions due to limitations of Expr.Eval()
         | P.VarSet(v, arg) ->
             //not sure what precedence should be, using precedence for < op
-            applyParens 13 (sprintf "%s <- %s" v.Name (sprint 0 arg)) 
+            applyParens 13 (sprintf "%s <- %s" v.Name (decompile 0 arg)) 
         //extremely verbose
         | P.UnionCaseTest(target, uci) ->
             let ucMatch =
@@ -234,19 +234,19 @@ let sprint expr =
                         sprintf "%s(%s)" uci.Name ("_" |> Array.create len |> String.concat ",")
 
             //using same precedence as if, 7, for match xxx with
-            applyParens 7 (sprintf "match %s with | %s -> true | _ -> false" (sprint 7 target) ucMatch)
+            applyParens 7 (sprintf "match %s with | %s -> true | _ -> false" (decompile 7 target) ucMatch)
         | _ -> 
             sprintf "%A" (expr)
-    and sprintArgs prec delimiter exprs =
-        exprs |> List.map (sprint prec) |> String.concat delimiter
-    and sprintTupledArgs = 
-        sprintArgs 10 ", "
-    and sprintCurriedArgs = //application of arguments to a function
-        sprintArgs 20 " "
-    and sprintSequencedArgs =
-        sprintArgs 4 "; "
+    and decompileArgs prec delimiter exprs =
+        exprs |> List.map (decompile prec) |> String.concat delimiter
+    and decompileTupledArgs = 
+        decompileArgs 10 ", "
+    and decompileCurriedArgs = //application of arguments to a function
+        decompileArgs 20 " "
+    and decompileSequencedArgs =
+        decompileArgs 4 "; "
     
-    sprint 0 expr
+    decompile 0 expr
 
 //-----precedence-----
 //note: http://stackoverflow.com/questions/4859151/help-me-understand-lambda-expression-precedence

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 *)
-module internal Swensen.Unquote.Eval
+module internal Swensen.Unquote.Evaluation
 
 open Swensen
 open Microsoft.FSharp.Quotations
