@@ -1,5 +1,5 @@
 ﻿///Tests for numeric Core.Operators, since many are known not to have dynamic table implementations (which we will implement ourselves as needed)
-module EvalDynamicOpTests
+module DynamicOperatorsEvaluationTests
 
 open Xunit
 open Swensen.Unquote

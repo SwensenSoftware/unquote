@@ -38,13 +38,13 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
-    <Compile Include="EvalTests.fs" />
-    <Compile Include="EvalOpTests.fs" />
-    <Compile Include="EvalCheckedOpTests.fs" />
+    <Compile Include="EvaluationTests.fs" />
+    <Compile Include="DynamicOperatorsEvaluationTests.fs" />
+    <Compile Include="CheckedDynamicOperatorsEvaluationTests.fs" />
     <Compile Include="FSharpNameTests.fs" />
-    <Compile Include="SourceOpTests.fs" />
-    <Compile Include="ReduceFullyOpTests.fs" />
-    <Compile Include="TestOpTests.fs" />
+    <Compile Include="DecompilationTests.fs" />
+    <Compile Include="ReductionTests.fs" />
+    <Compile Include="AssertionOperatorsTests.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
