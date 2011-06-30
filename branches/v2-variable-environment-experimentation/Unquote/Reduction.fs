@@ -37,7 +37,7 @@ let evalValue env (expr:Expr) =
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced env = function
-    | P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name) |> not //if the variable is in the environment, it can be reduced (return false), otherwise it can't (return true)
+    | P.Var v -> false //we need to assume Vars are reducible and let the exceptions fly when env lookup fails, can revist later //env |> List.exists (fun (name,_) -> name = v.Name) |> not //if the variable is in the environment, it can be reduced (return false), otherwise it can't (return true)
     | P.Value _ | P.Lambda _ | DP.Unit -> true
     | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced env -> true
     | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced env -> true //TupleGet here helps TupleLet expressions reduce correctly
@@ -59,12 +59,21 @@ let rec reduce env (expr:Expr) =
     | P.Sequential (lhs, rhs) ->
         if lhs |> isReduced env then rhs
         else Expr.Sequential(reduce env lhs, rhs)
-    | P.Let(var, assignment, body) ->
-        if assignment |> isReduced env then
-            let env = (var.Name, Evaluation.evalUntyped env assignment |> ref)::env
-            reduce env body
-        else
-            Expr.Let(var, reduce env assignment, body)
+    | EP.TupleLet(vars, assignment, body) when assignment |> isReduced env -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
+        let assignment = Evaluation.evalUntyped env assignment //a tuple
+        let tupleFields = Microsoft.FSharp.Reflection.FSharpValue.GetTupleFields(assignment)
+        let env = 
+           (Seq.zip vars tupleFields 
+            |> Seq.choose
+                (fun (var, tupleField) ->
+                    match var with
+                    | Some(var) -> Some(var.Name, ref tupleField)
+                    | None -> None)
+            |> Seq.toList) @ env
+        reduce env body
+    | P.Let(var, assignment, body) when assignment |> isReduced env -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
+        let env = (var.Name, Evaluation.evalUntyped env assignment |> ref)::env
+        reduce env body
     | P.Var _ ->
         evalValue env expr        
     | DP.Applications(fExpr,args) ->
