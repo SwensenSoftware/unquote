@@ -37,7 +37,7 @@ let evalValue env (expr:Expr) =
 
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced env = function
-    | P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name)
+    | P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name) |> not //if the variable is in the environment, it can be reduced (return false), otherwise it can't (return true)
     | P.Value _ | P.Lambda _ | DP.Unit -> true
     | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced env -> true
     | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced env -> true //TupleGet here helps TupleLet expressions reduce correctly
@@ -59,6 +59,14 @@ let rec reduce env (expr:Expr) =
     | P.Sequential (lhs, rhs) ->
         if lhs |> isReduced env then rhs
         else Expr.Sequential(reduce env lhs, rhs)
+    | P.Let(var, assignment, body) ->
+        if assignment |> isReduced env then
+            let env = (var.Name, Evaluation.evalUntyped env assignment |> ref)::env
+            reduce env body
+        else
+            Expr.Let(var, reduce env assignment, body)
+    | P.Var _ ->
+        evalValue env expr        
     | DP.Applications(fExpr,args) ->
         if args |> List.concat |> allReduced env then evalValue env expr
         else Expr.Applications(fExpr, args |> List.map (reduceAll env))
