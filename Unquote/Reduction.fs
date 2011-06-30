@@ -25,6 +25,12 @@ module ES = Microsoft.FSharp.Quotations.ExprShape
 open Swensen
 module EP = Swensen.Unquote.ExtraPatterns
 
+//hmmm, looking at this with new eyes, having just implemented the Evaluation module,
+//i don't like how Vars are considered "reduced" and somewhat related the body of of let bindings is not
+//incrementally evaluated.  I think we can have a version of reduce which returns both a reduction
+//and an enviroment to be passed into the next reduction... possibly we can have some "evalWithEnvironment (expr:Expr<'a>) (env) -> ('a, env)"
+//and "reduceWithEnvironment" functions
+
 ///Construct a Value from an evaluated expression
 let evalValue (expr:Expr) = 
     Expr.Value(Evaluation.evalUntyped expr, expr.Type)
