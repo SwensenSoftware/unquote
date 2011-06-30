@@ -59,6 +59,8 @@ let rec reduce env (expr:Expr) =
     | P.Sequential (lhs, rhs) ->
         if lhs |> isReduced env then rhs
         else Expr.Sequential(reduce env lhs, rhs)
+    | EP.IncompleteLambdaCall(_,args) when args |> allReduced env ->
+        expr
     | EP.TupleLet(vars, assignment, body) when assignment |> isReduced env -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
         let assignment = Evaluation.evalUntyped env assignment //a tuple
         let tupleFields = Microsoft.FSharp.Reflection.FSharpValue.GetTupleFields(assignment)
