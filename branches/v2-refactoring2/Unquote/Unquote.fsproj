@@ -45,11 +45,11 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="DynamicOperators.fs" />
-    <Compile Include="Eval.fs" />
+    <Compile Include="Evaluation.fs" />
     <Compile Include="ExtraReflection.fs" />
     <Compile Include="ExtraPatterns.fs" />
-    <Compile Include="Sprint.fs" />
-    <Compile Include="Reduce.fs" />
+    <Compile Include="Decompilation.fs" />
+    <Compile Include="Reduction.fs" />
     <Compile Include="Extensions.fs" />
     <Compile Include="Operators.fs" />
     <None Include="Startup.fsx" />
