@@ -15,7 +15,7 @@ limitations under the License.
 *)
 
 [<AutoOpen>]
-module ReduceFullyOpTests
+module ReductionTests
 open Xunit
 open Swensen.Unquote
 open Swensen
