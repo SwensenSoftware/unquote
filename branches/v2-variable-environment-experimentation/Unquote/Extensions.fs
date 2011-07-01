@@ -38,7 +38,8 @@ type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable 
     ///Reduce this expression by one step with the given variable environment: convert each branch of the given expression to a Value expression of its 
     ///evaluation if each sub-branch of the branch is reduced.
     ///If this expression is already reduced, or cannot be reduced, returns itself.
-    member this.Reduce(env) = Reduction.reduce env this
+    member this.Reduce(env) = 
+        Reduction.reduce env this
 
     ///Reduce this expression by one step: convert each branch of the given expression to a Value expression of its 
     ///evaluation if each sub-branch of the branch is reduced.

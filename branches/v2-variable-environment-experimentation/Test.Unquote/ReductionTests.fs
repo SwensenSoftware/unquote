@@ -418,10 +418,10 @@ open Microsoft.FSharp.Quotations
 let reduceWithEnv env (expr:Expr) = expr.Reduce(env) //need to make function here since can't capture Extension methods in quotations (makes me think then of exposing functions in Operators module for these overloads)
 //let reduceWithEnv env (expr:Expr) = expr.Reduce(env) //need to make function here since can't capture Extension methods in quotations (makes me think then of exposing functions in Operators module for these overloads)
 
-[<Fact>]
-let ``reduce untyped synthetic quotation with a supplied variable environment`` () =
-    let x = Expr.Var(Var("x", typeof<int>))
-    test <@ let env = [("x", 27 |> box |> ref)] in x |> reduceWithEnv env |> function Patterns.Value(x,_) -> x :?> int = 27 | _ -> false @>
+//[<Fact>]
+//let ``reduce untyped synthetic quotation with a supplied variable environment`` () =
+//    let x = Expr.Var(Var("x", typeof<int>))
+//    test <@ let env = [("x", 27 |> box |> ref)] in x |> reduceWithEnv env |> function Patterns.Value(x,_) -> x :?> int = 27 | _ -> false @>
 
 [<Fact(Skip="Failing")>]
 let ``variables should be passed in each phase of a sub evaluation`` () =

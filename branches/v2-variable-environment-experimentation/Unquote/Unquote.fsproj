@@ -53,6 +53,7 @@
     <Compile Include="Extensions.fs" />
     <Compile Include="Operators.fs" />
     <None Include="Startup.fsx" />
+    <Compile Include="Reduction.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utils\Utils.fsproj">

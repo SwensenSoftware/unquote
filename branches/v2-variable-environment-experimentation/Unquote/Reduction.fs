@@ -54,13 +54,17 @@ let rec reduce env (expr:Expr) =
     match expr with
     //if lhs is a Application, PropertyGet, Call, or other unit returning call, may want to discard, rather than deal with null return value.
     | P.Sequential (P.Sequential(lhs, (DP.Unit as u)), rhs) ->
-        if lhs |> isReduced then rhs
-        else Expr.Sequential(Expr.Sequential(reduce env lhs, u), rhs)
+        if lhs |> isReduced then env, rhs
+        else
+            let env, lhs = reduce env lhs 
+            env, Expr.Sequential(Expr.Sequential(lhs, u), rhs)
     | P.Sequential (lhs, rhs) ->
-        if lhs |> isReduced then rhs
-        else Expr.Sequential(reduce env lhs, rhs)
+        if lhs |> isReduced then env,rhs
+        else
+            let env, lhs = reduce env lhs  
+            env, Expr.Sequential(lhs, rhs)
     | EP.IncompleteLambdaCall(_,args) when args |> allReduced ->
-        expr
+        env, expr
     | EP.TupleLet(vars, assignment, body) when assignment |> isReduced -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
         let assignment = Evaluation.eval env assignment //a tuple
         let tupleFields = Microsoft.FSharp.Reflection.FSharpValue.GetTupleFields(assignment)
@@ -77,29 +81,44 @@ let rec reduce env (expr:Expr) =
         let env = (var.Name, Evaluation.eval env assignment |> ref)::env
         reduce env body
     | P.Var _ ->
-        evalValue env expr        
-    | DP.Applications(fExpr,args) ->
-        if args |> List.concat |> allReduced then evalValue env expr
-        else Expr.Applications(fExpr, args |> List.map (reduceAll env))
-    | EP.Range(_,_,a,b) when [a;b] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
-        evalValue env expr
-    | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
-        evalValue env expr
-    | ES.ShapeVar _ -> expr
-    | ES.ShapeLambda _ -> expr
+        env, evalValue env expr
+//    | DP.Applications(fExpr,args) ->
+//        if args |> List.concat |> allReduced then env, evalValue env expr
+//        else 
+//            let rec reduceFirstNonReduced consumed remaining =
+//                match remaining with
+//                | h::t when h |> isReduced -> reduceFirstNonReduced (consumed @ [h]) t
+//                | h::t -> 
+//                    let env, h = reduce env h
+//                    env, consumed @ h::t
+//            let env, args = reduceFirstNonReduced [] args
+//            env, Expr.Applications(fExpr, args)
+//    | EP.Range(_,_,a,b) when [a;b] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
+//        evalValue env expr
+//    | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
+//        evalValue env expr
+//    | ES.ShapeVar _ -> expr
+//    | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 
-        if isReduced expr then expr
-        elif allReduced exprs then evalValue env expr
-        else ES.RebuildShapeCombination(o, reduceAll env exprs)
-and reduceAll env exprList =
-    exprList |> List.map (reduce env)
+        if isReduced expr then env, expr
+        elif allReduced exprs then 
+            env, (evalValue env expr)
+        else 
+            let rec reduceFirstNonReduced consumed remaining =
+                match remaining with
+                | h::t when h |> isReduced -> reduceFirstNonReduced (consumed @ [h]) t
+                | h::t -> 
+                    let env, h = reduce env h
+                    env, consumed @ h::t
+            let env, exprs = reduceFirstNonReduced [] exprs
+            env, ES.RebuildShapeCombination(o, exprs)
     
 //note Expr uses reference equality and comparison, so have to be
 //carefule in reduce algorithm to only rebuild actually reduced parts of an expresion
 let reduceFully =
     let rec loop env expr acc =
         try
-            let nextExpr = expr |> (reduce env)
+            let env, nextExpr = expr |> (reduce env)
             if isReduced nextExpr then //is reduced
                 if nextExpr <> List.head acc then nextExpr::acc //different than last
                 else acc //same as last
