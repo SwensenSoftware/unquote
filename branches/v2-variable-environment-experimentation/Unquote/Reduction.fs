@@ -33,17 +33,17 @@ module EP = Swensen.Unquote.ExtraPatterns
 
 ///Construct a Value from an evaluated expression
 let evalValue env (expr:Expr) = 
-    Expr.Value(Evaluation.evalUntyped env expr, expr.Type)
+    Expr.Value(Evaluation.eval env expr, expr.Type)
 
 //need to keep in synce with the depth of Sprinting.
-let rec isReduced env = function
+let rec isReduced = function
     | P.Var v -> false //we need to assume Vars are reducible and let the exceptions fly when env lookup fails, can revist later //env |> List.exists (fun (name,_) -> name = v.Name) |> not //if the variable is in the environment, it can be reduced (return false), otherwise it can't (return true)
     | P.Value _ | P.Lambda _ | DP.Unit -> true
-    | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced env -> true
-    | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced env -> true //TupleGet here helps TupleLet expressions reduce correctly
+    | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced -> true
+    | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
     | _ -> false
-and allReduced env x = 
-    x |> List.forall (isReduced env)
+and allReduced x = 
+    x |> List.forall (isReduced)
 
 // need to handle nested application/lambda expr: replace lambda vars with reduced applications
 // unquote <@ ((fun i j -> i + j) 3 4) + 2 @>
@@ -54,15 +54,15 @@ let rec reduce env (expr:Expr) =
     match expr with
     //if lhs is a Application, PropertyGet, Call, or other unit returning call, may want to discard, rather than deal with null return value.
     | P.Sequential (P.Sequential(lhs, (DP.Unit as u)), rhs) ->
-        if lhs |> isReduced env then rhs
+        if lhs |> isReduced then rhs
         else Expr.Sequential(Expr.Sequential(reduce env lhs, u), rhs)
     | P.Sequential (lhs, rhs) ->
-        if lhs |> isReduced env then rhs
+        if lhs |> isReduced then rhs
         else Expr.Sequential(reduce env lhs, rhs)
-    | EP.IncompleteLambdaCall(_,args) when args |> allReduced env ->
+    | EP.IncompleteLambdaCall(_,args) when args |> allReduced ->
         expr
-    | EP.TupleLet(vars, assignment, body) when assignment |> isReduced env -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
-        let assignment = Evaluation.evalUntyped env assignment //a tuple
+    | EP.TupleLet(vars, assignment, body) when assignment |> isReduced -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
+        let assignment = Evaluation.eval env assignment //a tuple
         let tupleFields = Microsoft.FSharp.Reflection.FSharpValue.GetTupleFields(assignment)
         let env = 
            (Seq.zip vars tupleFields 
@@ -73,23 +73,23 @@ let rec reduce env (expr:Expr) =
                     | None -> None)
             |> Seq.toList) @ env
         reduce env body
-    | P.Let(var, assignment, body) when assignment |> isReduced env -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
-        let env = (var.Name, Evaluation.evalUntyped env assignment |> ref)::env
+    | P.Let(var, assignment, body) when assignment |> isReduced -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
+        let env = (var.Name, Evaluation.eval env assignment |> ref)::env
         reduce env body
     | P.Var _ ->
         evalValue env expr        
     | DP.Applications(fExpr,args) ->
-        if args |> List.concat |> allReduced env then evalValue env expr
+        if args |> List.concat |> allReduced then evalValue env expr
         else Expr.Applications(fExpr, args |> List.map (reduceAll env))
-    | EP.Range(_,_,a,b) when [a;b] |> allReduced env -> //defer to ShapeCombination pattern for rebuilding when not reduced
+    | EP.Range(_,_,a,b) when [a;b] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
         evalValue env expr
-    | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced env -> //defer to ShapeCombination pattern for rebuilding when not reduced
+    | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
         evalValue env expr
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 
-        if isReduced env expr then expr
-        elif allReduced env exprs then evalValue env expr
+        if isReduced expr then expr
+        elif allReduced exprs then evalValue env expr
         else ES.RebuildShapeCombination(o, reduceAll env exprs)
 and reduceAll env exprList =
     exprList |> List.map (reduce env)
@@ -100,7 +100,7 @@ let reduceFully =
     let rec loop env expr acc =
         try
             let nextExpr = expr |> (reduce env)
-            if isReduced env nextExpr then //is reduced
+            if isReduced nextExpr then //is reduced
                 if nextExpr <> List.head acc then nextExpr::acc //different than last
                 else acc //same as last
             elif nextExpr = List.head acc then //is not reduced and could not reduce

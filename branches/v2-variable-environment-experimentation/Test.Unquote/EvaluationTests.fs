@@ -1,4 +1,5 @@
-﻿module EvaluationTests
+﻿[<AutoOpen>]
+module EvaluationTests
 
 open Xunit
 open Swensen.Unquote
@@ -512,3 +513,28 @@ let ``Known PowerPack quotation eval bug`` () =
                 let value2 = { x = 1; y = 1; }
                 let result2 = value1 = value2
                 result2 @> true
+
+open Microsoft.FSharp.Quotations
+let evalUntypedWithEnv env (expr:Expr) = expr.EvalUntyped(env) //need to make function here since can't capture Extension methods in quotations (makes me think then of exposing functions in Operators module for these overloads)
+
+[<Fact>]
+let ``evaluate untyped synthetic quotation with a supplied variable environment`` () =
+    let x = Expr.Var(Var("x", typeof<int>))
+    test <@ let env = [("x", 27 |> box |> ref)] in x |> evalUntypedWithEnv env :?> int = 27 @>
+
+//open Microsoft.FSharp.Quotations
+//let evalUntyped env (expr:Expr) = expr.EvalUntyped(env)
+//
+//[<Fact>]
+//let ``evaluate untyped synthetic quotation with a supplied variable environment`` () =
+//    test <@ let env = [("x", 27 |> box |> ref)] in Expr.Var(Var("x", typeof<int>)) |> evalUntyped env :?> int = 22 @>
+//
+//Test 'EvaluationTests.evaluate untyped synthetic quotation with a supplied variable environment' failed: 
+//INTERESTING STACK TRACE
+////let env = [("x", (27 |> box |> ref))] in (FSharpExpr.Var(new FSharpVar("x", typeof<int>, None)) |> fun expr -> EvaluationTests.evalUntyped env expr) :?> int = 22
+////let env = [("x", (27 |> ref))] in (FSharpExpr.Var(new FSharpVar("x", typeof<int>, None)) |> fun expr -> EvaluationTests.evalUntyped env expr) :?> int = 22
+////let env = [("x", {contents = 27;})] in (FSharpExpr.Var(new FSharpVar("x", typeof<int>, None)) |> fun expr -> EvaluationTests.evalUntyped env expr) :?> int = 22
+////(FSharpExpr.Var(new FSharpVar("x", System.Int32, None)) |> fun expr -> EvaluationTests.evalUntyped env expr) :?> int = 22
+////(FSharpExpr.Var(x) |> fun expr -> EvaluationTests.evalUntyped env expr) :?> int = 22
+////(x |> fun expr -> EvaluationTests.evalUntyped env expr) :?> int = 22
+////System.Collections.Generic.KeyNotFoundException: Exception of type 'System.Collections.Generic.KeyNotFoundException' was thrown.
