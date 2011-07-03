@@ -512,3 +512,19 @@ let ``Known PowerPack quotation eval bug`` () =
                 let value2 = { x = 1; y = 1; }
                 let result2 = value1 = value2
                 result2 @> true
+
+
+
+open Microsoft.FSharp.Quotations
+open Swensen.Unquote
+[<Fact>]
+let ``typed synthetic evaluation`` () =
+    let evalWithEnv env (expr:Expr<int>) = expr.Eval(env)
+    let synExpr:Expr<int> = Expr.Var(new Var("x", typeof<int>)) |> Expr.Cast
+    <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = 2 @>
+
+[<Fact>]
+let ``untyped synthetic evaluation`` () =
+    let evalWithEnv env (expr:Expr) = expr.Eval(env)
+    let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
+    <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = box 2 @>
