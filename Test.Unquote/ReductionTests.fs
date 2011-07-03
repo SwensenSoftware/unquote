@@ -414,6 +414,18 @@ let ``array range step with sub expr`` () =
       "[|1; 4; 7|]"
     ]
 
+open Microsoft.FSharp.Quotations
+open Swensen.Unquote
+[<Fact>]
+let ``synthetic full reduction`` () =
+    let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
+    <@ synExpr.ReduceFully([("x", 2 |> box |> ref)]) |> List.map decompile = ["x"; "2"] @>
+
+[<Fact>]
+let ``synthetic single reduction`` () =
+    let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
+    <@ synExpr.Reduce([("x", 2 |> box |> ref)]) |> decompile = "2" @>
+
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"
