@@ -110,15 +110,15 @@ let (|CheckedUnaryOp|_|) = function
         | false, _ -> None
     | _ -> None
 
-let evalUntyped expr =
+let findInEnv name env =
+    env |> List.find (fun (curName, _) -> curName = name) |> snd
+
+let evalUntyped env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         failwithf "Quotation pattern %s not supported: expression = %A" name expr
 
     let inline failwithOperatorLookupFailed name (expr:Expr) =
         failwithf "Operator %s is a dynamic invocation operator which should be supported but lookup failed: expression = %A" name expr
-
-    let findInEnv name env =
-        env |> List.find (fun (curName, _) -> curName = name) |> snd
         
     let rec eval env expr =
         match expr with
@@ -245,12 +245,12 @@ let evalUntyped expr =
 //        eval env expr
 
     try
-        eval [] expr
+        eval env expr
     with
     | :? TargetInvocationException as e when e.InnerException <> null -> 
         //this is the real exception; but we need to figure out how to keep stack trace from being erased
         reraisePreserveStackTrace e.InnerException
     | _ -> reraise()
 
-let eval (expr:Expr<'a>) =
-    evalUntyped expr :?> 'a
+let eval env (expr:Expr<'a>) =
+    evalUntyped env expr :?> 'a
