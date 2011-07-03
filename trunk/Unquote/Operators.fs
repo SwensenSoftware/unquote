@@ -26,8 +26,6 @@ open Swensen.Unquote
 
 ///Evaluate the given typed expression.
 let inline eval (expr:Expr<'a>) = expr.Eval()
-///Evaluate the given untyped expression.
-let inline evalUntyped (expr:Expr) = expr.EvalUntyped()
 ///Decompile given expression to its source code representation. Sub-expressions which are
 ///not currently supported will fallback on the default Expr.ToString() implementation.
 let inline decompile (expr:Expr) = expr.Decompile()
@@ -139,7 +137,7 @@ let inline test (expr:Expr<bool>) =
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let result =
         try
-            ignore <| expr.EvalUntyped()
+            ignore <| expr.Eval()
             NoException
         with
         | :? 'a -> RightException

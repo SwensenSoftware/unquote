@@ -26,10 +26,10 @@ type Microsoft.FSharp.Quotations.Expr<'a> with
 
 type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable environments
     ///Evaluate this untyped expression with the given variable environment.
-    member this.EvalUntyped(env) = Evaluation.eval env this
+    member this.Eval(env) = Evaluation.eval env this
 
-    ///Evaluate the given untyped expression.
-    member this.EvalUntyped() = Evaluation.eval [] this
+    ///Evaluate this untyped expression.
+    member this.Eval() = Evaluation.eval [] this
 
     ///Decompile this expression to its source code representation. Sub-expressions which are
     ///not currently supported will fallback on the default Expr.ToString() implementation.
