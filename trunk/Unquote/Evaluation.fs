@@ -113,7 +113,7 @@ let (|CheckedUnaryOp|_|) = function
 let findInEnv name env =
     env |> List.find (fun (curName, _) -> curName = name) |> snd
 
-let evalUntyped env expr =
+let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         failwithf "Quotation pattern %s not supported: expression = %A" name expr
 
@@ -251,6 +251,3 @@ let evalUntyped env expr =
         //this is the real exception; but we need to figure out how to keep stack trace from being erased
         reraisePreserveStackTrace e.InnerException
     | _ -> reraise()
-
-let eval env (expr:Expr<'a>) =
-    evalUntyped env expr :?> 'a
