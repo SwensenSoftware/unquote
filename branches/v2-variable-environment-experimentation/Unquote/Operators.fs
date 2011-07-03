@@ -34,7 +34,7 @@ let inline decompile (expr:Expr) = expr.Decompile()
 ///Reduce by one step: convert each branch of the given expression to a Value expression of its 
 ///evaluation if each sub-branch of the branch is reduced.
 ///If this expression is already reduced, or cannot be reduced, returns itself.
-let inline reduce (expr:Expr) = expr.Reduce()
+//let inline reduce (expr:Expr) = expr.Reduce()
 ///Convert the given expression to a list of all of its Reduce steps in order.
 let inline reduceFully (expr:Expr) = expr.ReduceFully()
 ///Determine whether the given expression is reduced.
