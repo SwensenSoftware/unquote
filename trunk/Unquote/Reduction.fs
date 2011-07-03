@@ -25,6 +25,11 @@ module ES = Microsoft.FSharp.Quotations.ExprShape
 open Swensen
 module EP = Swensen.Unquote.ExtraPatterns
 
+///Extensions for building DerivedPatterns and ExtraPatterns
+type Expr with
+    static member AndAlso(x,y) = Expr.IfThenElse(x,y,Expr.Value(false)) //see line 1705 in quotations.fs
+    static member OrElse(x,y) = Expr.IfThenElse(x,Expr.Value(true),y) //see line 1711 in quotations.fs
+
 //hmmm, looking at this with new eyes, having just implemented the Evaluation module,
 //i don't like how Vars are considered "reduced" and somewhat related the body of of let bindings is not
 //incrementally evaluated.  I think we can have a version of reduce which returns both a reduction
@@ -66,6 +71,14 @@ let rec reduce env (expr:Expr) =
         evalValue env expr
     | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
         evalValue env expr
+    | DP.AndAlso(DP.Bool(false),_) -> //short-circuit
+        Expr.Value(false)
+    | DP.AndAlso(DP.Bool(true), DP.Bool(b)) -> //both sides reduced, evaluate
+        evalValue env expr
+    | DP.AndAlso(DP.Bool(true), b) -> //lhs reduced, need to reduce rhs
+        Expr.AndAlso(Expr.Value(true), reduce env b)
+    | DP.AndAlso(a,b) -> //need to reduce lhs (rhs may or may not be reduced)
+        Expr.AndAlso(reduce env a, b)
     | P.IfThenElse(a,b,c) ->
         if a |> isReduced then
             if Evaluation.eval env a :?> bool then b
