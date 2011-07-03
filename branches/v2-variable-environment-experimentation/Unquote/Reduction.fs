@@ -51,6 +51,9 @@ and allReduced x =
 //note: we are not super careful about evaluation order (expect, of course, Sequential), which may be an issue.
 //reduce all args / calles if any of them are not reduced; otherwise eval
 open System.Collections.Generic
+///Reduce the given expression with the given environment by "one step"; except for sequential expressions
+///and let bindings, the order of evaluation is not generally honored. The environment cache (a mutable dictionary) is used to
+///persist expression environments between reduction steps.
 let rec reduce env (envCache:Dictionary<_,_>) (expr:Expr) = 
     match expr with
     //if lhs is a Application, PropertyGet, Call, or other unit returning call, may want to discard, rather than deal with null return value.
@@ -71,6 +74,7 @@ let rec reduce env (envCache:Dictionary<_,_>) (expr:Expr) =
             envCache.[x] <- env
             x
     | EP.IncompleteLambdaCall(_,args) when args |> allReduced ->
+        //we want to be able to rebuild incomplete lambda calls at each reduction step eventually
         envCache.[expr] <- env
         expr
     | EP.TupleLet(vars, assignment, body) when assignment |> isReduced -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
@@ -118,9 +122,12 @@ and reduceAll env envCache exprList =
     
 //note Expr uses reference equality and comparison, so have to be
 //carefule in reduce algorithm to only rebuild actually reduced parts of an expresion
+///Reduce the given expression with the initial variable environment (empty for non-synthetic quotations;
+///use this when a synthetic quotation has free variables without corresponding let bindings).
 let reduceFully env expr =
+    ///maps expressions to environments so that outer and inner environment state is persisted between reductions
     let envCache = Dictionary<_,_>()
-    envCache.Add(expr, env)
+    envCache.Add(expr, env) //bootstrap the environment cache with the intial expression and environment
     let rec loop env expr acc =
         try
             let nextExpr = expr |> (reduce envCache.[expr] envCache)
