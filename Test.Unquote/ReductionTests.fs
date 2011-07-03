@@ -439,11 +439,48 @@ let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =
 
 [<Fact>]
 let ``IfThenElse predicate is false, then branch is cut and never reduced`` () =
-    <@ if 2 = 2 then 1 + 2 else 3 + 4 @> |> decompiledReductions =? [
+    <@ if 2 = 1 then 1 + 2 else 3 + 4 @> |> decompiledReductions =? [
         "if 2 = 1 then 1 + 2 else 3 + 4"
         "if false then 1 + 2 else 3 + 4"
         "3 + 4"
         "7"
+    ]
+
+[<Fact>]
+let ``AndAlso short circuit false`` () =
+    <@ 1 = 2 && 1 = 2 @> |> decompiledReductions =? [
+        "1 = 2 && 1 = 2"
+        "false && 1 = 2"
+        "false"
+    ]
+
+[<Fact>]
+let ``AndAlso no short circuit false`` () =
+    <@ 2 = 2 && 1 = 2 @> |> decompiledReductions =? [
+        "2 = 2 && 1 = 2"
+        "true && 1 = 2"
+        "true && false"
+        "false"
+    ]
+
+[<Fact>]
+let ``AndAlso no short circuit true`` () =
+    <@ 2 = 2 && 2 = 2 @> |> decompiledReductions =? [
+        "2 = 2 && 2 = 2"
+        "true && 2 = 2"
+        "true && true"
+        "true"
+    ]
+
+[<Fact>]
+let ``AndAlso nested`` () =
+    <@ 1 = 1 && (2 = 2 && 3 = 3) @> |> decompiledReductions =? [
+        "1 = 1 && (2 = 2 && 3 = 3)"
+        "true && (2 = 2 && 3 = 3)"
+        "true && (true && 3 = 3)"
+        "true && (true && true)"
+        "true && true"
+        "true"
     ]
 
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
