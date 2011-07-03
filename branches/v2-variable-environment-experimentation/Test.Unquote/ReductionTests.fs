@@ -297,6 +297,7 @@ let ``TupleLet variation 1`` () =
     <@ let a, b = t in (a, b) @> |> decompiledReductions =? [
       "let a, b = t in (a, b)"
       "let a, b = (1, 2) in (a, b)"
+      "(a, b)"
       "(1, 2)"
     ]
 
@@ -304,6 +305,7 @@ let ``TupleLet variation 1`` () =
 let ``TupleLet variation 2`` () =
     <@ let a,b = (1,2) in a,b @> |> decompiledReductions =? [
       "let a, b = (1, 2) in (a, b)"
+      "(a, b)"
       "(1, 2)"
     ]
 
@@ -312,6 +314,7 @@ let ``TupleLet variation 2 multiple unreduced sub exprs`` () =
     <@ let (x,y,z) = (1 + 3, 2, 3 + 4) in (x, z) @> |> decompiledReductions =? [
       "let x, y, z = (1 + 3, 2, 3 + 4) in (x, z)"
       "let x, y, z = (4, 2, 7) in (x, z)"
+      "(x, z)"
       "(4, 7)"
     ]
 

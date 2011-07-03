@@ -88,10 +88,12 @@ let rec reduce env (envCache:Dictionary<_,_>) (expr:Expr) =
                     | Some(var) -> Some(var.Name, ref tupleField)
                     | None -> None)
             |> Seq.toList) @ env
-        reduce env envCache body
+        envCache.[body] <- env
+        body
     | P.Let(var, assignment, body) when assignment |> isReduced -> //else defer to ShapeCombination, which will only reduce the assignment and rebuild the Let expression
         let env = (var.Name, Evaluation.eval env assignment |> ref)::env
-        reduce env envCache body
+        envCache.[body] <- env
+        body
     | P.Var _ ->
         evalValue env expr
     | DP.Applications(fExpr,args) ->
