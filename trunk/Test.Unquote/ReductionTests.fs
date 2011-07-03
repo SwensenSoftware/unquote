@@ -418,13 +418,15 @@ open Microsoft.FSharp.Quotations
 open Swensen.Unquote
 [<Fact>]
 let ``synthetic full reduction`` () =
+    let reduceFullyWithEnv env (expr:Expr) = expr.ReduceFully(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr.ReduceFully([("x", 2 |> box |> ref)]) |> List.map decompile = ["x"; "2"] @>
+    <@ synExpr |> reduceFullyWithEnv [("x", 2 |> box |> ref)] |> List.map decompile = ["x"; "2"] @>
 
 [<Fact>]
 let ``synthetic single reduction`` () =
+    let reduceWithEnv env (expr:Expr) = expr.Reduce(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr.Reduce([("x", 2 |> box |> ref)]) |> decompile = "2" @>
+    <@ synExpr |> reduceWithEnv [("x", 2 |> box |> ref)] |> decompile = "2" @>
 
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
 //        "let x = 2 + 3 in fun j -> j + x"
