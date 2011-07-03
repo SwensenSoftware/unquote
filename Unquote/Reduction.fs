@@ -66,6 +66,11 @@ let rec reduce env (expr:Expr) =
         evalValue env expr
     | EP.RangeStep(_,_,a,b,c) when [a;b;c] |> allReduced -> //defer to ShapeCombination pattern for rebuilding when not reduced
         evalValue env expr
+    | P.IfThenElse(a,b,c) ->
+        if a |> isReduced then
+            if Evaluation.eval env a :?> bool then b
+            else c
+        else Expr.IfThenElse(reduce env a, b, c)
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 

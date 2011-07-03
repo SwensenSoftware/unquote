@@ -428,6 +428,24 @@ let ``synthetic single reduction`` () =
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
     <@ synExpr |> reduceWithEnv [("x", 2 |> box |> ref)] |> decompile = "2" @>
 
+[<Fact>]
+let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =
+    <@ if 2 = 2 then 1 + 2 else 3 + 4 @> |> decompiledReductions =? [
+        "if 2 = 2 then 1 + 2 else 3 + 4"
+        "if true then 1 + 2 else 3 + 4"
+        "1 + 2"
+        "3"
+    ]
+
+[<Fact>]
+let ``IfThenElse predicate is false, then branch is cut and never reduced`` () =
+    <@ if 2 = 2 then 1 + 2 else 3 + 4 @> |> decompiledReductions =? [
+        "if 2 = 1 then 1 + 2 else 3 + 4"
+        "if false then 1 + 2 else 3 + 4"
+        "3 + 4"
+        "7"
+    ]
+
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"
