@@ -538,6 +538,14 @@ let ``can't differentiate between true || false and true && true``() =
     (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
     (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
 
+[<Fact>]
+let ``raw Quote`` () =
+    <@ (<@@ <@@ 1 @@> @@> |> decompile) = "<@@ 1 @@>" @> |> decompiledReductions =? [
+        "(<@@ <@@ 1 @@> @@> |> decompile) = \"<@@ 1 @@>\""
+        "\"<@@ 1 @@>\" = \"<@@ 1 @@>\""
+        "true"
+    ]
+
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"
