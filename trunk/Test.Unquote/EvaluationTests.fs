@@ -528,3 +528,20 @@ let ``untyped synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr) = expr.Eval(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
     <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = box 2 @>
+
+//let (|Unbox|_|) x y = 
+//    if y |> unbox = x then
+//        Some()
+//    else
+//        None
+
+let evalUntyped (expr:Expr) = expr.Eval()
+[<Fact>]
+let ``raw Quote`` () =
+    let result = <@@ <@@ 1 @@> @@> |> evalUntyped :?> Expr
+    let expectedQuotationValue =
+        match result with
+        | Patterns.Value(x,_) -> Some(x)
+        | _ -> None
+
+    test <@ expectedQuotationValue.Value :?> int = 1 @>

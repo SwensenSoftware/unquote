@@ -218,6 +218,8 @@ let eval env expr =
             op (eval env lhs) (eval env rhs)
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
+        | P.Quote(captured) -> //N.B. we have no way of differentiating betweened typed and untyped inner quotations; all come as untyped so that's the only kind we can support.
+            box captured
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.AddressOf _ -> 
@@ -228,8 +230,6 @@ let eval env expr =
             failwithPatternNotSupported "NewDelegate" expr
         | P.LetRecursive _ -> 
             failwithPatternNotSupported "LetRecursive" expr
-        | P.Quote _ -> 
-            failwithPatternNotSupported "Quote" expr
         | _ -> 
             failwithf "this expression should not be possible: %A" expr 
     and evalAll env exprs =

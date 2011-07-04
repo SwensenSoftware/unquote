@@ -207,9 +207,9 @@ let decompile expr =
         | P.Let(var, e1, e2) ->
             //todo: this needs to be handled better for curried functions
             applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (decompile 0 e1) (decompile 0 e2))
-        | P.Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
-            //note, this only handles typed quotations
-            sprintf "<@ %s @>" (decompile 0 qx) 
+        | P.Quote(qx) ->
+            //N.B. we have no way of differentiating betweened typed and untyped inner quotations; all come as untyped so that's the only kind we can support.
+            sprintf "<@@ %s @@>" (decompile 0 qx) 
         | DP.OrElse(DP.Bool(true), DP.Bool(false)) -> //true || false can't be distinguished from true && true, yet is less likely an expression due to short-circuiting
             applyParens 12 "true && true"
         | DP.AndAlso(DP.Bool(false), DP.Bool(true)) -> //false && true can't be distinguished from false || false, yet is less likely an expression due to short-circuiting
