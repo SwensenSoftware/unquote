@@ -161,6 +161,7 @@ let (|TupleLet|_|) x =
         Some(varList, body, final)
     | _ -> None
 
+//there seems to be an issue with coersion value applications and decompilation here
 ////need to check all args are reduced?
 ///Partial application and zero application of Lambda call (e.g. List.map (+), or id).
 ///Must come before Let and Lambdas patterns.
@@ -181,7 +182,7 @@ let (|IncompleteLambdaCall|_|) x =
 
         match final with
         | DP.Lambdas(lambdaVarsList, P.Call(None, mi, callArgs)) 
-            //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args
+            //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args **    
             when List.equalsWith varEqualsExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
                 Some(mi, bindingList)
         | _ -> None

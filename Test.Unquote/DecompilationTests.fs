@@ -702,8 +702,21 @@ let ``Raw quoatation nested in typed quotation, confirmed F# bug`` () =
     <@ <@@ 1 @@> @> //System.ArgumentException: Type mismatch when building 'expr': the expression has the wrong type. Expected 'Microsoft.FSharp.Quotations.FSharpExpr', but received type 'Microsoft.FSharp.Quotations.FSharpExpr`1[System.Int32]'.
 
 [<Fact>]
-let ``raw Quote`` () =
+let ``Quote, supported typed`` () =
     //whoa, now we're talking!
-    test <@ <@@ <@@ 1 @@> @@> |> decompile = "<@@ 1 @@>" @>
+    test <@ <@ <@ 1 @> @> |> decompile = "<@ 1 @>" @>
     //or 
-    <@@ <@@ 1 @@> @@> |> decompile =? "<@@ 1 @@>" //double test, since kinda unsure about the above level of self-testing right now
+    <@ <@ 1 @> @> |> decompile =? "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
+
+[<Fact>]
+let ``Quote, unsupported untyped treated as typed`` () =
+    //whoa, now we're talking!
+    test <@ <@@ <@@ 1 @@> @@> |> decompile = "<@ 1 @>" @>
+    //or 
+    <@@ <@@ 1 @@> @@> |> decompile =? "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
+
+[<Fact(Skip="need to work on")>]
+let ``lambda applications of Coerce values is not decompiled correctly``() =
+    ()
+    //instead of "(<@ <@ 1 @> @> |> fun expr -> decompile expr) = "<@ 1 @>""
+    //should be "(<@ <@ 1 @> @> |> decompile) = "<@ 1 @>""

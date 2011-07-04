@@ -545,3 +545,17 @@ let ``raw Quote`` () =
         | _ -> None
 
     test <@ expectedQuotationValue.Value :?> int = 1 @>
+
+[<Fact>]
+let ``typed Quote`` () =
+    let result = <@ <@ 1 @> @> |> eval :?> Expr<int>
+    let expectedQuotationValue =
+        match result with
+        | Patterns.Value(x,_) -> Some(x)
+        | _ -> None
+
+    test <@ expectedQuotationValue.Value :?> int = 1 @>
+
+[<Fact>]
+let ``nested typed Quote`` () =
+    test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
