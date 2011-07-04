@@ -689,3 +689,10 @@ let ``GenericUnbox Intrinsic function, precedence of overall expression weaker t
 let ``GenericUnbox Intrinsic function, precedence of overall expression stronger than right pipe`` () =
     <@ box 3 :?> int |> box @> |> decompile =? "box 3 :?> int |> box"
 
+[<Fact>]
+let ``false || false is given priority over false && true even though they can't be differentiated``() =
+    <@ false || false @> |> decompile =? "false || false"
+
+[<Fact>]
+let ``true && true is given priority over true || false even though they can't be differentiated``() =
+    <@ true && true @> |> decompile =? "true && true"

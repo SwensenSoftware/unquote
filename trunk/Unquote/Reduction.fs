@@ -79,6 +79,14 @@ let rec reduce env (expr:Expr) =
         Expr.AndAlso(Expr.Value(true), reduce env b)
     | DP.AndAlso(a,b) -> //need to reduce lhs (rhs may or may not be reduced)
         Expr.AndAlso(reduce env a, b)
+    | DP.OrElse(DP.Bool(true),_) -> //short-circuit
+        Expr.Value(true)
+    | DP.OrElse(DP.Bool(false), DP.Bool(b)) -> //both sides reduced, evaluate
+        evalValue env expr
+    | DP.OrElse(DP.Bool(false), b) -> //lhs reduced, need to reduce rhs
+        Expr.OrElse(Expr.Value(false), reduce env b)
+    | DP.OrElse(a,b) -> //need to reduce lhs (rhs may or may not be reduced)
+        Expr.OrElse(reduce env a, b)
     | P.IfThenElse(a,b,c) ->
         if a |> isReduced then
             if Evaluation.eval env a :?> bool then b
