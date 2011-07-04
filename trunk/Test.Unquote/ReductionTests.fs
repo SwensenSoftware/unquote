@@ -539,10 +539,18 @@ let ``can't differentiate between true || false and true && true``() =
     (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
 
 [<Fact>]
-let ``raw Quote`` () =
-    <@ (<@@ <@@ 1 @@> @@> |> decompile) = "<@@ 1 @@>" @> |> decompiledReductions =? [
-        "(<@@ <@@ 1 @@> @@> |> decompile) = \"<@@ 1 @@>\""
-        "\"<@@ 1 @@>\" = \"<@@ 1 @@>\""
+let ``Quote, supported typed`` () =
+    <@ (<@ <@ 1 @> @> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =? [
+        "(<@ <@ 1 @> @> |> fun expr -> decompile expr) = \"<@ 1 @>\"" //note, we are unable to resugar expressiosn involving lambda applications of coerced values now
+        "\"<@ 1 @>\" = \"<@ 1 @>\""
+        "true"
+    ]
+
+[<Fact>]
+let ``Quote, unsupported untyped treated as typed`` () =
+    <@ (<@@ <@@ 1 @@> @@> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =? [
+        "(<@ <@ 1 @> @> |> decompile) = \"<@ 1 @>\""
+        "\"<@ 1 @>\" = \"<@ 1 @>\""
         "true"
     ]
 

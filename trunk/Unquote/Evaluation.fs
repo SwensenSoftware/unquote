@@ -219,7 +219,10 @@ let eval env expr =
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> //N.B. we have no way of differentiating betweened typed and untyped inner quotations; all come as untyped so that's the only kind we can support.
-            box captured
+            let ctor = expr.Type.GetConstructors(BindingFlags.NonPublic ||| BindingFlags.Instance).[0]
+            let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
+            let generic = ctor.Invoke([|tree; expr.CustomAttributes|])
+            box generic
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.AddressOf _ -> 
@@ -243,7 +246,9 @@ let eval env expr =
             | result -> result
 //    and (|Eval|) env expr =
 //        eval env expr
-
+#if DEBUG 
+    eval env expr
+#else
     try
         eval env expr
     with
@@ -251,3 +256,4 @@ let eval env expr =
         //this is the real exception; but we need to figure out how to keep stack trace from being erased
         reraisePreserveStackTrace e.InnerException
     | _ -> reraise()
+#endif
