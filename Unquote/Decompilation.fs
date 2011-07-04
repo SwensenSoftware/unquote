@@ -210,6 +210,10 @@ let decompile expr =
         | P.Quote(qx) -> //even though can't reduce due to UntypedEval() limitations
             //note, this only handles typed quotations
             sprintf "<@ %s @>" (decompile 0 qx) 
+        | DP.OrElse(DP.Bool(true), DP.Bool(false)) -> //true || false can't be distinguished from true && true, yet is less likely an expression due to short-circuiting
+            applyParens 12 "true && true"
+        | DP.AndAlso(DP.Bool(false), DP.Bool(true)) -> //false && true can't be distinguished from false || false, yet is less likely an expression due to short-circuiting
+            applyParens 11 "false || false"
         | DP.AndAlso(a,b) -> //must come before if then else
             applyParens 12 (sprintf "%s && %s" (decompile 11 a) (decompile 12 b))
         | DP.OrElse(a,b) -> //must come before if then else
@@ -245,7 +249,6 @@ let decompile expr =
         decompileArgs 20 " "
     and decompileSequencedArgs =
         decompileArgs 4 "; "
-    
     decompile 0 expr
 
 //-----precedence-----

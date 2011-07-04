@@ -483,6 +483,61 @@ let ``AndAlso nested`` () =
         "true"
     ]
 
+[<Fact>]
+let ``OrElse short circuit true`` () =
+    <@ 1 = 1 || 1 = 2 @> |> decompiledReductions =? [
+        "1 = 1 || 1 = 2"
+        "true || 1 = 2"
+        "true"
+    ]
+
+[<Fact>]
+let ``OrElse no short circuit true`` () =
+    <@ 1 = 2 || 1 = 1 @> |> decompiledReductions =? [
+        "1 = 2 || 1 = 1"
+        "false || 1 = 1"
+        "false || true"
+        "true"
+    ]
+
+[<Fact>]
+let ``OrElse no short circuit false`` () =
+    <@ 1 = 2 || 1 = 2 @> |> decompiledReductions =? [
+        "1 = 2 || 1 = 2"
+        "false || 1 = 2"
+        "false || false"
+        "false"
+    ]
+
+[<Fact>]
+let ``OrElse nested`` () =
+    <@ 1 = 2 || (2 = 3 || 3 = 4) @> |> decompiledReductions =? [
+        "1 = 2 || (2 = 3 || 3 = 4)"
+        "false || (2 = 3 || 3 = 4)"
+        "false || (false || 3 = 4)"
+        "false || (false || false)"
+        "false || false"
+        "false"
+    ]
+
+[<Fact>] //N.B. due to F# lib
+let ``can't differentiate between false || false and false && true``() =
+    let q1 = <@ false || false @>
+    let q2 = <@ false && true @>
+    (q1 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
+    (q1 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
+    (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
+    (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
+
+[<Fact>] //N.B. due to F# lib
+let ``can't differentiate between true || false and true && true``() =
+    let q1 = <@ true || false @>
+    let q2 = <@ true && true @>
+    (q1 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
+    (q1 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
+    (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
+    (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
+
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"
