@@ -13,6 +13,7 @@
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //*)
+#r @"C:\Users\Stephen\Documents\Visual Studio 2010\Projects\Unquote\code\Unquote\bin\Debug\Unquote.dll"
 #r @"C:\Users\Stephen\Documents\Visual Studio 2010\Projects\Unquote\code\Unquote\bin\Release\Unquote.dll"
 open Swensen.Unquote
 open Microsoft.FSharp.Quotations

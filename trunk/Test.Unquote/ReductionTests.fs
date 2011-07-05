@@ -541,7 +541,7 @@ let ``can't differentiate between true || false and true && true``() =
 [<Fact>]
 let ``Quote, supported typed`` () =
     <@ (<@ <@ 1 @> @> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =? [
-        "(<@ <@ 1 @> @> |> fun expr -> decompile expr) = \"<@ 1 @>\"" //note, we are unable to resugar expressiosn involving lambda applications of coerced values now
+        "(<@ <@ 1 @> @> |> decompile) = \"<@ 1 @>\"" //note, we are unable to resugar expressiosn involving lambda applications of coerced values now
         "\"<@ 1 @>\" = \"<@ 1 @>\""
         "true"
     ]
