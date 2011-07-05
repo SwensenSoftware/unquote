@@ -715,8 +715,7 @@ let ``Quote, unsupported untyped treated as typed`` () =
     //or 
     <@@ <@@ 1 @@> @@> |> decompile =? "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
 
-[<Fact(Skip="need to work on")>]
-let ``lambda applications of Coerce values is not decompiled correctly``() =
-    ()
-    //instead of "(<@ <@ 1 @> @> |> fun expr -> decompile expr) = "<@ 1 @>""
-    //should be "(<@ <@ 1 @> @> |> decompile) = "<@ 1 @>""
+let f' (x:obj) (y:obj) = x |> string
+[<Fact>] //issue 40
+let ``handle lambda re-sugaring when vars are implicitly coerced``() =
+    <@ <@ 2 |> f' "2" @> |> decompile = "2 |> f' \"2\"" @> |> test
