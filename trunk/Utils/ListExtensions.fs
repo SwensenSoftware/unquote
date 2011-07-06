@@ -15,7 +15,7 @@ limitations under the License.
 *)
 
 namespace Swensen.Utils
-module List =
+module internal List =
     let rec equalsWith f xl yl =
         match xl, yl with
         | [], [] -> true
