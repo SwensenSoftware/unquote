@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 [<AutoOpen>]
-///Various extensions methods on Expr and Expr<'a> for decompiling, evaluating, and incrementally reducing quotation expressions.
-module Swensen.Unquote.ExprExtensions
+///Extensions methods on Expr and Expr<'a> for decompiling, evaluating, and incrementally reducing quotation expressions. Also includes an
+///extension method on Type for getting the short, F#-style name of a type.
+module Swensen.Unquote.Extensions
 
 //N.B. Expr<'T> extends Expr
 
@@ -54,3 +55,8 @@ type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable 
 
     ///Determine whether this expression is reduced.
     member this.IsReduced() = Reduction.isReduced this
+
+type System.Type with
+    ///The F#-style signature
+    member this.FSharpName =
+        ExtraReflection.sprintSig this
