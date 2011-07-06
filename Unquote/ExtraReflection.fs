@@ -20,7 +20,7 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Metadata
-open Swensen
+open Swensen.Utils
 
 ///is the top-level FSI module
 let isFsiModule (declaringType:Type) =

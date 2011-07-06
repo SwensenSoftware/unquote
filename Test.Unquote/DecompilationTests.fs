@@ -18,7 +18,7 @@ limitations under the License.
 module DecompilationTests
 open Xunit
 open Swensen.Unquote
-open Swensen
+open Swensen.Utils
 
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.

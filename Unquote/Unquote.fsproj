@@ -52,6 +52,7 @@
     <Compile Include="Reduction.fs" />
     <Compile Include="ExprExtensions.fs" />
     <Compile Include="Operators.fs" />
+    <Compile Include="TypeExtensions.fs" />
     <None Include="Startup.fsx" />
   </ItemGroup>
   <ItemGroup>

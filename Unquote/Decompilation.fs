@@ -24,7 +24,7 @@ open Microsoft.FSharp.Metadata
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
 
-open Swensen
+open Swensen.Utils
 module EP = Swensen.Unquote.ExtraPatterns
 module ER = Swensen.Unquote.ExtraReflection
                 

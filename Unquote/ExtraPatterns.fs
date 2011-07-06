@@ -25,7 +25,7 @@ open Microsoft.FSharp.Metadata
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
 
-open Swensen
+open Swensen.Utils
 
 type binOpAssoc =
     | Left
