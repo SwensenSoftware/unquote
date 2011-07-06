@@ -51,7 +51,6 @@
     <Compile Include="Decompilation.fs" />
     <Compile Include="Reduction.fs" />
     <Compile Include="Extensions.fs" />
-    <Compile Include="TypeExtensions.fs" />
     <Compile Include="Operators.fs" />
     <None Include="Startup.fsx" />
   </ItemGroup>
