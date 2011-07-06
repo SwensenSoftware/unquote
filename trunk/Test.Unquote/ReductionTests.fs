@@ -554,6 +554,75 @@ let ``Quote, unsupported untyped treated as typed`` () =
         "true"
     ]
 
+[<Fact>]
+let ``VarSet`` () =
+    <@ let mutable x = 0 in x <- 1 ; x @> |> decompiledReductions =? [
+        "let mutable x = 0 in x <- 1; x"
+        "1"
+    ]
+
+let mutable x= 0
+[<Fact>]
+let ``static PropertySet`` () =    
+    <@ x ; x <- 1 ; x @> |> decompiledReductions =? [
+        "x; x <- 1; x"
+        "0; x <- 1; x"
+        "x <- 1; x"
+        "(); x"
+        "x"
+        "1"
+    ]
+
+type SetTest() =
+    [<DefaultValue>]
+    val mutable public x : int
+
+    member this.X
+        with get() = this.x
+        and set(value) = this.x <- value
+
+    override this.ToString() =
+        sprintf "{ x = %i }" this.x
+
+let st = new SetTest()
+[<Fact>]
+let ``instance FieldSet`` () =    
+    <@ st.x ; st.x <- 1 ; st.x @> |> decompiledReductions =? [
+        "st.x; st.x <- 1; st.x"
+        "{ x = 1 }.x; st.x <- 1; st.x"
+        "0; st.x <- 1; st.x"
+        "st.x <- 1; st.x"
+        "{ x = 1 }.x <- 1; st.x"
+        "(); st.x"
+        "st.x"
+        "{ x = 1 }.x"
+        "1"
+    ]
+
+let st2 = new SetTest()
+[<Fact>]
+let ``instance PropertySet`` () =    
+    <@ st2.X ; st2.X <- 1 ; st2.X @> |> decompiledReductions =? [
+        "st2.X; st2.X <- 1; st2.X"
+        "{ x = 1 }.X; st2.X <- 1; st2.X"
+        "0; st2.X <- 1; st2.X"
+        "st2.X <- 1; st2.X"
+        "{ x = 1 }.X <- 1; st2.X"
+        "(); st2.X"
+        "st2.X"
+        "{ x = 1 }.X"
+        "1"
+    ]
+
+//[<Fact>]
+//let ``instance PropertySet`` () =    
+//    let tt = new TestType(0)
+//    <@ tt.instanceField ; tt.InstancePropNoArgs <- 1 ; tt.instanceField @> |> decompiledReductions =? [
+//
+//    ]
+//
+
+
 //    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"

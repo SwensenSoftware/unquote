@@ -27,8 +27,8 @@ type TestType =
 
     member this.IncrementInstanceField() = this.instanceField <- this.instanceField + 1
 
-    member this.Item
-        with get(i) = i
+    member this.Item 
+        with get(i:int) : int = (i:int)
         and set(i) v = this.instanceField <- i + v
 
     member this.InstancePropNoArgs 
@@ -36,31 +36,31 @@ type TestType =
         and set v = this.instanceField <- v
 
     member this.InstancePropOneArg
-        with get(i) = i
+        with get(i:int) = i
         and set(i) v = this.instanceField <- i + v
 
     member this.InstancePropTwoArgs
-        with get(i1,i2) = i1,i2
+        with get(i1:int,i2:int) = i1,i2
         and set(i1,i2) v = 
             this.instanceField <- i1 + i2 + v
 
     member this.InstanceCallNoArgs() = 0
-    member this.InstanceCallOneArg(i) = i
-    member this.InstanceCallTwoArgs(i1,i2) = i1,i2
+    member this.InstanceCallOneArg(i:int) = i
+    member this.InstanceCallTwoArgs(i1:int,i2:int) = i1,i2
 
     static member StaticPropNoArgs
         with get() = 0
         and set v = TestType.staticField <- v
     static member StaticPropOneArg
-        with get (i) = i
-        and set(i) v = TestType.staticField <- i + v
+        with get (i:int) = i
+        and set(i:int) v = TestType.staticField <- i + v
     static member StaticPropTwoArgs
-        with get (i1,i2) = i1,i2
-        and set(i1,i2) v = TestType.staticField <- i1 + i2 + v
+        with get (i1:int,i2:int) = i1,i2
+        and set(i1:int,i2:int) v = TestType.staticField <- i1 + i2 + v
 
     static member StaticCallNoArgs() = 0
-    static member StaticCallOneArg(i) = i
-    static member StaticCallTwoArgs(i1,i2) = i1,i2
+    static member StaticCallOneArg(i:int) = i
+    static member StaticCallTwoArgs(i1:int,i2:int) = i1,i2
 
     static member StaticField = TestType.staticField
 
@@ -495,6 +495,8 @@ let ``eval calling instance member on null should throw NullReferenceException i
 
     test <@ e :? NullReferenceException @>
 
+#if DEBUG
+#else
 [<Fact>]
 let ``eval reraise TargetInvocation inner exception with stack trace preserved`` ()=
     let e =
@@ -504,6 +506,7 @@ let ``eval reraise TargetInvocation inner exception with stack trace preserved``
         with e -> e
 
     test <@ e.GetType() = typeof<exn> @>
+#endif
 
 type record = { x:int; y:int }
 [<Fact>] ///http://stackoverflow.com/q/2344805/236255
@@ -512,8 +515,6 @@ let ``Known PowerPack quotation eval bug`` () =
                 let value2 = { x = 1; y = 1; }
                 let result2 = value1 = value2
                 result2 @> true
-
-
 
 open Microsoft.FSharp.Quotations
 open Swensen.Unquote
