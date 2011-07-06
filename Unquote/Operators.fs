@@ -15,7 +15,7 @@ limitations under the License.
 *)
 
 [<AutoOpen>]
-///Various operators for processing quotations including performing unit test assertions.
+///Operators on Expr and Expr<'a> for decompiling, evaluating, and incrementally reducing quotation expressions.
 module Swensen.Unquote.Operators
 
 open System
@@ -25,6 +25,8 @@ open Microsoft.FSharp.Quotations
 open Swensen.Utils //auto opens Swensen.MiscUtils which includes inline IL raises operator for clean stack traces
 open Swensen.Unquote
 
+///Evaluate the given untyped expression.
+let inline evalRaw (expr:Expr) = expr.Eval()
 ///Evaluate the given typed expression.
 let inline eval (expr:Expr<'a>) = expr.Eval()
 ///Decompile given expression to its source code representation. Sub-expressions which are
@@ -36,8 +38,21 @@ let inline decompile (expr:Expr) = expr.Decompile()
 let inline reduce (expr:Expr) = expr.Reduce()
 ///Convert the given expression to a list of all of its Reduce steps in order.
 let inline reduceFully (expr:Expr) = expr.ReduceFully()
+
+///Evaluate the given untyped expression with the given variable environment.
+let inline evalRawWith (expr:Expr) env = expr.Eval(env)
+///Evaluate the given typed expression with the given variable environment.
+let inline evalWith (expr:Expr<'a>) env = expr.Eval(env)
+///Reduce the given expression by one step with the given variable environment: convert each branch of the given expression to a Value expression of its 
+///evaluation if each sub-branch of the branch is reduced.
+///If this expression is already reduced, or cannot be reduced, returns itself.
+let inline reduceWith (expr:Expr) env = expr.Reduce(env)
+///Convert the given expression with the given variable environment to a list of all of its Reduce steps in order.
+let inline reduceFullyWith (expr:Expr) env = expr.ReduceFully(env)
+
 ///Determine whether the given expression is reduced.
 let inline isReduced (expr:Expr) = expr.IsReduced()
+
 ///Print the newline concated source code reduce steps of the given expression to stdout.
 let unquote expr =
     expr
@@ -117,8 +132,7 @@ open Internal
 ///Evaluate the given boolean expression: if false output incremental eval steps using
 ///1) stdout if fsi mode
 ///2) framework fail methods if Xunit or Nunit present
-///3) Debug.Fail if debug mode
-///4) System.Exception if release mode (which is discouraged due to performance cost)
+///3) System.Exception if release mode.
 let inline test (expr:Expr<bool>) =
     let passes = 
         try
@@ -134,7 +148,7 @@ let inline test (expr:Expr<bool>) =
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
     | true -> ()
 
-///Test wether the given expr fails with the given expected exception
+///Test wether the given expr fails with the given expected exception (or a subclass thereof).
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let result =
         try
