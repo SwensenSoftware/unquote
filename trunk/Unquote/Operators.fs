@@ -15,13 +15,14 @@ limitations under the License.
 *)
 
 [<AutoOpen>]
+///Various operators for processing quotations including performing unit test assertions.
 module Swensen.Unquote.Operators
 
 open System
 open System.Reflection
 open Microsoft.FSharp.Quotations
 
-open Swensen //auto opens Swensen.MiscUtils which includes inline IL raises operator for clean stack traces
+open Swensen.Utils //auto opens Swensen.MiscUtils which includes inline IL raises operator for clean stack traces
 open Swensen.Unquote
 
 ///Evaluate the given typed expression.

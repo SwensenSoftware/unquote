@@ -13,11 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 *)
+[<AutoOpen>]
+///Useful extensions on System.Type
+module Swensen.Unquote.TypeExtensions
 
-namespace Swensen.Utils
-module List =
-    let rec equalsWith f xl yl =
-        match xl, yl with
-        | [], [] -> true
-        | [], _ | _, [] -> false
-        | xh::xt, yh::yt -> if f xh yh then equalsWith f xt yt else false
+type System.Type with
+    ///The F#-style signature
+    member this.FSharpName =
+        ExtraReflection.sprintSig this
+

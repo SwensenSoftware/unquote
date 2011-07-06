@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 [<AutoOpen>]
-module Swensen.MiscUtils //want to make this internal, but also use in tests.
+module Swensen.Utils.MiscUtils //want to make this internal, but also use in tests.
 #nowarn "42" //turn off warning for use of inline IL feature
 open System
 

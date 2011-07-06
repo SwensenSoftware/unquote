@@ -18,7 +18,7 @@ limitations under the License.
 module ReductionTests
 open Xunit
 open Swensen.Unquote
-open Swensen
+open Swensen.Utils
 
 //we use this since expr don't support structural comparison
 let decompiledReductions expr =

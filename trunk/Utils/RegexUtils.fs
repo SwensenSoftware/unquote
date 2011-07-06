@@ -15,7 +15,7 @@ limitations under the License.
 *)
 
 [<AutoOpen>]
-module Swensen.RegexUtils
+module Swensen.Utils.RegexUtils
 
 open System.Text.RegularExpressions
 //Regex.CacheSize <- (default is 15)
