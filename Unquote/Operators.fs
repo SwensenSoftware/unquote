@@ -83,6 +83,10 @@ module Internal =
         | Xunit
         | Nunit
 
+    //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
+    //duplicated from Utils.MiscUtils since we want to keep everything in that assembly internal (using friend assemblies)
+    let inline raise (e: System.Exception) = (# "throw" e : 'U #)
+
     let testFailed =
         #if INTERACTIVE
             fsiTestFailed

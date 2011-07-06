@@ -39,6 +39,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="MiscUtils.fs" />
     <Compile Include="RegexUtils.fs" />
     <Compile Include="PrintfUtils.fs" />

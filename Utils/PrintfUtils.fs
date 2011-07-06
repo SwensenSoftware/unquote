@@ -18,7 +18,7 @@ nxxxf functions originally based on Mauricio Scheffer's answer at http://stackov
 *)
 
 [<AutoOpen>]
-module Swensen.Utils.PrintfUtils  //should make as extension to Microsoft.FSharp.Core.Printf?
+module internal Swensen.Utils.PrintfUtils  //should make as extension to Microsoft.FSharp.Core.Printf?
 
 open System
 open System.Text.RegularExpressions
