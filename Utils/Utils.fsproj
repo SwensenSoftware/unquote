@@ -39,10 +39,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Misc.fs" />
-    <Compile Include="Regex.fs" />
-    <Compile Include="Printf.fs" />
-    <Compile Include="ListExt.fs" />
+    <Compile Include="MiscUtils.fs" />
+    <Compile Include="RegexUtils.fs" />
+    <Compile Include="PrintfUtils.fs" />
+    <Compile Include="ListExtensions.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
