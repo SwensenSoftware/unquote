@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 [<AutoOpen>]
-///Extensions methods on Expr and Expr<'a> for decompiling, evaluating, and incrementally reducing quotation expressions. Also includes an
+///Extensions methods on Expr and Expr<'a> for decompiling, evaluating, and incrementally reducing quotation expressions. Also includes a bonus
 ///extension method on Type for getting the short, F#-style name of a type.
 module Swensen.Unquote.Extensions
 
