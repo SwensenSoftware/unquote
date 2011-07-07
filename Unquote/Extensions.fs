@@ -57,6 +57,6 @@ type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable 
     member this.IsReduced() = Reduction.isReduced this
 
 type System.Type with
-    ///The F#-style signature
+    ///The F#-style signature. Note: this property is out-of-place in this assembly and may be moved elsewhere in future versions.
     member this.FSharpName =
         ExtraReflection.sprintSig this
