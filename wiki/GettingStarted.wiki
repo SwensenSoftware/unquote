@@ -108,7 +108,7 @@ val it : int = 31
 
   * `val evalRaw : Quotations.Expr -> obj`
 {{{
-> eval <@ "Hello World".Length + 20 @>;;
+> eval <@@ "Hello World".Length + 20 @@>;;
 val it : obj = 31
 }}}
 
