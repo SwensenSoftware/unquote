@@ -90,11 +90,20 @@ Expected Exception but got nothing
 val it : unit = ()
 }}}
 
+=== Operators ===
 
-  * `val source : Quotations.Expr -> string`
+The `Swensen.Unquote.Operators` module contains additional functions for decompiling, evaluating, and reducing quotation expressions. The following is a reference of the functions available and some examples:
+
+  * `val decompile : Quotations.Expr -> string`
 {{{
-> source <@ (1+2)/3 @>;;
+> decompile <@ (1+2)/3 @>;;
 val it : string = "(1 + 2) / 3"
+}}}
+
+  * `val eval : Quotations.Expr -> string`
+{{{
+> eval <@ "Hello World".Length + 20 @>;;
+val it : int = 31
 }}}
 
   * `val reduce : Quotations.Expr -> Quotations.Expr`
@@ -128,25 +137,11 @@ val it : bool = true
 val it : unit = ()
 }}}
 
+=== Extensions ===
 
-Some Unquote operators are also available as `Expr` extensions:
-{{{
-  type Expr with
-    member ToSource : unit -> string
-  type Expr with
-    member Reduce : unit -> Quotations.Expr
-  type Expr with
-    member ReduceFully : unit -> Quotations.Expr list
-  type Expr with
-    member IsReduced : unit -> bool
-}}}
-
-Opening Swensen.Unquote also makes a `System.Type` extension available for printing F# style type signatures:
+The `Swensen.Unquote.Extensions` module duplicates functions in the `Swensen.Unquote.Operators` as instance type extensions on `Quotations.Expr` and `Quotations.Expr<'a>`. But it also includes an instance property extension on `System.Type`, `FSharpName`, which returns the F#-style signature of a type:
 
 {{{
-type Type with
-  member FSharpName : string
-
 > typeof<int>.FSharpName;;
 val it : string = "int"
 > typeof<int[]>.FSharpName;;
