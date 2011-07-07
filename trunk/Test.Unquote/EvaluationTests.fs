@@ -560,3 +560,21 @@ let ``typed Quote`` () =
 [<Fact>]
 let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
+
+//Swensen.Unquote.Quotations.Assertions.Operators
+//Swensen.Unquote.Quotations.Operators
+//Swensen.Unquote.Quotations.Extensions
+//Swensen.Unquote.Reflection.Operators
+//Swensen.Unquote.Reflection.Extensions
+//
+//OR
+//
+//Swensen.Unquote.AssertionOperators
+//Swensen.Unquote.QuotationOperators
+//Swensen.Unquote.QuotationExtensions
+//Swensen.Unquote.TypeExtensions
+//
+//OR
+//
+//Swensen.Unquote.Operators
+//Swensen.Unquote.Extensions
