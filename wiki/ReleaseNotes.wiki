@@ -18,6 +18,7 @@ Major release featuring custom reflection-based evaluation engine resulting in s
   * Issue 44: Fully support VarSet, FieldSet, and PropertySet expressions
   * Issue 45: Code documentation comments are unavailable in distributions
   * Issue 46: No assembly info available
+  * Issue 47: Statically link FSharp.PowerPack.Metadata
 
 == v1.3.0, 4/2/11 ==
 
