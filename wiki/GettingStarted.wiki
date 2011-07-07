@@ -18,7 +18,16 @@ To use Unquote within FSI, locate and add a reference to Unquote.dll using the `
 
 == Using ==
 
-Open `Swensen.Unquote` within FSI session or top of unit test file, this will automatically open `Swensen.Unquote.Operators`. The `test` and `raises` operators and the `xx?` series binary infix operators can be used within FSI sessions or within supported unit testing framework test methods to perform boolean assertions (if INTERACTIVE compiler symbol defined, then output to FSI; else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods; else throw Exception).
+The `Swensen.Unquote` namespace contains three `AutoOpen` modules, `Assertions`, `Operators`, and `Extensions`. Therefore you may choose to bring all of Unquote's features into top-level scope simply by opening `Swensen.Unquote` or you may choose to open individual modules or even alias individual modules for a finer level of control.
+
+=== Swensen.Unquote.Assertions ===
+
+The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and the `xx?` series of binary infix operators used for performing boolean assertions. All of these operators can be used within a unit test enabled project or FSI.
+
+Unquote chooses its output source as follows
+  * If INTERACTIVE compiler symbol defined, then output to FSI
+  * Else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
+  * Else throw a `System.Exception` with a message
 
   * `val source : Quotations.Expr -> string`
 {{{
