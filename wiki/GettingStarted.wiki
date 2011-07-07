@@ -100,7 +100,7 @@ The `Swensen.Unquote.Operators` module contains additional functions for decompi
 val it : string = "(1 + 2) / 3"
 }}}
 
-  * `val eval : Quotations.Expr -> string`
+  * `val eval : Quotations.Expr<'a> -> 'a`
 {{{
 > eval <@ "Hello World".Length + 20 @>;;
 val it : int = 31
