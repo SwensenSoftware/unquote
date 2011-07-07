@@ -16,11 +16,11 @@ You must also obtain and install your unit testing framework of choice, NUnit an
 
 To use Unquote within FSI, locate and add a reference to Unquote.dll using the `#r` directive.
 
-== Using ==
+== User Guide ==
 
 The `Swensen.Unquote` namespace contains three `AutoOpen` modules, `Assertions`, `Operators`, and `Extensions`. Therefore you may choose to bring all of Unquote's features into top-level scope simply by opening `Swensen.Unquote` or you may choose to open individual modules or even alias individual modules for a finer level of control.
 
-=== Swensen.Unquote.Assertions ===
+=== Assertions ===
 
 The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and the `xx?` series of binary infix operators used for performing boolean assertions. All of these operators can be used within a unit test enabled project or FSI.
 
@@ -29,42 +29,7 @@ Unquote chooses its output source as follows
   * Else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
   * Else throw a `System.Exception` with a message
 
-  * `val source : Quotations.Expr -> string`
-{{{
-> source <@ (1+2)/3 @>;;
-val it : string = "(1 + 2) / 3"
-}}}
-
-  * `val reduce : Quotations.Expr -> Quotations.Expr`
-{{{
-> <@ (1+2)/3 @> |> reduce |> source;;
-val it : string = "3 / 3"
-}}}
-
-  * `val reduceFully : Quotations.Expr -> Quotations.Expr list`
-{{{
-> <@ (1+2)/3 @> |> reduceFully |> List.map source;;
-val it : string list = ["(1 + 2) / 3"; "3 / 3"; "1"]
-}}}
-
-  * `val isReduced : Quotations.Expr -> bool`
-{{{
-> <@ (1+2)/3 @> |> isReduced;;
-val it : bool = false
-> <@ 1 @> |> isReduced;;
-val it : bool = true
-}}}
-
-  * `val unquote : Quotations.Expr -> unit`
-{{{
-> unquote <@ (1+2)/3 @>;;
-
-(1 + 2) / 3
-3 / 3
-1
-
-val it : unit = ()
-}}}
+The following is a reference of the functions available and some examples:
 
   * `val inline test : Quotations.Expr<bool> -> unit`
 {{{
@@ -124,6 +89,45 @@ Expected Exception but got nothing
 
 val it : unit = ()
 }}}
+
+
+  * `val source : Quotations.Expr -> string`
+{{{
+> source <@ (1+2)/3 @>;;
+val it : string = "(1 + 2) / 3"
+}}}
+
+  * `val reduce : Quotations.Expr -> Quotations.Expr`
+{{{
+> <@ (1+2)/3 @> |> reduce |> source;;
+val it : string = "3 / 3"
+}}}
+
+  * `val reduceFully : Quotations.Expr -> Quotations.Expr list`
+{{{
+> <@ (1+2)/3 @> |> reduceFully |> List.map source;;
+val it : string list = ["(1 + 2) / 3"; "3 / 3"; "1"]
+}}}
+
+  * `val isReduced : Quotations.Expr -> bool`
+{{{
+> <@ (1+2)/3 @> |> isReduced;;
+val it : bool = false
+> <@ 1 @> |> isReduced;;
+val it : bool = true
+}}}
+
+  * `val unquote : Quotations.Expr -> unit`
+{{{
+> unquote <@ (1+2)/3 @>;;
+
+(1 + 2) / 3
+3 / 3
+1
+
+val it : unit = ()
+}}}
+
 
 Some Unquote operators are also available as `Expr` extensions:
 {{{
