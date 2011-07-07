@@ -106,6 +106,12 @@ val it : string = "(1 + 2) / 3"
 val it : int = 31
 }}}
 
+  * `val evalRaw : Quotations.Expr -> obj`
+{{{
+> eval <@ "Hello World".Length + 20 @>;;
+val it : obj = 31
+}}}
+
   * `val reduce : Quotations.Expr -> Quotations.Expr`
 {{{
 > <@ (1+2)/3 @> |> reduce |> source;;
