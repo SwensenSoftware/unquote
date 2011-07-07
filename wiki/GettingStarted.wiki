@@ -143,6 +143,13 @@ val it : bool = true
 val it : unit = ()
 }}}
 
+The following are functions which accept a variable environment for processing synthetic expressions with unbound variables:
+
+  * `val evalWith : Quotations.Expr<'a> -> (string * obj ref) list -> 'a`
+  * `val evalRawWith : Quotations.Expr -> (string * obj ref) list -> obj`
+  * `val reduceWith : Quotations.Expr -> (string * obj ref) list -> Quotations.Expr`
+  * `val reduceFullyWith : Quotations.Expr -> (string * obj ref) list -> Quotations.Expr list`
+
 === Extensions ===
 
 The `Swensen.Unquote.Extensions` module duplicates functions in the `Swensen.Unquote.Operators` as instance type extensions on `Quotations.Expr` and `Quotations.Expr<'a>`. But it also includes an instance property extension on `System.Type`, `FSharpName`, which returns the F#-style signature of a type:
