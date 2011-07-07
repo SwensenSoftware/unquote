@@ -13,7 +13,7 @@ Major release featuring custom reflection-based evaluation engine resulting in s
   * Issue 36: Short-circuiting rules should be honored during reduction steps
   * Issue 37: Make smarter choices about decompilation of AndOr and OrElse expressions which can't be differentiated
   * Issue 38: Add feature for evaluating and reducing synthetic quotations with unbound variables
-  * Issue 39: Add support for typed* (nested) Quote expressions
+  * Issue 39: Add support for typed Quote expressions (nested quotations)
   * Issue 40: Further support for partial application lambda re-sugaring by supporting coerced vars
   * Issue 44: Fully support VarSet, FieldSet, and PropertySet expressions
   * Issue 45: Code documentation comments are unavailable in distributions
