@@ -16,7 +16,7 @@ Major release featuring custom reflection-based evaluation engine resulting in s
   * Issue 39: Add support for typed Quote expressions (nested quotations)
   * Issue 40: Further support for partial application lambda re-sugaring by supporting coerced vars
   * Issue 44: Fully support VarSet, FieldSet, and PropertySet expressions
-  * Issue 45: Code documentation comments are unavailable in distributions
+  * Issue 45: Code documentation comments aren't unavailable in distributions
   * Issue 46: No assembly info available
   * Issue 47: Statically link FSharp.PowerPack.Metadata
 
