@@ -139,7 +139,6 @@ let (|TupleLet|_|) x =
         Some(tupledVars |> Array.toList, tuple, body)
     | _ -> None
 
-//there seems to be an issue with coersion value applications and decompilation here
 ////need to check all args are reduced?
 ///Partial application and zero application of Lambda call (e.g. List.map (+), or id).
 ///Must come before Let and Lambdas patterns.
