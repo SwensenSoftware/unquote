@@ -41,8 +41,6 @@ let inline private reraisePreserveStackTrace(ex:Exception) =
     typeof<Exception>.GetMethod("PrepForRemoting", BindingFlags.NonPublic ||| BindingFlags.Instance).Invoke(ex, [||]) |> ignore
     raise ex
 
-//initial tests show this reflection based eval can be about 60 (for native impls) to 10 (for reflective impls) times faster than PowerPack's
-
 //N.B. eval is about 6 times faster using native impls for ops instead of F#'s reflective impls,
 //so we should consider giving native impls even for ops implemented by F#
 //let x = <@ 10 + 10 @>
@@ -220,7 +218,10 @@ let eval env expr =
             op (eval env lhs) (eval env rhs)
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
-        | P.Quote(captured) -> //N.B. we have no way of differentiating betweened typed and untyped inner quotations; all come as untyped so that's the only kind we can support.
+        | P.Quote(captured) -> 
+            //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 
+            //all Expr are themselves untyped, but their Type property is actually always typed: 
+            //we assume the frequency of typed Quote expressions is more common then untyped and convert all (untyped) Expr to typed using the Type property
             let ctor = expr.Type.GetConstructors(BindingFlags.NonPublic ||| BindingFlags.Instance).[0]
             let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
             let generic = ctor.Invoke([|tree; expr.CustomAttributes|])
