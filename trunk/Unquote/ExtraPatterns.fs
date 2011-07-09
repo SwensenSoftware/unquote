@@ -100,7 +100,7 @@ let (|UnaryPrefixCall|_|) = function
 
 //suprisingly, this is actually used twice.
 ///Test whether the Expr is a Var and equals the given Var property-wise
-let private varEqualsExpr (x:Var) = function
+let private isVarOfExpr (x:Var) = function
     | P.Var y | P.Coerce(P.Var y,_) -> x.Name = y.Name && x.Type = y.Type && x.IsMutable = y.IsMutable
     | _ -> false
 
@@ -110,21 +110,21 @@ let (|TupleLet|_|) x =
     //N.B. breaking out the two TupleLetStart variations allows us to using | pattern match with start and body binding.
 
     ///TupleLet start variation 1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
-    let (|Variation1|_|) = function
-        | (P.Let(_,P.TupleGet(tupleProperty, _),_) as varBindings) ->
-            Some(varBindings, tupleProperty)
+    let (|PropertyTuple|_|) = function
+        | (P.Let(_,P.TupleGet(propertyTuple, _),_) as bindings) ->
+            Some(bindings, propertyTuple)
         | _ -> None
 
     ///TupleLet start variation 2) let patternInput = expression in let a = TupleGet(patternInput, index) in ...
-    let (|Variation2|_|) = function
+    let (|PatternInputTuple|_|) = function
         //this is getting a little crazy, but it is the observed pattern, and pi = piAgain is a necessary restriction
         //so as to not have too wide a net.
-        | P.Let(var, patternInput, (P.Let(_,P.TupleGet(var',_),_) as varBindings)) when varEqualsExpr var var' ->
-            Some(varBindings, patternInput)
+        | P.Let(var, patternInputTuple, (P.Let(_,P.TupleGet(varExpr,_),_) as bindings)) when isVarOfExpr var varExpr ->
+            Some(bindings, patternInputTuple)
         | _ -> None
 
     match x with
-    | Variation1(varBindings,tuple) | Variation2(varBindings,tuple) ->
+    | PropertyTuple(bindings,tuple) | PatternInputTuple(bindings,tuple) ->
         //e.g., the "var index list" for let (a,_,b,_,_,c,_,_,_) would be [(a,0);(b,2);(c,5)]
         //order can either be forward (lambda expressions) or in reverse (normal tuple let bindings)
         let tupledVars = Array.create (FSharpType.GetTupleElements(tuple.Type).Length) (None:Var option)
@@ -134,7 +134,7 @@ let (|TupleLet|_|) x =
                 fillVarsAndGetBody next
             | final -> final
         
-        let body = fillVarsAndGetBody varBindings
+        let body = fillVarsAndGetBody bindings
 
         Some(tupledVars |> Array.toList, tuple, body)
     | _ -> None
@@ -161,7 +161,7 @@ let (|IncompleteLambdaCall|_|) x =
         match final with
         | DP.Lambdas(lambdaVarsList, P.Call(None, mi, callArgs)) 
             //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args **    
-            when List.equalsWith varEqualsExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
+            when List.equalsWith isVarOfExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
                 Some(mi, bindingList)
         | _ -> None
     | _ -> None
