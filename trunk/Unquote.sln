@@ -11,7 +11,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport",
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils", "Utils\Utils.fsproj", "{56F71A1E-1A42-4F00-AB55-5971386668B0}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test.Unquote", "Test.Unquote\Test.Unquote.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "Test.Unquote\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
