@@ -13,10 +13,13 @@
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //*)
+
+#r "FSharp.PowerPack.Linq";;
 #r @"C:\Users\Stephen\Documents\Visual Studio 2010\Projects\Unquote\code\Unquote\bin\Debug\Unquote.dll"
 #r @"C:\Users\Stephen\Documents\Visual Studio 2010\Projects\Unquote\code\Unquote\bin\Release\Unquote.dll"
 open Swensen.Unquote
 open Microsoft.FSharp.Quotations
+
 
 //#r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.dll"
 //#r @"C:\Program Files\FSharpPowerPack-2.0.0.0\bin\FSharp.PowerPack.Linq.dll"

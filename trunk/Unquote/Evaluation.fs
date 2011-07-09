@@ -45,19 +45,21 @@ let inline private reraisePreserveStackTrace(ex:Exception) =
 
 //N.B. eval is about 6 times faster using native impls for ops instead of F#'s reflective impls,
 //so we should consider giving native impls even for ops implemented by F#
-//let x = <@ "asdfasdfasdfasdf".Substring(1,2) @> 
+//let x = <@ 10 + 10 @>
+//let x = <@ "asdf".Substring(0,2) @> 
+//let x = <@ "asdf".Substring(0,2).Length * 5 + 2 / 23 = 4 + 2 @> 
 
 //PowerPack's Eval:
-//{0..10000} |> Seq.iter (fun _ -> x.Eval() |> ignore);;
-//Real: 00:00:12.839, CPU: 00:00:12.932, GC gen0: 390, gen1: 194, gen2: 0
+//{0..100000} |> Seq.iter (fun _ -> Microsoft.FSharp.Linq.QuotationEvaluator.Evaluate x |> ignore);;
+//Real: 00:00:10.775, CPU: 00:00:10.873, GC gen0: 313, gen1: 156, gen2: 0
+//Real: 00:00:14.618, CPU: 00:00:14.788, GC gen0: 388, gen1: 192, gen2: 1
+//Real: 00:00:27.149, CPU: 00:00:27.346, GC gen0: 682, gen1: 225, gen2: 0
 
 //This Reflection Based Eval:
 //{0..100000} |> Seq.iter (fun _ -> eval x |> ignore);;
-//Real: 00:00:00.281, CPU: 00:00:00.280, GC gen0: 48, gen1: 1, gen2: 0
-
-//Native execution (so fast!):
-//{0..100000} |> Seq.iter (fun _ -> 10 - 10 - 10 - 10 |> ignore);;
-//Real: 00:00:00.008, CPU: 00:00:00.000, GC gen0: 0, gen1: 0, gen2: 0
+//Real: 00:00:00.212, CPU: 00:00:00.202, GC gen0: 22, gen1: 1, gen2: 0 (50.82 faster)
+//Real: 00:00:00.377, CPU: 00:00:00.374, GC gen0: 29, gen1: 0, gen2: 0 (38.77 faster)
+//Real: 00:00:02.095, CPU: 00:00:02.090, GC gen0: 147, gen1: 0, gen2: 0 (12.98 faster)
 
 //N.B. Tried and Failed to implement NewDelegate and Quote expressions (the former seems doable, but the later I am fighting against some
 //string issues involving regarding typed vs. raw quotations.
