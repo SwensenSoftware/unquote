@@ -110,33 +110,33 @@ let (|TupleLet|_|) x =
     //N.B. breaking out the two TupleLetStart variations allows us to using | pattern match with start and body binding.
 
     ///TupleLet start variation 1) let a = TupleGet(tupleProperty, index) in let b = TupleGet(tupleProperty, index) in ...
-    let (|TupleLetStart1|_|) = function
-        | (P.Let(_,P.TupleGet(body, _),_) as start) ->
-            Some(start, body)
+    let (|Variation1|_|) = function
+        | (P.Let(_,P.TupleGet(tupleProperty, _),_) as varBindings) ->
+            Some(varBindings, tupleProperty)
         | _ -> None
 
     ///TupleLet start variation 2) let patternInput = expression in let a = TupleGet(patternInput, index) in ...
-    let (|TupleLetStart2|_|) = function
+    let (|Variation2|_|) = function
         //this is getting a little crazy, but it is the observed pattern, and pi = piAgain is a necessary restriction
         //so as to not have too wide a net.
-        | P.Let(var, body, (P.Let(_,P.TupleGet(varAgain,_),_) as start)) when varEqualsExpr var varAgain ->
-            Some(start,body)
+        | P.Let(var, patternInput, (P.Let(_,P.TupleGet(var',_),_) as varBindings)) when varEqualsExpr var var' ->
+            Some(varBindings, patternInput)
         | _ -> None
 
     match x with
-    | TupleLetStart1(start,body) | TupleLetStart2(start,body) ->
+    | Variation1(varBindings,tuple) | Variation2(varBindings,tuple) ->
         //e.g., the "var index list" for let (a,_,b,_,_,c,_,_,_) would be [(a,0);(b,2);(c,5)]
         //order can either be forward (lambda expressions) or in reverse (normal tuple let bindings)
-        let tupledVars = Array.create (FSharpType.GetTupleElements(body.Type).Length) (None:Var option)
-        let rec fillAndGetFinal = function
+        let tupledVars = Array.create (FSharpType.GetTupleElements(tuple.Type).Length) (None:Var option)
+        let rec fillVarsAndGetBody = function
             | P.Let(var,P.TupleGet(_,index),next) ->
                 tupledVars.[index] <- Some(var)
-                fillAndGetFinal next
+                fillVarsAndGetBody next
             | final -> final
         
-        let final = fillAndGetFinal start
+        let body = fillVarsAndGetBody varBindings
 
-        Some(tupledVars |> Array.toList, body, final)
+        Some(tupledVars |> Array.toList, tuple, body)
     | _ -> None
 
 //there seems to be an issue with coersion value applications and decompilation here
