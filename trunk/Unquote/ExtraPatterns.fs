@@ -135,6 +135,7 @@ let (|TupleLet|_|) x =
         
         let varIndexList, final = gather [] start
 
+        //the following works as well, and seems to have no impact on performance, should consider: FSharpType.GetTupleElements(body.Type).Length
         let tupleLength =  
             let rec calcTupleLength (ty:Type) = 
                 match ty.Name with
