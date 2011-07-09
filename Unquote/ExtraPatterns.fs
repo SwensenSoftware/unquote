@@ -125,6 +125,7 @@ let (|TupleLet|_|) x =
 
     match x with
     | TupleLetStart1(start,body) | TupleLetStart2(start,body) ->
+        //e.g., let (a,_,b,_,_,c,_,_,_) will result in [(a,0);(b,2);(c,5)]
         let rec gather varIndexList = function
             | P.Let(var,P.TupleGet(_,index),next) ->
                 gather ((var,index)::varIndexList) next
