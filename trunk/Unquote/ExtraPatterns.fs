@@ -125,42 +125,18 @@ let (|TupleLet|_|) x =
 
     match x with
     | TupleLetStart1(start,body) | TupleLetStart2(start,body) ->
-        //e.g., let (a,_,b,_,_,c,_,_,_) will result in [(a,0);(b,2);(c,5)]
-        let rec gather varIndexList = function
+        //e.g., the "var index list" for let (a,_,b,_,_,c,_,_,_) would be [(a,0);(b,2);(c,5)]
+        //order can either be forward (lambda expressions) or in reverse (normal tuple let bindings)
+        let tupledVars = Array.create (FSharpType.GetTupleElements(body.Type).Length) (None:Var option)
+        let rec fillAndGetFinal = function
             | P.Let(var,P.TupleGet(_,index),next) ->
-                gather ((var,index)::varIndexList) next
-            | final -> 
-                 //need to sort varIndexList since tuple let bindings in lambda expressions
-                 //are order in forward order, but normal tuple let bindings in reverse order.
-                (varIndexList |> List.sortBy snd), final
+                tupledVars.[index] <- Some(var)
+                fillAndGetFinal next
+            | final -> final
         
-        let varIndexList, final = gather [] start
+        let final = fillAndGetFinal start
 
-        //the following works as well, and seems to have no impact on performance, should consider: FSharpType.GetTupleElements(body.Type).Length
-        let tupleLength =  
-            let rec calcTupleLength (ty:Type) = 
-                match ty.Name with
-                | CompiledMatch(@"Tuple`([1-8])") [_;g] ->
-                    match g.Value with
-                    | Int(8) -> 7 + (calcTupleLength (ty.GetProperty("Rest").PropertyType))
-                    | Int(len) -> len
-                    | _ -> failwithf "unexpected match: %A" g.Value
-                | _ -> failwithf "unexcepted Type Name: %s" ty.Name
-            calcTupleLength body.Type
-
-        let varList = 
-            let rec fillInGaps i input output =
-                match input with
-                | [] -> 
-                    (List.init (tupleLength - i) (fun _ -> None)) @ output //pad output with None when there are "_" bindings extending past length of input
-                | (var,index)::tail -> 
-                    if index = i then 
-                        fillInGaps (i+1) tail (Some(var)::output)
-                    else 
-                        fillInGaps (i+1) input (None::output)
-            fillInGaps 0 varIndexList [] |> List.rev
-
-        Some(varList, body, final)
+        Some(tupledVars |> Array.toList, body, final)
     | _ -> None
 
 //there seems to be an issue with coersion value applications and decompilation here
