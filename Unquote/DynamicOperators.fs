@@ -23,6 +23,15 @@ module internal Swensen.Unquote.DynamicOperators
 open System
 open System.Reflection
 
+//N.B. there are 13 primitive numeric types and also bigint to consider
+
+///aty is the arg type, bty is the return type, x is the arg
+let invokeExplicitOpDynamic (aty:Type) (bty:Type) (x:obj) =
+    let ameth = aty.GetMethods() |> Array.find (fun m -> m.Name = "op_Explicit" && ((m.GetParameters() |> Array.map(fun p -> p.ParameterType)) = [| aty |]) && m.ReturnType = bty)
+    match ameth  with 
+    | null -> raise (NotSupportedException ())
+    | m -> m.Invoke(null,[| x |])
+
 ///name is the name of the method, aty is the type of the first arg, bty is the type of the second arg,
 ///x is the first arg, y is the second arg.
 let invokeBinOpDynamic name (aty:Type) (bty:Type) (x:obj) (y:obj) =
@@ -33,20 +42,6 @@ let invokeBinOpDynamic name (aty:Type) (bty:Type) (x:obj) (y:obj) =
     | m,null | null,m -> m.Invoke(null,[| x; y |])
     | _ -> raise (NotSupportedException ())
 
-///name is the name of the unary op method, aty is the arg type, x is the arg
-let invokeUnaryOpDynamic name (aty:Type) (x:obj) =
-    let ameth = aty.GetMethod(name,[| aty |])
-    match ameth  with 
-    | null -> raise (NotSupportedException ())
-    | m -> m.Invoke(null,[| x |])
-
-///aty is the arg type, bty is the return type, x is the arg
-let invokeExplicitOpDynamic (aty:Type) (bty:Type) (x:obj) =
-    let ameth = aty.GetMethods() |> Array.find (fun m -> m.Name = "op_Explicit" && ((m.GetParameters() |> Array.map(fun p -> p.ParameterType)) = [| aty |]) && m.ReturnType = bty)
-    match ameth  with 
-    | null -> raise (NotSupportedException ())
-    | m -> m.Invoke(null,[| x |])
-
 let inline (|InvokeBinOpStatic|_|) (op:'a->'b->'a) (aty:Type, x:obj, y:obj) =
     if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x) (unbox<'b> y))
     else None
@@ -56,10 +51,10 @@ let inline (|InvokeOptionalBinOpStatic|_|) (op:('a->'b->'a) option) (aty:Type, x
     | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x) (unbox<'b> y))
     | _ -> None
 
-let inline invokeNumericBinOp 
+let inline invokeBinOp 
     name 
     op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 
-    op12 op13 op14 op15
+    op12 op13 op14 op15 //non-integral types and string types not always supported
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
     let dyn() = invokeBinOpDynamic name aty bty x y
     if aty.Equals(bty) && bty.Equals(cty) then
@@ -82,17 +77,17 @@ let inline invokeNumericBinOp
         | _ -> dyn()
     else dyn()
 
-let op_Addition = invokeNumericBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
-let op_Multiply = invokeNumericBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) None
-let op_Subtraction = invokeNumericBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) None
-let op_Division = invokeNumericBinOp "op_Division" (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (Some(/)) (Some(/)) (Some(/)) None
-let op_Modulus = invokeNumericBinOp "op_Modulus" (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (Some(%)) (Some(%)) (Some(%)) None
+let op_Addition = invokeBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
+let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) None
+let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) None
+let op_Division = invokeBinOp "op_Division" (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (Some(/)) (Some(/)) (Some(/)) None
+let op_Modulus = invokeBinOp "op_Modulus" (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (Some(%)) (Some(%)) (Some(%)) None
 
-let op_BitwiseOr = invokeNumericBinOp "op_BitwiseOr" (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) None None None None
-let op_BitwiseAnd = invokeNumericBinOp "op_BitwiseAnd" (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) None None None None
-let op_ExclusiveOr = invokeNumericBinOp "op_ExclusiveOr" (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) None None None None
-let op_LeftShift = invokeNumericBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) None None None None
-let op_RightShift = invokeNumericBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) None None None None
+let op_BitwiseOr = invokeBinOp "op_BitwiseOr" (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) None None None None
+let op_BitwiseAnd = invokeBinOp "op_BitwiseAnd" (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) None None None None
+let op_ExclusiveOr = invokeBinOp "op_ExclusiveOr" (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) None None None None
+let op_LeftShift = invokeBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) None None None None
+let op_RightShift = invokeBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) None None None None
 
 let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
     dict
@@ -107,39 +102,49 @@ let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Ty
          ("op_LeftShift",op_LeftShift)
          ("op_RightShift",op_RightShift)]
 
-let op_UnaryNegation (aty:Type) (bty:Type) (x:obj) : obj = 
-    let dyn() = invokeUnaryOpDynamic "op_UnaryNegation" aty x
+///name is the name of the unary op method, aty is the arg type, x is the arg
+let invokeUnaryOpDynamic name (aty:Type) (x:obj) =
+    let ameth = aty.GetMethod(name,[| aty |])
+    match ameth  with 
+    | null -> raise (NotSupportedException ())
+    | m -> m.Invoke(null,[| x |])
+
+let inline (|InvokeUnaryOpStatic|_|) (op:'a->'a) (aty:Type, x:obj) =
+    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x))
+    else None
+
+let inline (|InvokeOptionalUnaryOpStatic|_|) (op:('a->'a) option) (aty:Type, x:obj) =
+    match op with
+    | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x))
+    | _ -> None
+
+let inline invokeUnaryOp 
+    name 
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
+    op11 op12 op13 op14 //unsigned types (which includes byte) not always supported
+    (aty:Type) (bty:Type) (x:obj) : obj =
+    let dyn() = invokeUnaryOpDynamic name aty x
     if aty.Equals(bty) then
-        if aty.Equals(typeof<int32>)        then box (-(unbox<int32> x))
-        elif aty.Equals(typeof<float>)      then box (-(unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (-(unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (-(unbox<int64> x))
-        elif aty.Equals(typeof<int16>)      then box (-(unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (-(unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (-(unbox<sbyte> x))
-        elif aty.Equals(typeof<decimal>)    then box (-(unbox<decimal> x))
-        elif aty.Equals(typeof<bigint>)     then box (-(unbox<bigint> x))
-        else dyn()
+        match aty, x with
+        | InvokeUnaryOpStatic op1 (r:sbyte) -> box r
+        | InvokeUnaryOpStatic op2 (r:int16) -> box r 
+        | InvokeUnaryOpStatic op3 (r:int32) -> box r
+        | InvokeUnaryOpStatic op4 (r:int64) -> box r
+        | InvokeUnaryOpStatic op5 (r:nativeint) -> box r
+        | InvokeUnaryOpStatic op6 (r:bigint) -> box r
+        | InvokeUnaryOpStatic op7 (r:float) -> box r
+        | InvokeUnaryOpStatic op8 (r:float32) -> box r
+        | InvokeUnaryOpStatic op9 (r:decimal) -> box r
+        | InvokeOptionalUnaryOpStatic op10 (r:byte) -> box r
+        | InvokeOptionalUnaryOpStatic op11 (r:uint16) -> box r
+        | InvokeOptionalUnaryOpStatic op12 (r:uint32) -> box r
+        | InvokeOptionalUnaryOpStatic op13 (r:uint64) -> box r
+        | InvokeOptionalUnaryOpStatic op14 (r:unativeint) -> box r
+        | _ -> dyn()
     else dyn()
 
-let op_UnaryPlus (aty:Type) (bty:Type) (x:obj) : obj = 
-    let dyn() = invokeUnaryOpDynamic "op_UnaryPlus" aty x
-    if aty.Equals(bty) then //N.B. a no-op for primitives
-        if aty.Equals(typeof<int32>)        then box ((~+)(unbox<int32> x))
-        elif aty.Equals(typeof<float>)      then box ((~+)(unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box ((~+)(unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box ((~+)(unbox<int64> x))
-        elif aty.Equals(typeof<uint64>)     then box ((~+)(unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box ((~+)(unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box ((~+)(unbox<uint16> x))
-        elif aty.Equals(typeof<nativeint>)  then box ((~+)(unbox<nativeint> x))
-        elif aty.Equals(typeof<unativeint>) then box ((~+)(unbox<unativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box ((~+)(unbox<sbyte> x))
-        elif aty.Equals(typeof<byte>)       then box ((~+)(unbox<byte> x))
-        elif aty.Equals(typeof<decimal>)    then box ((~+)(unbox<decimal> x))
-        elif aty.Equals(typeof<bigint>)     then box ((~+)(unbox<bigint> x))
-        else dyn()
-    else dyn()
+let op_UnaryPlus = invokeUnaryOp "op_UnaryPlus" (~+) (~+) (~+) (~+) (~+) (~+) (~+) (~+) (~+) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+))
+let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) None None None None None
 
 let ToByte (aty:Type) (bty:Type) (x:obj) : obj =
     if aty.Equals(typeof<string>)       then box (byte (unbox<string> x))
@@ -405,9 +410,9 @@ let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->
 
 module Checked =
     open Checked
-    let op_Addition = invokeNumericBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
-    let op_Multiply = invokeNumericBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) None
-    let op_Subtraction = invokeNumericBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) None
+    let op_Addition = invokeBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
+    let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) None
+    let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) None
 
     let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
         dict
