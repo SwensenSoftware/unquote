@@ -11,6 +11,73 @@ let inline testEval expr expected =
     let result = expr |> eval
     result =? expected
 
+//enumerating all the cases for op_Addition goes a long way towards testing all the other numeric binary ops as well due to shared implementation details
+[<Fact>]
+let ``op_Addition sbyte`` () =
+    testEval <@ 1y + 2y @> 3y
+
+[<Fact>]
+let ``op_Addition int16`` () =
+    testEval <@ 1s + 2s @> 3s
+
+[<Fact>]
+let ``op_Addition int32`` () =
+    testEval <@ 1 + 2 @> 3
+
+[<Fact>]
+let ``op_Addition int64`` () =
+    testEval <@ 1L + 2L @> 3L
+
+[<Fact>]
+let ``op_Addition nativeint`` () =
+    let x,y = 1n, 2n //quotations cannot contain nativeint literals
+    testEval <@ x + y @> 3n
+
+[<Fact>]
+let ``op_Addition byte`` () =
+    testEval <@ 1uy + 2uy @> 3uy
+
+[<Fact>]
+let ``op_Addition uint16`` () =
+    testEval <@ 1us + 2us @> 3us
+
+[<Fact>]
+let ``op_Addition uint32`` () =
+    testEval <@ 1u + 2u @> 3u
+
+[<Fact>]
+let ``op_Addition uint64`` () =
+    testEval <@ 1UL + 2UL @> 3UL
+
+[<Fact>]
+let ``op_Addition unativeint`` () =
+    let x,y = 1un, 2un //quotations cannot contain nativeint literals
+    testEval <@ x + y @> 3un
+
+[<Fact>]
+let ``op_Addition float`` () =
+    testEval <@ 1.0 + 2.0 @> 3.0
+
+[<Fact>]
+let ``op_Addition float32`` () =
+    testEval <@ 1.0f + 2.0f @> 3.0f
+
+[<Fact>]
+let ``op_Addition decimal`` () =
+    testEval <@ 1.0m + 2.0m @> 3.0m
+
+[<Fact>]
+let ``op_Addition bigint`` () =
+    testEval <@ 1I + 2I @> 3I
+
+[<Fact>]
+let ``op_Addition reflective`` () =
+    testEval <@ 12N + 2N @> 14N
+
+[<Fact>]
+let ``op_Addition string`` () =
+    testEval <@ "10" + "10" @> "1010"
+
 [<Fact>]
 let ``op_Subtraction primitive`` () =
     testEval <@ 1 - 2 @> -1
@@ -84,14 +151,6 @@ let ``op_Exponation reflective`` () =
     testEval <@ 12I ** 2 @> 144I
 
 [<Fact>]
-let ``op_Addition primitive`` () =
-    testEval <@ 12 + 2 @> 14
-
-[<Fact>]
-let ``op_Addition reflective`` () =
-    testEval <@ 12N + 2N @> 14N
-
-[<Fact>]
 let ``op_Multiply primitive`` () =
     testEval <@ 12 * 2 @> 24
 
@@ -122,10 +181,6 @@ let ``op_UnaryPlus primitive`` () =
 [<Fact>]
 let ``op_UnaryPlus reflective`` () =
     testEval <@ +12m @> +12m
-
-[<Fact>]
-let ``op_Addition string`` () =
-    testEval <@ "10" + "10" @> "1010"
 
 [<Fact>]
 let ``ToBtye primitive`` () =
