@@ -491,66 +491,10 @@ let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->
          ("ToChar", ToChar)]
 
 module Checked =
-    let op_Addition (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj = 
-        let dyn() = invokeBinOpDynamic "op_Addition" aty bty x y                        
-        if aty.Equals(bty) && bty.Equals(cty) then
-            if aty.Equals(typeof<sbyte>)        then box (Checked.(+) (unbox<sbyte> x) (unbox<sbyte> y))
-            elif aty.Equals(typeof<int16>)      then box (Checked.(+) (unbox<int16> x) (unbox<int16> y))
-            elif aty.Equals(typeof<int32>)      then box (Checked.(+) (unbox<int32> x) (unbox<int32> y))
-            elif aty.Equals(typeof<int64>)      then box (Checked.(+) (unbox<int64> x) (unbox<int64> y))
-            elif aty.Equals(typeof<nativeint>)  then box (Checked.(+) (unbox<nativeint> x) (unbox<nativeint> y))
-            elif aty.Equals(typeof<byte>)       then box (Checked.(+) (unbox<byte> x) (unbox<byte> y))
-            elif aty.Equals(typeof<uint16>)     then box (Checked.(+) (unbox<uint16> x) (unbox<uint16> y))
-            elif aty.Equals(typeof<uint32>)     then box (Checked.(+) (unbox<uint32> x) (unbox<uint32> y))
-            elif aty.Equals(typeof<uint64>)     then box (Checked.(+) (unbox<uint64> x) (unbox<uint64> y))
-            elif aty.Equals(typeof<unativeint>) then box (Checked.(+) (unbox<unativeint> x) (unbox<unativeint> y))
-            elif aty.Equals(typeof<float>)      then box (Checked.(+) (unbox<float> x) (unbox<float> y))
-            elif aty.Equals(typeof<float32>)    then box (Checked.(+) (unbox<float32> x) (unbox<float32> y))
-            elif aty.Equals(typeof<string>)     then box (Checked.(+) (unbox<string> x) (unbox<string> y))
-            elif aty.Equals(typeof<decimal>)    then box (Checked.(+) (unbox<decimal> x) (unbox<decimal> y))
-            elif aty.Equals(typeof<bigint>)     then box (Checked.(+) (unbox<bigint> x) (unbox<bigint> y))
-            else dyn()
-        else dyn()
-
-    let op_Subtraction (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj = 
-        let dyn() = invokeBinOpDynamic "op_Subtraction" aty bty x y                        
-        if aty.Equals(bty) && bty.Equals(cty) then
-            if aty.Equals(typeof<sbyte>)        then box (Checked.(-) (unbox<sbyte> x) (unbox<sbyte> y))
-            elif aty.Equals(typeof<int16>)      then box (Checked.(-) (unbox<int16> x) (unbox<int16> y))
-            elif aty.Equals(typeof<int32>)      then box (Checked.(-) (unbox<int32> x) (unbox<int32> y))
-            elif aty.Equals(typeof<int64>)      then box (Checked.(-) (unbox<int64> x) (unbox<int64> y))
-            elif aty.Equals(typeof<nativeint>)  then box (Checked.(-) (unbox<nativeint> x) (unbox<nativeint> y))
-            elif aty.Equals(typeof<byte>)       then box (Checked.(-) (unbox<byte> x) (unbox<byte> y))
-            elif aty.Equals(typeof<uint16>)     then box (Checked.(-) (unbox<uint16> x) (unbox<uint16> y))
-            elif aty.Equals(typeof<uint32>)     then box (Checked.(-) (unbox<uint32> x) (unbox<uint32> y))
-            elif aty.Equals(typeof<uint64>)     then box (Checked.(-) (unbox<uint64> x) (unbox<uint64> y))
-            elif aty.Equals(typeof<unativeint>) then box (Checked.(-) (unbox<unativeint> x) (unbox<unativeint> y))
-            elif aty.Equals(typeof<float>)      then box (Checked.(-) (unbox<float> x) (unbox<float> y))
-            elif aty.Equals(typeof<float32>)    then box (Checked.(-) (unbox<float32> x) (unbox<float32> y))
-            elif aty.Equals(typeof<decimal>)    then box (Checked.(-) (unbox<decimal> x) (unbox<decimal> y))
-            elif aty.Equals(typeof<bigint>)     then box (Checked.(-) (unbox<bigint> x) (unbox<bigint> y))
-            else dyn()
-        else dyn()
-
-    let op_Multiply (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj = 
-        let dyn() = invokeBinOpDynamic "op_Multiply" aty bty x y
-        if aty.Equals(bty) && bty.Equals(cty) then
-            if aty.Equals(typeof<sbyte>)        then box (Checked.(*) (unbox<sbyte> x) (unbox<sbyte> y))
-            elif aty.Equals(typeof<int16>)      then box (Checked.(*) (unbox<int16> x) (unbox<int16> y))
-            elif aty.Equals(typeof<int32>)      then box (Checked.(*) (unbox<int32> x) (unbox<int32> y))
-            elif aty.Equals(typeof<int64>)      then box (Checked.(*) (unbox<int64> x) (unbox<int64> y))
-            elif aty.Equals(typeof<nativeint>)  then box (Checked.(*) (unbox<nativeint> x) (unbox<nativeint> y))
-            elif aty.Equals(typeof<byte>)       then box (Checked.(*) (unbox<byte> x) (unbox<byte> y))
-            elif aty.Equals(typeof<uint16>)     then box (Checked.(*) (unbox<uint16> x) (unbox<uint16> y))
-            elif aty.Equals(typeof<uint32>)     then box (Checked.(*) (unbox<uint32> x) (unbox<uint32> y))
-            elif aty.Equals(typeof<uint64>)     then box (Checked.(*) (unbox<uint64> x) (unbox<uint64> y))
-            elif aty.Equals(typeof<unativeint>) then box (Checked.(*) (unbox<unativeint> x) (unbox<unativeint> y))
-            elif aty.Equals(typeof<float>)      then box (Checked.(*) (unbox<float> x) (unbox<float> y))
-            elif aty.Equals(typeof<float32>)    then box (Checked.(*) (unbox<float32> x) (unbox<float32> y))
-            elif aty.Equals(typeof<decimal>)    then box (Checked.(*) (unbox<decimal> x) (unbox<decimal> y))
-            elif aty.Equals(typeof<bigint>)     then box (Checked.(*) (unbox<bigint> x) (unbox<bigint> y))
-            else dyn()
-        else dyn()
+    open Checked
+    let op_Addition = invokeNumericBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+))
+    let op_Multiply = invokeNumericBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) None
+    let op_Subtraction = invokeNumericBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) None
 
     let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
         dict
