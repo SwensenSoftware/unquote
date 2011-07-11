@@ -166,21 +166,76 @@ let ``op_Exponentiation primitive`` () =
 let ``op_Exponentiation reflective`` () =
     testEval <@ 12I ** 2 @> 144I
 
+//covering UnaryPlus goes a long way to covering all unary op tests due to shared implementation
+[<Fact>]
+let ``op_UnaryPlus sbyte`` () =
+    testEval <@ (~+) 12y @> ((~+) 12y)
+
+[<Fact>]
+let ``op_UnaryPlus int16`` () =
+    testEval <@ (~+) 12s @> ((~+) 12s)
+
+[<Fact>]
+let ``op_UnaryPlus int32`` () =
+    testEval <@ (~+) 12 @> ((~+) 12)
+
+[<Fact>]
+let ``op_UnaryPlus int64`` () =
+    testEval <@ (~+) 12L @> ((~+) 12L)
+
+[<Fact>]
+let ``op_UnaryPlus nativeint`` () =
+    let x = 12n
+    testEval <@ (~+) x @> ((~+) 12n)
+
+[<Fact>]
+let ``op_UnaryPlus bigint`` () =
+    testEval <@ (~+) 12I @> ((~+) 12I)
+
+[<Fact>]
+let ``op_UnaryPlus float`` () =
+    testEval <@ (~+) 12. @> ((~+) 12.)
+
+[<Fact>]
+let ``op_UnaryPlus float32`` () =
+    testEval <@ (~+) 12.f @> ((~+) 12.f)
+
+[<Fact>]
+let ``op_UnaryPlus decimal`` () =
+    testEval <@ (~+) 12m @> ((~+) 12m)
+
+[<Fact>]
+let ``op_UnaryPlus byte`` () =
+    testEval <@ (~+) 12uy @> ((~+) 12uy)
+
+[<Fact>]
+let ``op_UnaryPlus uint16`` () =
+    testEval <@ (~+) 12us @> ((~+) 12us)
+
+[<Fact>]
+let ``op_UnaryPlus uint32`` () =
+    testEval <@ (~+) 12u @> ((~+) 12u)
+
+[<Fact>]
+let ``op_UnaryPlus uint64`` () =
+    testEval <@ (~+) 12UL @> ((~+) 12UL)
+
+[<Fact>]
+let ``op_UnaryPlus unativeint`` () =
+    let x = 12un
+    testEval <@ (~+) x @> ((~+) x)
+
+[<Fact>]
+let ``op_UnaryPlus reflective`` () =
+    testEval <@ (~+) 12N @> ((~+) 12N)
+
 [<Fact>]
 let ``op_UnaryNegation primitive`` () =
     testEval <@ (~-) 12 @> ((~-) 12)
 
 [<Fact>]
 let ``op_UnaryNegation reflective`` () =
-    testEval <@ (~-) 12m @> ((~-) 12m)
-
-[<Fact>]
-let ``op_UnaryPlus primitive`` () =
-    testEval <@ (~+) 12 @> ((~+) 12)
-
-[<Fact>]
-let ``op_UnaryPlus reflective`` () =
-    testEval <@ (~+) 12m @> ((~+) 12m)
+    testEval <@ (~-) 12N @> ((~-) 12N)
 
 [<Fact>]
 let ``ToBtye primitive`` () =
