@@ -420,20 +420,7 @@ module Checked =
              ("op_Subtraction", op_Subtraction)
              ("op_Multiply", op_Multiply)]
 
-    let op_UnaryNegation (aty:Type) (bty:Type) (x:obj) : obj = 
-        let dyn() = invokeUnaryOpDynamic "op_UnaryNegation" aty x
-        if aty.Equals(bty) then
-            if aty.Equals(typeof<int32>)        then box (Checked.(~-) (unbox<int32> x))
-            elif aty.Equals(typeof<float>)      then box (Checked.(~-) (unbox<float> x))
-            elif aty.Equals(typeof<float32>)    then box (Checked.(~-) (unbox<float32> x))
-            elif aty.Equals(typeof<int64>)      then box (Checked.(~-) (unbox<int64> x))
-            elif aty.Equals(typeof<int16>)      then box (Checked.(~-) (unbox<int16> x))
-            elif aty.Equals(typeof<nativeint>)  then box (Checked.(~-) (unbox<nativeint> x))
-            elif aty.Equals(typeof<sbyte>)      then box (Checked.(~-) (unbox<sbyte> x))
-            elif aty.Equals(typeof<decimal>)    then box (Checked.(~-) (unbox<decimal> x))
-            elif aty.Equals(typeof<bigint>)     then box (Checked.(~-) (unbox<bigint> x))
-            else dyn()
-        else dyn()
+    let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) None None None None None
 
     let ToByte (aty:Type) (bty:Type) (x:obj) : obj =
         if aty.Equals(typeof<string>)       then box (Checked.byte (unbox<string> x))
