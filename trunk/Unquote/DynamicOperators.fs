@@ -57,7 +57,7 @@ let inline invokeBinOp
     op12 op13 op14 op15 //non-integral types and string types not always supported
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
     let dyn() = invokeBinOpDynamic name aty bty x y
-    if aty.Equals(bty) && bty.Equals(cty) then
+    if aty.Equals(bty) && bty.Equals(cty) then //NOT TRUE FOR EXPLICIT OPS
         match aty, x, y with
         | InvokeBinOpStatic op1 (r:sbyte) -> box r
         | InvokeBinOpStatic op2 (r:int16) -> box r 
@@ -86,8 +86,35 @@ let op_Modulus = invokeBinOp "op_Modulus" (%) (%) (%) (%) (%) (%) (%) (%) (%) (%
 let op_BitwiseOr = invokeBinOp "op_BitwiseOr" (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) None None None None
 let op_BitwiseAnd = invokeBinOp "op_BitwiseAnd" (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) None None None None
 let op_ExclusiveOr = invokeBinOp "op_ExclusiveOr" (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) None None None None
-let op_LeftShift = invokeBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) None None None None
-let op_RightShift = invokeBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) None None None None
+
+let inline (|InvokeShiftBinOpStatic|_|) (op:'a->int->'a) (aty:Type, x:obj, y:obj) =
+    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x) (unbox<int> y))
+    else None
+
+///Binary ops of the form 'a->int->'a
+let inline invokeShiftBinOp 
+    name 
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 
+    (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
+    let dyn() = invokeBinOpDynamic name aty bty x y
+    if aty.Equals(cty) && bty.Equals(typeof<int>) then
+        match aty, x, y with
+        | InvokeShiftBinOpStatic op1 (r:sbyte) -> box r
+        | InvokeShiftBinOpStatic op2 (r:int16) -> box r 
+        | InvokeShiftBinOpStatic op3 (r:int32) -> box r
+        | InvokeShiftBinOpStatic op4 (r:int64) -> box r
+        | InvokeShiftBinOpStatic op5 (r:nativeint) -> box r
+        | InvokeShiftBinOpStatic op6 (r:byte) -> box r
+        | InvokeShiftBinOpStatic op7 (r:uint16) -> box r
+        | InvokeShiftBinOpStatic op8 (r:uint32) -> box r
+        | InvokeShiftBinOpStatic op9 (r:uint64) -> box r
+        | InvokeShiftBinOpStatic op10 (r:unativeint) -> box r
+        | InvokeShiftBinOpStatic op11 (r:bigint) -> box r //even though this isn't an inlined IL call in prim-types, it is still statically resolved so better than reflection
+        | _ -> dyn()
+    else dyn()
+
+let op_LeftShift = invokeShiftBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<)
+let op_RightShift = invokeShiftBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>)
 
 let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
     dict
@@ -145,6 +172,40 @@ let inline invokeUnaryOp
 
 let op_UnaryPlus = invokeUnaryOp "op_UnaryPlus" (~+) (~+) (~+) (~+) (~+) (~+) (~+) (~+) (~+) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+))
 let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) None None None None None
+
+//let inline (|InvokeExplicitOpStatic|_|) (op:'a->'a) (aty:Type, x:obj) =
+//    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x))
+//    else None
+//
+//let inline (|InvokeOptionalExplicitOpStatic|_|) (op:('a->'a) option) (aty:Type, x:obj) =
+//    match op with
+//    | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x))
+//    | _ -> None
+//
+//let inline invokeExplicitOp //string and decimal are optional
+//    name 
+//    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
+//    op11 op12 op13 op14 //unsigned types (which includes byte) not always supported
+//    (aty:Type) (bty:Type) (x:obj) : obj =
+//    let dyn() = invokeUnaryOpDynamic name aty x
+//    if aty.Equals(bty) then
+//        match aty, x with
+//        | InvokeUnaryOpStatic op1 (r:sbyte) -> box r
+//        | InvokeUnaryOpStatic op2 (r:int16) -> box r 
+//        | InvokeUnaryOpStatic op3 (r:int32) -> box r
+//        | InvokeUnaryOpStatic op4 (r:int64) -> box r
+//        | InvokeUnaryOpStatic op5 (r:nativeint) -> box r
+//        | InvokeUnaryOpStatic op6 (r:bigint) -> box r
+//        | InvokeUnaryOpStatic op7 (r:float) -> box r
+//        | InvokeUnaryOpStatic op8 (r:float32) -> box r
+//        | InvokeUnaryOpStatic op9 (r:decimal) -> box r
+//        | InvokeOptionalUnaryOpStatic op10 (r:byte) -> box r
+//        | InvokeOptionalUnaryOpStatic op11 (r:uint16) -> box r
+//        | InvokeOptionalUnaryOpStatic op12 (r:uint32) -> box r
+//        | InvokeOptionalUnaryOpStatic op13 (r:uint64) -> box r
+//        | InvokeOptionalUnaryOpStatic op14 (r:unativeint) -> box r
+//        | _ -> dyn()
+//    else dyn()
 
 let ToByte (aty:Type) (bty:Type) (x:obj) : obj =
     if aty.Equals(typeof<string>)       then box (byte (unbox<string> x))
