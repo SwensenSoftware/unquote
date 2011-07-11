@@ -96,7 +96,7 @@ let inline invokeShiftBinOp
     name 
     op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
-    let dyn() = invokeBinOpDynamic name aty bty x y
+    let dyn() = invokeBinOpDynamic name aty bty x y //invokeBinOpDynamic works fine both for invokeBinOp and invokeShiftBinOp
     if aty.Equals(cty) && bty.Equals(typeof<int>) then
         match aty, x, y with
         | InvokeShiftBinOpStatic op1 (r:sbyte) -> box r
