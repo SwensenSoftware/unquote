@@ -147,7 +147,8 @@ let inline (|InvokeOptionalUnaryOpStatic|_|) (op:('a->'a) option) (aty:Type, x:o
 
 let inline invokeUnaryOp 
     name 
-    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
+    op1 op2 op3 op4 op5 op6 
+    op7 op8 op9 op10 //non-integral types not supported by LogicalNot
     op11 op12 op13 op14 //unsigned types (which includes byte) not always supported
     (aty:Type) (bty:Type) (x:obj) : obj =
     let dyn() = invokeUnaryOpDynamic name aty x
@@ -158,10 +159,10 @@ let inline invokeUnaryOp
         | InvokeUnaryOpStatic op3 (r:int32) -> box r
         | InvokeUnaryOpStatic op4 (r:int64) -> box r
         | InvokeUnaryOpStatic op5 (r:nativeint) -> box r
-        | InvokeUnaryOpStatic op6 (r:bigint) -> box r
-        | InvokeUnaryOpStatic op7 (r:float) -> box r
-        | InvokeUnaryOpStatic op8 (r:float32) -> box r
-        | InvokeUnaryOpStatic op9 (r:decimal) -> box r
+        | InvokeOptionalUnaryOpStatic op6 (r:bigint) -> box r
+        | InvokeOptionalUnaryOpStatic op7 (r:float) -> box r
+        | InvokeOptionalUnaryOpStatic op8 (r:float32) -> box r
+        | InvokeOptionalUnaryOpStatic op9 (r:decimal) -> box r
         | InvokeOptionalUnaryOpStatic op10 (r:byte) -> box r
         | InvokeOptionalUnaryOpStatic op11 (r:uint16) -> box r
         | InvokeOptionalUnaryOpStatic op12 (r:uint32) -> box r
@@ -170,8 +171,9 @@ let inline invokeUnaryOp
         | _ -> dyn()
     else dyn()
 
-let op_UnaryPlus = invokeUnaryOp "op_UnaryPlus" (~+) (~+) (~+) (~+) (~+) (~+) (~+) (~+) (~+) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+))
-let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) None None None None None
+let op_UnaryPlus = invokeUnaryOp "op_UnaryPlus" (~+) (~+) (~+) (~+) (~+) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+)) (Some(~+))
+let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (Some(~-)) (Some(~-)) (Some(~-)) (Some(~-)) None None None None None
+let op_LogicalNot = invokeUnaryOp "op_LogicalNot" (~~~) (~~~) (~~~) (~~~) (~~~) None None None None (Some(~~~)) (Some(~~~)) (Some(~~~)) (Some(~~~)) (Some(~~~))
 
 //let inline (|InvokeExplicitOpStatic|_|) (op:'a->'a) (aty:Type, x:obj) =
 //    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x))
@@ -453,6 +455,7 @@ let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->
     dict
         [("op_UnaryNegation",op_UnaryNegation)
          ("op_UnaryPlus", op_UnaryPlus)
+         ("op_LogicalNot", op_LogicalNot)
          ("ToByte", ToByte)
          ("ToSByte", ToSByte)
          ("ToUInt16", ToUInt16)
@@ -481,7 +484,7 @@ module Checked =
              ("op_Subtraction", op_Subtraction)
              ("op_Multiply", op_Multiply)]
 
-    let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) (~-) None None None None None
+    let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (Some(~-)) (Some(~-)) (Some(~-)) (Some(~-)) None None None None None
 
     let ToByte (aty:Type) (bty:Type) (x:obj) : obj =
         if aty.Equals(typeof<string>)       then box (Checked.byte (unbox<string> x))

@@ -154,7 +154,7 @@ let ``op_RightShift reflective`` () =
 let ``op_Exponation primitive`` () =
     testEval <@ 12. ** 2. @> 144.
 
-[<Fact>]
+[<Fact>] //op_Exponation is not actually implemented in DynamicOperators (as it's not actually an operator in the F# Operators module)
 let ``op_Exponation reflective`` () =
     testEval <@ 12I ** 2 @> 144I
 
@@ -244,6 +244,14 @@ let ``op_UnaryNegation primitive`` () =
 [<Fact>]
 let ``op_UnaryNegation reflective`` () =
     testEval <@ (~-) 12N @> ((~-) 12N)
+
+[<Fact>]
+let ``op_LogicalNot primitive`` () =
+    testEval <@ (~~~) 234 @> -235
+
+[<Fact(Skip="No type to test")>]
+let ``op_LogicalNot reflective`` () =
+    ()
 
 [<Fact>]
 let ``ToBtye primitive`` () =
