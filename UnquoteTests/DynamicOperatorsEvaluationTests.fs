@@ -134,9 +134,17 @@ let ``op_LeftShift primitive`` () =
 let ``op_LeftShift with first arg different than second, primitive`` () =
     testEval <@ 12L <<< 5 @> 384L
 
-[<Fact(Skip="Need to design type with reflective impl")>]
+type Shiftable() =
+    static member (<<<) (lhs:Shiftable, rhs:int) =
+        lhs
+
+    static member (>>>) (lhs:Shiftable, rhs:int) =
+        lhs
+
+[<Fact>]
 let ``op_LeftShift reflective`` () =
-    ()
+    let lhs = Shiftable()
+    testEval <@ lhs <<< 0 @> lhs
 
 [<Fact>]
 let ``op_RightShift primitive`` () =
@@ -146,9 +154,10 @@ let ``op_RightShift primitive`` () =
 let ``op_RightShift with first arg different than second, primitive`` () =
     testEval <@ 12L >>> 2 @> 3L
 
-[<Fact(Skip="Need to design type with reflective impl")>]
+[<Fact>]
 let ``op_RightShift reflective`` () =
-    ()
+    let lhs = Shiftable()
+    testEval <@ lhs >>> 0 @> lhs
 
 [<Fact>] //op_Exponation is not actually implemented in DynamicOperators (as it's not actually an operator in the F# Operators module)
 let ``op_Exponation primitive`` () =
