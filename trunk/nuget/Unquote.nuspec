@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Unquote</id>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <authors>Stephen Swensen</authors>
     <owners>Stephen Swensen</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
