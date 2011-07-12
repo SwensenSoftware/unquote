@@ -25,8 +25,7 @@ The `Swensen.Unquote` namespace contains three `AutoOpen` modules: `Assertions`,
 The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and the `xx?` series of binary infix operators. All of these operators can be used within a unit test enabled project or FSI.
 
 Unquote chooses its output source as follows
-  * if the INTERACTIVE compiler symbol defined, then output to FSI
-  * else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
+  * if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
   * else throw a `System.Exception` with a message
 
 The following is a reference of the functions available and some examples:
