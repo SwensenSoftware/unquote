@@ -35,13 +35,13 @@ let invokeBinOpDynamic name (aty:Type) (bty:Type) (x:obj) (y:obj) =
     | m,null | null,m -> m.Invoke(null,[| x; y |])
     | _ -> raise (NotSupportedException ())
 
-let inline (|InvokeBinOpStatic|_|) (op:'a->'b->'a) (aty:Type, x:obj, y:obj) =
-    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x) (unbox<'b> y))
+let inline (|InvokeBinOpStatic|_|) (op:'a->'a->'a) (aty:Type, x:obj, y:obj) =
+    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x) (unbox<'a> y))
     else None
 
-let inline (|InvokeOptionalBinOpStatic|_|) (op:('a->'b->'a) option) (aty:Type, x:obj, y:obj) =
+let inline (|InvokeOptionalBinOpStatic|_|) (op:('a->'a->'a) option) (aty:Type, x:obj, y:obj) =
     match op with
-    | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x) (unbox<'b> y))
+    | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x) (unbox<'a> y))
     | _ -> None
 
 let inline invokeBinOp 
