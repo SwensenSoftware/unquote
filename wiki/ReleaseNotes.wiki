@@ -3,6 +3,15 @@
 
 = Release Notes =
 
+== v2.0.1, 7/11/11 ==
+
+Service release fixing bugs and tweaking API for new v2.0.0 features.
+
+  * Issue 48 Bug: op_UnaryPlus on int16 overlooked
+  * Issue 49 Bug: op_LogicalNot is not supported
+  * Issue 50 Bug: left shift and right shift operators fail with primitive operands of different types
+  * Issue 52 Evaluation and Reduction Operators with Environment API breaking Change Needed for Proper Piping
+
 == v2.0.0, 7/6/11 ==
 
 Major release featuring custom reflection-based evaluation engine resulting in significant performance improvements.
