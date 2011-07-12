@@ -25,13 +25,6 @@ open System.Reflection
 
 //N.B. there are 13 primitive numeric types and also bigint to consider
 
-///aty is the arg type, bty is the return type, x is the arg
-let invokeExplicitOpDynamic (aty:Type) (bty:Type) (x:obj) =
-    let ameth = aty.GetMethods() |> Array.find (fun m -> m.Name = "op_Explicit" && ((m.GetParameters() |> Array.map(fun p -> p.ParameterType)) = [| aty |]) && m.ReturnType = bty)
-    match ameth  with 
-    | null -> raise (NotSupportedException ())
-    | m -> m.Invoke(null,[| x |])
-
 ///name is the name of the method, aty is the type of the first arg, bty is the type of the second arg,
 ///x is the first arg, y is the second arg.
 let invokeBinOpDynamic name (aty:Type) (bty:Type) (x:obj) (y:obj) =
@@ -175,58 +168,50 @@ let op_UnaryPlus = invokeUnaryOp "op_UnaryPlus" (~+) (~+) (~+) (~+) (~+) (Some(~
 let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (Some(~-)) (Some(~-)) (Some(~-)) (Some(~-)) None None None None None
 let op_LogicalNot = invokeUnaryOp "op_LogicalNot" (~~~) (~~~) (~~~) (~~~) (~~~) None None None None (Some(~~~)) (Some(~~~)) (Some(~~~)) (Some(~~~)) (Some(~~~))
 
-//let inline (|InvokeExplicitOpStatic|_|) (op:'a->'a) (aty:Type, x:obj) =
-//    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x))
-//    else None
-//
-//let inline (|InvokeOptionalExplicitOpStatic|_|) (op:('a->'a) option) (aty:Type, x:obj) =
-//    match op with
-//    | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x))
-//    | _ -> None
-//
-//let inline invokeExplicitOp //string and decimal are optional
-//    name 
-//    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
-//    op11 op12 op13 op14 //unsigned types (which includes byte) not always supported
-//    (aty:Type) (bty:Type) (x:obj) : obj =
-//    let dyn() = invokeUnaryOpDynamic name aty x
-//    if aty.Equals(bty) then
-//        match aty, x with
-//        | InvokeUnaryOpStatic op1 (r:sbyte) -> box r
-//        | InvokeUnaryOpStatic op2 (r:int16) -> box r 
-//        | InvokeUnaryOpStatic op3 (r:int32) -> box r
-//        | InvokeUnaryOpStatic op4 (r:int64) -> box r
-//        | InvokeUnaryOpStatic op5 (r:nativeint) -> box r
-//        | InvokeUnaryOpStatic op6 (r:bigint) -> box r
-//        | InvokeUnaryOpStatic op7 (r:float) -> box r
-//        | InvokeUnaryOpStatic op8 (r:float32) -> box r
-//        | InvokeUnaryOpStatic op9 (r:decimal) -> box r
-//        | InvokeOptionalUnaryOpStatic op10 (r:byte) -> box r
-//        | InvokeOptionalUnaryOpStatic op11 (r:uint16) -> box r
-//        | InvokeOptionalUnaryOpStatic op12 (r:uint32) -> box r
-//        | InvokeOptionalUnaryOpStatic op13 (r:uint64) -> box r
-//        | InvokeOptionalUnaryOpStatic op14 (r:unativeint) -> box r
-//        | _ -> dyn()
-//    else dyn()
+///aty is the arg type, bty is the return type, x is the arg
+let invokeExplicitOpDynamic (aty:Type) (bty:Type) (x:obj) =
+    let ameth = aty.GetMethods() |> Array.find (fun m -> m.Name = "op_Explicit" && ((m.GetParameters() |> Array.map(fun p -> p.ParameterType)) = [| aty |]) && m.ReturnType = bty)
+    match ameth  with 
+    | null -> raise (NotSupportedException ())
+    | m -> m.Invoke(null,[| x |])
 
-let ToByte (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (byte (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (byte (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (byte (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (byte (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (byte (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (byte (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (byte (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (byte (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (byte (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (byte (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (byte (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (byte (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (byte (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (byte (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
+let inline (|InvokeExplicitOpStatic|_|) (op:'a->'b) (aty:Type, x:obj) =
+    if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x))
+    else None
 
-let ToSByte (aty:Type) (bty:Type) (x:obj) : obj =
+let inline (|InvokeOptionalExplicitOpStatic|_|) (op:('a->'b) option) (aty:Type, x:obj) =
+    match op with
+    | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x))
+    | _ -> None
+
+let inline invokeExplicitOp //string and decimal are optional
+    name 
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 op12 op13 op14 
+    op15 op16 //string and char not always supported
+    (aty:Type) (bty:Type) (x:obj) : obj =
+    let dyn() = invokeExplicitOpDynamic aty bty x
+    match aty, x with
+    | InvokeExplicitOpStatic (op1:sbyte->_) r -> box r
+    | InvokeExplicitOpStatic (op2:int16->_) r -> box r 
+    | InvokeExplicitOpStatic (op3:int32->_) r -> box r
+    | InvokeExplicitOpStatic (op4:int64->_) r -> box r
+    | InvokeExplicitOpStatic (op5:nativeint->_) r -> box r
+    | InvokeExplicitOpStatic (op6:bigint->_) r -> box r
+    | InvokeExplicitOpStatic (op7:float->_) r -> box r
+    | InvokeExplicitOpStatic (op8:float32->_) r -> box r
+    | InvokeExplicitOpStatic (op9:decimal->_) r -> box r
+    | InvokeExplicitOpStatic (op10:byte->_) r -> box r
+    | InvokeExplicitOpStatic (op11:uint16->_) r -> box r
+    | InvokeExplicitOpStatic (op12:uint32->_) r -> box r
+    | InvokeExplicitOpStatic (op13:uint64->_) r -> box r
+    | InvokeExplicitOpStatic (op14:unativeint->_) r -> box r
+    | InvokeOptionalExplicitOpStatic (op15:(string->_) option) r -> box r
+    | InvokeOptionalExplicitOpStatic (op16:(char->_) option) r -> box r
+    | _ -> dyn()
+    
+let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte byte byte byte (Some(byte)) (Some(byte))
+
+let ToSByte (aty:Type) (bty:Type) (x:obj) : obj = //no decimal or bigint
     if aty.Equals(typeof<string>)       then box (sbyte (unbox<string> x))
     elif aty.Equals(typeof<float>)      then box (sbyte (unbox<float> x))
     elif aty.Equals(typeof<float32>)    then box (sbyte (unbox<float32> x))
