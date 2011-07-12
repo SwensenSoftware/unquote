@@ -38,15 +38,15 @@ let inline reduce (expr:Expr) = expr.Reduce()
 let inline reduceFully (expr:Expr) = expr.ReduceFully()
 
 ///Evaluate the given untyped expression with the given variable environment.
-let inline evalRawWith (expr:Expr) env = expr.Eval(env)
+let inline evalRawWith env (expr:Expr) = expr.Eval(env)
 ///Evaluate the given typed expression with the given variable environment.
-let inline evalWith (expr:Expr<'a>) env = expr.Eval(env)
+let inline evalWith env (expr:Expr<'a>) = expr.Eval(env)
 ///Reduce the given expression by one step with the given variable environment: convert each branch of the given expression to a Value expression of its 
 ///evaluation if each sub-branch of the branch is reduced.
 ///If this expression is already reduced, or cannot be reduced, returns itself.
-let inline reduceWith (expr:Expr) env = expr.Reduce(env)
+let inline reduceWith env (expr:Expr) = expr.Reduce(env)
 ///Convert the given expression with the given variable environment to a list of all of its Reduce steps in order.
-let inline reduceFullyWith (expr:Expr) env = expr.ReduceFully(env)
+let inline reduceFullyWith env (expr:Expr) = expr.ReduceFully(env)
 
 ///Determine whether the given expression is reduced.
 let inline isReduced (expr:Expr) = expr.IsReduced()
