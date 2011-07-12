@@ -185,256 +185,44 @@ let inline (|InvokeOptionalExplicitOpStatic|_|) (op:('a->'b) option) (aty:Type, 
     | _ -> None
 
 let inline invokeExplicitOp //string and decimal are optional
-    name 
     op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 op12 op13 op14 
     op15 op16 //string and char not always supported
     (aty:Type) (bty:Type) (x:obj) : obj =
     let dyn() = invokeExplicitOpDynamic aty bty x
-    match aty, x with
-    | InvokeExplicitOpStatic (op1:sbyte->_) r -> box r
-    | InvokeExplicitOpStatic (op2:int16->_) r -> box r 
-    | InvokeExplicitOpStatic (op3:int32->_) r -> box r
-    | InvokeExplicitOpStatic (op4:int64->_) r -> box r
-    | InvokeExplicitOpStatic (op5:nativeint->_) r -> box r
-    | InvokeExplicitOpStatic (op6:bigint->_) r -> box r
-    | InvokeExplicitOpStatic (op7:float->_) r -> box r
-    | InvokeExplicitOpStatic (op8:float32->_) r -> box r
-    | InvokeExplicitOpStatic (op9:decimal->_) r -> box r
-    | InvokeExplicitOpStatic (op10:byte->_) r -> box r
-    | InvokeExplicitOpStatic (op11:uint16->_) r -> box r
-    | InvokeExplicitOpStatic (op12:uint32->_) r -> box r
-    | InvokeExplicitOpStatic (op13:uint64->_) r -> box r
-    | InvokeExplicitOpStatic (op14:unativeint->_) r -> box r
-    | InvokeOptionalExplicitOpStatic (op15:(string->_) option) r -> box r
-    | InvokeOptionalExplicitOpStatic (op16:(char->_) option) r -> box r
+    match aty, x with //note: writing the op type as <type>->'a instead of <type>->_ gives us extra static type checking in partial applications to help prevent typos
+    | InvokeExplicitOpStatic (op1:sbyte->'a) r -> box r
+    | InvokeExplicitOpStatic (op2:int16->'a) r -> box r 
+    | InvokeExplicitOpStatic (op3:int32->'a) r -> box r
+    | InvokeExplicitOpStatic (op4:int64->'a) r -> box r
+    | InvokeExplicitOpStatic (op5:nativeint->'a) r -> box r
+    | InvokeExplicitOpStatic (op6:float->'a) r -> box r
+    | InvokeExplicitOpStatic (op7:float32->'a) r -> box r
+    | InvokeExplicitOpStatic (op8:byte->'a) r -> box r
+    | InvokeExplicitOpStatic (op9:uint16->'a) r -> box r
+    | InvokeExplicitOpStatic (op10:uint32->'a) r -> box r
+    | InvokeExplicitOpStatic (op11:uint64->'a) r -> box r
+    | InvokeExplicitOpStatic (op12:unativeint->'a) r -> box r
+    | InvokeOptionalExplicitOpStatic (op13:(bigint->'a) option) r -> box r
+    | InvokeOptionalExplicitOpStatic (op14:(decimal->'a) option) r -> box r
+    | InvokeOptionalExplicitOpStatic (op15:(string->'a) option) r -> box r
+    | InvokeOptionalExplicitOpStatic (op16:(char->'a) option) r -> box r
     | _ -> dyn()
-    
-let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte byte byte byte (Some(byte)) (Some(byte))
 
-let ToSByte (aty:Type) (bty:Type) (x:obj) : obj = //no decimal or bigint
-    if aty.Equals(typeof<string>)       then box (sbyte (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (sbyte (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (sbyte (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (sbyte (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (sbyte (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (sbyte (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (sbyte (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (sbyte (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (sbyte (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (sbyte (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (sbyte (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (sbyte (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (sbyte (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (sbyte (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToUInt16 (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (uint16 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (uint16 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (uint16 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (uint16 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (uint16 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (uint16 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (uint16 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (uint16 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (uint16 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (uint16 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (uint16 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (uint16 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (uint16 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (uint16 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToInt16 (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (int16 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (int16 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (int16 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (int16 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (int16 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (int16 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (int16 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (int16 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (int16 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (int16 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (int16 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (int16 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (int16 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (int16 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToUInt32 (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (uint32 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (uint32 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (uint32 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (uint32 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (uint32 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (uint32 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (uint32 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (uint32 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (uint32 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (uint32 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (uint32 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (uint32 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (uint32 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (uint32 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToInt32 (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (int32 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (int32 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (int32 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (int32 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (int32 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (int32 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (int32 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (int32 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (int32 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (int32 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (int32 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (int32 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (int32 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (int32 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
+let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte (Some(byte)) (Some(byte)) (Some(byte)) (Some(byte))
+let ToSByte = invokeExplicitOp sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte (Some(sbyte)) (Some(sbyte)) (Some(sbyte)) (Some(sbyte))
+let ToUInt16 = invokeExplicitOp uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 (Some(uint16)) (Some(uint16)) (Some(uint16)) (Some(uint16))
+let ToInt16 = invokeExplicitOp int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 (Some(int16)) (Some(int16)) (Some(int16)) (Some(int16))
+let ToUInt32 = invokeExplicitOp uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 (Some(uint32)) (Some(uint32)) (Some(uint32)) (Some(uint32))
+let ToInt32 = invokeExplicitOp int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 (Some(int32)) (Some(int32)) (Some(int32)) (Some(int32))
 let ToInt = ToInt32
-
-let ToUInt64 (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (uint64 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (uint64 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (uint64 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (uint64 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (uint64 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (uint64 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (uint64 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (uint64 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (uint64 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (uint64 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (uint64 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (uint64 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (uint64 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (uint64 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToInt64 (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (int64 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (int64 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (int64 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (int64 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (int64 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (int64 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (int64 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (int64 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (int64 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (int64 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (int64 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (int64 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (int64 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (int64 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToSingle (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (float32 (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (float32 (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (float32 (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (float32 (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (float32 (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (float32 (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (float32 (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (float32 (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (float32 (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (float32 (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (float32 (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (float32 (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (float32 (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (float32 (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToDouble (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (float (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (float (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (float (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (float (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (float (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (float (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (float (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (float (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (float (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (float (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (float (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (float (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (float (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (float (unbox<byte> x))
-    elif aty.Equals(typeof<decimal>)    then box (float (unbox<decimal> x)) //**
-    else invokeExplicitOpDynamic aty bty x
-
-let ToDecimal (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (decimal (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (decimal (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (decimal (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (decimal (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (decimal (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (decimal (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (decimal (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (decimal (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (decimal (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (decimal (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (decimal (unbox<uint16> x))
-//    elif aty.Equals(typeof<char>)       then box (decimal (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (decimal (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (decimal (unbox<byte> x))
-    elif aty.Equals(typeof<decimal>)    then box (decimal (unbox<decimal> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToUIntPtr (aty:Type) (bty:Type) (x:obj) : obj =
-//    if aty.Equals(typeof<string>)       then box (unativeint (unbox<string> x))
-    if aty.Equals(typeof<float>)      then box (unativeint (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (unativeint (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (unativeint (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (unativeint (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (unativeint (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (unativeint (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (unativeint (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (unativeint (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (unativeint (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (unativeint (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (unativeint (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (unativeint (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (unativeint (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToIntPtr (aty:Type) (bty:Type) (x:obj) : obj =
-//    if aty.Equals(typeof<string>)       then box (unativeint (unbox<string> x))
-    if aty.Equals(typeof<float>)      then box (nativeint (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (nativeint (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (nativeint (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (nativeint (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (nativeint (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (nativeint (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (nativeint (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (nativeint (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (nativeint (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (nativeint (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (nativeint (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (nativeint (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (nativeint (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
-
-let ToChar (aty:Type) (bty:Type) (x:obj) : obj =
-    if aty.Equals(typeof<string>)       then box (char (unbox<string> x))
-    elif aty.Equals(typeof<float>)      then box (char (unbox<float> x))
-    elif aty.Equals(typeof<float32>)    then box (char (unbox<float32> x))
-    elif aty.Equals(typeof<int64>)      then box (char (unbox<int64> x))
-    elif aty.Equals(typeof<int32>)      then box (char (unbox<int32> x))
-    elif aty.Equals(typeof<int16>)      then box (char (unbox<int16> x))
-    elif aty.Equals(typeof<nativeint>)  then box (char (unbox<nativeint> x))
-    elif aty.Equals(typeof<sbyte>)      then box (char (unbox<sbyte> x))
-    elif aty.Equals(typeof<uint64>)     then box (char (unbox<uint64> x))
-    elif aty.Equals(typeof<uint32>)     then box (char (unbox<uint32> x))
-    elif aty.Equals(typeof<uint16>)     then box (char (unbox<uint16> x))
-    elif aty.Equals(typeof<char>)       then box (char (unbox<char> x))
-    elif aty.Equals(typeof<unativeint>) then box (char (unbox<unativeint> x))
-    elif aty.Equals(typeof<byte>)       then box (char (unbox<byte> x))
-    else invokeExplicitOpDynamic aty bty x
+let ToUInt64 = invokeExplicitOp uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 (Some(uint64)) (Some(uint64)) (Some(uint64)) (Some(uint64))
+let ToInt64 = invokeExplicitOp int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 (Some(int64)) (Some(int64)) (Some(int64)) (Some(int64))
+let ToSingle = invokeExplicitOp float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 (Some(float32)) (Some(float32)) (Some(float32)) (Some(float32))
+let ToDouble = invokeExplicitOp float float float float float float float float float float float float (Some(float)) (Some(float)) (Some(float)) (Some(float))
+let ToDecimal = invokeExplicitOp decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal (Some(decimal)) (Some(decimal)) (Some(decimal)) None
+let ToUIntPtr = invokeExplicitOp unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint None None None (Some(unativeint))
+let ToIntPtr = invokeExplicitOp nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint None None None (Some(nativeint))
+let ToChar = invokeExplicitOp char char char char char char char char char char char char None (Some(char)) (Some(char)) (Some(char))
 
 let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->obj->obj)> = 
     dict
@@ -471,196 +259,19 @@ module Checked =
 
     let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (Some(~-)) (Some(~-)) (Some(~-)) (Some(~-)) None None None None None
 
-    let ToByte (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.byte (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.byte (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.byte (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.byte (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.byte (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.byte (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.byte (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.byte (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.byte (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.byte (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.byte (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.byte (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.byte (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.byte (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToSByte (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.sbyte (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.sbyte (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.sbyte (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.sbyte (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.sbyte (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.sbyte (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.sbyte (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.sbyte (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.sbyte (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.sbyte (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.sbyte (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.sbyte (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.sbyte (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.sbyte (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToUInt16 (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.uint16 (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.uint16 (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.uint16 (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.uint16 (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.uint16 (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.uint16 (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.uint16 (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.uint16 (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.uint16 (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.uint16 (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.uint16 (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.uint16 (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.uint16 (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.uint16 (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToInt16 (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.int16 (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.int16 (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.int16 (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.int16 (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.int16 (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.int16 (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.int16 (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.int16 (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.int16 (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.int16 (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.int16 (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.int16 (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.int16 (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.int16 (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToUInt32 (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.uint32 (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.uint32 (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.uint32 (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.uint32 (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.uint32 (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.uint32 (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.uint32 (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.uint32 (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.uint32 (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.uint32 (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.uint32 (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.uint32 (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.uint32 (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.uint32 (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToInt32 (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.int32 (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.int32 (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.int32 (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.int32 (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.int32 (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.int32 (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.int32 (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.int32 (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.int32 (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.int32 (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.int32 (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.int32 (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.int32 (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.int32 (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
+    let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte (Some(byte)) (Some(byte)) (Some(byte)) (Some(byte))
+    let ToSByte = invokeExplicitOp sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte (Some(sbyte)) (Some(sbyte)) (Some(sbyte)) (Some(sbyte))
+    let ToUInt16 = invokeExplicitOp uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 (Some(uint16)) (Some(uint16)) (Some(uint16)) (Some(uint16))
+    let ToInt16 = invokeExplicitOp int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 (Some(int16)) (Some(int16)) (Some(int16)) (Some(int16))
+    let ToUInt32 = invokeExplicitOp uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 (Some(uint32)) (Some(uint32)) (Some(uint32)) (Some(uint32))
+    let ToInt32 = invokeExplicitOp int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 (Some(int32)) (Some(int32)) (Some(int32)) (Some(int32))
     let ToInt = ToInt32
-
-    let ToUInt64 (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.uint64 (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.uint64 (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.uint64 (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.uint64 (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.uint64 (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.uint64 (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.uint64 (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.uint64 (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.uint64 (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.uint64 (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.uint64 (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.uint64 (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.uint64 (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.uint64 (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToInt64 (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.int64 (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.int64 (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.int64 (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.int64 (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.int64 (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.int64 (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.int64 (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.int64 (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.int64 (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.int64 (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.int64 (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.int64 (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.int64 (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.int64 (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-    
+    let ToUInt64 = invokeExplicitOp uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 (Some(uint64)) (Some(uint64)) (Some(uint64)) (Some(uint64))
+    let ToInt64 = invokeExplicitOp int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 (Some(int64)) (Some(int64)) (Some(int64)) (Some(int64))
     //N.B. no checked decimal, float, or float32
-
-    let ToUIntPtr (aty:Type) (bty:Type) (x:obj) : obj =
-    //    if aty.Equals(typeof<string>)       then box (Checked.unativeint (unbox<string> x))
-        if aty.Equals(typeof<float>)      then box (Checked.unativeint (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.unativeint (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.unativeint (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.unativeint (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.unativeint (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.unativeint (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.unativeint (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.unativeint (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.unativeint (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.unativeint (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.unativeint (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.unativeint (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.unativeint (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToIntPtr (aty:Type) (bty:Type) (x:obj) : obj =
-    //    if aty.Equals(typeof<string>)       then box (Checked.unativeint (unbox<string> x))
-        if aty.Equals(typeof<float>)      then box (Checked.nativeint (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.nativeint (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.nativeint (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.nativeint (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.nativeint (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.nativeint (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.nativeint (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.nativeint (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.nativeint (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.nativeint (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.nativeint (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.nativeint (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.nativeint (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
-
-    let ToChar (aty:Type) (bty:Type) (x:obj) : obj =
-        if aty.Equals(typeof<string>)       then box (Checked.char (unbox<string> x))
-        elif aty.Equals(typeof<float>)      then box (Checked.char (unbox<float> x))
-        elif aty.Equals(typeof<float32>)    then box (Checked.char (unbox<float32> x))
-        elif aty.Equals(typeof<int64>)      then box (Checked.char (unbox<int64> x))
-        elif aty.Equals(typeof<int32>)      then box (Checked.char (unbox<int32> x))
-        elif aty.Equals(typeof<int16>)      then box (Checked.char (unbox<int16> x))
-        elif aty.Equals(typeof<nativeint>)  then box (Checked.char (unbox<nativeint> x))
-        elif aty.Equals(typeof<sbyte>)      then box (Checked.char (unbox<sbyte> x))
-        elif aty.Equals(typeof<uint64>)     then box (Checked.char (unbox<uint64> x))
-        elif aty.Equals(typeof<uint32>)     then box (Checked.char (unbox<uint32> x))
-        elif aty.Equals(typeof<uint16>)     then box (Checked.char (unbox<uint16> x))
-        elif aty.Equals(typeof<char>)       then box (Checked.char (unbox<char> x))
-        elif aty.Equals(typeof<unativeint>) then box (Checked.char (unbox<unativeint> x))
-        elif aty.Equals(typeof<byte>)       then box (Checked.char (unbox<byte> x))
-        else invokeExplicitOpDynamic aty bty x
+    let ToUIntPtr = invokeExplicitOp unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint None None None (Some(unativeint))
+    let ToIntPtr = invokeExplicitOp nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint None None None (Some(nativeint))
+    let ToChar = invokeExplicitOp char char char char char char char char char char char char None (Some(char)) (Some(char)) (Some(char))
 
     let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->obj->obj)> = 
         dict
