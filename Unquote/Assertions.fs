@@ -27,6 +27,8 @@ open Swensen.Unquote
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
 #nowarn "44"
+#nowarn "42" //for raises (inline IL)
+
 [<System.ObsoleteAttribute>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
 module Internal =
     let private fsiTestFailed (expr:Expr) additionalInfo =
