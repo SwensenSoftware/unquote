@@ -151,7 +151,7 @@ The following are functions which accept a variable environment for processing s
 
 === Extensions ===
 
-The `Swensen.Unquote.Extensions` module duplicates functions in the `Swensen.Unquote.Operators` as instance type extensions on `Quotations.Expr` and `Quotations.Expr<'a>`. But it also includes an instance property extension on `System.Type`, `FSharpName`, which returns the F#-style signature of a type:
+The `Swensen.Unquote.Extensions` module duplicates functions in the `Swensen.Unquote.Operators` as instance type extensions on `Quotations.Expr` and `Quotations.Expr<'a>`. But it also includes an instance property extension on `System.Type`, `FSharpName`, which returns the F#-style signature of a type (N.B. this feature is out-of-place in Unquote and should be considered "experimental"):
 
 {{{
 > typeof<int>.FSharpName;;
