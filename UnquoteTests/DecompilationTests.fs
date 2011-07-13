@@ -719,3 +719,28 @@ let f' (x:obj) (y:obj) = x |> string
 [<Fact>] //issue 40
 let ``handle lambda re-sugaring when vars are implicitly coerced``() =
     <@ <@ 2 |> f' "2" @> |> decompile = "2 |> f' \"2\"" @> |> test
+
+[<Fact>] //issue 51
+let ``RecursiveLet mutually recursive funtions``() =
+    <@    
+        let rec even x =
+            if x = 0 then true
+            else odd (x-1)
+        and odd x =
+            if x = 0 then false
+            else even (x-1)
+        in
+            even 19, odd 20
+    @> |> decompile =? "let rec even = fun x -> x = 0 || odd (x - 1) and odd = fun x -> if x = 0 then false else even (x - 1) in (even 19, odd 20)"
+
+[<Fact>] //issue 51
+let ``RecursiveLet self recursive function``() =
+    <@    
+        let rec countdown i steps  =
+            if i < 0 then i
+            else countdown (i - steps) steps
+        in
+            countdown 34 10
+    @> |> decompile =? "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
+
+

@@ -110,16 +110,13 @@ let (|CheckedUnaryOp|_|) = function
         | false, _ -> None
     | _ -> None
 
-let findInEnv name env =
+let findInEnv name env = //fail with specific exception
     env |> List.find (fun (curName, _) -> curName = name) |> snd
 
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         failwithf "Quotation pattern %s not supported: expression = %A" name expr
 
-    let inline failwithOperatorLookupFailed name (expr:Expr) =
-        failwithf "Operator %s is a dynamic invocation operator which should be supported but lookup failed: expression = %A" name expr
-        
     let rec eval env expr =
         match expr with
         | P.Let(var, assignment, body) ->
