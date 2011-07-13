@@ -110,9 +110,6 @@ let (|CheckedUnaryOp|_|) = function
         | false, _ -> None
     | _ -> None
 
-let findInEnv name env = //fail with specific exception
-    env |> List.find (fun (curName, _) -> curName = name) |> snd
-
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         failwithf "Quotation pattern %s not supported: expression = %A" name expr
@@ -120,12 +117,12 @@ let eval env expr =
     let rec eval env expr =
         match expr with
         | P.Let(var, assignment, body) ->
-            let env = (var.Name, eval env assignment |> ref)::env
+            let env = env |> Map.add var.Name (eval env assignment |> ref)
             eval env body //ref type for future VarSet for mutable let bindings
         | P.Var(var) ->
-            findInEnv var.Name env |> (!)
+            env |> Map.find var.Name |> (!)
         | P.VarSet(var, assignment) ->
-            (findInEnv var.Name env) := eval env assignment
+            (env |> Map.find var.Name) := eval env assignment
             box ()
         | P.Sequential(lhs, rhs) ->
             eval env lhs |> ignore
@@ -176,7 +173,7 @@ let eval env expr =
             let ifrom = eval env ifrom :?> int
             let ito = eval env ito :?> int
             for i in ifrom..ito do
-                let env = (var.Name, ref (box i))::env
+                let env = env |> Map.add var.Name (i |> box |> ref)
                 eval env body |> ignore
             box ()
         | P.UnionCaseTest(target, uci) ->
@@ -191,7 +188,7 @@ let eval env expr =
                     match e with
                     | :? TargetInvocationException when e.InnerException <> null -> e.InnerException //thrown from within reflective call (target of invocation exception)
                     | _ -> e //thrown from eval code itself
-                let env = (catchVar.Name, ref (box e))::env
+                let env = env |> Map.add catchVar.Name (e |> box |> ref)
                 eval env catchBody
         | P.TryFinally(tryBlock, finallyBlock) ->
             try
@@ -202,7 +199,7 @@ let eval env expr =
             let ty = FSharpType.MakeFunctionType(var.Type, body.Type)
             let impl : obj -> obj = 
                 fun arg ->
-                    let env = (var.Name, ref arg)::env
+                    let env = env |> Map.add var.Name (ref arg)
                     eval env body
             FSharpValue.MakeFunction(ty, impl)
         | P.Application(lambda, arg) ->
@@ -227,12 +224,12 @@ let eval env expr =
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.LetRecursive(bindings, finalBody) -> 
             let rec init env = function
-                | (var:Var, _)::rest -> init ((var.Name, null |> box |> ref)::env) rest
+                | (var:Var, _)::rest -> init (env |> Map.add var.Name (ref null)) rest
                 | [] -> env
             let env = init env bindings
                 
             for (var, body) in bindings do
-                (findInEnv var.Name env) := eval env body
+                (env |> Map.find var.Name) := eval env body
 
             eval env finalBody                       
         | P.AddressOf _ -> 

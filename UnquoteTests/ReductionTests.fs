@@ -420,13 +420,13 @@ open Swensen.Unquote
 let ``synthetic full reduction`` () =
     let reduceFullyWithEnv env (expr:Expr) = expr.ReduceFully(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> reduceFullyWithEnv [("x", 2 |> box |> ref)] |> List.map decompile = ["x"; "2"] @>
+    <@ synExpr |> reduceFullyWithEnv (Map.ofList [("x", 2 |> box |> ref)]) |> List.map decompile = ["x"; "2"] @>
 
 [<Fact>]
 let ``synthetic single reduction`` () =
     let reduceWithEnv env (expr:Expr) = expr.Reduce(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> reduceWithEnv [("x", 2 |> box |> ref)] |> decompile = "2" @>
+    <@ synExpr |> reduceWithEnv (Map.ofList [("x", 2 |> box |> ref)]) |> decompile = "2" @>
 
 [<Fact>]
 let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =
