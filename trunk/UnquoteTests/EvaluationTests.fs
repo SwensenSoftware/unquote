@@ -522,13 +522,13 @@ open Swensen.Unquote
 let ``typed synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr<int>) = expr.Eval(env)
     let synExpr:Expr<int> = Expr.Var(new Var("x", typeof<int>)) |> Expr.Cast
-    <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = 2 @>
+    <@ synExpr |> (evalWithEnv (Map.ofList [("x", 2 |> box |> ref)])) = 2 @>
 
 [<Fact>]
 let ``untyped synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr) = expr.Eval(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = box 2 @>
+    <@ synExpr |> (evalWithEnv (Map.ofList [("x", 2 |> box |> ref)])) = box 2 @>
 
 //let (|Unbox|_|) x y = 
 //    if y |> unbox = x then
