@@ -228,14 +228,22 @@ let eval env expr =
             box generic
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
+        | P.LetRecursive(bindings, finalBody) -> 
+            let rec init env = function
+                | (var:Var, _)::rest -> init ((var.Name, null |> box |> ref)::env) rest
+                | [] -> env
+            let env = init env bindings
+                
+            for (var, body) in bindings do
+                (findInEnv var.Name env) := eval env body
+
+            eval env finalBody                       
         | P.AddressOf _ -> 
             failwithPatternNotSupported "AddressOf" expr
         | P.AddressSet _ -> 
             failwithPatternNotSupported "AddressSet" expr
         | P.NewDelegate _ -> 
             failwithPatternNotSupported "NewDelegate" expr
-        | P.LetRecursive _ -> 
-            failwithPatternNotSupported "LetRecursive" expr
         | _ -> 
             failwithf "this expression should not be possible: %A" expr 
     and evalAll env exprs =
@@ -247,8 +255,7 @@ let eval env expr =
             match eval env instance with
             | null -> raise (System.NullReferenceException()) //otherwise will get misleading System.Reflection.TargetException: Non-static method requires a target.
             | result -> result
-//    and (|Eval|) env expr =
-//        eval env expr
+
 #if DEBUG 
     eval env expr
 #else
