@@ -204,6 +204,13 @@ let decompile expr =
             let anyMutable = vars |> List.exists (function | Some(v) -> v.IsMutable | None -> false)
             let varNames = vars |> List.map (function | Some(v) -> v.Name | None -> "_")
             applyParens 5 (sprintf "let%s%s = %s in %s" (if anyMutable then " mutable " else " ") (varNames |> String.concat ", ") (decompile 0 e1) (decompile 0 e2))
+        | P.LetRecursive((firstVar, firstBody)::rest, finalBody) -> //let recursives always have at least thef first var and body
+            //note: single line recursive ("and") let bindings are only valid with #light "off", see: http://stackoverflow.com/questions/6501378/what-is-the-non-light-syntax-for-recursive-let-bindings
+            let rec decompileRest = function
+                | (var:Var, body)::rest ->
+                    sprintf " and %s = %s%s" var.Name (decompile 0 body) (decompileRest rest)
+                | [] -> sprintf " in %s" (decompile 0 finalBody)
+            applyParens 5 (sprintf "let rec %s = %s%s" firstVar.Name (decompile 0 firstBody) (decompileRest rest))
         | P.Let(var, e1, e2) ->
             //todo: this needs to be handled better for curried functions
             applyParens 5 (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (decompile 0 e1) (decompile 0 e2))
