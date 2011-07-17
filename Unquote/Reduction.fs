@@ -92,6 +92,11 @@ let rec reduce env (expr:Expr) =
             if Evaluation.eval env a :?> bool then b
             else c
         else Expr.IfThenElse(reduce env a, b, c)
+    | P.TryFinally(tryBody,finallyBody) ->
+        if tryBody |> isReduced then
+            evalValue env expr
+        else
+            Expr.TryFinally(tryBody |> reduce env, finallyBody)
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 

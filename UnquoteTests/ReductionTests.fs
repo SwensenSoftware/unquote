@@ -643,6 +643,15 @@ let ``RecursiveLet self recursive function``() =
         "-6"
     ]
 
+[<Fact>] //issue 43
+let ``TryFinally incremental reduction of try body but finally body is never reduced ``() =
+    <@ try 2 + 3 finally 2 + 3 |> ignore @> |> decompiledReductions =? [
+        "try 2 + 3 finally (2 + 3 |> ignore)"
+        "try 5 finally (2 + 3 |> ignore)"
+        "5"
+    ]
+
+
 //[<Fact>]
 //let ``instance PropertySet`` () =    
 //    let tt = new TestType(0)
