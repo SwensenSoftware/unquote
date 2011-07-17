@@ -250,6 +250,8 @@ let decompile expr =
             applyParens OP.Try.Prec (sprintf "try %s finally %s" (decompile OP.Try.Prec tryBody) (decompile OP.Try.Prec finallyBody))
         | P.WhileLoop(condition,body) ->
             applyParens OP.While.Prec (sprintf "while %s do %s" (decompile OP.While.Prec condition) (decompile OP.Try.Prec body))
+        | P.ForIntegerRangeLoop(var,rangeStart,rangeEnd,body) ->
+            applyParens OP.For.Prec (sprintf "for %s in %s..%s do %s" var.Name (decompile 0 rangeStart) (decompile 0 rangeEnd) (decompile OP.For.Prec body))
         | _ -> 
             sprintf "%A" (expr)
     and decompileArgs prec delimiter exprs =

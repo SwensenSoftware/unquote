@@ -652,17 +652,39 @@ let ``TryFinally incremental reduction of try body but finally body is never red
     ]
 
 [<Fact>] //issue 41
-let ``WhileLoop``() =
+let ``WhileLoop reduces to unit``() =
     <@ while false do () @> |> decompiledReductions =? [
         "while false do ()"
         "()"
     ]
 
 [<Fact>] //issue 41
-let ``WhileLoop complex``() =
+let ``WhileLoop reduces to unit without any sub reductions``() =
+    <@ while 2 + 5 = 0 do 3 |> ignore @> |> decompiledReductions =? [
+        "while 2 + 5 = 0 do (3 |> ignore)" //precedence in do body is off
+        "()"
+    ]
+
+[<Fact>] //issue 41
+let ``WhileLoop as subexpression``() =
     <@ (while false do ()), 3 @> |> decompiledReductions =? [
         "((while false do ()), 3)"
         "((), 3)"
+    ]
+
+[<Fact>] //issue 41
+let ``ForIntegerRangeLoop reduces to unit``() =
+    <@ for i in 1..5 do () @> |> decompiledReductions =? [
+        "for i in 1..5 do ()"
+        "()"
+    ]
+
+[<Fact>] //issue 41
+let ``ForIntegerRangeLoop reduces range start and end but not body``() =
+    <@ for i in 1 + 2..5 + 2 do 5 |> ignore @> |> decompiledReductions =? [
+        "for i in 1 + 2..5 + 2 do (5 |> ignore)" //precedence in do body is off
+        "for i in 3..7 do (5 |> ignore)"
+        "()"
     ]
 
 //[<Fact>]

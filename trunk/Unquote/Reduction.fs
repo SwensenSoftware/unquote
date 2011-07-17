@@ -99,6 +99,11 @@ let rec reduce env (expr:Expr) =
             Expr.TryFinally(tryBody |> reduce env, finallyBody)
     | P.WhileLoop _ ->
         evalValue env expr
+    | P.ForIntegerRangeLoop(var, rangeStart, rangeEnd, body) ->
+        if [rangeStart; rangeEnd] |> allReduced then
+            evalValue env expr
+        else
+            Expr.ForIntegerRangeLoop(var,reduce env rangeStart, reduce env rangeEnd, body)
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 
