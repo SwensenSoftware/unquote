@@ -760,14 +760,18 @@ let ``TryFinally in stronger precedence context`` () =
 let ``TryFinally in weaker precedence context`` () =
     <@ let x = try 3 finally () in x @> |> decompile =? "let x = try 3 finally () in x"
 
-[<Fact>] //issue 43
+[<Fact>] //issue 41
 let ``WhileLoop`` () =
     <@ while false do () @> |> decompile =? "while false do ()"
 
-[<Fact>] //issue 43
+[<Fact>] //issue 41
 let ``WhileLoop in stronger precedence context`` () =
     <@ (while false do ()), () @> |> decompile =? "((while false do ()), ())" //we always parenthesize tuples right now
 
-[<Fact>] //issue 43
+[<Fact>] //issue 41
 let ``WhileLoop in weaker precedence context`` () =
     <@ (while false do ()); () @> |> decompile =? "while false do (); ()"
+
+[<Fact>] //issue 55
+let ``TypeTest`` () =
+    <@ for i in 2.0..3.0 do () @> |> decompile =? "let inputSequence = {2.0..3.0} in let enumerator = inputSequence.GetEnumerator() in try (while enumerator.MoveNext() do (let i = enumerator.Current in ())) finally if enumerator :? IDisposable then (enumerator :?> IDisposable).Dispose() else ()"

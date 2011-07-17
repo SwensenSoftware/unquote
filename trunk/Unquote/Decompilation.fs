@@ -88,6 +88,8 @@ let decompile expr =
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
             //but I think the sprinting of lhs it is reduced conveys type info sufficiently enough
             applyParens OP.TypeTest.Prec (sprintf "%s :? %s" (decompile OP.TypeTest.LeftPrec lhs) (ER.sprintSig (mi.GetGenericArguments().[0])))
+        | P.TypeTest(lhs, ty) -> //seems to be same as TypeTestGeneric
+            applyParens OP.TypeTest.Prec (sprintf "%s :? %s" (decompile OP.TypeTest.LeftPrec lhs) (ER.sprintSig ty))
         | EP.Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges
             sprintf "%s%s..%s%s" startToken (decompile 0 a) (decompile 0 b) endToken
         | EP.RangeStep(startToken,endToken,a,b,c) ->
