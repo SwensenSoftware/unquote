@@ -244,6 +244,8 @@ let decompile expr =
 
             //using same precedence as if, 7, for match xxx with
             applyParens OP.If.Prec (sprintf "match %s with | %s -> true | _ -> false" (decompile OP.If.Prec target) ucMatch)
+        | P.TryFinally(tryBody, finallyBody) ->
+            applyParens OP.Try.Prec (sprintf "try %s finally %s" (decompile OP.Try.Prec tryBody) (decompile OP.Try.Prec finallyBody))
         | _ -> 
             sprintf "%A" (expr)
     and decompileArgs prec delimiter exprs =
