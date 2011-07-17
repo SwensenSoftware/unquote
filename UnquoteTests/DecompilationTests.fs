@@ -775,3 +775,19 @@ let ``WhileLoop in weaker precedence context`` () =
 [<Fact>] //issue 55
 let ``TypeTest`` () =
     <@ for i in 2.0..3.0 do () @> |> decompile =? "let inputSequence = {2.0..3.0} in let enumerator = inputSequence.GetEnumerator() in try (while enumerator.MoveNext() do (let i = enumerator.Current in ())) finally if enumerator :? IDisposable then (enumerator :?> IDisposable).Dispose() else ()"
+
+[<Fact>] //issue 41
+let ``ForIntegerRangeLoop`` () =
+    <@ for i in 1..10 do () @> |> decompile =? "for i in 1..10 do ()"
+
+[<Fact>] //issue 41
+let ``ForIntegerRangeLoop with reducible start and end range`` () =
+    <@ for i in 1 + 2..10 + 2 do () @> |> decompile =? "for i in 1 + 2..10 + 2 do ()"
+
+[<Fact>] //issue 41
+let ``ForIntegerRangeLoop in stronger precedence context`` () =
+    <@ (for i in 1..10 do ()), () @> |> decompile =? "((for i in 1..10 do ()), ())" //we always parenthesize tuples right now
+
+[<Fact>] //issue 41
+let ``ForIntegerRangeLoop in weaker precedence context`` () =
+    <@ (for i in 1..10 do ()); () @> |> decompile =? "for i in 1..10 do (); ()"
