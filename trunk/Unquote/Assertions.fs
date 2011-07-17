@@ -53,13 +53,13 @@ module Internal =
     let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
     let testFailed =
-        #if INTERACTIVE
+        let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
+        if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
             fsiTestFailed
-        #else
+        else
             //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
             ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
             let outputNonFsiTestFailedMsg =
-                let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
                 let framework = 
                     seq { 
                         for a in assemblies do
@@ -88,7 +88,6 @@ module Internal =
                         (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
                         (expr |> reduceFully |> List.map decompile |> String.concat "\n")    
                 outputNonFsiTestFailedMsg msg
-        #endif
 
     type raisesResult<'a when 'a :> exn> =
         | NoException
