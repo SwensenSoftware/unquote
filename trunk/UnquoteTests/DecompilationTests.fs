@@ -747,3 +747,15 @@ let ``RecursiveLet self recursive function``() =
 let ``Bitwise operator precedence: plus has stronger precedence than shift left`` () =
     <@ 1 <<< 2 + 3 @> |> decompile =? "1 <<< 2 + 3"
     <@ (1 <<< 2) + 3 @> |> decompile =? "(1 <<< 2) + 3"
+
+[<Fact>] //issue 43
+let ``TryFinally`` () =
+    <@ try 3 finally () @> |> decompile =? "try 3 finally ()"
+
+[<Fact>] //issue 43
+let ``TryFinally in stronger precedence context`` () =
+    <@ (try 3 finally ()) + 5 @> |> decompile =? "(try 3 finally ()) + 5"
+
+[<Fact>] //issue 43
+let ``TryFinally in weaker precedence context`` () =
+    <@ let x = try 3 finally () in x @> |> decompile =? "let x = try 3 finally () in x"
