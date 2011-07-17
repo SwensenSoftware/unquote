@@ -46,6 +46,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="DynamicOperators.fs" />
     <Compile Include="Evaluation.fs" />
+    <Compile Include="Precedence.fs" />
     <Compile Include="ExtraReflection.fs" />
     <Compile Include="ExtraPatterns.fs" />
     <Compile Include="Decompilation.fs" />
