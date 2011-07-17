@@ -43,7 +43,7 @@ let evalValue env (expr:Expr) =
 //need to keep in synce with the depth of Sprinting.
 let rec isReduced = function
     //| P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name)
-    | P.Value _ | P.Lambda _ | DP.Unit | P.Quote _ | P.WhileLoop _ -> true
+    | P.Value _ | P.Lambda _ | DP.Unit | P.Quote _ -> true
     | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced -> true
     | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
     | _ -> false
@@ -97,6 +97,8 @@ let rec reduce env (expr:Expr) =
             evalValue env expr
         else
             Expr.TryFinally(tryBody |> reduce env, finallyBody)
+    | P.WhileLoop _ ->
+        evalValue env expr
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 
