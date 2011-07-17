@@ -743,4 +743,7 @@ let ``RecursiveLet self recursive function``() =
             countdown 34 10
     @> |> decompile =? "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
 
-
+[<Fact>] //issue 54
+let ``Bitwise operator precedence: plus has stronger precedence than shift left`` () =
+    <@ 1 <<< 2 + 3 @> |> decompile =? "1 <<< 2 + 3"
+    <@ (1 <<< 2) + 3 @> |> decompile =? "(1 <<< 2) + 3"
