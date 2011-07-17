@@ -759,3 +759,15 @@ let ``TryFinally in stronger precedence context`` () =
 [<Fact>] //issue 43
 let ``TryFinally in weaker precedence context`` () =
     <@ let x = try 3 finally () in x @> |> decompile =? "let x = try 3 finally () in x"
+
+[<Fact>] //issue 43
+let ``WhileLoop`` () =
+    <@ while false do () @> |> decompile =? "while false do ()"
+
+[<Fact>] //issue 43
+let ``WhileLoop in stronger precedence context`` () =
+    <@ (while false do ()), () @> |> decompile =? "((while false do ()), ())" //we always parenthesize tuples right now
+
+[<Fact>] //issue 43
+let ``WhileLoop in weaker precedence context`` () =
+    <@ (while false do ()); () @> |> decompile =? "while false do (); ()"

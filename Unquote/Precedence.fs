@@ -33,7 +33,7 @@ let When = mk(2,Right)
 let Pipe = mk(3,Left)
 let Semicolon = mk(4,Right) //Sequential
 let Let = mk(5,None)
-let Function,Fun,Match,Try = let p = mk(6,None) in p,p,p,p
+let Function,Fun,Match,Try,While = let p = mk(6,None) in p,p,p,p,p //While is not in spec, but seems at home here
 let If = mk(7,None)
 let RightArrow = mk(8,Right)
 let RefAssign = mk(9,Right)
