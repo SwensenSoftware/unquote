@@ -24,52 +24,48 @@ open Microsoft.FSharp.Metadata
 
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
+module OP = Swensen.Unquote.OperatorPrecedence
 
 open Swensen.Utils
-
-type binOpAssoc =
-    | Left
-    | Right
-    | Non
 
 let binaryOps = 
     [
     //boolean ops
-    "op_Equality", ("=", 13, Left)
-    "op_GreaterThan", (">", 13, Left)
-    "op_LessThan", ("<", 13, Left)
-    "op_GreaterThanOrEqual", (">=", 13, Left)
-    "op_LessThanOrEqual", ("<=", 13, Left)
-    "op_Inequality", ("<>", 13, Left)
+    "op_Equality", ("=", OP.EqualsOp)
+    "op_GreaterThan", (">", OP.GreaterThanOp)
+    "op_LessThan", ("<", OP.LessThanOp)
+    "op_GreaterThanOrEqual", (">=", OP.GreaterThanOp)
+    "op_LessThanOrEqual", ("<=", OP.LessThanOp)
+    "op_Inequality", ("<>", OP.LessThanOp)
     //pipe ops
-    "op_PipeRight", ("|>", 3, Left)
-    "op_PipeRight2", ("||>", 3, Left)
-    "op_PipeRight3", ("|||>", 3, Left)
-    "op_PipeLeft", ("<|", 13, Left)
-    "op_PipeLeft2", ("<||", 13, Left)
-    "op_PipeLeft3", ("<|||", 13, Left)
+    "op_PipeRight", ("|>", OP.Pipe) //might need to be OP.PipeOp
+    "op_PipeRight2", ("||>", OP.Pipe)
+    "op_PipeRight3", ("|||>", OP.Pipe)
+    "op_PipeLeft", ("<|", OP.LessThanOp)
+    "op_PipeLeft2", ("<||", OP.LessThanOp)
+    "op_PipeLeft3", ("<|||", OP.LessThanOp)
     //numeric ops
-    "op_Addition", ("+", 17, Left)
-    "op_Subtraction", ("-", 17, Left)
-    "op_Division", ("/", 18, Left)
-    "op_Multiply", ("*", 18, Left)
-    "op_Modulus", ("%", 18, Left)
-    "op_Exponentiation", ("**", 19, Left)
+    "op_Addition", ("+", OP.PlusBinaryOp)
+    "op_Subtraction", ("-", OP.MinusBinaryOp)
+    "op_Division", ("/", OP.DivideOp)
+    "op_Multiply", ("*", OP.MultiplyOp)
+    "op_Modulus", ("%", OP.ModOp)
+    "op_Exponentiation", ("**", OP.ExponentiationOp)
     //bit operators
-    "op_BitwiseAnd", ("&&&", 13, Left)
-    "op_BitwiseOr", ("|||", 13, Left)
-    "op_ExclusiveOr", ("^^^", 14, Right)
-    "op_LeftShift", ("<<<", 13, Left)
-    "op_RightShift", (">>>", 13, Left)
+    "op_BitwiseAnd", ("&&&", OP.BitwiseAnd)
+    "op_BitwiseOr", ("|||", OP.BitwiseOr)
+    "op_ExclusiveOr", ("^^^", OP.ExclusiveOr)
+    "op_LeftShift", ("<<<", OP.LeftShift)
+    "op_RightShift", (">>>", OP.RightShift)
 
     //composition
-    "op_ComposeRight", (">>", 13, Left)
-    "op_ComposeLeft", ("<<", 13, Left)
+    "op_ComposeRight", (">>", OP.GreaterThanOp)
+    "op_ComposeLeft", ("<<", OP.LessThanOp)
     //special
-    "op_Append", ("@", 17, Left) //not sure what precedence, falling back on (+)
-    "op_Concatenate", ("^", 14, Right) //ocaml style string concatentation
+    "op_Append", ("@", OP.AppendOp) //not sure what precedence, falling back on (+)
+    "op_Concatenate", ("^", OP.ConcatenateOp) //ocaml style string concatentation
     //set ref cell
-    "op_ColonEquals", (":=", 9, Right)
+    "op_ColonEquals", (":=", OP.RefAssign)
     ] |> Map.ofList
 
 //future feature, support custom ops
