@@ -246,6 +246,8 @@ let decompile expr =
             applyParens OP.If.Prec (sprintf "match %s with | %s -> true | _ -> false" (decompile OP.If.Prec target) ucMatch)
         | P.TryFinally(tryBody, finallyBody) ->
             applyParens OP.Try.Prec (sprintf "try %s finally %s" (decompile OP.Try.Prec tryBody) (decompile OP.Try.Prec finallyBody))
+        | P.WhileLoop(condition,body) ->
+            applyParens OP.While.Prec (sprintf "while %s do %s" (decompile OP.While.Prec condition) (decompile OP.Try.Prec body))
         | _ -> 
             sprintf "%A" (expr)
     and decompileArgs prec delimiter exprs =
