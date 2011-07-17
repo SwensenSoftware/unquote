@@ -5,16 +5,23 @@ type assoc =
 | Left
 | Right
 
-type OpPrec = {Prec:int; Assoc: assoc}
+type OpPrec = 
+    ///Precedence
+   {Prec:int; 
+    ///Associativity
+    Assoc: assoc}
 with
+    ///The Left precedence of this OpPrec (depends on Assoc)
     member this.LeftPrec =
         match this.Assoc with
         | Left -> this.Prec - 1
         |_ -> this.Prec
+    ///The Right precedence of this OpPrec (depends on Assoc)
     member this.RightPrec =
         match this.Assoc with
         | Right -> this.Prec - 1
         |_ -> this.Prec
+    ///Construct a new OpPrec
     static member mk(p,a) =
         {Prec=p; Assoc=a}
 
