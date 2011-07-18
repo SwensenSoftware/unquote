@@ -148,14 +148,26 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 let isListUnionCase (uci:UnionCaseInfo) = 
     uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
 
-///Test whether the given MemberInfo instance represents an F# Generic Value rather than 
-///a Unit argument function.  Assumes that the MemberInfo instance is for a .NET member taking zero arguments.
-let isGenericValue (mi:MemberInfo) =
+type fty =
+    | Function
+    | GenericValue
+
+let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     try
         let mOrV =
             FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
-            |> Seq.find (fun mOrV -> mOrV.CompiledName = mi.Name)
+            |> Seq.tryFind (fun mOrV -> mOrV.CompiledName = mi.Name)
 
-        not mOrV.Type.IsFunction
+        match mOrV with
+        | Some(mOrV) when mOrV.Type.IsFunction -> Some(Function)
+        | Some(_) -> Some(GenericValue)
+        | None -> None
     with
-    | :? System.NotSupportedException -> true //for dynamic assemblies, just assume idiomatic generic value
+    //PowerPack MetadataReader throws NotSupported Exception in dynamic assemblies like FSI
+    //and also more worrying it throws internal exceptions sometimes in other cases (should file bug!)
+    //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
+    | :? System.NotSupportedException | _  -> 
+        if FSharpType.IsModule mi.DeclaringType then
+            if mi.GetParameters().Length = 0 then Some(GenericValue)
+            else Some(Function)
+        else None

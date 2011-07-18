@@ -99,26 +99,25 @@ let decompile expr =
             applyParens OP.DynamicCast.Prec (sprintf "%s :?> %s" (decompile OP.DynamicCast.LeftPrec target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (decompile 22 target) (decompileTupledArgs args) //not sure what precedence is
+        | P.Call(None, (ER.FunctionOrGenericValue(fOrGV) as mi), args) ->
+            //if mi has generic args which can't be infered, need to decompile them.
+            //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
+            let sprintedArgs = 
+                sprintf "%s%s"
+                    (if ER.genericArgsInferable mi then "" else ER.sprintGenericArgs mi) 
+                    (if args.Length = 0 then 
+                        match fOrGV with
+                        | ER.GenericValue -> ""
+                        | ER.Function -> "()"
+                     else " " + decompileCurriedArgs args)
+            
+            let methodName = ER.sourceName mi    
+            if ER.isOpenModule mi.DeclaringType then 
+                applyParens OP.Application.Prec (sprintf "%s%s" methodName sprintedArgs)
+            else 
+                applyParens OP.Application.Prec (sprintf "%s.%s%s" (ER.sourceName mi.DeclaringType) methodName sprintedArgs)
         | P.Call(None, mi, args) -> //static call (we assume F# functions are always static calls for simplicity)
-            if FSharpType.IsModule mi.DeclaringType then //we assume static calls in modules are functions, for simplicity
-                let methodName = ER.sourceName mi
-                                
-                //if mi has generic args which can't be infered, need to decompile them.
-                //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
-                let sprintedArgs = 
-                    sprintf "%s%s"
-                        (if ER.genericArgsInferable mi then "" else ER.sprintGenericArgs mi) 
-                        (if args.Length = 0 then 
-                            if ER.isGenericValue(mi) then ""
-                            else "()"
-                         else " " + decompileCurriedArgs args)
-                
-                if ER.isOpenModule mi.DeclaringType then 
-                    applyParens OP.Application.Prec (sprintf "%s%s" methodName sprintedArgs)
-                else 
-                    applyParens OP.Application.Prec (sprintf "%s.%s%s" (ER.sourceName mi.DeclaringType) methodName sprintedArgs)
-            else //assume static calls in non-modules are members for simplicity, also CompiledName same as SourceName
-                applyParens OP.Application.Prec (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
+            applyParens OP.Application.Prec (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->

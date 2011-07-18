@@ -25,6 +25,7 @@ open Microsoft.FSharp.Metadata
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
 module OP = Swensen.Unquote.OperatorPrecedence
+//module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
 
@@ -195,3 +196,6 @@ let (|RangeStep|_|) x =
     | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
         Some("[|", "|]", a,b,c)
     | _ -> None
+
+//let (|FunctionCall|_|) = function
+//    | Call(target, mi, args) when ER.isFunction mi -> 
