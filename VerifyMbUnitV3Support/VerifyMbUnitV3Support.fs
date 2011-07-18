@@ -14,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-module VerifyNunitSupport
-open Swensen.Unquote
-open NUnit
-open NUnit.Framework
+module VerifyMbUnitV3Support
 
+open Swensen.Unquote
+open MbUnit.Framework
+
+
+//N.B. due to MbUnits unique implementation, we can't produce clean stack traces while using it's own assertion
+//methods dynamically, so by "support" we mean that we have verified that using the generic support is best for MbUnit.
 [<Test>]
-let ``test nunit support, this should fail with clean stack trace`` () =
+let ``test mbunit support, this should fail with clean stack trace`` () =
     test <@ 22 + 2 = 5 @>

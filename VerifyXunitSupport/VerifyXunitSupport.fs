@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-module Test.Swensen.Unquote.VerifyXunitSupport
+module VerifyXunitSupport
 open Swensen.Unquote
 open Xunit
 
