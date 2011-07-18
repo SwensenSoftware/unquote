@@ -150,14 +150,12 @@ let isListUnionCase (uci:UnionCaseInfo) =
 
 ///Test whether the given MemberInfo instance represents an F# Generic Value rather than 
 ///a Unit argument function.  Assumes that the MemberInfo instance is for a .NET member taking zero arguments.
-let isGenericValue =
-    memoize //performance testing shows about 10% performance increase in SourceOpTests.``Call distinguishes between generic value Call and unit function Call`` using memoization 
-        (fun (mi:MemberInfo) ->
-            try
-                let mOrV =
-                    FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
-                    |> Seq.find (fun mOrV -> mOrV.CompiledName = mi.Name)
+let isGenericValue (mi:MemberInfo) =
+    try
+        let mOrV =
+            FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
+            |> Seq.find (fun mOrV -> mOrV.CompiledName = mi.Name)
 
-                not mOrV.Type.IsFunction
-            with
-            | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value
+        not mOrV.Type.IsFunction
+    with
+    | :? System.NotSupportedException -> true //for dynamic assemblies, just assume idiomatic generic value
