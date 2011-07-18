@@ -13,6 +13,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils", "Utils\Utils.fsproj
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnitV3Support", "VerifyMbUnitV3Support\VerifyMbUnitV3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,15 @@ Global
 		{110FE67E-4603-4905-8BA0-8B043AAC2677}.Release|Mixed Platforms.Build.0 = Release|x86
 		{110FE67E-4603-4905-8BA0-8B043AAC2677}.Release|x86.ActiveCfg = Release|x86
 		{110FE67E-4603-4905-8BA0-8B043AAC2677}.Release|x86.Build.0 = Release|x86
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
