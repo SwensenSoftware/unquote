@@ -48,7 +48,7 @@ let decompile expr =
             applyParens OP.Application.Prec (sprintf "%s %s" (decompile OP.Application.LeftPrec curry) (decompile OP.Application.RightPrec last))
         //issue 25 and issue 23: the following "re-sugars" both partially applied and unapplied lambda call expressions
         //must come before Lambdas
-        | EP.IncompleteLambdaCall(mi, args) -> //assume lambdas are only part of modules.
+        | EP.IncompleteLambdaCall(target, mi, args) -> //assume lambdas are only part of modules.
             match EP.binaryOps |> Map.tryFind mi.Name with
                 | Some(symbol,_) -> 
                     let sprintedSymbol = sprintf "(%s)" symbol
@@ -62,7 +62,12 @@ let decompile expr =
                     | None -> 
                         let sprintFunction (mi:MethodInfo) =
                             if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
-                            else sprintf "%s.%s" (ER.sourceName mi.DeclaringType) (ER.sourceName mi)
+                            else
+                                let decompiledTarget =
+                                    match target with
+                                    | Some(target) -> (decompile 22 target) //instance
+                                    | None -> ER.sourceName mi.DeclaringType 
+                                sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
                         if args.Length = 0 then sprintFunction mi //not sure what precedence should be
                         else applyParens OP.Application.Prec (sprintf "%s %s" (sprintFunction mi) (decompileCurriedArgs args))
         | DP.Lambdas(vars, body) -> //addresses issue 27
@@ -96,7 +101,7 @@ let decompile expr =
             applyParens OP.DynamicCast.Prec (sprintf "%s :?> %s" (decompile OP.DynamicCast.LeftPrec target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (decompile 22 target) (decompileTupledArgs args) //not sure what precedence is
-        | P.Call(None, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //static call representing an F# function or generic value
+        | P.Call(target, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //instance or static call representing an F# function or generic value
             //if mi has generic args which can't be infered, need to sprint them.
             //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
             let sprintedArgs = 
@@ -112,7 +117,12 @@ let decompile expr =
             if ER.isOpenModule mi.DeclaringType then 
                 applyParens OP.Application.Prec (sprintf "%s%s" methodName sprintedArgs)
             else 
-                applyParens OP.Application.Prec (sprintf "%s.%s%s" (ER.sourceName mi.DeclaringType) methodName sprintedArgs)
+                let decompiledTarget =
+                    match target with
+                    | Some(target) -> (decompile 22 target) //instance
+                    | None -> ER.sourceName mi.DeclaringType
+
+                applyParens OP.Application.Prec (sprintf "%s.%s%s" decompiledTarget methodName sprintedArgs)
         | P.Call(target, mi, args) -> //a "normal" .net instance or static call
             let decompiledTarget =
                 match target with
