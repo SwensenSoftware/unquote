@@ -155,10 +155,10 @@ let (|IncompleteLambdaCall|_|) x =
         let varsList, bindingList, final = gatherLetBindings [] [] x
 
         match final with
-        | DP.Lambdas(lambdaVarsList, P.Call(None, mi, callArgs)) 
+        | DP.Lambdas(lambdaVarsList, P.Call(target, mi, callArgs)) 
             //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args **    
             when List.equalsWith isVarOfExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
-                Some(mi, bindingList)
+                Some(target, mi, bindingList)
         | _ -> None
     | _ -> None
 

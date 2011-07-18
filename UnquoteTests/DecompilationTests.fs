@@ -791,3 +791,16 @@ let ``ForIntegerRangeLoop in stronger precedence context`` () =
 [<Fact>] //issue 41
 let ``ForIntegerRangeLoop in weaker precedence context`` () =
     <@ (for i in 1..10 do ()); () @> |> decompile =? "for i in 1..10 do (); ()"
+
+type TypeWithFunctionMembers() =
+    member this.f x y = x + y
+    static member g x y = x + y
+
+[<Fact>] //issue 58
+let ``static member function call`` () =
+    <@ TypeWithFunctionMembers.g 1 2 @> |> decompile =? "TypeWithFunctionMembers.g 1 2"
+
+let twfm = TypeWithFunctionMembers()
+[<Fact>] //issue 58
+let ``instance member function call`` () =
+    <@ twfm.f 1 2 @> |> decompile =? "twfm.f 1 2"
