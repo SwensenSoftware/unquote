@@ -148,7 +148,7 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 let isListUnionCase (uci:UnionCaseInfo) = 
     uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
 
-type fty =
+type fsharpValueType =
     | Function
     | GenericValue
 

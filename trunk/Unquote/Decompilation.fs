@@ -80,9 +80,6 @@ let decompile expr =
             applyParens prec.Prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
         | EP.UnaryPrefixCall(symbol, arg) -> //must come before Call pattern
             applyParens OP.PrefixOps.Prec (sprintf "%s%s" symbol (decompile OP.PrefixOps.Prec arg))
-        | P.Call(Some(target), mi, args) -> //instance call
-            //just assume instance members always have tupled args
-            applyParens OP.Application.Prec (sprintf "%s.%s%s(%s)" (decompile 22 target) mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
             //thinking about making decompile depend on Reduce.isReduced: 
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
@@ -99,8 +96,8 @@ let decompile expr =
             applyParens OP.DynamicCast.Prec (sprintf "%s :?> %s" (decompile OP.DynamicCast.LeftPrec target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
             sprintf "%s.[%s]" (decompile 22 target) (decompileTupledArgs args) //not sure what precedence is
-        | P.Call(None, (ER.FunctionOrGenericValue(fOrGV) as mi), args) ->
-            //if mi has generic args which can't be infered, need to decompile them.
+        | P.Call(None, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //static call representing an F# function or generic value
+            //if mi has generic args which can't be infered, need to sprint them.
             //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
             let sprintedArgs = 
                 sprintf "%s%s"
@@ -116,8 +113,12 @@ let decompile expr =
                 applyParens OP.Application.Prec (sprintf "%s%s" methodName sprintedArgs)
             else 
                 applyParens OP.Application.Prec (sprintf "%s.%s%s" (ER.sourceName mi.DeclaringType) methodName sprintedArgs)
-        | P.Call(None, mi, args) -> //static call (we assume F# functions are always static calls for simplicity)
-            applyParens OP.Application.Prec (sprintf "%s.%s%s(%s)" mi.DeclaringType.Name mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
+        | P.Call(target, mi, args) -> //a "normal" .net instance or static call
+            let decompiledTarget =
+                match target with
+                | Some(target) -> (decompile 22 target) //instance
+                | None -> mi.DeclaringType.Name
+            applyParens OP.Application.Prec (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
