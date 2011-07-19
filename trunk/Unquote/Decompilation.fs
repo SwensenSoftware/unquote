@@ -235,6 +235,8 @@ let decompile expr =
             applyParens OP.And.Prec (sprintf "%s && %s" (decompile 11 a) (decompile 12 b))
         | DP.OrElse(a,b) -> //must come before if then else
             applyParens OP.Or.Prec (sprintf "%s || %s" (decompile 10 a) (decompile 11 b))
+        | P.IfThenElse(a,b, DP.Unit) -> //syntax doesn't require else branch when it's nothing but unit
+            applyParens OP.If.Prec (sprintf "if %s then %s" (decompile OP.If.Prec a) (decompile OP.If.Prec b))
         | P.IfThenElse(a,b,c) ->
             applyParens OP.If.Prec (sprintf "if %s then %s else %s" (decompile OP.If.Prec a) (decompile OP.If.Prec b) (decompile OP.If.Prec c))
         //we can't reduce any XXXSet expressions due to limitations of Expr.Eval()

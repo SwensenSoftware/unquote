@@ -774,7 +774,7 @@ let ``WhileLoop in weaker precedence context`` () =
 
 [<Fact>] //issue 55
 let ``TypeTest`` () =
-    <@ for i in 2.0..3.0 do () @> |> decompile =? "let inputSequence = {2.0..3.0} in let enumerator = inputSequence.GetEnumerator() in try (while enumerator.MoveNext() do (let i = enumerator.Current in ())) finally if enumerator :? IDisposable then (enumerator :?> IDisposable).Dispose() else ()"
+    <@ for i in 2.0..3.0 do () @> |> decompile =? "let inputSequence = {2.0..3.0} in let enumerator = inputSequence.GetEnumerator() in try (while enumerator.MoveNext() do (let i = enumerator.Current in ())) finally if enumerator :? IDisposable then (enumerator :?> IDisposable).Dispose()"
 
 [<Fact>] //issue 41
 let ``ForIntegerRangeLoop`` () =
@@ -804,3 +804,11 @@ let twfm = TypeWithFunctionMembers()
 [<Fact>] //issue 58
 let ``instance member function call`` () =
     <@ twfm.f 1 2 @> |> decompile =? "twfm.f 1 2"
+
+[<Fact>] //issue 59
+let ``IfThenElse else branch omitted when simple Unit``() =
+    <@ if true then () @> |> decompile =? "if true then ()"
+
+[<Fact>] //issue 59
+let ``IfThenElse with omitted else branch in higher precedence context``() =
+    <@ (if true then ()), () @> |> decompile =? "((if true then ()), ())"
