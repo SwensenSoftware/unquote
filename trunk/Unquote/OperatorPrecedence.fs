@@ -20,27 +20,27 @@ type assoc =
 | Left
 | Right
 
-type OpPrec = 
+type OperatorPrecedence = 
     ///Precedence
-   {Prec:int; 
+   {Precedence:int; 
     ///Associativity
-    Assoc: assoc}
+    Associativity: assoc}
 with
-    ///The Left precedence of this OpPrec (depends on Assoc)
-    member this.LeftPrec =
-        match this.Assoc with
-        | Left -> this.Prec - 1
-        |_ -> this.Prec
-    ///The Right precedence of this OpPrec (depends on Assoc)
-    member this.RightPrec =
-        match this.Assoc with
-        | Right -> this.Prec - 1
-        |_ -> this.Prec
+    ///The precedence context to apply to expressions on the left hand side of an expresion with this precedence (depends on Associativity)
+    member this.LeftContext =
+        match this.Associativity with
+        | Left -> this.Precedence - 1
+        |_ -> this.Precedence
+    ///The precedence context to apply to expressions on the right hand side of an expresion with this precedence (depends on Associativity)
+    member this.RightContext =
+        match this.Associativity with
+        | Right -> this.Precedence - 1
+        |_ -> this.Precedence
     ///Construct a new OpPrec
     static member mk(p,a) =
-        {Prec=p; Assoc=a}
+        {Precedence=p; Associativity=a}
 
-let private mk = OpPrec.mk
+let private mk = OperatorPrecedence.mk
 
 //"Op" suffix indicates a legitimate customizable op
 let As = mk(1,Right)
