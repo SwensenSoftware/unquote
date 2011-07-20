@@ -3,6 +3,23 @@
 
 = Release Notes =
 
+== v2.0.2, 7/19/11 ==
+
+Lots of added features and bug fixes including support for several more kinds of expressions.
+
+  * Issue 32 Type.FSharpName bug: generic typedef args should be printed with leading tick
+  * Issue 41 Support WhileLoop expressions
+  * Issue 42 Support ForIntegerRangeLoop expressions
+  * Issue 43 Support TryFinally expressions
+  * Issue 51 Support LetRecursive expressions
+  * Issue 53 Evaluation and Reduction with environment should use a Map instead of a List to represent the Environment
+  * Issue 54 Update precedence for bitwise operators
+  * Issue 55 Support TypeTest expressions
+  * Issue 56 Custom FSI test failed output is broken
+  * Issue 57 Create and use custom "AssertionFailureException" for generic unit test framework support
+  * Issue 58 Support functions which are static or instance members of a type
+  * Issue 59 Omit else branch of IfThenElse expressions when it's body is only a simple tuple
+
 == v2.0.1, 7/11/11 ==
 
 Service release fixing bugs and tweaking API for new v2.0.0 features.
