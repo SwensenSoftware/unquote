@@ -25,7 +25,8 @@ The `Swensen.Unquote` namespace contains three `AutoOpen` modules: `Assertions`,
 The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and the `xx?` series of binary infix operators. All of these operators can be used within a unit test enabled project or FSI.
 
 Unquote chooses its output source as follows
-  * if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
+  * if loaded in FSI then print to the console
+  * else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
   * else throw a `System.Exception` with a message
 
 The following is a reference of the functions available and some examples:
@@ -142,12 +143,12 @@ val it : bool = true
 val it : unit = ()
 }}}
 
-The following are functions which accept a variable environment for processing synthetic expressions with unbound variables (N.B. these functions should be considered "experimental" and subject to breaking changes):
+The following are functions which accept a variable environment for processing synthetic expressions with unbound variables:
 
-  * `val evalWith : Quotations.Expr<'a> -> (string * obj ref) list -> 'a`
-  * `val evalRawWith : Quotations.Expr -> (string * obj ref) list -> obj`
-  * `val reduceWith : Quotations.Expr -> (string * obj ref) list -> Quotations.Expr`
-  * `val reduceFullyWith : Quotations.Expr -> (string * obj ref) list -> Quotations.Expr list`
+  * `val evalWith : Map<string,obj ref> -> Quotations.Expr<'a> -> 'a`
+  * `val evalRawWith : Map<string,obj ref> -> Quotations.Expr<'a> -> obj`
+  * `val reduceWith : Map<string,obj ref> -> Quotations.Expr<'a> -> Quotations.Expr`
+  * `val reduceFullyWith : Map<string,obj ref> -> Quotations.Expr<'a> -> Quotations.Expr list`
 
 === Extensions ===
 
@@ -172,4 +173,6 @@ val it : string = "int * float * string"
 val it : string = "int * (bool * float) * string"
 > typeof<int -> (list<(int * (int -> string))[]> * string[,,])>.FSharpName;;
 val it : string = "int -> list<(int * (int -> string))[]> * string[,,]"
+> typedefof<int -> int>.FSharpName;;
+val it : string = "'T -> 'TResult"
 }}}
