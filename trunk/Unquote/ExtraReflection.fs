@@ -55,7 +55,7 @@ let applyParensForPrecInContext context prec s = if prec > context then s else s
 ///Sprint the F#-style type signature of the given Type.  Handles known type abbreviations,
 ///simple types, arbitrarily complex generic types (multiple parameters and nesting),
 ///lambdas, tuples, and arrays.
-let sprintSig =
+let sprintSig (outerTy:Type) =
     //list of F# type abbrs: http://207.46.16.248/en-us/library/ee353649.aspx
     ///Get the type abbr name or short name from the "clean" name
     let displayName = function
@@ -93,19 +93,19 @@ let sprintSig =
         | CompiledMatch @"[\.\+]?([^\.\+]*)$" [_;nameMatch] -> nameMatch.Value //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
-    let rec sprintSig context (t:Type) =
+    let rec sprintSig context (ty:Type) =
         let applyParens = applyParensForPrecInContext context
         let cleanName, arrSig = 
             //if is generic type, then doesn't have FullName, need to use just Name
-            match (if String.IsNullOrEmpty(t.FullName) then t.Name else t.FullName) with
+            match (if String.IsNullOrEmpty(ty.FullName) then ty.Name else ty.FullName) with
             | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrSigMatch] -> //long name type encoding left of `, array encoding at end
                 cleanNameMatch.Value, arrSigMatch.Value
             | _ -> 
-                failwith ("failed to parse type name: " + t.FullName)
+                failwith ("failed to parse type name: " + ty.FullName)
 
-        match t.GetGenericArguments() with
-        | args when args.Length = 0 -> 
-            (displayName cleanName) + arrSig
+        match ty.GetGenericArguments() with
+        | args when args.Length = 0 ->
+            (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
         | args when cleanName = "System.Tuple" ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
         | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
@@ -113,7 +113,7 @@ let sprintSig =
         | args ->
             sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
     
-    sprintSig 0
+    sprintSig 0 outerTy
 
 //If the method is not generic, returns true. If the function is generic,
 //the current algorithm tests whether the type parameters are a subset of those
