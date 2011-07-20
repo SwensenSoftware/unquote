@@ -15,7 +15,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("Unquote")>]
-[<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("UnquoteTests")>]
+[<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("Test.Unquote")>]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

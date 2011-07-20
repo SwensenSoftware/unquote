@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6e3f6fdb-a45f-4d07-8735-1cccd10a7dba}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>VerifyNunitSupport</RootNamespace>
     <AssemblyName>Unquote.VerifyNunitSupport</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>

@@ -522,13 +522,13 @@ open Swensen.Unquote
 let ``typed synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr<int>) = expr.Eval(env)
     let synExpr:Expr<int> = Expr.Var(new Var("x", typeof<int>)) |> Expr.Cast
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", 2 |> box |> ref)])) = 2 @>
+    <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = 2 @>
 
 [<Fact>]
 let ``untyped synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr) = expr.Eval(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", 2 |> box |> ref)])) = box 2 @>
+    <@ synExpr |> (evalWithEnv [("x", 2 |> box |> ref)]) = box 2 @>
 
 //let (|Unbox|_|) x y = 
 //    if y |> unbox = x then
@@ -560,35 +560,6 @@ let ``typed Quote`` () =
 [<Fact>]
 let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
-
-
-[<Fact>]
-let ``LetRecursive mutually recursive functions`` () =
-    testEval
-        <@    
-            let rec even x =
-                if x = 0 then true
-                else odd (x-1)
-            and odd x =
-                if x = 0 then false
-                else even (x-1)
-            in
-                even 19, odd 20
-        @>
-        (false, false)
-
-[<Fact>]
-let ``LetRecursive self recursive function`` () =    
-    testEval
-        <@ 
-            let rec fib n =
-                match n with
-                | 1 | 2 -> 1
-                | n -> fib(n-1) + fib(n-2)
-            in
-                fib 9
-        @>
-        34
 
 //Swensen.Unquote.Quotations.Assertions.Operators
 //Swensen.Unquote.Quotations.Operators

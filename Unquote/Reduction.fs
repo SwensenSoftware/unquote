@@ -44,7 +44,7 @@ let evalValue env (expr:Expr) =
 let rec isReduced = function
     //| P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name)
     | P.Value _ | P.Lambda _ | DP.Unit | P.Quote _ -> true
-    | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,_,args) when args |> allReduced -> true //might need a separate case for instance incompletelambda calls so that the instance must be reduced too
+    | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,args) when args |> allReduced -> true
     | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
     | _ -> false
 and allReduced exprs = 
@@ -92,18 +92,6 @@ let rec reduce env (expr:Expr) =
             if Evaluation.eval env a :?> bool then b
             else c
         else Expr.IfThenElse(reduce env a, b, c)
-    | P.TryFinally(tryBody,finallyBody) ->
-        if tryBody |> isReduced then
-            evalValue env expr
-        else
-            Expr.TryFinally(tryBody |> reduce env, finallyBody)
-    | P.WhileLoop _ ->
-        evalValue env expr
-    | P.ForIntegerRangeLoop(var, rangeStart, rangeEnd, body) ->
-        if [rangeStart; rangeEnd] |> allReduced then
-            evalValue env expr
-        else
-            Expr.ForIntegerRangeLoop(var,reduce env rangeStart, reduce env rangeEnd, body)
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 

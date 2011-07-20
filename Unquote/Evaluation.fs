@@ -110,19 +110,25 @@ let (|CheckedUnaryOp|_|) = function
         | false, _ -> None
     | _ -> None
 
+let findInEnv name env =
+    env |> List.find (fun (curName, _) -> curName = name) |> snd
+
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         failwithf "Quotation pattern %s not supported: expression = %A" name expr
 
+    let inline failwithOperatorLookupFailed name (expr:Expr) =
+        failwithf "Operator %s is a dynamic invocation operator which should be supported but lookup failed: expression = %A" name expr
+        
     let rec eval env expr =
         match expr with
         | P.Let(var, assignment, body) ->
-            let env = env |> Map.add var.Name (eval env assignment |> ref)
+            let env = (var.Name, eval env assignment |> ref)::env
             eval env body //ref type for future VarSet for mutable let bindings
         | P.Var(var) ->
-            env |> Map.find var.Name |> (!)
+            findInEnv var.Name env |> (!)
         | P.VarSet(var, assignment) ->
-            (env |> Map.find var.Name) := eval env assignment
+            (findInEnv var.Name env) := eval env assignment
             box ()
         | P.Sequential(lhs, rhs) ->
             eval env lhs |> ignore
@@ -173,7 +179,7 @@ let eval env expr =
             let ifrom = eval env ifrom :?> int
             let ito = eval env ito :?> int
             for i in ifrom..ito do
-                let env = env |> Map.add var.Name (i |> box |> ref)
+                let env = (var.Name, ref (box i))::env
                 eval env body |> ignore
             box ()
         | P.UnionCaseTest(target, uci) ->
@@ -188,7 +194,7 @@ let eval env expr =
                     match e with
                     | :? TargetInvocationException when e.InnerException <> null -> e.InnerException //thrown from within reflective call (target of invocation exception)
                     | _ -> e //thrown from eval code itself
-                let env = env |> Map.add catchVar.Name (e |> box |> ref)
+                let env = (catchVar.Name, ref (box e))::env
                 eval env catchBody
         | P.TryFinally(tryBlock, finallyBlock) ->
             try
@@ -199,7 +205,7 @@ let eval env expr =
             let ty = FSharpType.MakeFunctionType(var.Type, body.Type)
             let impl : obj -> obj = 
                 fun arg ->
-                    let env = env |> Map.add var.Name (ref arg)
+                    let env = (var.Name, ref arg)::env
                     eval env body
             FSharpValue.MakeFunction(ty, impl)
         | P.Application(lambda, arg) ->
@@ -222,22 +228,14 @@ let eval env expr =
             box generic
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
-        | P.LetRecursive(bindings, finalBody) -> 
-            let rec init env = function
-                | (var:Var, _)::rest -> init (env |> Map.add var.Name (ref null)) rest
-                | [] -> env
-            let env = init env bindings
-                
-            for (var, body) in bindings do
-                (env |> Map.find var.Name) := eval env body
-
-            eval env finalBody                       
         | P.AddressOf _ -> 
             failwithPatternNotSupported "AddressOf" expr
         | P.AddressSet _ -> 
             failwithPatternNotSupported "AddressSet" expr
         | P.NewDelegate _ -> 
             failwithPatternNotSupported "NewDelegate" expr
+        | P.LetRecursive _ -> 
+            failwithPatternNotSupported "LetRecursive" expr
         | _ -> 
             failwithf "this expression should not be possible: %A" expr 
     and evalAll env exprs =
@@ -249,7 +247,8 @@ let eval env expr =
             match eval env instance with
             | null -> raise (System.NullReferenceException()) //otherwise will get misleading System.Reflection.TargetException: Non-static method requires a target.
             | result -> result
-
+//    and (|Eval|) env expr =
+//        eval env expr
 #if DEBUG 
     eval env expr
 #else

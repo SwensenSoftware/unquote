@@ -55,7 +55,7 @@ let applyParensForPrecInContext context prec s = if prec > context then s else s
 ///Sprint the F#-style type signature of the given Type.  Handles known type abbreviations,
 ///simple types, arbitrarily complex generic types (multiple parameters and nesting),
 ///lambdas, tuples, and arrays.
-let sprintSig (outerTy:Type) =
+let sprintSig =
     //list of F# type abbrs: http://207.46.16.248/en-us/library/ee353649.aspx
     ///Get the type abbr name or short name from the "clean" name
     let displayName = function
@@ -93,19 +93,19 @@ let sprintSig (outerTy:Type) =
         | CompiledMatch @"[\.\+]?([^\.\+]*)$" [_;nameMatch] -> nameMatch.Value //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
-    let rec sprintSig context (ty:Type) =
+    let rec sprintSig context (t:Type) =
         let applyParens = applyParensForPrecInContext context
         let cleanName, arrSig = 
             //if is generic type, then doesn't have FullName, need to use just Name
-            match (if String.IsNullOrEmpty(ty.FullName) then ty.Name else ty.FullName) with
+            match (if String.IsNullOrEmpty(t.FullName) then t.Name else t.FullName) with
             | CompiledMatch @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [_;cleanNameMatch;arrSigMatch] -> //long name type encoding left of `, array encoding at end
                 cleanNameMatch.Value, arrSigMatch.Value
             | _ -> 
-                failwith ("failed to parse type name: " + ty.FullName)
+                failwith ("failed to parse type name: " + t.FullName)
 
-        match ty.GetGenericArguments() with
-        | args when args.Length = 0 ->
-            (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+        match t.GetGenericArguments() with
+        | args when args.Length = 0 -> 
+            (displayName cleanName) + arrSig
         | args when cleanName = "System.Tuple" ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
         | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
@@ -113,7 +113,7 @@ let sprintSig (outerTy:Type) =
         | args ->
             sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
     
-    sprintSig 0 outerTy
+    sprintSig 0
 
 //If the method is not generic, returns true. If the function is generic,
 //the current algorithm tests whether the type parameters are a subset of those
@@ -148,26 +148,16 @@ let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
 let isListUnionCase (uci:UnionCaseInfo) = 
     uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
 
-type fsharpValueType =
-    | Function
-    | GenericValue
+///Test whether the given MemberInfo instance represents an F# Generic Value rather than 
+///a Unit argument function.  Assumes that the MemberInfo instance is for a .NET member taking zero arguments.
+let isGenericValue =
+    memoize //performance testing shows about 10% performance increase in SourceOpTests.``Call distinguishes between generic value Call and unit function Call`` using memoization 
+        (fun (mi:MemberInfo) ->
+            try
+                let mOrV =
+                    FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
+                    |> Seq.find (fun mOrV -> mOrV.CompiledName = mi.Name)
 
-let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
-    try
-        let mOrV =
-            FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
-            |> Seq.tryFind (fun mOrV -> mOrV.CompiledName = mi.Name)
-
-        match mOrV with
-        | Some(mOrV) when mOrV.Type.IsFunction -> Some(Function)
-        | Some(_) -> Some(GenericValue)
-        | None -> None
-    with
-    //PowerPack MetadataReader throws NotSupported Exception in dynamic assemblies like FSI
-    //and also more worrying it throws internal exceptions sometimes in other cases (should file bug!)
-    //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
-    | :? System.NotSupportedException | _  -> 
-        if FSharpType.IsModule mi.DeclaringType then
-            if mi.GetParameters().Length = 0 then Some(GenericValue)
-            else Some(Function)
-        else None
+                not mOrV.Type.IsFunction
+            with
+            | :? System.NotSupportedException -> true) //for dynamic assemblies, just assume idiomatic generic value

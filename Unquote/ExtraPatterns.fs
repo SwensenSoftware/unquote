@@ -24,49 +24,52 @@ open Microsoft.FSharp.Metadata
 
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
-module OP = Swensen.Unquote.OperatorPrecedence
-//module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
+
+type binOpAssoc =
+    | Left
+    | Right
+    | Non
 
 let binaryOps = 
     [
     //boolean ops
-    "op_Equality", ("=", OP.EqualsOp)
-    "op_GreaterThan", (">", OP.GreaterThanOp)
-    "op_LessThan", ("<", OP.LessThanOp)
-    "op_GreaterThanOrEqual", (">=", OP.GreaterThanOp)
-    "op_LessThanOrEqual", ("<=", OP.LessThanOp)
-    "op_Inequality", ("<>", OP.LessThanOp)
+    "op_Equality", ("=", 13, Left)
+    "op_GreaterThan", (">", 13, Left)
+    "op_LessThan", ("<", 13, Left)
+    "op_GreaterThanOrEqual", (">=", 13, Left)
+    "op_LessThanOrEqual", ("<=", 13, Left)
+    "op_Inequality", ("<>", 13, Left)
     //pipe ops
-    "op_PipeRight", ("|>", OP.Pipe) //might need to be OP.PipeOp
-    "op_PipeRight2", ("||>", OP.Pipe)
-    "op_PipeRight3", ("|||>", OP.Pipe)
-    "op_PipeLeft", ("<|", OP.LessThanOp)
-    "op_PipeLeft2", ("<||", OP.LessThanOp)
-    "op_PipeLeft3", ("<|||", OP.LessThanOp)
+    "op_PipeRight", ("|>", 3, Left)
+    "op_PipeRight2", ("||>", 3, Left)
+    "op_PipeRight3", ("|||>", 3, Left)
+    "op_PipeLeft", ("<|", 13, Left)
+    "op_PipeLeft2", ("<||", 13, Left)
+    "op_PipeLeft3", ("<|||", 13, Left)
     //numeric ops
-    "op_Addition", ("+", OP.PlusBinaryOp)
-    "op_Subtraction", ("-", OP.MinusBinaryOp)
-    "op_Division", ("/", OP.DivideOp)
-    "op_Multiply", ("*", OP.MultiplyOp)
-    "op_Modulus", ("%", OP.ModOp)
-    "op_Exponentiation", ("**", OP.ExponentiationOp)
+    "op_Addition", ("+", 17, Left)
+    "op_Subtraction", ("-", 17, Left)
+    "op_Division", ("/", 18, Left)
+    "op_Multiply", ("*", 18, Left)
+    "op_Modulus", ("%", 18, Left)
+    "op_Exponentiation", ("**", 19, Left)
     //bit operators
-    "op_BitwiseAnd", ("&&&", OP.BitwiseAnd)
-    "op_BitwiseOr", ("|||", OP.BitwiseOr)
-    "op_ExclusiveOr", ("^^^", OP.ExclusiveOr)
-    "op_LeftShift", ("<<<", OP.LeftShift)
-    "op_RightShift", (">>>", OP.RightShift)
+    "op_BitwiseAnd", ("&&&", 13, Left)
+    "op_BitwiseOr", ("|||", 13, Left)
+    "op_ExclusiveOr", ("^^^", 14, Right)
+    "op_LeftShift", ("<<<", 13, Left)
+    "op_RightShift", (">>>", 13, Left)
 
     //composition
-    "op_ComposeRight", (">>", OP.GreaterThanOp)
-    "op_ComposeLeft", ("<<", OP.LessThanOp)
+    "op_ComposeRight", (">>", 13, Left)
+    "op_ComposeLeft", ("<<", 13, Left)
     //special
-    "op_Append", ("@", OP.AppendOp) //not sure what precedence, falling back on (+)
-    "op_Concatenate", ("^", OP.ConcatenateOp) //ocaml style string concatentation
+    "op_Append", ("@", 17, Left) //not sure what precedence, falling back on (+)
+    "op_Concatenate", ("^", 14, Right) //ocaml style string concatentation
     //set ref cell
-    "op_ColonEquals", (":=", OP.RefAssign)
+    "op_ColonEquals", (":=", 9, Right)
     ] |> Map.ofList
 
 //future feature, support custom ops
@@ -155,10 +158,10 @@ let (|IncompleteLambdaCall|_|) x =
         let varsList, bindingList, final = gatherLetBindings [] [] x
 
         match final with
-        | DP.Lambdas(lambdaVarsList, P.Call(target, mi, callArgs)) 
+        | DP.Lambdas(lambdaVarsList, P.Call(None, mi, callArgs)) 
             //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args **    
             when List.equalsWith isVarOfExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
-                Some(target, mi, bindingList)
+                Some(mi, bindingList)
         | _ -> None
     | _ -> None
 
@@ -196,6 +199,3 @@ let (|RangeStep|_|) x =
     | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
         Some("[|", "|]", a,b,c)
     | _ -> None
-
-//let (|FunctionCall|_|) = function
-//    | Call(target, mi, args) when ER.isFunction mi -> 

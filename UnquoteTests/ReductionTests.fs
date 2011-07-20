@@ -420,13 +420,13 @@ open Swensen.Unquote
 let ``synthetic full reduction`` () =
     let reduceFullyWithEnv env (expr:Expr) = expr.ReduceFully(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> reduceFullyWithEnv (Map.ofList [("x", 2 |> box |> ref)]) |> List.map decompile = ["x"; "2"] @>
+    <@ synExpr |> reduceFullyWithEnv [("x", 2 |> box |> ref)] |> List.map decompile = ["x"; "2"] @>
 
 [<Fact>]
 let ``synthetic single reduction`` () =
     let reduceWithEnv env (expr:Expr) = expr.Reduce(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> reduceWithEnv (Map.ofList [("x", 2 |> box |> ref)]) |> decompile = "2" @>
+    <@ synExpr |> reduceWithEnv [("x", 2 |> box |> ref)] |> decompile = "2" @>
 
 [<Fact>]
 let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =
@@ -612,79 +612,6 @@ let ``instance PropertySet`` () =
         "st2.X"
         "{ x = 1 }.X"
         "1"
-    ]
-
-[<Fact>] //issue 51
-let ``RecursiveLet mutually recursive funtions``() =
-    <@    
-        let rec even x =
-            if x = 0 then true
-            else odd (x-1)
-        and odd x =
-            if x = 0 then false
-            else even (x-1)
-        in
-            even 19, odd 20
-    @> |> decompiledReductions =? [
-        "let rec even = fun x -> x = 0 || odd (x - 1) and odd = fun x -> if x = 0 then false else even (x - 1) in (even 19, odd 20)"
-        "(false, false)"
-    ]
-
-[<Fact>] //issue 51
-let ``RecursiveLet self recursive function``() =
-    <@    
-        let rec countdown i steps  =
-            if i < 0 then i
-            else countdown (i - steps) steps
-        in
-            countdown 34 10
-    @> |> decompiledReductions =? [
-        "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
-        "-6"
-    ]
-
-[<Fact>] //issue 43
-let ``TryFinally incremental reduction of try body but finally body is never reduced``() =
-    <@ try 2 + 3 finally 2 + 3 |> ignore @> |> decompiledReductions =? [
-        "try 2 + 3 finally (2 + 3 |> ignore)"
-        "try 5 finally (2 + 3 |> ignore)"
-        "5"
-    ]
-
-[<Fact>] //issue 41
-let ``WhileLoop reduces to unit``() =
-    <@ while false do () @> |> decompiledReductions =? [
-        "while false do ()"
-        "()"
-    ]
-
-[<Fact>] //issue 41
-let ``WhileLoop reduces to unit without any sub reductions``() =
-    <@ while 2 + 5 = 0 do 3 |> ignore @> |> decompiledReductions =? [
-        "while 2 + 5 = 0 do (3 |> ignore)" //precedence in do body is off
-        "()"
-    ]
-
-[<Fact>] //issue 41
-let ``WhileLoop as subexpression``() =
-    <@ (while false do ()), 3 @> |> decompiledReductions =? [
-        "((while false do ()), 3)"
-        "((), 3)"
-    ]
-
-[<Fact>] //issue 41
-let ``ForIntegerRangeLoop reduces to unit``() =
-    <@ for i in 1..5 do () @> |> decompiledReductions =? [
-        "for i in 1..5 do ()"
-        "()"
-    ]
-
-[<Fact>] //issue 41
-let ``ForIntegerRangeLoop reduces range start and end but not body``() =
-    <@ for i in 1 + 2..5 + 2 do 5 |> ignore @> |> decompiledReductions =? [
-        "for i in 1 + 2..5 + 2 do (5 |> ignore)" //precedence in do body is off
-        "for i in 3..7 do (5 |> ignore)"
-        "()"
     ]
 
 //[<Fact>]

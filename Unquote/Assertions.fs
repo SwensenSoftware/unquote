@@ -24,14 +24,11 @@ open Microsoft.FSharp.Quotations
 open Swensen.Utils
 open Swensen.Unquote
 
+///Functions and values public inline Operator functions rely on (and therefore must be public,
+///even though we do not want to expose them publically).
 #nowarn "44"
 #nowarn "42" //for raises (inline IL)
 
-type AssertionFailedException(msg: string) =
-    inherit Exception(msg)
-
-///Functions and values public inline Operator functions rely on (and therefore must be public,
-///even though we do not want to expose them publically).
 [<System.ObsoleteAttribute>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
 module Internal =
     let private fsiTestFailed (expr:Expr) additionalInfo =
@@ -50,27 +47,25 @@ module Internal =
     type private testFramework =
         | Xunit
         | Nunit
-//        | Mbunit
 
     //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
     //duplicated from Utils.MiscUtils since we want to keep everything in that assembly internal (using friend assemblies)
     let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
     let testFailed =
-        let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
-        if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
+        #if INTERACTIVE
             fsiTestFailed
-        else
+        #else
             //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
             ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
             let outputNonFsiTestFailedMsg =
+                let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
                 let framework = 
                     seq { 
                         for a in assemblies do
                             match a.GetName().Name with
                             | "xunit" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit"))
                             | "nunit.framework" -> yield Some(Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
-//                            | "MbUnit" -> yield Some(Mbunit, Type.GetType("MbUnit.Framework.Assert, MbUnit"))
                             | _ -> ()
                         yield None //else none
                     } |> Seq.head
@@ -79,17 +74,13 @@ module Internal =
                 | Some(Xunit, t) -> 
                     let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
                     let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
-                    fun msg -> del.Invoke(false,msg)
+                    fun msg -> del.Invoke(false, msg)
                 | Some(Nunit, t) -> 
                     let mi = t.GetMethod("Fail", [|typeof<string>|])
                     let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
                     fun msg -> del.Invoke(msg)
-//                | Some(Mbunit, t) -> 
-//                    let mi = t.GetMethod("Fail", [|typeof<string>;typeof<obj[]>|])
-//                    let del = Delegate.CreateDelegate(typeof<Action<string,obj[]>>, mi) :?> (Action<string,obj[]>)
-//                    fun msg -> del.Invoke(msg,null)
-                | _ ->
-                    fun msg -> raise <| AssertionFailedException("Test failed:" + msg)
+                | None ->
+                    fun msg -> raise <| System.Exception("Test failed:" + msg)
 
             fun (expr:Expr) additionalInfo ->
                 let msg = 
@@ -97,6 +88,7 @@ module Internal =
                         (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
                         (expr |> reduceFully |> List.map decompile |> String.concat "\n")    
                 outputNonFsiTestFailedMsg msg
+        #endif
 
     type raisesResult<'a when 'a :> exn> =
         | NoException
@@ -117,12 +109,13 @@ let inline test (expr:Expr<bool>) =
         with
         | _ -> false //testFailed output will contain exception info
 
-    if not passes then
+    match passes with
+    | false -> 
         try
             testFailed expr ""
         with 
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
-    else ()
+    | true -> ()
 
 ///Test wether the given expr fails with the given expected exception (or a subclass thereof).
 let inline raises<'a when 'a :> exn> (expr:Expr) = 

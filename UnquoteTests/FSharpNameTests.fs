@@ -84,25 +84,13 @@ let ``fsharp funcs`` () =
     typeof<(int -> int -> int)[][][]>.FSharpName =? "(int -> int -> int)[][][]";
     typeof<(int -> int) -> int>.FSharpName =? "(int -> int) -> int";
 
-[<Fact>]//issue 32
-let ``generic type definition: function`` () =
-    typedefof<int -> (int * int)>.FSharpName =? "'T -> 'TResult"
-
-[<Fact>]//issue 32
-let ``generic type definition: tuple`` () =
-    typedefof<int * int>.FSharpName =? "'T1 * 'T2"
-
-[<Fact>]//issue 32
-let ``generic type definition: list`` () =
-    typedefof<list<_>>.FSharpName =? "list<'T>"
-
-[<Fact>]//issue 32
-let ``generic type definition: seq of nested list, no such thing as "partially open" generic types`` () =
-    typedefof<seq<list<_>>>.FSharpName =? "seq<'T>"
-
-[<Fact>]//issue 32
-let ``generic type definition: 1d array, arrays are not generic`` () =
-    typedefof<_[]>.FSharpName =? "obj[]" //sorry, arrays just aren't generic
+[<Fact>]
+let ``generic type definitions`` () =
+    typedefof<int -> (int * int)>.FSharpName =? "T -> TResult"
+    typedefof<int * int>.FSharpName =? "T1 * T2"
+    typedefof<list<_>>.FSharpName =? "list<T>"
+    typedefof<seq<list<_>>>.FSharpName =? "seq<T>"
+    typedefof<_[]>.FSharpName =? "obj[]"
 
 module Module = 
     type Hello(x:int) = 
