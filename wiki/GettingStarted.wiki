@@ -27,7 +27,7 @@ The `Swensen.Unquote.Assertions` module contains all functions used for performi
 Unquote chooses its output source as follows
   * if loaded in FSI then print to the console
   * else if xUnit or NUnit loaded in currently executing assembly, then use appropriate test failed methods
-  * else throw a `System.Exception` with a message
+  * else throw a `Swensen.Unquote.Assertions.AssertionFailureException` with a message
 
 The following is a reference of the functions available and some examples:
 
