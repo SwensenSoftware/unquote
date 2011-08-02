@@ -358,7 +358,7 @@ let ``TryFinally no exception try body returned and finally is called`` () =
              3
     test <@ !finallyCalled @>
 
-[<Fact>]
+[<Fact>] //note: this also revealed a weakness in TryFinally reduction
 let ``TryFinally exception is thrown and finally is called`` () =
     let finallyCalled = ref false
     raises<exn> <@ try

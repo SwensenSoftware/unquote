@@ -686,6 +686,15 @@ let ``ForIntegerRangeLoop reduces range start and end but not body``() =
         "for i in 3..7 do (5 |> ignore)"
         "()"
     ]
+
+[<Fact>] //note: this also revealed a weakness in TryFinally reduction
+let ``Issue 62: TryWith with block is followed when exception in body`` () =
+    let called = ref false
+    reduceFully <@ try
+                       raise (exn())
+                   with e ->
+                       called := true @>
+    test <@ !called @>
     
 //[<Fact>]
 //let ``instance PropertySet`` () =    
