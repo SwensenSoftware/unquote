@@ -686,7 +686,7 @@ let ``ForIntegerRangeLoop reduces range start and end but not body``() =
         "for i in 3..7 do (5 |> ignore)"
         "()"
     ]
-
+    
 //[<Fact>]
 //let ``instance PropertySet`` () =    
 //    let tt = new TestType(0)

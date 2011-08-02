@@ -55,5 +55,5 @@ let ``Issue 60: Double evaluation in test internal implementation obscures state
         try
             test <@ se.X = 2 @> ; false
         with e ->
-            e.Message.Contains("1 = 2") //not "4 = 2"!
+            e.ToString().Contains("1 = 2") //not "4 = 2"!
     @>
