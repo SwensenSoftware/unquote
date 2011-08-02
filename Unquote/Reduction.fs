@@ -40,7 +40,8 @@ type Expr with
 let evalValue env (expr:Expr) = 
     Expr.Value(Evaluation.eval env expr, expr.Type)
 
-//need to keep in synce with the depth of Sprinting.
+//need to keep in synce with the depth of decompilation.
+//note: only immutable expressions should be considered reduced
 let rec isReduced = function
     //| P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name)
     | P.Value _ | P.Lambda _ | DP.Unit | P.Quote _ -> true
@@ -93,10 +94,18 @@ let rec reduce env (expr:Expr) =
             else c
         else Expr.IfThenElse(reduce env a, b, c)
     | P.TryFinally(tryBody,finallyBody) ->
-        if tryBody |> isReduced then
+        if tryBody |> isReduced then 
             evalValue env expr
         else
-            Expr.TryFinally(tryBody |> reduce env, finallyBody)
+            //need to ensure finallyBody is evaluated if tryBody raises an exception during reduction
+            let reducedTryBody =
+                try 
+                    tryBody |> reduce env
+                with e ->
+                    finallyBody |> Evaluation.eval env |> ignore
+                    reraise()
+
+            Expr.TryFinally(reducedTryBody, finallyBody)
     | P.WhileLoop _ ->
         evalValue env expr
     | P.ForIntegerRangeLoop(var, rangeStart, rangeEnd, body) ->
