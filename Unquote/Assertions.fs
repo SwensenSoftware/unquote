@@ -121,13 +121,15 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
     let reducedExprs = expr |> reduceFully
     let lastExpr = reducedExprs |> List.rev |> List.head
     match lastExpr with
-    | Patterns.Value(_,ty) when typeof<'a>.IsAssignableFrom(ty) -> ()
-    | Patterns.Value(_,ty) when typeof<exn>.IsAssignableFrom(ty) ->
-        try
-            testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (ty.Name))
-        with 
-        | e -> raise e
-    | _ ->
+    | Patterns.Value(v,_) when v <> null && typeof<exn>.IsAssignableFrom(v.GetType()) -> //it's an exception
+        let vty = v.GetType()
+        if typeof<'a>.IsAssignableFrom(vty) then () //it's the correct exception
+        else //it's not the correct exception
+            try
+                testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (vty.Name))
+            with 
+            | e -> raise e
+    | _ -> //it's not an exception
         try
             testFailed reducedExprs (sprintf "Expected %s but got nothing" typeof<'a>.Name)
         with 
