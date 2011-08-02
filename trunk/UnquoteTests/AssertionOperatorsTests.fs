@@ -44,5 +44,16 @@ let ``test failes`` () =
     raises<exn> <@ test <@ 4 = 5 @> @>
 
 
+type SideEffects() =
+    let mutable x = 0
+    member __.X = x <- x + 1 ; x
 
-
+[<Fact>]
+let ``Issue 60: Double evaluation in test internal implementation obscures state related test failure causes`` () =
+    let se = SideEffects()
+    test <@ 
+        try
+            test <@ se.X = 2 @> ; false
+        with e ->
+            e.Message.Contains("1 = 2") //not "4 = 2"!
+    @>
