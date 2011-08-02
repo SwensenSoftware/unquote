@@ -106,6 +106,10 @@ let rec reduce env (expr:Expr) =
                     reraise()
 
             Expr.TryFinally(reducedTryBody, finallyBody)
+    | P.TryWith _ -> 
+        //we don't currently support TryWith reduction, but it could be similar to TryFinally reduction,
+        //however for now we merely wish to completely reduce so with path is always followed (issue 62)
+        evalValue env expr
     | P.WhileLoop _ ->
         evalValue env expr
     | P.ForIntegerRangeLoop(var, rangeStart, rangeEnd, body) ->
