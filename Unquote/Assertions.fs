@@ -34,13 +34,13 @@ type AssertionFailedException(msg: string) =
 ///even though we do not want to expose them publically).
 [<System.ObsoleteAttribute>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
 module Internal =
-    let private fsiTestFailed (expr:Expr) additionalInfo =
+    let private fsiTestFailed (reducedExprs:Expr list) additionalInfo =
         nprintfn "\nTest failed:\n" 
         if additionalInfo |> String.IsNullOrWhiteSpace |> not then
              nprintfn "%s\n" additionalInfo
 
-        for expr in expr |> reduceFully do
-            printfn "%s" (expr |> decompile)
+        for rd in reducedExprs do
+            printfn "%s" (rd |> decompile)
         
         printfn ""
 
@@ -91,17 +91,12 @@ module Internal =
                 | _ ->
                     fun msg -> raise <| AssertionFailedException("Test failed:" + msg)
 
-            fun (expr:Expr) additionalInfo ->
+            fun (reducedExprs:Expr list) additionalInfo ->
                 let msg = 
                     nsprintf "\n%s\n%s\n"
                         (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
-                        (expr |> reduceFully |> List.map decompile |> String.concat "\n")    
+                        (reducedExprs |> List.map decompile |> String.concat "\n")    
                 outputNonFsiTestFailedMsg msg
-
-    type raisesResult<'a when 'a :> exn> =
-        | NoException
-        | WrongException of 'a
-        | RightException
 
 open Internal
 
@@ -111,46 +106,36 @@ open Internal
 ///2) framework fail methods if Xunit or Nunit present
 ///3) System.Exception if release mode.
 let inline test (expr:Expr<bool>) =
-    let passes = 
+    let reducedExprs = expr |> reduceFully
+    let lastExpr = reducedExprs |> List.rev |> List.head
+    match lastExpr with
+    | DerivedPatterns.Bool(true) -> ()
+    | _ ->
         try
-            expr.Eval()
-        with
-        | _ -> false //testFailed output will contain exception info
-
-    if not passes then
-        try
-            testFailed expr ""
+            testFailed reducedExprs ""
         with 
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
-    else ()
 
 ///Test wether the given expr fails with the given expected exception (or a subclass thereof).
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
-    let result =
+    let reducedExprs = expr |> reduceFully
+    let lastExpr = reducedExprs |> List.rev |> List.head
+    match lastExpr with
+    | Patterns.Value(_,ty) when typeof<'a>.IsAssignableFrom(ty) -> ()
+    | Patterns.Value(_,ty) when typeof<exn>.IsAssignableFrom(ty) ->
         try
-            ignore <| expr.Eval()
-            NoException
-        with
-        | :? 'a -> RightException
-        | actual -> WrongException actual
-
-    match result with
-    | RightException -> ()
-    | WrongException actual ->
-        try
-            testFailed expr (sprintf "Expected %s but got %s" typeof<'a>.Name (actual.GetType().Name))
+            testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (ty.Name))
         with 
         | e -> raise e
-    | NoException ->
+    | _ ->
         try
-            testFailed expr (sprintf "Expected %s but got nothing" typeof<'a>.Name)
+            testFailed reducedExprs (sprintf "Expected %s but got nothing" typeof<'a>.Name)
         with 
-        | e -> raise e        
-
+        | e -> raise e
+    
 let inline (=?) x y = test <@ x = y @>
 let inline (<?) x y = test <@ x < y @>
 let inline (>?) x y = test <@ x > y @>
 let inline (<=?) x y = test <@ x <= y @>
 let inline (>=?) x y = test <@ x >= y @>
 let inline (<>?) x y = test <@ x <> y @>
-
