@@ -143,7 +143,7 @@ val it : bool = true
 val it : unit = ()
 }}}
 
-The following are functions which accept a variable environment for processing synthetic expressions with unbound variables:
+The following are functions which accept a variable environment for processing synthetic expressions with unbound variables (N.B. this API may evolve and should be considered "experimental"):
 
   * `val evalWith : Map<string,obj ref> -> Quotations.Expr<'a> -> 'a`
   * `val evalRawWith : Map<string,obj ref> -> Quotations.Expr<'a> -> obj`
