@@ -450,6 +450,17 @@ let ``TryWith exception thrown with multiple bindings and filtering`` () =
                 | :? System.ArgumentNullException as ex3 when (box ex3 :? System.ArgumentNullException) -> ex3.GetType() @>
             expected
 
+open System.Reflection
+[<Fact>]
+let ``Issue 63: TryWith nested TargetInvocationExceptions`` () =
+    testEval <@ try
+                    raise (TargetInvocationException(TargetInvocationException(System.ArgumentNullException())))
+                    null
+                with 
+                | :? TargetInvocationException as ex1 when (box ex1 :? TargetInvocationException) -> ex1.GetType()
+                | :? System.ArgumentNullException as ex3 when (box ex3 :? System.ArgumentNullException) -> ex3.GetType() @>
+            typeof<System.ArgumentNullException>
+
 [<Fact(Skip="TBD")>]
 let ``TryWith exception thrown but doesn't match any with cases`` () =
     testEval <@ try
