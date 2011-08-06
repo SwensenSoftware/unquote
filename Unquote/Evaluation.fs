@@ -50,6 +50,13 @@ let rec stripTargetInvocationException (e:exn) =
         else stripTargetInvocationException e.InnerException //recursively find first non-TargetInvocationException InnerException (the real user code exception)
     | _ -> Some(e) //the real user code exception
 
+///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
+let reraisePreserveStackTrace (e:Exception) =
+    //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
+    let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
+    remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
+    raise e
+
 open System.Collections.Generic
 //N.B. using hashset of known ops instead of mi.GetCustomAttributes(false) |> Array.exists (fun attr -> attr.GetType() = typeof<NoDynamicInvocationAttribute>)
 //is about 4 times faster
@@ -93,6 +100,23 @@ let (|CheckedUnaryOp|_|) = function
         | false, _ -> None
     | _ -> None
 
+type EnvVar(name:string, value:obj, ?reraisable:bool) =
+    let mutable value = value
+    let reraisable = defaultArg reraisable false
+
+    member __.Name = name
+    member this.Value
+        with get() = value
+        and set(value') = value <- value'
+    
+    member __.Reraisable = reraisable
+    
+    static member findByName name (xl:EnvVar list)  =
+        xl |> List.find (fun x -> x.Name = name)
+
+    static member findRaisable (xl:EnvVar list) =
+        xl |> List.find (fun x -> x.Reraisable)
+
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         failwithf "Quotation pattern %s not supported: expression = %A" name expr
@@ -100,12 +124,12 @@ let eval env expr =
     let rec eval env expr =
         match expr with
         | P.Let(var, assignment, body) ->
-            let env = env |> Map.add var.Name (eval env assignment |> ref)
+            let env = EnvVar(var.Name, eval env assignment)::env
             eval env body //ref type for future VarSet for mutable let bindings
         | P.Var(var) ->
-            env |> Map.find var.Name |> (!)
+            (env |> EnvVar.findByName var.Name).Value
         | P.VarSet(var, assignment) ->
-            (env |> Map.find var.Name) := eval env assignment
+            (env |> EnvVar.findByName var.Name).Value <- eval env assignment
             box ()
         | P.Sequential(lhs, rhs) ->
             eval env lhs |> ignore
@@ -156,7 +180,7 @@ let eval env expr =
             let ifrom = eval env ifrom :?> int
             let ito = eval env ito :?> int
             for i in ifrom..ito do
-                let env = env |> Map.add var.Name (i |> box |> ref)
+                let env =  EnvVar(var.Name,i)::env
                 eval env body |> ignore
             box ()
         | P.UnionCaseTest(target, uci) ->
@@ -171,8 +195,11 @@ let eval env expr =
                     match stripTargetInvocationException e with
                     | Some(e) -> e
                     | None -> e
-                let env = env |> Map.add catchVar.Name (e |> box |> ref)
+                let env = EnvVar(catchVar.Name, e, true)::env
                 eval env catchBody
+        | P.Call(None, mi, []) when mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" ->
+            let e = (EnvVar.findRaisable env).Value :?> Exception
+            reraisePreserveStackTrace e
         | P.TryFinally(tryBlock, finallyBlock) ->
             try
                 eval env tryBlock
@@ -182,7 +209,7 @@ let eval env expr =
             let ty = FSharpType.MakeFunctionType(var.Type, body.Type)
             let impl : obj -> obj = 
                 fun arg ->
-                    let env = env |> Map.add var.Name (ref arg)
+                    let env = EnvVar(var.Name, arg)::env
                     eval env body
             FSharpValue.MakeFunction(ty, impl)
         | P.Application(lambda, arg) ->
@@ -207,12 +234,12 @@ let eval env expr =
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.LetRecursive(bindings, finalBody) -> 
             let rec init env = function
-                | (var:Var, _)::rest -> init (env |> Map.add var.Name (ref null)) rest
+                | (var:Var, _)::rest -> init (EnvVar(var.Name, null)::env) rest
                 | [] -> env
             let env = init env bindings
                 
             for (var, body) in bindings do
-                (env |> Map.find var.Name) := eval env body
+                (env |> EnvVar.findByName var.Name).Value <- eval env body
 
             eval env finalBody                       
         | P.AddressOf _ -> 
@@ -238,14 +265,7 @@ let eval env expr =
 #else
     try
         eval env expr
-    with e ->
-        ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
-        let reraisePreserveStackTrace (e:Exception) =
-            //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
-            let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
-            remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
-            raise e
-        
+    with e ->        
         match stripTargetInvocationException e with
         | Some(e) -> reraisePreserveStackTrace e
         | None -> reraise()
