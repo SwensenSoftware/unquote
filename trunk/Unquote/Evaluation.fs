@@ -42,6 +42,14 @@ module DP = DerivedPatterns
 //Real: 00:00:00.377, CPU: 00:00:00.374, GC gen0: 29, gen1: 0, gen2: 0 (38.77 faster)
 //Real: 00:00:02.095, CPU: 00:00:02.090, GC gen0: 147, gen1: 0, gen2: 0 (12.98 faster)
 
+///Strip possibly nested target invocation exception
+let rec stripTargetInvocationException (e:exn) =
+    match e with
+    | :? TargetInvocationException -> 
+        if e.InnerException = null then None //user code threw TargetInvocationException
+        else stripTargetInvocationException e.InnerException //recursively find first non-TargetInvocationException InnerException (the real user code exception)
+    | _ -> Some(e) //the real user code exception
+
 open System.Collections.Generic
 //N.B. using hashset of known ops instead of mi.GetCustomAttributes(false) |> Array.exists (fun attr -> attr.GetType() = typeof<NoDynamicInvocationAttribute>)
 //is about 4 times faster
@@ -160,9 +168,9 @@ let eval env expr =
                 eval env tryBody
             with e ->
                 let e =
-                    match e with
-                    | :? TargetInvocationException when e.InnerException <> null -> e.InnerException //thrown from within reflective call (target of invocation exception)
-                    | _ -> e //thrown from eval code itself
+                    match stripTargetInvocationException e with
+                    | Some(e) -> e
+                    | None -> e
                 let env = env |> Map.add catchVar.Name (e |> box |> ref)
                 eval env catchBody
         | P.TryFinally(tryBlock, finallyBlock) ->
@@ -238,14 +246,7 @@ let eval env expr =
             remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
             raise e
         
-        let rec strip (e:exn) =
-            match e with
-            | :? TargetInvocationException -> 
-                if e.InnerException = null then None //user code threw TargetInvocationException
-                else strip e.InnerException //recursively find first non-TargetInvocationException InnerException (the real user code exception)
-            | _ -> Some(e) //the real user code exception
-
-        match strip e with
+        match stripTargetInvocationException e with
         | Some(e) -> reraisePreserveStackTrace e
         | None -> reraise()
 #endif
