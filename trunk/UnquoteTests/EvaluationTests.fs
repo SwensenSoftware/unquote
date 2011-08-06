@@ -461,16 +461,17 @@ let ``Issue 63: TryWith nested TargetInvocationExceptions`` () =
                 | :? System.ArgumentNullException as ex3 when (box ex3 :? System.ArgumentNullException) -> ex3.GetType() @>
             typeof<System.ArgumentNullException>
 
-[<Fact(Skip="TBD")>]
-let ``TryWith exception thrown but doesn't match any with cases`` () =
-    testEval <@ try
-                    raise (System.ArgumentNullException())
-                    null
-                with 
-                | :? System.InvalidCastException as ex1 -> ex1.GetType()
-                | :? System.InsufficientExecutionStackException as ex2 -> ex2.GetType() @>
-            typeof<System.ArgumentNullException>
+[<Fact>]
+let ``Issue 64: TryWith exception thrown but doesn't match any with cases`` () =
+    raises<System.ArgumentNullException> 
+        <@  try
+                raise (System.ArgumentNullException())
+                null
+            with 
+            | :? System.InvalidCastException as ex1 when (box ex1 :? InvalidCastException) -> ex1.GetType()
+            | :? System.InsufficientExecutionStackException as ex2 when (box ex2 :? InsufficientExecutionStackException) -> ex2.GetType() @>
 
+[<Fact>]
 let ``TryWith exception originating from method evaluation strips TargetInvocationException`` () =
     let e =
         try
@@ -543,13 +544,13 @@ open Swensen.Unquote
 let ``typed synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr<int>) = expr.Eval(env)
     let synExpr:Expr<int> = Expr.Var(new Var("x", typeof<int>)) |> Expr.Cast
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", 2 |> box |> ref)])) = 2 @>
+    <@ synExpr |> (evalWithEnv (Map.ofList [("x", box 2)])) = 2 @>
 
 [<Fact>]
 let ``untyped synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr) = expr.Eval(env)
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", 2 |> box |> ref)])) = box 2 @>
+    <@ synExpr |> (evalWithEnv (Map.ofList [("x", box 2)])) = box 2 @>
 
 //let (|Unbox|_|) x y = 
 //    if y |> unbox = x then
