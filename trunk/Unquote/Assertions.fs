@@ -110,7 +110,7 @@ let inline test (expr:Expr<bool>) =
     let lastExpr = reducedExprs |> List.rev |> List.head
     match lastExpr with
     | DerivedPatterns.Bool(true) -> ()
-    | _ ->
+    | _ ->  
         try
             testFailed reducedExprs ""
         with 

@@ -23,26 +23,9 @@ open System
 module P = Patterns
 module DP = DerivedPatterns
 
-//Feature highlights
-// 1) Reflection-based interpretation can be tens of times faster than PowerPack's Quotation Expression -> Linq Expression -> Compile -> Execute strategy. Typically 4 to 20 times faster depending on the scenario.
-// 2) Strips TargetInvocation exceptions; both uncaught (escaping eval) and uncaught (within TryWith Quotation Expressions for correct exception pattern matching)
-// 3) Supports more Quotation Expressions than PowerPack; all exception NewDelegate, AddressOf, AddressSet, LetRecursive, and Quote.
-//       N.B. PowerPack doesn't even support: VarSet, ForIntegerRangeLoop
-// 4) Implements most common NoDynamicInvoke operators in Core.Operators and Core.Operators.Checked
-// 5) Performance optimized operators even for those operators given dynamic implementations in the F# library.
+//N.B. eval is about 6 times faster using native impls for ops instead of F#'s reflective impls (which is terrible since then we have reflection calling reflection),
+//so we give native impls even for ops given dynamic implementations by F# (e.g. while (+) is given dynamic impl, for whatever reason (/) isn't)
 
-//two questions:
-// 1) why no dynamic table impls for (-), (/), (%), ...
-// 2) why does SpecificCall(|||) _ return only one Type in the param ty list?
-
-//translated from C# to F# from Stephen Cleary's answer on StackOverflow: http://stackoverflow.com/questions/4555599/how-to-rethrow-the-inner-exception-of-a-targetinvocationexception-without-losing/4557183#4557183
-///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
-let inline private reraisePreserveStackTrace(ex:Exception) =
-    typeof<Exception>.GetMethod("PrepForRemoting", BindingFlags.NonPublic ||| BindingFlags.Instance).Invoke(ex, [||]) |> ignore
-    raise ex
-
-//N.B. eval is about 6 times faster using native impls for ops instead of F#'s reflective impls,
-//so we should consider giving native impls even for ops implemented by F#
 //let x = <@ 10 + 10 @>
 //let x = <@ "asdf".Substring(0,2) @> 
 //let x = <@ "asdf".Substring(0,2).Length * 5 + 2 / 23 = 4 + 2 @> 
@@ -58,14 +41,6 @@ let inline private reraisePreserveStackTrace(ex:Exception) =
 //Real: 00:00:00.212, CPU: 00:00:00.202, GC gen0: 22, gen1: 1, gen2: 0 (50.82 faster)
 //Real: 00:00:00.377, CPU: 00:00:00.374, GC gen0: 29, gen1: 0, gen2: 0 (38.77 faster)
 //Real: 00:00:02.095, CPU: 00:00:02.090, GC gen0: 147, gen1: 0, gen2: 0 (12.98 faster)
-
-//N.B. Tried and Failed to implement NewDelegate and Quote expressions (the former seems doable, but the later I am fighting against some
-//string issues involving regarding typed vs. raw quotations.
-//N.B. applications and lambda expressions are going to take some work
-
-//todo: in release mode, grab inner exception from reflection invocation target exceptions when appropriate (let 'em fly in debug mode, write unit tests as appropriate)
-//todo: dynamic Operators (maybe scrape Operators module for all NoDynamicInvoke methods/functions)!!!
-//todo: make sure try/with handles exceptions good enough (stripping and so forth)
 
 open System.Collections.Generic
 //N.B. using hashset of known ops instead of mi.GetCustomAttributes(false) |> Array.exists (fun attr -> attr.GetType() = typeof<NoDynamicInvocationAttribute>)
@@ -255,9 +230,22 @@ let eval env expr =
 #else
     try
         eval env expr
-    with
-    | :? TargetInvocationException as e when e.InnerException <> null -> 
-        //this is the real exception; but we need to figure out how to keep stack trace from being erased
-        reraisePreserveStackTrace e.InnerException
-    | _ -> reraise()
+    with e ->
+        ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
+        let reraisePreserveStackTrace (e:Exception) =
+            //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
+            let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
+            remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
+            raise e
+        
+        let rec strip (e:exn) =
+            match e with
+            | :? TargetInvocationException -> 
+                if e.InnerException = null then None //user code threw TargetInvocationException
+                else strip e.InnerException //recursively find first non-TargetInvocationException InnerException (the real user code exception)
+            | _ -> Some(e) //the real user code exception
+
+        match strip e with
+        | Some(e) -> reraisePreserveStackTrace e
+        | None -> reraise()
 #endif
