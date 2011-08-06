@@ -450,6 +450,16 @@ let ``TryWith exception thrown with multiple bindings and filtering`` () =
                 | :? System.ArgumentNullException as ex3 when (box ex3 :? System.ArgumentNullException) -> ex3.GetType() @>
             expected
 
+[<Fact(Skip="TBD")>]
+let ``TryWith exception thrown but doesn't match any with cases`` () =
+    testEval <@ try
+                    raise (System.ArgumentNullException())
+                    null
+                with 
+                | :? System.InvalidCastException as ex1 -> ex1.GetType()
+                | :? System.InsufficientExecutionStackException as ex2 -> ex2.GetType() @>
+            typeof<System.ArgumentNullException>
+
 let ``TryWith exception originating from method evaluation strips TargetInvocationException`` () =
     let e =
         try
