@@ -462,7 +462,7 @@ let ``Issue 63: TryWith nested TargetInvocationExceptions`` () =
             typeof<System.ArgumentNullException>
 
 [<Fact>]
-let ``Issue 64: TryWith exception thrown but doesn't match any with cases`` () =
+let ``Issue 64: TryWith exception thrown but doesn't match any with cases leading to an implicit reraise`` () =
     raises<System.ArgumentNullException> 
         <@  try
                 raise (System.ArgumentNullException())
@@ -470,6 +470,26 @@ let ``Issue 64: TryWith exception thrown but doesn't match any with cases`` () =
             with 
             | :? System.InvalidCastException as ex1 when (box ex1 :? InvalidCastException) -> ex1.GetType()
             | :? System.InsufficientExecutionStackException as ex2 when (box ex2 :? InsufficientExecutionStackException) -> ex2.GetType() @>
+
+[<Fact>]
+let ``Issue 64: TryWith reraise`` () =
+    raises<System.ArgumentNullException> 
+        <@  try
+                raise (System.ArgumentNullException()) ; null
+            with _ ->
+                reraise()    
+        @>
+
+[<Fact>]
+let ``Issue 64: TryWith reraise shadowing isn't possible`` () =
+    raises<System.ArgumentNullException> 
+        <@  try
+                raise (System.ArgumentNullException()) ; null
+            with e ->
+                match e with
+                | :? InvalidCastException -> raise (InvalidCastException())
+                | _ -> reraise()    
+        @>
 
 [<Fact>]
 let ``TryWith exception originating from method evaluation strips TargetInvocationException`` () =
