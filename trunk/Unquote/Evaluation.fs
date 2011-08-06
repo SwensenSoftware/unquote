@@ -20,6 +20,7 @@ open Microsoft.FSharp.Quotations
 open System.Reflection
 open Microsoft.FSharp.Reflection
 open System
+
 module P = Patterns
 module DP = DerivedPatterns
 
@@ -42,6 +43,8 @@ module DP = DerivedPatterns
 //Real: 00:00:00.377, CPU: 00:00:00.374, GC gen0: 29, gen1: 0, gen2: 0 (38.77 faster)
 //Real: 00:00:02.095, CPU: 00:00:02.090, GC gen0: 147, gen1: 0, gen2: 0 (12.98 faster)
 
+let inline raise (e: System.Exception) = (# "throw" e : 'U #)
+
 ///Strip possibly nested target invocation exception
 let rec stripTargetInvocationException (e:exn) =
     match e with
@@ -51,7 +54,7 @@ let rec stripTargetInvocationException (e:exn) =
     | _ -> Some(e) //the real user code exception
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
-let reraisePreserveStackTrace (e:Exception) =
+let inline reraisePreserveStackTrace (e:Exception) =
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
     remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
