@@ -168,6 +168,6 @@ let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
     | :? System.NotSupportedException | _  -> 
         if FSharpType.IsModule mi.DeclaringType then
-            if mi.GetParameters().Length = 0 then Some(GenericValue)
+            if mi.GetParameters().Length = 0 && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) then Some(GenericValue)
             else Some(Function)
         else None
