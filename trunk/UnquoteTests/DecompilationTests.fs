@@ -835,3 +835,9 @@ let ``issue 59: IfThenElse with omitted else branch in higher precedence context
 let ``Issue 66: Pow operator has space in parens when given as lambda``() =
     <@ ( ** ) @> |> decompile =? "( ** )"
 
+let ff x y = x + y
+let gg ff x = ff x
+
+[<Fact>]
+let ``precedence of partial application in application``() =
+    <@ gg (ff 3) 2 @> |> decompile =? "gg (ff 3) 2"
