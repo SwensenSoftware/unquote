@@ -135,7 +135,7 @@ let decompile expr =
                 match target with
                 | Some(target) -> (decompile CC.TwentyTwo target) //instance
                 | None -> mi.DeclaringType.Name
-            applyParens OP.Application (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args)) //SHOULD BE CALL PREC
+            applyParens OP.MethodCall (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
@@ -143,7 +143,7 @@ let decompile expr =
                 sprintf "(%s?%s : %s)" (decompile CC.TwentyTwo target) pi.Name (pi.PropertyType |> ER.sprintSig)
             | _, [] -> sprintf "%s.%s" (decompile CC.TwentyTwo target) pi.Name //also includes "Item" with zero args
             | "Item", _ -> sprintf "%s.[%s]" (decompile CC.TwentyTwo target) (decompileTupledArgs args)
-            | _, _ -> applyParens OP.Application (sprintf "%s.%s(%s)" (decompile CC.TwentyTwo target) pi.Name (decompileTupledArgs args)) //SHOULD BE CALL
+            | _, _ -> applyParens OP.MethodCall (sprintf "%s.%s(%s)" (decompile CC.TwentyTwo target) pi.Name (decompileTupledArgs args))
         | P.PropertyGet(None, pi, args) -> //static get (note: can't accept params)
             let sprintedName =
                 if ER.isOpenModule pi.DeclaringType then 
@@ -152,7 +152,7 @@ let decompile expr =
                     sprintf "%s.%s" pi.DeclaringType.Name pi.Name
 
             if args.Length = 0 then sprintedName
-            else applyParens OP.Application (sprintf "%s(%s)" sprintedName (decompileTupledArgs args)) //SHOULD BE CALL
+            else applyParens OP.MethodCall (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
         | P.PropertySet(target, pi, piArgs, rhs) ->
             let lhs = //leverage PropertyGet sprinting
                 match target with
@@ -212,8 +212,13 @@ let decompile expr =
             | [] -> uci.Name
             | _ -> sprintf "%s(%s)" uci.Name (decompileTupledArgs args)
         | P.NewObject(ci, args) ->
-            //todo: only use "new" prefix for IDisposible
-            applyParens OP.Application (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args)) //SHOULD BE CALL
+            applyParens OP.Application (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
+
+//            if typeof<System.IDisposable>.IsAssignableFrom(ci.DeclaringType) then
+//                //not sure what precedence is
+//                applyParens OP.Application (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
+//            else
+//                applyParens OP.MethodCall (sprintf "%s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
         | P.Coerce(target, _) ->
             //don't even "mention" anything about the coersion (pass through context)
             decompile (contextOP,contextAssoc) target
@@ -240,7 +245,7 @@ let decompile expr =
         | DP.AndAlso(DP.Bool(false), DP.Bool(true)) -> //false && true can't be distinguished from false || false, yet is less likely an expression due to short-circuiting
             applyParens OP.Or "false || false"
         | DP.AndAlso(a,b) -> //must come before if then else
-            applyParens OP.And (sprintf "%s && %s" (decompile (OP.And, OP.Left) a) (decompile (OP.And,OP.Right) b)) //JUST UPDATED
+            applyParens OP.And (sprintf "%s && %s" (decompile (OP.And, OP.Left) a) (decompile (OP.And,OP.Right) b))
         | DP.OrElse(a,b) -> //must come before if then else
             applyParens OP.Or (sprintf "%s || %s" (decompile (OP.Or,OP.Left) a) (decompile (OP.Or,OP.Right) b))
         | P.IfThenElse(a,b, DP.Unit) -> //syntax doesn't require else branch when it's nothing but unit

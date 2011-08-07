@@ -263,11 +263,29 @@ let ``instace FieldGet`` () =
 let ``static FieldGet`` () =
     decompile <@ String.Empty @> =? "String.Empty"
 
-[<Fact(Skip="Precedence left of . operator wrong for applications")>]
-let ``set instance field on constructed object`` () =
-    decompile <@ Foo().X <- 5 @> =? "Foo().X <- 5"
-    decompile <@ (Foo().Add(Foo())).X <- 5 @> =? "(Foo().Add(Foo())).X <- 5"
+[<Fact>]
+let ``new object precence in left dot context`` () =
+    decompile <@ (new Foo()).X <- 5 @> =? "(new Foo()).X <- 5"
+
+[<Fact>]
+let ``new object precence in left dot context in left arrow context`` () =
+    decompile <@ (new Foo()).Add(new Foo()).X <- 5 @> =? "(new Foo()).Add(new Foo()).X <- 5"
+    
+[<Fact>]    
+let ``Issue 7: method call precedence in left dot context`` () =
     decompile <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =? "\"abcdefg\".Substring(0, 5).Substring(0, 2)"
+
+[<Fact>]    
+let ``Issue 7: new object precedence weaker than left dot`` () =
+    decompile <@ (new string([|'h'; 'i'|])).Length @> =? "(new string([|'h'; 'i'|])).Length"
+
+[<Fact>]    
+let ``Issue 7: method call precedence stronger than left dot`` () =
+    decompile <@ "asdf".Substring(1, 2).Length @> =? "\"asdf\".Substring(1, 2).Length"
+
+[<Fact>]    
+let ``Issue 7: method call precedence weakend within application context`` () =
+    decompile <@ String.length ("asdf".Substring(1, 2)) @> =? "String.length (\"asdf\".Substring(1, 2))"
 
 let t = (1,2)
 [<Fact>]
