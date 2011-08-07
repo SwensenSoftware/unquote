@@ -27,17 +27,6 @@ type OperatorPrecedence(precedence:int, ?associativity:assoc) =
     ///Associativity
     member __.Associativity = associativity
 
-    ///The precedence context to apply to expressions on the left hand side of an expresion with this precedence (depends on Associativity)
-    member this.LeftContext =
-        match this.Associativity with
-        | Left -> this.Precedence - 1
-        |_ -> this.Precedence
-    ///The precedence context to apply to expressions on the right hand side of an expresion with this precedence (depends on Associativity)
-    member this.RightContext =
-        match this.Associativity with
-        | Right -> this.Precedence - 1
-        |_ -> this.Precedence
-
 type OP = OperatorPrecedence
 
 //"Op" suffix indicates a legitimate customizable op
@@ -74,9 +63,8 @@ let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (loc
         sprintf "(%s)" s
     else //normal rules
         let context =
-            match contextAssoc with
-            | Left -> contextOP.LeftContext
-            | Right -> contextOP.RightContext
-            | Non -> contextOP.Precedence
+            match contextOP.Associativity, contextAssoc with
+            | Left, Left | Right, Right -> contextOP.Precedence - 1
+            | _ -> contextOP.Precedence
     
         if localOP.Precedence > context then s else sprintf "(%s)" s
