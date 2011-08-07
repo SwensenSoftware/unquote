@@ -3,22 +3,32 @@
 
 = Release Notes =
 
+== v2.0.3, 8/7/11 ==
+
+Several high-priority fixes.
+
+  * Issue 60: Double evaluation in test internal implementation obscures state related test failure causes
+  * Issue 61: reduce / reduceFully operator bug: finally path in TryFinally expressions not followed when exception raised from body
+  * Issue 62: reduce / reduceFully operator bug: with path in TryWith expressions not followed when exception raised from body
+  * Issue 63: When using pipe and testing for exception "raises" finds reflection exception instead
+  * Issue 64: Support (NoDynamicInvocation) reraise operator
+
 == v2.0.2, 7/19/11 ==
 
 Lots of added features and bug fixes including support for several more kinds of expressions.
 
-  * Issue 32 Type.FSharpName bug: generic typedef args should be printed with leading tick
-  * Issue 41 Support WhileLoop expressions
-  * Issue 42 Support ForIntegerRangeLoop expressions
-  * Issue 43 Support TryFinally expressions
-  * Issue 51 Support LetRecursive expressions
-  * Issue 53 Evaluation and Reduction with environment should use a Map instead of a List to represent the Environment
-  * Issue 54 Update precedence for bitwise operators
-  * Issue 55 Support TypeTest expressions
-  * Issue 56 Custom FSI test failed output is broken
-  * Issue 57 Create and use custom "AssertionFailureException" for generic unit test framework support
-  * Issue 58 Support functions which are static or instance members of a type
-  * Issue 59 Omit else branch of IfThenElse expressions when it's body is only a simple tuple
+  * Issue 32: Type.FSharpName bug: generic typedef args should be printed with leading tick
+  * Issue 41: Support WhileLoop expressions
+  * Issue 42: Support ForIntegerRangeLoop expressions
+  * Issue 43: Support TryFinally expressions
+  * Issue 51: Support LetRecursive expressions
+  * Issue 53: Evaluation and Reduction with environment should use a Map instead of a List to represent the Environment
+  * Issue 54: Update precedence for bitwise operators
+  * Issue 55: Support TypeTest expressions
+  * Issue 56: Custom FSI test failed output is broken
+  * Issue 57: Create and use custom "AssertionFailureException" for generic unit test framework support
+  * Issue 58: Support functions which are static or instance members of a type
+  * Issue 59: Omit else branch of IfThenElse expressions when it's body is only a simple tuple
 
 == v2.0.1, 7/11/11 ==
 
