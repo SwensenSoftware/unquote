@@ -57,30 +57,30 @@ let decompile expr =
         //must come before Lambdas
         | EP.IncompleteLambdaCall(target, mi, args) -> //assume lambdas are only part of modules.
             match EP.binaryOps |> Map.tryFind mi.Name with
-                | Some(symbol,_) -> 
-                    let sprintedSymbol = 
-                        if symbol.StartsWith("*") || symbol.EndsWith("*") then
-                            sprintf "( %s )" symbol
+            | Some(symbol,_) -> 
+                let sprintedSymbol = 
+                    if symbol.StartsWith("*") || symbol.EndsWith("*") then
+                        sprintf "( %s )" symbol
+                    else
+                        sprintf "(%s)" symbol
+                match args.Length with
+                | 1 -> applyParens OP.Application (sprintf "%s %s" sprintedSymbol (decompileCurriedArgs args))
+                | 0 -> sprintedSymbol
+                | _ -> failwithf "partial applied binary op should only have 0 or 1 args but has more: %A" args
+            | None ->
+                match EP.unaryOps |> Map.tryFind mi.Name with
+                | Some(symbol) -> sprintf "(~%s)" symbol
+                | None -> 
+                    let sprintFunction (mi:MethodInfo) =
+                        if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
                         else
-                            sprintf "(%s)" symbol
-                    match args.Length with
-                    | 1 -> applyParens OP.Application (sprintf "%s %s" sprintedSymbol (decompileCurriedArgs args))
-                    | 0 -> sprintedSymbol
-                    | _ -> failwithf "partial applied binary op should only have 0 or 1 args but has more: %A" args
-                | None ->
-                    match EP.unaryOps |> Map.tryFind mi.Name with
-                    | Some(symbol) -> sprintf "(~%s)" symbol
-                    | None -> 
-                        let sprintFunction (mi:MethodInfo) =
-                            if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
-                            else
-                                let decompiledTarget =
-                                    match target with
-                                    | Some(target) -> (decompile CC.TwentyTwo target) //instance
-                                    | None -> ER.sourceName mi.DeclaringType 
-                                sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
-                        if args.Length = 0 then sprintFunction mi //not sure what precedence should be
-                        else applyParens OP.Application (sprintf "%s %s" (sprintFunction mi) (decompileCurriedArgs args))
+                            let decompiledTarget =
+                                match target with
+                                | Some(target) -> (decompile CC.TwentyTwo target) //instance
+                                | None -> ER.sourceName mi.DeclaringType 
+                            sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
+                    if args.Length = 0 then sprintFunction mi //not sure what precedence should be
+                    else applyParens OP.Application (sprintf "%s %s" (sprintFunction mi) (decompileCurriedArgs args))
         | DP.Lambdas(vars, body) -> //addresses issue 27
             let sprintSingleVar (var:Var) = if var.Type = typeof<Unit> then "()" else var.Name
             let sprintedVars =
