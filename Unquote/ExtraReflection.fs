@@ -48,8 +48,7 @@ let sourceName (mi:MemberInfo) =
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
 
-//used by both sprintSig and sprint
-let applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
+let private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 
 //the usefullness of this function makes me think to open up Sprint module (currently just added TypeExt with this feature)
 ///Sprint the F#-style type signature of the given Type.  Handles known type abbreviations,
