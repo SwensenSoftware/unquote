@@ -145,10 +145,10 @@ val it : unit = ()
 
 The following are functions which accept a variable environment for processing synthetic expressions with unbound variables (N.B. this API may evolve and should be considered "experimental"):
 
-  * `val evalWith : Map<string,obj ref> -> Quotations.Expr<'a> -> 'a`
-  * `val evalRawWith : Map<string,obj ref> -> Quotations.Expr<'a> -> obj`
-  * `val reduceWith : Map<string,obj ref> -> Quotations.Expr<'a> -> Quotations.Expr`
-  * `val reduceFullyWith : Map<string,obj ref> -> Quotations.Expr<'a> -> Quotations.Expr list`
+  * `val evalWith : Map<string,obj> -> Quotations.Expr<'a> -> 'a`
+  * `val evalRawWith : Map<string,obj> -> Quotations.Expr<'a> -> obj`
+  * `val reduceWith : Map<string,obj> -> Quotations.Expr<'a> -> Quotations.Expr`
+  * `val reduceFullyWith : Map<string,obj> -> Quotations.Expr<'a> -> Quotations.Expr list`
 
 === Extensions ===
 
