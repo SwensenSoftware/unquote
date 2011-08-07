@@ -16,16 +16,17 @@ limitations under the License.
 module internal Swensen.Unquote.OperatorPrecedence
 
 type assoc =
-| None
+| Non
 | Left
 | Right
 
-type OperatorPrecedence = 
+type OperatorPrecedence(precedence:int, ?associativity:assoc) = 
+    let associativity = match associativity with Some(a) -> a | None -> Non
     ///Precedence
-   {Precedence:int; 
+    member __.Precedence = precedence
     ///Associativity
-    Associativity: assoc}
-with
+    member __.Associativity = associativity
+
     ///The precedence context to apply to expressions on the left hand side of an expresion with this precedence (depends on Associativity)
     member this.LeftContext =
         match this.Associativity with
@@ -36,37 +37,46 @@ with
         match this.Associativity with
         | Right -> this.Precedence - 1
         |_ -> this.Precedence
-    ///Construct a new OpPrec
-    static member mk(p,a) =
-        {Precedence=p; Associativity=a}
 
-let private mk = OperatorPrecedence.mk
+type OP = OperatorPrecedence
 
 //"Op" suffix indicates a legitimate customizable op
-let As = mk(1,Right)
-let When = mk(2,Right)
-let Pipe = mk(3,Left)
-let Semicolon = mk(4,Right) //Sequential
-let Let = mk(5,None)
-let Function,Fun,Match,Try,While,For = let p = mk(6,None) in p,p,p,p,p,p //While and For are not in spec, but seems at home here
-let If = mk(7,None)
-let RightArrow = mk(8,Right)
-let RefAssign = mk(9,Right)
-let Comma = mk(10,None)
-let Or = mk(11,Left) //note "or" is deprecated form of "||"
-let And = mk(12,Left) //note "&" is deprecated form of "&&"
-let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp = let p = mk(13,Left) in p,p,p,p,p
-let BitwiseAnd,BitwiseOr,ExclusiveOr,LogicalNot,LeftShift,RightShift = let p = mk(14,Left) in p,p,p,p,p,p
-let ConcatenateOp = mk(15,Right) //OCaml string concat
-let Cons = mk(16,Right)
-let AppendOp = mk(17,Left) //not sure, empirical
-let DynamicCast,TypeTest = let p = mk(17,None) in p,p
-let MinusBinaryOp,PlusBinaryOp = let p = mk(18,Left) in p,p
-let MultiplyOp,DivideOp,ModOp = let p = mk(19,Left) in p,p,p
-let ExponentiationOp = mk(20,Right)
-let Application = mk(21,Left)
-let PatternMatch = mk(22,Right)
-let PrefixOps = mk(23,Left)
-let Dot = mk(24,Left)
-let MethodCall = mk(25,Left)
-let TypeArguments = mk(26,Left)
+let As = OP(1,Right)
+let When = OP(2,Right)
+let Pipe = OP(3,Left)
+let Semicolon = OP(4,Right) //Sequential
+let Let = OP(5)
+let Function,Fun,Match,Try,While,For = let p() = OP(6) in p(),p(),p(),p(),p(),p() //While and For are not in spec, but seems at home here
+let If = OP(7)
+let RightArrow = OP(8,Right)
+let RefAssign = OP(9,Right)
+let Comma = OP(10)
+let Or = OP(11,Left) //note "or" is deprecated form of "||"
+let And = OP(12,Left) //note "&" is deprecated form of "&&"
+let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp = let p() = OP(13,Left) in p(),p(),p(),p(),p()
+let BitwiseAnd,BitwiseOr,ExclusiveOr,LogicalNot,LeftShift,RightShift = let p() = OP(14,Left) in p(),p(),p(),p(),p(),p()
+let ConcatenateOp = OP(15,Right) //OCaml string concat
+let Cons = OP(16,Right)
+let AppendOp = OP(17,Left) //not sure, empirical
+let DynamicCast,TypeTest = let p() = OP(17) in p(),p()
+let MinusBinaryOp,PlusBinaryOp = let p() = OP(18,Left) in p(),p()
+let MultiplyOp,DivideOp,ModOp = let p() = OP(19,Left) in p(),p(),p()
+let ExponentiationOp = OP(20,Right)
+let Application = OP(21,Left)
+let PatternMatch = OP(22,Right)
+let PrefixOps = OP(23,Left)
+let Dot = OP(24,Left)
+let MethodCall = OP(25,Left)
+let TypeArguments = OP(26,Left)
+
+let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (localOP:OperatorPrecedence) s = 
+    if contextOP = Application && localOP = MethodCall then //special rule
+        sprintf "(%s)" s
+    else //normal rules
+        let context =
+            match contextAssoc with
+            | Left -> contextOP.LeftContext
+            | Right -> contextOP.RightContext
+            | Non -> contextOP.Precedence
+    
+        if localOP.Precedence > context then s else sprintf "(%s)" s
