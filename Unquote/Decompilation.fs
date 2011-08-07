@@ -29,6 +29,12 @@ module EP = Swensen.Unquote.ExtraPatterns
 module ER = Swensen.Unquote.ExtraReflection
 module OP = Swensen.Unquote.OperatorPrecedence
 type OP = OP.OperatorPrecedence
+
+module CustomContext =
+    let Zero = (OP(0),OP.Non)
+    let TwentyTwo = (OP(22),OP.Non)
+
+module CC = CustomContext
       
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
@@ -66,7 +72,7 @@ let decompile expr =
                             else
                                 let decompiledTarget =
                                     match target with
-                                    | Some(target) -> (decompile (OP(22),OP.Non) target) //instance
+                                    | Some(target) -> (decompile CC.TwentyTwo target) //instance
                                     | None -> ER.sourceName mi.DeclaringType 
                                 sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
                         if args.Length = 0 then sprintFunction mi //not sure what precedence should be
@@ -80,7 +86,7 @@ let decompile expr =
                         | [var] -> sprintSingleVar var 
                         | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
                 |> String.concat " "
-            applyParens OP.Fun (sprintf "fun %s -> %s" sprintedVars (decompile (OP(0),OP.Non) body))
+            applyParens OP.Fun (sprintf "fun %s -> %s" sprintedVars (decompile CC.Zero body))
         | EP.BinaryInfixCall((symbol, prec), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = decompile (prec,OP.Left) lhs, decompile (prec,OP.Right) rhs
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
@@ -94,14 +100,14 @@ let decompile expr =
         | P.TypeTest(lhs, ty) -> //seems to be same as TypeTestGeneric
             applyParens OP.TypeTest (sprintf "%s :? %s" (decompile (OP.TypeTest,OP.Left) lhs) (ER.sprintSig ty))
         | EP.Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges
-            sprintf "%s%s..%s%s" startToken (decompile (OP(0),OP.Non) a) (decompile (OP(0),OP.Non) b) endToken
+            sprintf "%s%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) endToken
         | EP.RangeStep(startToken,endToken,a,b,c) ->
-            sprintf "%s%s..%s..%s%s" startToken (decompile (OP(0),OP.Non) a) (decompile (OP(0),OP.Non) b) (decompile (OP(0),OP.Non) c) endToken
+            sprintf "%s%s..%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) (decompile CC.Zero c) endToken
         | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && mi.Name = "UnboxGeneric" -> //i.e. :?>
             let ty = mi.GetGenericArguments().[0]
             applyParens OP.DynamicCast (sprintf "%s :?> %s" (decompile (OP.DynamicCast,OP.Left) target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
-            sprintf "%s.[%s]" (decompile (OP(22),OP.Non) target) (decompileTupledArgs args) //not sure what precedence is
+            sprintf "%s.[%s]" (decompile CC.TwentyTwo target) (decompileTupledArgs args) //not sure what precedence is
         | P.Call(target, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //instance or static call representing an F# function or generic value
             //if mi has generic args which can't be infered, need to sprint them.
             //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
@@ -120,24 +126,24 @@ let decompile expr =
             else 
                 let decompiledTarget =
                     match target with
-                    | Some(target) -> (decompile (OP(22),OP.Non) target) //instance
+                    | Some(target) -> (decompile CC.TwentyTwo target) //instance
                     | None -> ER.sourceName mi.DeclaringType
 
                 applyParens OP.Application (sprintf "%s.%s%s" decompiledTarget methodName sprintedArgs)
         | P.Call(target, mi, args) -> //a "normal" .net instance or static call
             let decompiledTarget =
                 match target with
-                | Some(target) -> (decompile (OP(22),OP.Non) target) //instance
+                | Some(target) -> (decompile CC.TwentyTwo target) //instance
                 | None -> mi.DeclaringType.Name
             applyParens OP.Application (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args)) //SHOULD BE CALL PREC
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
                 //for UnionCaseTypeTests, require a op_Dynamic implementation
-                sprintf "(%s?%s : %s)" (decompile (OP(22),OP.Non) target) pi.Name (pi.PropertyType |> ER.sprintSig)
-            | _, [] -> sprintf "%s.%s" (decompile (OP(22),OP.Non) target) pi.Name //also includes "Item" with zero args
-            | "Item", _ -> sprintf "%s.[%s]" (decompile (OP(22),OP.Non) target) (decompileTupledArgs args)
-            | _, _ -> applyParens OP.Application (sprintf "%s.%s(%s)" (decompile (OP(22),OP.Non) target) pi.Name (decompileTupledArgs args)) //SHOULD BE CALL
+                sprintf "(%s?%s : %s)" (decompile CC.TwentyTwo target) pi.Name (pi.PropertyType |> ER.sprintSig)
+            | _, [] -> sprintf "%s.%s" (decompile CC.TwentyTwo target) pi.Name //also includes "Item" with zero args
+            | "Item", _ -> sprintf "%s.[%s]" (decompile CC.TwentyTwo target) (decompileTupledArgs args)
+            | _, _ -> applyParens OP.Application (sprintf "%s.%s(%s)" (decompile CC.TwentyTwo target) pi.Name (decompileTupledArgs args)) //SHOULD BE CALL
         | P.PropertyGet(None, pi, args) -> //static get (note: can't accept params)
             let sprintedName =
                 if ER.isOpenModule pi.DeclaringType then 
@@ -153,9 +159,9 @@ let decompile expr =
                 | Some(instance) -> Expr.PropertyGet(instance, pi, piArgs)
                 | None -> Expr.PropertyGet(pi, piArgs)
             //don't know what precedence is
-            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile (OP(0),OP.Non) lhs) (decompile (OP(0),OP.Non) rhs))
+            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
         | P.FieldGet(Some(target), fi) ->
-            sprintf "%s.%s" (decompile (OP(22),OP.Non) target) fi.Name
+            sprintf "%s.%s" (decompile CC.TwentyTwo target) fi.Name
         | P.FieldGet(None, fi) ->
             sprintf "%s.%s" fi.DeclaringType.Name fi.Name
         | P.FieldSet(target, fi, rhs) ->
@@ -164,7 +170,7 @@ let decompile expr =
                 | Some(instance) -> Expr.FieldGet(instance, fi) 
                 | None -> Expr.FieldGet(fi)
             //don't know what precedence is
-            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile (OP(0),OP.Non) lhs) (decompile (OP(0),OP.Non) rhs))
+            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
         | DP.Unit -> "()" //must come before Value pattern
         | P.Value(o, _) ->
             match o with
@@ -190,9 +196,9 @@ let decompile expr =
 
                 if expr |> isLiteralConstruction then
                     let rec sprintLiteralConstructionArgs = function
-                        | P.NewUnionCase(_, lhs::(P.NewUnionCase(_, []))::[]) -> decompile (OP(4),OP.Non) lhs //SHOULD BE SEMICOLON
+                        | P.NewUnionCase(_, lhs::(P.NewUnionCase(_, []))::[]) -> decompile (OP.Semicolon,OP.Non) lhs
                         | P.NewUnionCase(_, lhs::rhs::[]) ->
-                            sprintf "%s; %s" (decompile (OP(4),OP.Non) lhs) (sprintLiteralConstructionArgs rhs) //SHOULD BE SEMICOLON
+                            sprintf "%s; %s" (decompile (OP.Semicolon,OP.Non) lhs) (sprintLiteralConstructionArgs rhs)
                         | _ -> failwith "unexpected list union case"
                     sprintf "[%s]" (sprintLiteralConstructionArgs expr)
                 else 
@@ -215,20 +221,20 @@ let decompile expr =
             //if any are mutable, they are all mutable
             let anyMutable = vars |> List.exists (function | Some(v) -> v.IsMutable | None -> false)
             let varNames = vars |> List.map (function | Some(v) -> v.Name | None -> "_")
-            applyParens OP.Let (sprintf "let%s%s = %s in %s" (if anyMutable then " mutable " else " ") (varNames |> String.concat ", ") (decompile (OP(0),OP.Non) e1) (decompile (OP(0),OP.Non) e2))
+            applyParens OP.Let (sprintf "let%s%s = %s in %s" (if anyMutable then " mutable " else " ") (varNames |> String.concat ", ") (decompile CC.Zero e1) (decompile CC.Zero e2))
         | P.LetRecursive((firstVar, firstBody)::rest, finalBody) -> //let recursives always have at least thef first var and body
             //note: single line recursive ("and") let bindings are only valid with #light "off", see: http://stackoverflow.com/questions/6501378/what-is-the-non-light-syntax-for-recursive-let-bindings
             let rec decompileRest = function
                 | (var:Var, body)::rest ->
-                    sprintf " and %s = %s%s" var.Name (decompile (OP(0),OP.Non) body) (decompileRest rest)
-                | [] -> sprintf " in %s" (decompile (OP(0),OP.Non) finalBody)
-            applyParens OP.Let (sprintf "let rec %s = %s%s" firstVar.Name (decompile (OP(0),OP.Non) firstBody) (decompileRest rest))
+                    sprintf " and %s = %s%s" var.Name (decompile CC.Zero body) (decompileRest rest)
+                | [] -> sprintf " in %s" (decompile CC.Zero finalBody)
+            applyParens OP.Let (sprintf "let rec %s = %s%s" firstVar.Name (decompile CC.Zero firstBody) (decompileRest rest))
         | P.Let(var, e1, e2) ->
             //todo: this needs to be handled better for curried functions
-            applyParens OP.Let (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (decompile (OP(0),OP.Non) e1) (decompile (OP(0),OP.Non) e2))
+            applyParens OP.Let (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (decompile CC.Zero e1) (decompile CC.Zero e2))
         | P.Quote(qx) ->
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; all come as untyped so that's the only kind we can support.
-            sprintf "<@ %s @>" (decompile (OP(0),OP.Non) qx) 
+            sprintf "<@ %s @>" (decompile CC.Zero qx) 
         | DP.OrElse(DP.Bool(true), DP.Bool(false)) -> //true || false can't be distinguished from true && true, yet is less likely an expression due to short-circuiting
             applyParens OP.And "true && true"
         | DP.AndAlso(DP.Bool(false), DP.Bool(true)) -> //false && true can't be distinguished from false || false, yet is less likely an expression due to short-circuiting
@@ -244,7 +250,7 @@ let decompile expr =
         //we can't reduce any XXXSet expressions due to limitations of Expr.Eval()
         | P.VarSet(v, arg) ->
             //not sure what precedence should be, using precedence for < op
-            applyParens OP.LessThanOp (sprintf "%s <- %s" v.Name (decompile (OP(0),OP.Non) arg)) 
+            applyParens OP.LessThanOp (sprintf "%s <- %s" v.Name (decompile CC.Zero arg)) 
         //extremely verbose
         | P.UnionCaseTest(target, uci) ->
             let ucMatch =
@@ -265,7 +271,7 @@ let decompile expr =
         | P.WhileLoop(condition,body) ->
             applyParens OP.While (sprintf "while %s do %s" (decompile (OP.While,OP.Non) condition) (decompile (OP.Try,OP.Non) body))
         | P.ForIntegerRangeLoop(var,rangeStart,rangeEnd,body) ->
-            applyParens OP.For (sprintf "for %s in %s..%s do %s" var.Name (decompile (OP(0),OP.Non) rangeStart) (decompile (OP(0),OP.Non) rangeEnd) (decompile (OP.For,OP.Non) body))
+            applyParens OP.For (sprintf "for %s in %s..%s do %s" var.Name (decompile CC.Zero rangeStart) (decompile CC.Zero rangeEnd) (decompile (OP.For,OP.Non) body))
         | _ -> 
             sprintf "%A" (expr)
     and decompileArgs prec delimiter exprs =
@@ -276,7 +282,7 @@ let decompile expr =
         decompileArgs (OP.Application,OP.Non) " "
     and decompileSequencedArgs =
         decompileArgs (OP.Semicolon,OP.Non) "; "
-    decompile (OP(0),OP.Non) expr
+    decompile CC.Zero expr
 
 //-----operator precedence updated April 2011 with bitwise ops-----
 //see OperatorPrecedenceedence.xlsx, not yet implemented.
