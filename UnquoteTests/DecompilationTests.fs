@@ -817,7 +817,7 @@ type TypeWithFunctionMembers() =
 [<Fact>]
 let ``issue 58: static member function call`` () =
     <@ TypeWithFunctionMembers.g 1 2 @> |> decompile =? "TypeWithFunctionMembers.g 1 2"
-
+        
 let twfm = TypeWithFunctionMembers()
 [<Fact>]
 let ``issue 58: instance member function call`` () =
@@ -841,3 +841,7 @@ let gg ff x = ff x
 [<Fact>]
 let ``precedence of partial application in application``() =
     <@ gg (ff 3) 2 @> |> decompile =? "gg (ff 3) 2"
+
+[<Fact>]
+let ``nested dot property indexer calls``() =
+    <@ [|[|0|]|].[0].[0] @> |> decompile =? "[|[|0|]|].[0].[0]"

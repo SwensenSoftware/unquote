@@ -32,7 +32,6 @@ type OP = OP.OperatorPrecedence
 
 module CustomContext =
     let Zero = (OP(0),OP.Non)
-    let TwentyTwo = (OP(22),OP.Non)
 
 module CC = CustomContext
       
@@ -76,7 +75,7 @@ let decompile expr =
                         else
                             let decompiledTarget =
                                 match target with
-                                | Some(target) -> (decompile CC.TwentyTwo target) //instance
+                                | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
                                 | None -> ER.sourceName mi.DeclaringType 
                             sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
                     if args.Length = 0 then sprintFunction mi //not sure what precedence should be
@@ -111,7 +110,7 @@ let decompile expr =
             let ty = mi.GetGenericArguments().[0]
             applyParens OP.DynamicCast (sprintf "%s :?> %s" (decompile (OP.DynamicCast,OP.Left) target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
-            sprintf "%s.[%s]" (decompile CC.TwentyTwo target) (decompileTupledArgs args) //not sure what precedence is
+            applyParens OP.Dot (sprintf "%s.[%s]" (decompile (OP.Dot, OP.Left) target) (decompileTupledArgs args)) //not sure what precedence is
         | P.Call(target, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //instance or static call representing an F# function or generic value
             //if mi has generic args which can't be infered, need to sprint them.
             //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
@@ -130,24 +129,24 @@ let decompile expr =
             else 
                 let decompiledTarget =
                     match target with
-                    | Some(target) -> (decompile CC.TwentyTwo target) //instance
+                    | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
                     | None -> ER.sourceName mi.DeclaringType
 
                 applyParens OP.Application (sprintf "%s.%s%s" decompiledTarget methodName sprintedArgs)
         | P.Call(target, mi, args) -> //a "normal" .net instance or static call
             let decompiledTarget =
                 match target with
-                | Some(target) -> (decompile CC.TwentyTwo target) //instance
+                | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
                 | None -> mi.DeclaringType.Name
             applyParens OP.MethodCall (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
             | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
                 //for UnionCaseTypeTests, require a op_Dynamic implementation
-                sprintf "(%s?%s : %s)" (decompile CC.TwentyTwo target) pi.Name (pi.PropertyType |> ER.sprintSig)
-            | _, [] -> sprintf "%s.%s" (decompile CC.TwentyTwo target) pi.Name //also includes "Item" with zero args
-            | "Item", _ -> sprintf "%s.[%s]" (decompile CC.TwentyTwo target) (decompileTupledArgs args)
-            | _, _ -> applyParens OP.MethodCall (sprintf "%s.%s(%s)" (decompile CC.TwentyTwo target) pi.Name (decompileTupledArgs args))
+                sprintf "(%s?%s : %s)" (decompile (OP.Dot,OP.Left) target) pi.Name (pi.PropertyType |> ER.sprintSig)
+            | _, [] -> sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) pi.Name //also includes "Item" with zero args
+            | "Item", _ -> sprintf "%s.[%s]" (decompile (OP.Dot,OP.Left) target) (decompileTupledArgs args)
+            | _, _ -> applyParens OP.MethodCall (sprintf "%s.%s(%s)" (decompile (OP.Dot,OP.Left) target) pi.Name (decompileTupledArgs args))
         | P.PropertyGet(None, pi, args) -> //static get (note: can't accept params)
             let sprintedName =
                 if ER.isOpenModule pi.DeclaringType then 
@@ -165,9 +164,9 @@ let decompile expr =
             //don't know what precedence is
             applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
         | P.FieldGet(Some(target), fi) ->
-            sprintf "%s.%s" (decompile CC.TwentyTwo target) fi.Name
+            applyParens OP.Dot (sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) fi.Name)
         | P.FieldGet(None, fi) ->
-            sprintf "%s.%s" fi.DeclaringType.Name fi.Name
+            applyParens OP.Dot (sprintf "%s.%s" fi.DeclaringType.Name fi.Name)
         | P.FieldSet(target, fi, rhs) ->
             let lhs = //leverage FieldGet sprinting
                 match target with
