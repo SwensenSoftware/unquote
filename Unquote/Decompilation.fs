@@ -58,7 +58,11 @@ let decompile expr =
         | EP.IncompleteLambdaCall(target, mi, args) -> //assume lambdas are only part of modules.
             match EP.binaryOps |> Map.tryFind mi.Name with
                 | Some(symbol,_) -> 
-                    let sprintedSymbol = sprintf "(%s)" symbol
+                    let sprintedSymbol = 
+                        if symbol.StartsWith("*") || symbol.EndsWith("*") then
+                            sprintf "( %s )" symbol
+                        else
+                            sprintf "(%s)" symbol
                     match args.Length with
                     | 1 -> applyParens OP.Application (sprintf "%s %s" sprintedSymbol (decompileCurriedArgs args))
                     | 0 -> sprintedSymbol

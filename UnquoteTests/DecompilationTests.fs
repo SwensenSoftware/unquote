@@ -608,103 +608,103 @@ let pt = new PropType()
 
 //--- PropertyGet
 
-[<Fact>] //issue 31
-let ``PropertyGet indexed instance`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet indexed instance`` () =
     <@ pt.[1] @> |> decompile =? "pt.[1]"
 
-[<Fact>] //issue 31
-let ``PropertyGet indexed instance, arg not reduced`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet indexed instance, arg not reduced`` () =
     <@ pt.[1 + 2] @> |> decompile =? "pt.[1 + 2]"
 
-[<Fact>] //issue 31
-let ``PropertyGet instance one arg`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet instance one arg`` () =
     <@ pt.InstancePropOneArg(1) @> |> decompile =? "pt.InstancePropOneArg(1)"
 
-[<Fact>] //issue 31
-let ``PropertyGet instance one arg, arg not reduced`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet instance one arg, arg not reduced`` () =
     <@ pt.InstancePropOneArg(1 + 2) @> |> decompile =? "pt.InstancePropOneArg(1 + 2)"
 
-[<Fact>] //issue 31
-let ``PropertyGet instance two args`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet instance two args`` () =
     <@ pt.InstancePropTwoArgs(1, 2) @> |> decompile =? "pt.InstancePropTwoArgs(1, 2)"
 
-[<Fact>] //issue 31
-let ``PropertyGet instance two args, args not reduced`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet instance two args, args not reduced`` () =
     <@ pt.InstancePropTwoArgs(1 + 1, 2 + 1) @> |> decompile =? "pt.InstancePropTwoArgs(1 + 1, 2 + 1)"
 
-[<Fact>] //issue 31
-let ``PropertyGet Static one arg`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet Static one arg`` () =
     <@ PropType.StaticPropOneArg(1) @> |> decompile =? "PropType.StaticPropOneArg(1)"
 
-[<Fact>] //issue 31
-let ``PropertyGet Static one arg, arg not reduced`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet Static one arg, arg not reduced`` () =
     <@ PropType.StaticPropOneArg(1 + 2) @> |> decompile =? "PropType.StaticPropOneArg(1 + 2)"
 
-[<Fact>] //issue 31
-let ``PropertyGet Static two args`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet Static two args`` () =
     <@ PropType.StaticPropTwoArgs(1, 2) @> |> decompile =? "PropType.StaticPropTwoArgs(1, 2)"
 
-[<Fact>] //issue 31
-let ``PropertyGet Static two args, args not reduced`` () =
+[<Fact>] 
+let ``issue 31: PropertyGet Static two args, args not reduced`` () =
     <@ PropType.StaticPropTwoArgs(1 + 1, 2 + 1) @> |> decompile =? "PropType.StaticPropTwoArgs(1 + 1, 2 + 1)"
 
 //---- PropertySet
 
-[<Fact>] //issue 31
-let ``PropertySet indexed instance`` () =
+[<Fact>]
+let ``issue 31: PropertySet indexed instance`` () =
     <@ pt.[1] <- 3 @> |> decompile =? "pt.[1] <- 3"
 
-[<Fact>] //issue 31
-let ``PropertySet indexed instance, arg not reduced`` () =
+[<Fact>]
+let ``issue 31: PropertySet indexed instance, arg not reduced`` () =
     <@ pt.[1 + 2] <- (3 + 1) @> |> decompile =? "pt.[1 + 2] <- 3 + 1"
 
-[<Fact>] //issue 31
-let ``PropertySet instance one arg`` () =
+[<Fact>]
+let ``issue 31: PropertySet instance one arg`` () =
     <@ pt.InstancePropOneArg(1) <- 3 @> |> decompile =? "pt.InstancePropOneArg(1) <- 3"
 
-[<Fact>] //issue 31
-let ``PropertySet instance one arg, arg not reduced`` () =
+[<Fact>]
+let ``issue 31: PropertySet instance one arg, arg not reduced`` () =
     <@ pt.InstancePropOneArg(1 + 2) <- (3 + 1) @> |> decompile =? "pt.InstancePropOneArg(1 + 2) <- 3 + 1"
 
-[<Fact>] //issue 31
-let ``PropertySet instance two args`` () =
+[<Fact>]
+let ``issue 31: PropertySet instance two args`` () =
     <@ pt.InstancePropTwoArgs(1, 2) <- 3 @> |> decompile =? "pt.InstancePropTwoArgs(1, 2) <- 3"
 
-[<Fact>] //issue 31
-let ``PropertySet instance two args, args not reduced`` () =
+[<Fact>]
+let ``issue 31: PropertySet instance two args, args not reduced`` () =
     <@ pt.InstancePropTwoArgs(1 + 1, 2 + 1) <- 3 @> |> decompile =? "pt.InstancePropTwoArgs(1 + 1, 2 + 1) <- 3"
 
-[<Fact>] //issue 31
-let ``PropertySet Static one arg`` () =
+[<Fact>]
+let ``issue 31: PropertySet Static one arg`` () =
     <@ PropType.StaticPropOneArg(1) <- 3 @> |> decompile =? "PropType.StaticPropOneArg(1) <- 3"
 
-[<Fact>] //issue 31
-let ``PropertySet Static one arg, arg not reduced`` () =
+[<Fact>]
+let ``issue 31: PropertySet Static one arg, arg not reduced`` () =
     <@ PropType.StaticPropOneArg(1 + 2) <- (3 + 1) @> |> decompile =? "PropType.StaticPropOneArg(1 + 2) <- 3 + 1"
 
-[<Fact>] //issue 31
-let ``PropertySet Static two args`` () =
+[<Fact>]
+let ``issue 31: PropertySet Static two args`` () =
     <@ PropType.StaticPropTwoArgs(1, 2) <- 3 @> |> decompile =? "PropType.StaticPropTwoArgs(1, 2) <- 3"
 
-[<Fact>] //issue 31
-let ``PropertySet Static two args, args not reduced`` () =
+[<Fact>]
+let ``issue 31: PropertySet Static two args, args not reduced`` () =
     <@ PropType.StaticPropTwoArgs(1 + 1, 2 + 1) <- (3 + 1) @> |> decompile =? "PropType.StaticPropTwoArgs(1 + 1, 2 + 1) <- 3 + 1"
 
 let xx = box 3
-[<Fact>] //issue 33
-let ``GenericUnbox Intrinsic function`` () =
+[<Fact>]
+let ``issue 33: GenericUnbox Intrinsic function`` () =
     <@ xx :?> int @> |> decompile =? "xx :?> int"
 
-[<Fact>]//issue 33
-let ``GenericUnbox Intrinsic function, precedence of left hand side`` () =
+[<Fact>]
+let ``issue 33: GenericUnbox Intrinsic function, precedence of left hand side`` () =
     <@ box 3 :?> int @> |> decompile =? "box 3 :?> int"
 
-[<Fact>]//issue 33
-let ``GenericUnbox Intrinsic function, precedence of overall expression weaker than function application`` () =
+[<Fact>]
+let ``issue 33: GenericUnbox Intrinsic function, precedence of overall expression weaker than function application`` () =
     <@ box (box 3 :?> int) @> |> decompile =? "box (box 3 :?> int)"
 
-[<Fact>]//issue 33
-let ``GenericUnbox Intrinsic function, precedence of overall expression stronger than right pipe`` () =
+[<Fact>]
+let ``issue 33: GenericUnbox Intrinsic function, precedence of overall expression stronger than right pipe`` () =
     <@ box 3 :?> int |> box @> |> decompile =? "box 3 :?> int |> box"
 
 [<Fact>]
@@ -734,12 +734,12 @@ let ``Quote, unsupported untyped treated as typed`` () =
     <@@ <@@ 1 @@> @@> |> decompile =? "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
 
 let f' (x:obj) (y:obj) = x |> string
-[<Fact>] //issue 40
-let ``handle lambda re-sugaring when vars are implicitly coerced``() =
+[<Fact>]
+let ``issue 40: handle lambda re-sugaring when vars are implicitly coerced``() =
     <@ <@ 2 |> f' "2" @> |> decompile = "2 |> f' \"2\"" @> |> test
 
-[<Fact>] //issue 51
-let ``RecursiveLet mutually recursive funtions``() =
+[<Fact>]
+let ``issue 51: RecursiveLet mutually recursive funtions``() =
     <@    
         let rec even x =
             if x = 0 then true
@@ -751,8 +751,8 @@ let ``RecursiveLet mutually recursive funtions``() =
             even 19, odd 20
     @> |> decompile =? "let rec even = fun x -> x = 0 || odd (x - 1) and odd = fun x -> if x = 0 then false else even (x - 1) in (even 19, odd 20)"
 
-[<Fact>] //issue 51
-let ``RecursiveLet self recursive function``() =
+[<Fact>]
+let ``issue 51: RecursiveLet self recursive function``() =
     <@    
         let rec countdown i steps  =
             if i < 0 then i
@@ -761,72 +761,77 @@ let ``RecursiveLet self recursive function``() =
             countdown 34 10
     @> |> decompile =? "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
 
-[<Fact>] //issue 54
-let ``Bitwise operator precedence: plus has stronger precedence than shift left`` () =
+[<Fact>]
+let ``issue 54: Bitwise operator precedence: plus has stronger precedence than shift left`` () =
     <@ 1 <<< 2 + 3 @> |> decompile =? "1 <<< 2 + 3"
     <@ (1 <<< 2) + 3 @> |> decompile =? "(1 <<< 2) + 3"
 
-[<Fact>] //issue 43
-let ``TryFinally`` () =
+[<Fact>]
+let ``issue 43: TryFinally`` () =
     <@ try 3 finally () @> |> decompile =? "try 3 finally ()"
 
-[<Fact>] //issue 43
-let ``TryFinally in stronger precedence context`` () =
+[<Fact>]
+let ``issue 43: TryFinally in stronger precedence context`` () =
     <@ (try 3 finally ()) + 5 @> |> decompile =? "(try 3 finally ()) + 5"
 
-[<Fact>] //issue 43
-let ``TryFinally in weaker precedence context`` () =
+[<Fact>]
+let ``issue 43: TryFinally in weaker precedence context`` () =
     <@ let x = try 3 finally () in x @> |> decompile =? "let x = try 3 finally () in x"
 
-[<Fact>] //issue 41
-let ``WhileLoop`` () =
+[<Fact>]
+let ``issue 41: WhileLoop`` () =
     <@ while false do () @> |> decompile =? "while false do ()"
 
-[<Fact>] //issue 41
-let ``WhileLoop in stronger precedence context`` () =
+[<Fact>]
+let ``issue 41: WhileLoop in stronger precedence context`` () =
     <@ (while false do ()), () @> |> decompile =? "((while false do ()), ())" //we always parenthesize tuples right now
 
-[<Fact>] //issue 41
-let ``WhileLoop in weaker precedence context`` () =
+[<Fact>]
+let ``issue 41: WhileLoop in weaker precedence context`` () =
     <@ (while false do ()); () @> |> decompile =? "while false do (); ()"
 
-[<Fact>] //issue 55
-let ``TypeTest`` () =
+[<Fact>]
+let ``float for loop`` () =
     <@ for i in 2.0..3.0 do () @> |> decompile =? "let inputSequence = {2.0..3.0} in let enumerator = inputSequence.GetEnumerator() in try (while enumerator.MoveNext() do (let i = enumerator.Current in ())) finally if enumerator :? IDisposable then (enumerator :?> IDisposable).Dispose()"
 
-[<Fact>] //issue 41
-let ``ForIntegerRangeLoop`` () =
+[<Fact>]
+let ``issue 42: ForIntegerRangeLoop`` () =
     <@ for i in 1..10 do () @> |> decompile =? "for i in 1..10 do ()"
 
-[<Fact>] //issue 41
-let ``ForIntegerRangeLoop with reducible start and end range`` () =
+[<Fact>]
+let ``issue 42: ForIntegerRangeLoop with reducible start and end range`` () =
     <@ for i in 1 + 2..10 + 2 do () @> |> decompile =? "for i in 1 + 2..10 + 2 do ()"
 
-[<Fact>] //issue 41
-let ``ForIntegerRangeLoop in stronger precedence context`` () =
+[<Fact>]
+let ``issue 42: ForIntegerRangeLoop in stronger precedence context`` () =
     <@ (for i in 1..10 do ()), () @> |> decompile =? "((for i in 1..10 do ()), ())" //we always parenthesize tuples right now
 
-[<Fact>] //issue 41
-let ``ForIntegerRangeLoop in weaker precedence context`` () =
+[<Fact>]
+let ``issue 42: ForIntegerRangeLoop in weaker precedence context`` () =
     <@ (for i in 1..10 do ()); () @> |> decompile =? "for i in 1..10 do (); ()"
 
 type TypeWithFunctionMembers() =
     member this.f x y = x + y
     static member g x y = x + y
 
-[<Fact>] //issue 58
-let ``static member function call`` () =
+[<Fact>]
+let ``issue 58: static member function call`` () =
     <@ TypeWithFunctionMembers.g 1 2 @> |> decompile =? "TypeWithFunctionMembers.g 1 2"
 
 let twfm = TypeWithFunctionMembers()
-[<Fact>] //issue 58
-let ``instance member function call`` () =
+[<Fact>]
+let ``issue 58: instance member function call`` () =
     <@ twfm.f 1 2 @> |> decompile =? "twfm.f 1 2"
 
-[<Fact>] //issue 59
-let ``IfThenElse else branch omitted when simple Unit``() =
+[<Fact>]
+let ``issue 59: IfThenElse else branch omitted when simple Unit``() =
     <@ if true then () @> |> decompile =? "if true then ()"
 
-[<Fact>] //issue 59
-let ``IfThenElse with omitted else branch in higher precedence context``() =
+[<Fact>] //
+let ``issue 59: IfThenElse with omitted else branch in higher precedence context``() =
     <@ (if true then ()), () @> |> decompile =? "((if true then ()), ())"
+
+[<Fact>]
+let ``Issue 66: Pow operator has space in parens when given as lambda``() =
+    <@ ( ** ) @> |> decompile =? "( ** )"
+
