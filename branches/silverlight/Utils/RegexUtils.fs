@@ -31,7 +31,14 @@ let (|InterpretedMatch|_|) pattern input =
 let (|CompiledMatch|_|) pattern input =
     if input = null then None
     else
-        let m = Regex.Match(input, pattern, RegexOptions.Compiled)
+        let ro = 
+#if SILVERLIGHT
+            RegexOptions.None
+#else
+            RegexOptions.Compiled
+#endif
+
+        let m = Regex.Match(input, pattern, ro)
         if m.Success then Some [for x in m.Groups -> x]
         else None
 
