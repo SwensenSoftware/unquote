@@ -418,7 +418,7 @@ let ``TryWith exception thrown with multiple bindings`` () =
                     null
                 with 
                 | :? System.InvalidCastException as ex1 -> ex1.GetType()
-                | :? System.InsufficientExecutionStackException as ex2 -> ex2.GetType()
+                | :? System.InvalidOperationException as ex2 -> ex2.GetType()
                 | :? System.ArgumentNullException as ex3 -> ex3.GetType()
 
     testEval <@ try
@@ -426,7 +426,7 @@ let ``TryWith exception thrown with multiple bindings`` () =
                     null
                 with 
                 | :? System.InvalidCastException as ex1 -> ex1.GetType()
-                | :? System.InsufficientExecutionStackException as ex2 -> ex2.GetType()
+                | :? System.InvalidOperationException as ex2 -> ex2.GetType()
                 | :? System.ArgumentNullException as ex3 -> ex3.GetType() @>
             expected
 
@@ -438,7 +438,7 @@ let ``TryWith exception thrown with multiple bindings and filtering`` () =
                     null
                 with 
                 | :? System.InvalidCastException as ex1 when (box ex1 :? System.InvalidCastException) -> ex1.GetType()
-                | :? System.InsufficientExecutionStackException as ex2 when (box ex2 :? System.InsufficientExecutionStackException) -> ex2.GetType()
+                | :? System.InvalidOperationException as ex2 when (box ex2 :? System.InvalidOperationException) -> ex2.GetType()
                 | :? System.ArgumentNullException as ex3 when (box ex3 :? System.ArgumentNullException) -> ex3.GetType()
 
     testEval <@ try
@@ -446,7 +446,7 @@ let ``TryWith exception thrown with multiple bindings and filtering`` () =
                     null
                 with 
                 | :? System.InvalidCastException as ex1 when (box ex1 :? System.InvalidCastException) -> ex1.GetType()
-                | :? System.InsufficientExecutionStackException as ex2 when (box ex2 :? System.InsufficientExecutionStackException) -> ex2.GetType()
+                | :? System.InvalidOperationException as ex2 when (box ex2 :? System.InvalidOperationException) -> ex2.GetType()
                 | :? System.ArgumentNullException as ex3 when (box ex3 :? System.ArgumentNullException) -> ex3.GetType() @>
             expected
 
@@ -469,7 +469,7 @@ let ``Issue 64: TryWith exception thrown but doesn't match any with cases leadin
                 null
             with 
             | :? System.InvalidCastException as ex1 when (box ex1 :? InvalidCastException) -> ex1.GetType()
-            | :? System.InsufficientExecutionStackException as ex2 when (box ex2 :? InsufficientExecutionStackException) -> ex2.GetType() @>
+            | :? System.InvalidOperationException as ex2 when (box ex2 :? InvalidOperationException) -> ex2.GetType() @>
 
 [<Fact>]
 let ``Issue 64: TryWith reraise`` () =

@@ -85,9 +85,12 @@ let ``ToInt32 primitive`` () =
 let ``ToInt primitive`` () =
     testEvalCheckedOverflow <@ Checked.int UInt64.MaxValue @>
 
+#if SILVERLIGHT
+#else
 [<Fact>]
 let ``ToUInt64 reflective`` () =
     testEvalCheckedOverflow <@ Checked.uint64 (bigint(UInt64.MaxValue) + 1I) @>
+#endif
 
 [<Fact>]
 let ``ToUIntPtr primitive`` () =
