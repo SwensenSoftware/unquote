@@ -23,6 +23,11 @@ module internal Swensen.Unquote.DynamicOperators
 open System
 open System.Reflection
 
+//Note: there is a confusion where the Silverlight 4.0 build of FSharp.Core includes its own System.Numerics.BigInteger implementation yet
+//the standard Silverlight 4.0 libraries include the assembly System.Numerics with the official BigInteger implementation. Moreover, the 
+//FSharp.Core version does not include all of the op_Explicit and other members included in the official implementation. For these reasons,
+//we wlll not include any big integer implementations here (so they will suffer Reflection performance penalty).
+
 //N.B. there are 13 primitive numeric types and also bigint to consider
 
 ///name is the name of the method, aty is the type of the first arg, bty is the type of the second arg,
@@ -46,8 +51,8 @@ let inline (|InvokeOptionalBinOpStatic|_|) (op:('a->'a->'a) option) (aty:Type, x
 
 let inline invokeBinOp 
     name 
-    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 
-    op12 op13 op14 op15 //non-integral types and string types not always supported
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 
+    op11 op12 op13 op14 op15 //non-integral types and string types not always supported
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
     let dyn() = invokeBinOpDynamic name aty bty x y
     if aty.Equals(bty) && bty.Equals(cty) then //NOT TRUE FOR EXPLICIT OPS
@@ -62,7 +67,7 @@ let inline invokeBinOp
         | InvokeBinOpStatic op8 (r:uint32) -> box r
         | InvokeBinOpStatic op9 (r:uint64) -> box r
         | InvokeBinOpStatic op10 (r:unativeint) -> box r
-        | InvokeBinOpStatic op11 (r:bigint) -> box r
+        | InvokeOptionalBinOpStatic op11 (r:bigint) -> box r
         | InvokeOptionalBinOpStatic op12 (r:float) -> box r
         | InvokeOptionalBinOpStatic op13 (r:float32) -> box r
         | InvokeOptionalBinOpStatic op14 (r:decimal) -> box r
@@ -70,15 +75,15 @@ let inline invokeBinOp
         | _ -> dyn()
     else dyn()
 
-let op_Addition = invokeBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
-let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) None
-let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) None
-let op_Division = invokeBinOp "op_Division" (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (Some(/)) (Some(/)) (Some(/)) None
-let op_Modulus = invokeBinOp "op_Modulus" (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (Some(%)) (Some(%)) (Some(%)) None
+let op_Addition = invokeBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
+let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) (Some(*)) None
+let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) (Some(-)) None
+let op_Division = invokeBinOp "op_Division" (/) (/) (/) (/) (/) (/) (/) (/) (/) (/) (Some(/)) (Some(/)) (Some(/)) (Some(/)) None
+let op_Modulus = invokeBinOp "op_Modulus" (%) (%) (%) (%) (%) (%) (%) (%) (%) (%) (Some(%)) (Some(%)) (Some(%)) (Some(%)) None
 
-let op_BitwiseOr = invokeBinOp "op_BitwiseOr" (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) None None None None
-let op_BitwiseAnd = invokeBinOp "op_BitwiseAnd" (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) None None None None
-let op_ExclusiveOr = invokeBinOp "op_ExclusiveOr" (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) None None None None
+let op_BitwiseOr = invokeBinOp "op_BitwiseOr" (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) (|||) None None None None None
+let op_BitwiseAnd = invokeBinOp "op_BitwiseAnd" (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) (&&&) None None None None None
+let op_ExclusiveOr = invokeBinOp "op_ExclusiveOr" (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) (^^^) None None None None None
 
 let inline (|InvokeShiftBinOpStatic|_|) (op:'a->int->'a) (aty:Type, x:obj, y:obj) =
     if aty.Equals(typeof<'a>) then Some(op (unbox<'a> x) (unbox<int> y))
@@ -87,7 +92,7 @@ let inline (|InvokeShiftBinOpStatic|_|) (op:'a->int->'a) (aty:Type, x:obj, y:obj
 ///Binary ops of the form 'a->int->'a
 let inline invokeShiftBinOp 
     name 
-    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
     let dyn() = invokeBinOpDynamic name aty bty x y //invokeBinOpDynamic works fine both for invokeBinOp and invokeShiftBinOp
     if aty.Equals(cty) && bty.Equals(typeof<int>) then
@@ -102,12 +107,11 @@ let inline invokeShiftBinOp
         | InvokeShiftBinOpStatic op8 (r:uint32) -> box r
         | InvokeShiftBinOpStatic op9 (r:uint64) -> box r
         | InvokeShiftBinOpStatic op10 (r:unativeint) -> box r
-        | InvokeShiftBinOpStatic op11 (r:bigint) -> box r //even though this isn't an inlined IL call in prim-types, it is still statically resolved so better than reflection
         | _ -> dyn()
     else dyn()
 
-let op_LeftShift = invokeShiftBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<)
-let op_RightShift = invokeShiftBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>)
+let op_LeftShift = invokeShiftBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<)
+let op_RightShift = invokeShiftBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>)
 
 let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
     dict
@@ -208,18 +212,18 @@ let inline invokeExplicitOp //string and decimal are optional
     | InvokeOptionalExplicitOpStatic (op16:(char->'a) option) r -> box r
     | _ -> dyn()
 
-let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte (Some(byte)) (Some(byte)) (Some(byte)) (Some(byte))
-let ToSByte = invokeExplicitOp sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte (Some(sbyte)) (Some(sbyte)) (Some(sbyte)) (Some(sbyte))
-let ToUInt16 = invokeExplicitOp uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 (Some(uint16)) (Some(uint16)) (Some(uint16)) (Some(uint16))
-let ToInt16 = invokeExplicitOp int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 (Some(int16)) (Some(int16)) (Some(int16)) (Some(int16))
-let ToUInt32 = invokeExplicitOp uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 (Some(uint32)) (Some(uint32)) (Some(uint32)) (Some(uint32))
+let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte None (Some(byte)) (Some(byte)) (Some(byte))
+let ToSByte = invokeExplicitOp sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte None (Some(sbyte)) (Some(sbyte)) (Some(sbyte))
+let ToUInt16 = invokeExplicitOp uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 None (Some(uint16)) (Some(uint16)) (Some(uint16))
+let ToInt16 = invokeExplicitOp int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 None (Some(int16)) (Some(int16)) (Some(int16))
+let ToUInt32 = invokeExplicitOp uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 None (Some(uint32)) (Some(uint32)) (Some(uint32))
 let ToInt32 = invokeExplicitOp int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 (Some(int32)) (Some(int32)) (Some(int32)) (Some(int32))
 let ToInt = ToInt32
-let ToUInt64 = invokeExplicitOp uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 (Some(uint64)) (Some(uint64)) (Some(uint64)) (Some(uint64))
+let ToUInt64 = invokeExplicitOp uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 None (Some(uint64)) (Some(uint64)) (Some(uint64))
 let ToInt64 = invokeExplicitOp int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 (Some(int64)) (Some(int64)) (Some(int64)) (Some(int64))
-let ToSingle = invokeExplicitOp float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 (Some(float32)) (Some(float32)) (Some(float32)) (Some(float32))
+let ToSingle = invokeExplicitOp float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 float32 None (Some(float32)) (Some(float32)) (Some(float32))
 let ToDouble = invokeExplicitOp float float float float float float float float float float float float (Some(float)) (Some(float)) (Some(float)) (Some(float))
-let ToDecimal = invokeExplicitOp decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal (Some(decimal)) (Some(decimal)) (Some(decimal)) None
+let ToDecimal = invokeExplicitOp decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal decimal None (Some(decimal)) (Some(decimal)) None
 let ToUIntPtr = invokeExplicitOp unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint None None None (Some(unativeint))
 let ToIntPtr = invokeExplicitOp nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint None None None (Some(nativeint))
 let ToChar = invokeExplicitOp char char char char char char char char char char char char None (Some(char)) (Some(char)) (Some(char))
@@ -247,9 +251,9 @@ let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->
 
 module Checked =
     open Checked
-    let op_Addition = invokeBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
-    let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) None
-    let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) None
+    let op_Addition = invokeBinOp "op_Addition" (+) (+) (+) (+) (+) (+) (+) (+) (+) (+) (Some(+)) (Some(+)) (Some(+)) (Some(+)) (Some(+)) //dynamic impl is given in F# lib, but we implement ourselves for perf. gain
+    let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) (Some(*)) None
+    let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) (Some(-)) None
 
     let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
         dict
@@ -259,14 +263,14 @@ module Checked =
 
     let op_UnaryNegation = invokeUnaryOp "op_UnaryNegation" (~-) (~-) (~-) (~-) (~-) (Some(~-)) (Some(~-)) (Some(~-)) (Some(~-)) None None None None None
 
-    let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte (Some(byte)) (Some(byte)) (Some(byte)) (Some(byte))
-    let ToSByte = invokeExplicitOp sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte (Some(sbyte)) (Some(sbyte)) (Some(sbyte)) (Some(sbyte))
-    let ToUInt16 = invokeExplicitOp uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 (Some(uint16)) (Some(uint16)) (Some(uint16)) (Some(uint16))
-    let ToInt16 = invokeExplicitOp int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 (Some(int16)) (Some(int16)) (Some(int16)) (Some(int16))
-    let ToUInt32 = invokeExplicitOp uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 (Some(uint32)) (Some(uint32)) (Some(uint32)) (Some(uint32))
+    let ToByte = invokeExplicitOp byte byte byte byte byte byte byte byte byte byte byte byte None (Some(byte)) (Some(byte)) (Some(byte))
+    let ToSByte = invokeExplicitOp sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte sbyte None (Some(sbyte)) (Some(sbyte)) (Some(sbyte))
+    let ToUInt16 = invokeExplicitOp uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 uint16 None (Some(uint16)) (Some(uint16)) (Some(uint16))
+    let ToInt16 = invokeExplicitOp int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 int16 None (Some(int16)) (Some(int16)) (Some(int16))
+    let ToUInt32 = invokeExplicitOp uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32 None (Some(uint32)) (Some(uint32)) (Some(uint32))
     let ToInt32 = invokeExplicitOp int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 int32 (Some(int32)) (Some(int32)) (Some(int32)) (Some(int32))
     let ToInt = ToInt32
-    let ToUInt64 = invokeExplicitOp uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 (Some(uint64)) (Some(uint64)) (Some(uint64)) (Some(uint64))
+    let ToUInt64 = invokeExplicitOp uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 None (Some(uint64)) (Some(uint64)) (Some(uint64))
     let ToInt64 = invokeExplicitOp int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 int64 (Some(int64)) (Some(int64)) (Some(int64)) (Some(int64))
     //N.B. no checked decimal, float, or float32
     let ToUIntPtr = invokeExplicitOp unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint unativeint None None None (Some(unativeint))
