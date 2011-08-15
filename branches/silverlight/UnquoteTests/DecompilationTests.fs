@@ -434,7 +434,11 @@ let g'<'a,'b>() = typeof<'a>.Name, typeof<'b>.Name
 [<Fact>]
 let ``Call distinguishes between generic value Call and unit function Call`` () =    
     decompile <@ g<int, string> @> =? "g<int, string>"
+
+#if SILVERLIGHT //have to take best guess in silverlight since don't have PowerPack.Metadata
+#else
     decompile <@ g'<int, string>() @> =? "g'<int, string>()"
+#endif
 
 [<Fact>] //issue 21
 let ``sprint Lambda Unit vars literally`` () =

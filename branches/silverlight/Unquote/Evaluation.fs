@@ -55,9 +55,12 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
+#if SILVERLIGHT
+#else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
     remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
+#endif
     raise e
 
 open System.Collections.Generic

@@ -47,12 +47,27 @@
     <Reference Include="FSharp.Core">
       <HintPath>$(ProgramFiles)\Microsoft F#\Silverlight\Libraries\Client\$(SilverlightVersion)\FSharp.Core.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.mocks">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.mocks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="pnunit.framework">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\pnunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Browser" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft SDKs\Silverlight\v4.0\Libraries\Client\System.Xml.Linq.dll</HintPath>
+    </Reference>
     <Reference Include="xunit-silverlight4">
       <HintPath>..\..\..\..\..\..\..\..\xunitcontrib-silverlight.0.2\Silverlight4\xunit-silverlight4.dll</HintPath>
     </Reference>
@@ -79,9 +94,7 @@
     <Compile Include="..\UnquoteTests\AssertionOperatorsTests.fs">
       <Link>AssertionOperatorsTests.fs</Link>
     </Compile>
-    <Compile Include="..\UnquoteTests\PrintfTests.fs">
-      <Link>PrintfTests.fs</Link>
-    </Compile>
+    <Compile Include="TestRunner.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Unquote.Silverlight\Unquote.Silverlight.fsproj">

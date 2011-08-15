@@ -47,12 +47,15 @@ let ``arithmetic expressions`` () =
         "-18"
     ]
 
+#if SILVERLIGHT
+#else
 [<Fact>]
 let ``simple lambda with application`` () =
     decompiledReductions <@ (fun i j -> i + j + 1) 1 2 @> =? [
         "(fun i j -> i + j + 1) 1 2"
         "4"
     ]
+#endif
 
 [<Fact>]
 let ``lambda with non-reduced applications`` () =
@@ -614,6 +617,8 @@ let ``instance PropertySet`` () =
         "1"
     ]
 
+#if SILVERLIGHT
+#else
 [<Fact>] //issue 51
 let ``RecursiveLet mutually recursive funtions``() =
     <@    
@@ -629,7 +634,10 @@ let ``RecursiveLet mutually recursive funtions``() =
         "let rec even = fun x -> x = 0 || odd (x - 1) and odd = fun x -> if x = 0 then false else even (x - 1) in (even 19, odd 20)"
         "(false, false)"
     ]
+#endif
 
+#if SILVERLIGHT
+#else
 [<Fact>] //issue 51
 let ``RecursiveLet self recursive function``() =
     <@    
@@ -642,6 +650,7 @@ let ``RecursiveLet self recursive function``() =
         "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
         "-6"
     ]
+#endif
 
 [<Fact>] //issue 43
 let ``TryFinally incremental reduction of try body but finally body is never reduced``() =

@@ -48,16 +48,19 @@ type SideEffects() =
     let mutable x = 0
     member __.X = x <- x + 1 ; x
 
+#if SILVERLIGHT
+#else
 [<Fact>]
 let ``Issue 60: Double evaluation in test internal implementation obscures state related test failure causes`` () =
     let se = SideEffects()
-    test <@ 
-        try
-            test <@ se.X = 2 @> ; false
-        with e ->
-            e.ToString().Contains("1 = 2") //not "4 = 2"!
-    @>
-
+    test 
+        <@ 
+            try
+                test <@ se.X = 2 @> ; false
+            with e ->
+                e.ToString().Contains("1 = 2") //not "4 = 2"!
+        @>
+#endif
 let RaiseException(message:string)=
     raise (System.NotSupportedException(message))
 
