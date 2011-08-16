@@ -223,7 +223,9 @@ let eval env expr =
             let argTy = arg.Type
             let arg = eval env arg
             //need to be very exact about GetMethod so won't get AmbiguousMatchException with curried functions
-            lambda.GetType().GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null).Invoke(lambda, [|arg|])
+            //(will fail in SL if lambda is a local function and thus implemented as an internal class...maybe can workaround since base type is public?)
+            let r = lambda.GetType().GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null).Invoke(lambda, [|arg|])
+            r
         | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) -> 
             op (eval env lhs) (eval env rhs)
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
