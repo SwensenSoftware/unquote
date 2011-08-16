@@ -34,4 +34,6 @@ type TestRunner() =
             for mi in methods do
                 let attrs = mi.GetCustomAttributes(false)
                 if attrs |> Array.exists (fun attr -> attr :? Xunit.FactAttribute) then
+                    printf "running test `%s`..." mi.Name
                     mi.Invoke(null,null) |> ignore
+                    printfn "passed"
