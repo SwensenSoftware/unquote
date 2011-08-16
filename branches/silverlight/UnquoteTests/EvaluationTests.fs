@@ -506,6 +506,8 @@ let ``TryWith exception originating from method evaluation strips TargetInvocati
 let ``DefaultValue`` () =
     testEval <@ new int() @> (new int())
 
+#if SILVERLIGHT //VERIFIED
+#else
 [<Fact>]
 let ``Lambda Applications with single unit application`` () =
     testEval <@ (fun () -> true)() @> true
@@ -526,6 +528,7 @@ let ``Lambda Applications with single non-decomposed tuple application`` () =
 let ``Lambda Application of curried function`` () =
     let f (x:string) (y:string) = x + y
     testEval <@ f "hello" "world"  @> "helloworld"
+#endif
 
 [<Fact>]
 let ``eval calling instance member on null should throw NullReferenceException instead of reflection TargetException`` ()=
@@ -607,7 +610,8 @@ let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
 #endif
 
-
+#if SILVERLIGHT //VERIFIED
+#else
 [<Fact>]
 let ``LetRecursive mutually recursive functions`` () =
     testEval
@@ -635,6 +639,7 @@ let ``LetRecursive self recursive function`` () =
                 fib 9
         @>
         34
+#endif
 
 //Swensen.Unquote.Quotations.Assertions.Operators
 //Swensen.Unquote.Quotations.Operators

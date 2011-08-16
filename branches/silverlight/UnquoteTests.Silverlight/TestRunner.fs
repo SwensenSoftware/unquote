@@ -25,6 +25,11 @@ open NUnit.Framework
 
 [<TestFixture>]
 type TestRunner() =
+    let isFact (attr:obj) =
+        match attr with
+        | :? Xunit.FactAttribute as attr when attr.Skip = null -> true
+        | _ -> false
+
     [<Test>]
     member this.Run () =
         let assm = System.Reflection.Assembly.GetExecutingAssembly()
@@ -33,7 +38,7 @@ type TestRunner() =
             let methods = ty.GetMethods()
             for mi in methods do
                 let attrs = mi.GetCustomAttributes(false)
-                if attrs |> Array.exists (fun attr -> attr :? Xunit.FactAttribute) then
+                if attrs |> Array.exists isFact then
                     printf "running test `%s`..." mi.Name
                     mi.Invoke(null,null) |> ignore
                     printfn "passed"
