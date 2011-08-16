@@ -34,6 +34,7 @@ type TestRunner() =
     member this.Run () =
         let assm = System.Reflection.Assembly.GetExecutingAssembly()
         let tys = assm.GetTypes()
+        let mutable count = 0
         for ty in tys do
             let methods = ty.GetMethods()
             for mi in methods do
@@ -42,3 +43,5 @@ type TestRunner() =
                     printf "running test `%s`..." mi.Name
                     mi.Invoke(null,null) |> ignore
                     printfn "passed"
+                    count <- count + 1
+        printfn "All %i tests passed." count

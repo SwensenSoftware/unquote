@@ -55,7 +55,6 @@ let ``simple lambda with application`` () =
         "(fun i j -> i + j + 1) 1 2"
         "4"
     ]
-#endif
 
 [<Fact>]
 let ``lambda with non-reduced applications`` () =
@@ -107,6 +106,8 @@ let ``lambdas are reduced`` () =
         "[2; 3; 4; 5] = [2; 3; 4; 5]"
         "true"
     ]
+
+#endif
 
 [<Fact>]
 let ``new array with arg sub expressions`` () =
@@ -177,6 +178,8 @@ let ``null reference exception`` () =
     step2 =? "3 = null.Length"
     test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
 
+#if SILVERLIGHT //LAMBDA PROBLEM
+#else
 [<Fact>]
 let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
     let doit (x:string) = (null:string)
@@ -213,6 +216,7 @@ let ``multi-var Value lambda application doesn't throw`` () =
 let ``multi-var lambda let binding application doesn't throw`` () =
     let doit2 (x:string) (y:string) = x + y
     reduceFully <@ doit2 (let x = "asdf" in x) ("asdf" + "asdf")  @>
+#endif
     
 let takesNoArgs() = (null:string)
 [<Fact>]
@@ -238,6 +242,8 @@ let ``new union case list compared to named list`` () =
         "true"
     ]
 
+#if SILVERLIGHT //LAMBDA PROBLEM
+#else
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``incomplete lambda call is reduced`` () =
     <@ List.map (fun i -> i + 1) @> |> decompiledReductions =? [
@@ -250,6 +256,7 @@ let ``incomplete lambda call on right hand side of pipe is not reduced`` () =
       "[1; 2; 3] |> List.map (fun i -> i + 1)"
       "[2; 3; 4]"
     ]
+#endif
 
 let f2 a b c d = a + b + c + d
 
@@ -541,6 +548,8 @@ let ``can't differentiate between true || false and true && true``() =
     (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
     (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
 
+#if SILVERLIGHT //QUOTE PROBLEM
+#else
 [<Fact>]
 let ``Quote, supported typed`` () =
     <@ (<@ <@ 1 @> @> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =? [
@@ -556,6 +565,7 @@ let ``Quote, unsupported untyped treated as typed`` () =
         "\"<@ 1 @>\" = \"<@ 1 @>\""
         "true"
     ]
+#endif
 
 [<Fact>]
 let ``VarSet`` () =
