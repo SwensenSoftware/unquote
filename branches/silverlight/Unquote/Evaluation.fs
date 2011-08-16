@@ -55,7 +55,7 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
-#if SILVERLIGHT
+#if SILVERLIGHT //VERIFIED
 #else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
@@ -125,7 +125,7 @@ type EnvVar(name:string, value:obj, ?reraisable:bool) =
 
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
-        failwithf "Quotation pattern %s not supported: expression = %A" name expr
+        raise <| System.NotSupportedException(sprintf "Evaluation of quotation pattern %s not supported: expression = %A" name expr)
 
     let rec eval env expr =
         match expr with
@@ -229,6 +229,9 @@ let eval env expr =
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> 
+#if SILVERLIGHT //VERIFIED
+            failwithPatternNotSupported "Quote (in Silverlight)" expr
+#else
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 
             //all Expr are themselves untyped, but their Type property is actually always typed: 
             //we assume the frequency of typed Quote expressions is more common then untyped and convert all (untyped) Expr to typed using the Type property
@@ -236,6 +239,7 @@ let eval env expr =
             let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
             let generic = ctor.Invoke([|tree; expr.CustomAttributes|])
             box generic
+#endif
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.LetRecursive(bindings, finalBody) -> 

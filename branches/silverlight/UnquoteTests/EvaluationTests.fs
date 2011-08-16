@@ -587,7 +587,12 @@ let ``raw Quote`` () =
         | Patterns.Value(x,_) -> Some(x)
         | _ -> None
 
-    test <@ expectedQuotationValue.Value :?> int = 1 @>
+    let testq = <@ expectedQuotationValue.Value :?> int = 1 @>
+#if SILVERLIGHT //VERIFIED
+    raises<NotSupportedException> testq
+#else
+    test testq
+#endif
 
 [<Fact>]
 let ``typed Quote`` () =
