@@ -64,23 +64,35 @@ let ``Issue 60: Double evaluation in test internal implementation obscures state
 let RaiseException(message:string)=
     raise (System.NotSupportedException(message))
 
+#if DEBUG
+#else
 [<Fact>] 
 let ``Issue 63: natural nested invocation exceptions are stripped`` ()=
     raises<System.NotSupportedException> <@ "Should be a NotSupportedException" |> RaiseException  @>
+#endif
 
 open System
 open System.Reflection
+#if DEBUG
+#else
 [<Fact>] 
 let ``Issue 63: synthetic nested invocation exceptions are stripped if no inner exception`` ()=
     raises<ArgumentNullException> <@ raise (TargetInvocationException(TargetInvocationException(ArgumentNullException())))  @>
+#endif
 
+#if DEBUG
+#else
 [<Fact>] 
 let ``Issue 63: synthetic invocation exception is stripped if no inner exception`` ()=
     raises<ArgumentNullException> <@ raise (TargetInvocationException(ArgumentNullException()))  @>
+#endif
 
+#if DEBUG
+#else
 [<Fact>] 
 let ``Issue 63: synthetic non invocation exception`` ()=
     raises<ArgumentNullException> <@ raise (ArgumentNullException()) @>
+#endif
 
 [<Fact>] 
 let ``Issue 63: synthetic nested invocation exceptions are not stripped if no inner exception`` ()=
