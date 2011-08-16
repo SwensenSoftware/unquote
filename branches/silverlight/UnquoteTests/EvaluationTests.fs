@@ -578,6 +578,8 @@ let ``untyped synthetic evaluation`` () =
 //    else
 //        None
 
+#if SILVERLIGHT //VERIFIED
+#else
 let evalUntyped (expr:Expr) = expr.Eval()
 [<Fact>]
 let ``raw Quote`` () =
@@ -587,12 +589,8 @@ let ``raw Quote`` () =
         | Patterns.Value(x,_) -> Some(x)
         | _ -> None
 
-    let testq = <@ expectedQuotationValue.Value :?> int = 1 @>
-#if SILVERLIGHT //VERIFIED
-    raises<NotSupportedException> testq
-#else
-    test testq
-#endif
+    test <@ expectedQuotationValue.Value :?> int = 1 @>
+
 
 [<Fact>]
 let ``typed Quote`` () =
@@ -607,6 +605,7 @@ let ``typed Quote`` () =
 [<Fact>]
 let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
+#endif
 
 
 [<Fact>]
