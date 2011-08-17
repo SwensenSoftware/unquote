@@ -20,11 +20,6 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
 
-#if SILVERLIGHT
-#else
-open Microsoft.FSharp.Metadata
-#endif
-
 open Swensen.Utils
 
 ///is the top-level FSI module
@@ -157,28 +152,29 @@ type fsharpValueType =
     | GenericValue
 
 let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
-    let fallback () =
-        if FSharpType.IsModule mi.DeclaringType then
-            if mi.GetParameters().Length = 0 && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) then Some(GenericValue)
-            else Some(Function)
-        else None
+    //let fallback () =
+    if FSharpType.IsModule mi.DeclaringType then
+        if mi.GetParameters().Length = 0 && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) then Some(GenericValue)
+        else Some(Function)
+    else None
 
-#if SILVERLIGHT
-    fallback()
-#else
-    try
-        let mOrV =
-            FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
-            |> Seq.tryFind (fun mOrV -> mOrV.CompiledName = mi.Name)
-
-        match mOrV with
-        | Some(mOrV) when mOrV.Type.IsFunction -> Some(Function)
-        | Some(_) -> Some(GenericValue)
-        | None -> None
-    with
-    //PowerPack MetadataReader throws NotSupported Exception in dynamic assemblies like FSI
-    //and also more worrying it throws internal exceptions sometimes in other cases (should file bug!)
-    //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
-    | :? System.NotSupportedException | _  -> 
-        fallback ()
-#endif
+//Issue 68: removing Metadata dependency, not worth it for this one scenario
+//#if SILVERLIGHT
+//    fallback()
+//#else
+//    try
+//        let mOrV =
+//            FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
+//            |> Seq.tryFind (fun mOrV -> mOrV.CompiledName = mi.Name)
+//
+//        match mOrV with
+//        | Some(mOrV) when mOrV.Type.IsFunction -> Some(Function)
+//        | Some(_) -> Some(GenericValue)
+//        | None -> None
+//    with
+//    //PowerPack MetadataReader throws NotSupported Exception in dynamic assemblies like FSI
+//    //and also more worrying it throws internal exceptions sometimes in other cases (should file bug!)
+//    //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
+//    | :? System.NotSupportedException | _  -> 
+//        fallback ()
+//#endif
