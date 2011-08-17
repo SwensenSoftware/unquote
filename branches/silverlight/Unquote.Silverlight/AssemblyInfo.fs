@@ -22,11 +22,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("Unquote.Silverlight")>]
-[<assembly: AssemblyDescription("")>]
+[<assembly: AssemblyTitle("Unquote")>]
+[<assembly: AssemblyDescription("Unquote for Silverlight 4")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("Unquote.Silverlight")>]
+[<assembly: AssemblyProduct("Unquote")>]
 [<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011")>]
 [<assembly: AssemblyTrademark("")>]
 

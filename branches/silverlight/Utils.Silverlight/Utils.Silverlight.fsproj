@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4321dd90-f530-457f-bdb4-51ad4801be64}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Utils.Silverlight</AssemblyName>
+    <AssemblyName>Utils</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <FileAlignment>512</FileAlignment>

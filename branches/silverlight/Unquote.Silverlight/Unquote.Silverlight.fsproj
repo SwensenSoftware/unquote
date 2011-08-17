@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d9c03ac2-0017-456a-9b01-87e389374e18}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Unquote.Silverlight</AssemblyName>
+    <AssemblyName>Unquote</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <FileAlignment>512</FileAlignment>
