@@ -610,8 +610,8 @@ let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
 #endif
 
-#if SILVERLIGHT //VERIFIED
-#else
+//#if SILVERLIGHT //VERIFIED
+//#else
 [<Fact>]
 let ``LetRecursive mutually recursive functions`` () =
     testEval
@@ -639,7 +639,7 @@ let ``LetRecursive self recursive function`` () =
                 fib 9
         @>
         34
-#endif
+//#endif
 
 //Swensen.Unquote.Quotations.Assertions.Operators
 //Swensen.Unquote.Quotations.Operators

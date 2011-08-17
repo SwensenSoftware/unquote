@@ -224,7 +224,12 @@ let eval env expr =
             let arg = eval env arg
             //need to be very exact about GetMethod so won't get AmbiguousMatchException with curried functions
             //(will fail in SL if lambda is a local function and thus implemented as an internal class...maybe can workaround since base type is public?)
-            let r = lambda.GetType().GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null).Invoke(lambda, [|arg|])
+            let lty = lambda.GetType()
+#if SILVERLIGHT
+            let lty = if lty.BaseType <> typeof<obj> then lty.BaseType else lty //if local lambda then we want the public base type
+#endif
+            let meth = lty.GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null)
+            let r = meth.Invoke(lambda, [|arg|])
             r
         | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) -> 
             op (eval env lhs) (eval env rhs)
