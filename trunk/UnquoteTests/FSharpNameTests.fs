@@ -33,7 +33,7 @@ let ``no alias with generic args`` () =
 
 [<Fact>]
 let ``no alias with no generic args`` () =
-    typeof<System.Collections.ArrayList>.FSharpName =? "ArrayList";
+    typeof<System.Collections.BitArray>.FSharpName =? "BitArray";
 
 [<Fact>]
 let ``tuple`` () =

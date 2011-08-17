@@ -55,9 +55,12 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
+#if SILVERLIGHT //VERIFIED
+#else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
     remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
+#endif
     raise e
 
 open System.Collections.Generic
@@ -122,7 +125,7 @@ type EnvVar(name:string, value:obj, ?reraisable:bool) =
 
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
-        failwithf "Quotation pattern %s not supported: expression = %A" name expr
+        raise <| System.NotSupportedException(sprintf "Evaluation of quotation pattern %s not supported: expression = %A" name expr)
 
     let rec eval env expr =
         match expr with
@@ -220,12 +223,22 @@ let eval env expr =
             let argTy = arg.Type
             let arg = eval env arg
             //need to be very exact about GetMethod so won't get AmbiguousMatchException with curried functions
-            lambda.GetType().GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null).Invoke(lambda, [|arg|])
+            //(will fail in SL if lambda is a local function and thus implemented as an internal class...maybe can workaround since base type is public?)
+            let lty = lambda.GetType()
+#if SILVERLIGHT
+            let lty = if lty.BaseType <> typeof<obj> then lty.BaseType else lty //if local lambda then we want the public base type
+#endif
+            let meth = lty.GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null)
+            let r = meth.Invoke(lambda, [|arg|])
+            r
         | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) -> 
             op (eval env lhs) (eval env rhs)
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> 
+#if SILVERLIGHT //VERIFIED
+            failwithPatternNotSupported "Quote (in Silverlight)" expr
+#else
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 
             //all Expr are themselves untyped, but their Type property is actually always typed: 
             //we assume the frequency of typed Quote expressions is more common then untyped and convert all (untyped) Expr to typed using the Type property
@@ -233,6 +246,7 @@ let eval env expr =
             let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
             let generic = ctor.Invoke([|tree; expr.CustomAttributes|])
             box generic
+#endif
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.LetRecursive(bindings, finalBody) -> 
