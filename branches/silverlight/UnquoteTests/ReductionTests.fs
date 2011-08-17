@@ -47,8 +47,6 @@ let ``arithmetic expressions`` () =
         "-18"
     ]
 
-#if SILVERLIGHT
-#else
 [<Fact>]
 let ``simple lambda with application`` () =
     decompiledReductions <@ (fun i j -> i + j + 1) 1 2 @> =? [
@@ -106,8 +104,6 @@ let ``lambdas are reduced`` () =
         "[2; 3; 4; 5] = [2; 3; 4; 5]"
         "true"
     ]
-
-#endif
 
 [<Fact>]
 let ``new array with arg sub expressions`` () =
@@ -178,8 +174,6 @@ let ``null reference exception`` () =
     step2 =? "3 = null.Length"
     test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
 
-#if SILVERLIGHT //LAMBDA PROBLEM
-#else
 [<Fact>]
 let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
     let doit (x:string) = (null:string)
@@ -216,7 +210,6 @@ let ``multi-var Value lambda application doesn't throw`` () =
 let ``multi-var lambda let binding application doesn't throw`` () =
     let doit2 (x:string) (y:string) = x + y
     reduceFully <@ doit2 (let x = "asdf" in x) ("asdf" + "asdf")  @>
-#endif
     
 let takesNoArgs() = (null:string)
 [<Fact>]
@@ -242,8 +235,6 @@ let ``new union case list compared to named list`` () =
         "true"
     ]
 
-#if SILVERLIGHT //LAMBDA PROBLEM
-#else
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``incomplete lambda call is reduced`` () =
     <@ List.map (fun i -> i + 1) @> |> decompiledReductions =? [
@@ -256,7 +247,6 @@ let ``incomplete lambda call on right hand side of pipe is not reduced`` () =
       "[1; 2; 3] |> List.map (fun i -> i + 1)"
       "[2; 3; 4]"
     ]
-#endif
 
 let f2 a b c d = a + b + c + d
 
@@ -627,8 +617,6 @@ let ``instance PropertySet`` () =
         "1"
     ]
 
-#if SILVERLIGHT
-#else
 [<Fact>] //issue 51
 let ``RecursiveLet mutually recursive funtions``() =
     <@    
@@ -644,10 +632,7 @@ let ``RecursiveLet mutually recursive funtions``() =
         "let rec even = fun x -> x = 0 || odd (x - 1) and odd = fun x -> if x = 0 then false else even (x - 1) in (even 19, odd 20)"
         "(false, false)"
     ]
-#endif
 
-#if SILVERLIGHT
-#else
 [<Fact>] //issue 51
 let ``RecursiveLet self recursive function``() =
     <@    
@@ -660,7 +645,6 @@ let ``RecursiveLet self recursive function``() =
         "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
         "-6"
     ]
-#endif
 
 [<Fact>] //issue 43
 let ``TryFinally incremental reduction of try body but finally body is never reduced``() =
