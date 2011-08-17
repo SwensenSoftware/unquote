@@ -394,6 +394,8 @@ let ``generic NewUnionCase with Value arg`` () =
 let ``generic NewUnionCase with nested construction`` () =
     decompile <@ World(Hello(3)) @> =? "World(Hello(3))"
 
+#if SILVERLIGHT //can't access stack frame
+#else
 //issue #3 -- UnionCaseTests
 //these tests are not as thorough as would like: can't verify op_Dynamic works right
 [<Fact>] 
@@ -404,6 +406,8 @@ let ``union case test list not requiring op_Dynamic`` () = //this test is a litt
     #else
     decompile <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21)
     #endif
+#endif
+
 let h = World (Hello2(Hello 3, true))
 [<Fact>] //issue #3
 let ``union case test requiring op_Dynamic`` () =
@@ -434,7 +438,12 @@ let g'<'a,'b>() = typeof<'a>.Name, typeof<'b>.Name
 [<Fact>]
 let ``Call distinguishes between generic value Call and unit function Call`` () =    
     decompile <@ g<int, string> @> =? "g<int, string>"
-    decompile <@ g'<int, string>() @> =? "g'<int, string>()"
+
+//Issue 68: removing Metadata dependency, not worth it for this one scenario
+//#if SILVERLIGHT //have to take best guess in silverlight since don't have PowerPack.Metadata
+//#else
+//    decompile <@ g'<int, string>() @> =? "g'<int, string>()"
+//#endif
 
 [<Fact>] //issue 21
 let ``sprint Lambda Unit vars literally`` () =
@@ -715,6 +724,8 @@ let ``false || false is given priority over false && true even though they can't
 let ``true && true is given priority over true || false even though they can't be differentiated``() =
     <@ true && true @> |> decompile =? "true && true"
 
+#if SILVERLIGHT //NESTED QUOTE PROBLEM (not all of these need to use nested quotes to test)
+#else
 [<Fact(Skip="there is a confirmed F# bug which makes this result in a runtime exception")>]
 let ``Raw quoatation nested in typed quotation, confirmed F# bug`` () =
     <@ <@@ 1 @@> @> //System.ArgumentException: Type mismatch when building 'expr': the expression has the wrong type. Expected 'Microsoft.FSharp.Quotations.FSharpExpr', but received type 'Microsoft.FSharp.Quotations.FSharpExpr`1[System.Int32]'.
@@ -737,6 +748,7 @@ let f' (x:obj) (y:obj) = x |> string
 [<Fact>]
 let ``issue 40: handle lambda re-sugaring when vars are implicitly coerced``() =
     <@ <@ 2 |> f' "2" @> |> decompile = "2 |> f' \"2\"" @> |> test
+#endif
 
 [<Fact>]
 let ``issue 51: RecursiveLet mutually recursive funtions``() =

@@ -23,8 +23,15 @@ module internal Swensen.Utils.PrintfUtils  //should make as extension to Microso
 open System
 open System.Text.RegularExpressions
 
+let private ro = 
+#if SILVERLIGHT
+    RegexOptions.None
+#else
+    RegexOptions.Compiled
+#endif
+
 ///Matches "\n", but not "\r\n"
-let private lfButNotCrLf = Regex(@"(?<!\r)\n", RegexOptions.Compiled)
+let private lfButNotCrLf = Regex(@"(?<!\r)\n", ro)
 
 ///Normalize newlines to Environment.NewLine: if Environment.NewLine = "\n", then do nothing.
 ///If Environment.NewLine = "\r\n", then replace all occurences of "\n", but not "\r\n", with "\r\n".

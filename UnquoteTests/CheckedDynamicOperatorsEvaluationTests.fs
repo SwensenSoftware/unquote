@@ -85,9 +85,12 @@ let ``ToInt32 primitive`` () =
 let ``ToInt primitive`` () =
     testEvalCheckedOverflow <@ Checked.int UInt64.MaxValue @>
 
+#if SILVERLIGHT //bigint issue in silverlight: http://stackoverflow.com/questions/7048578/missing-biginteger-features-under-f-silverlight
+#else
 [<Fact>]
 let ``ToUInt64 reflective`` () =
     testEvalCheckedOverflow <@ Checked.uint64 (bigint(UInt64.MaxValue) + 1I) @>
+#endif
 
 [<Fact>]
 let ``ToUIntPtr primitive`` () =

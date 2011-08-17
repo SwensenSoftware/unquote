@@ -57,6 +57,19 @@ module Internal =
     let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
     let testFailed =
+        let outputGenericTestFailedMsg = fun msg -> raise <| AssertionFailedException("Test failed:" + msg)
+
+        let outputReducedExprsMsg =
+            fun outputTestFailedMsg (reducedExprs:Expr list) additionalInfo ->
+                    let msg = 
+                        nsprintf "\n%s\n%s\n"
+                            (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
+                            (reducedExprs |> List.map decompile |> String.concat "\n")    
+                    outputTestFailedMsg msg
+
+#if SILVERLIGHT
+        outputReducedExprsMsg outputGenericTestFailedMsg
+#else
         let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
         if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
             fsiTestFailed
@@ -89,14 +102,10 @@ module Internal =
 //                    let del = Delegate.CreateDelegate(typeof<Action<string,obj[]>>, mi) :?> (Action<string,obj[]>)
 //                    fun msg -> del.Invoke(msg,null)
                 | _ ->
-                    fun msg -> raise <| AssertionFailedException("Test failed:" + msg)
+                    outputGenericTestFailedMsg
 
-            fun (reducedExprs:Expr list) additionalInfo ->
-                let msg = 
-                    nsprintf "\n%s\n%s\n"
-                        (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
-                        (reducedExprs |> List.map decompile |> String.concat "\n")    
-                outputNonFsiTestFailedMsg msg
+            outputReducedExprsMsg outputNonFsiTestFailedMsg
+#endif
 
 open Internal
 
