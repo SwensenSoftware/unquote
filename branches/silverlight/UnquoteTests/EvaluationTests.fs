@@ -506,8 +506,6 @@ let ``TryWith exception originating from method evaluation strips TargetInvocati
 let ``DefaultValue`` () =
     testEval <@ new int() @> (new int())
 
-#if SILVERLIGHT //VERIFIED
-#else
 [<Fact>]
 let ``Lambda Applications with single unit application`` () =
     testEval <@ (fun () -> true)() @> true
@@ -528,7 +526,6 @@ let ``Lambda Applications with single non-decomposed tuple application`` () =
 let ``Lambda Application of curried function`` () =
     let f (x:string) (y:string) = x + y
     testEval <@ f "hello" "world"  @> "helloworld"
-#endif
 
 [<Fact>]
 let ``eval calling instance member on null should throw NullReferenceException instead of reflection TargetException`` ()=
