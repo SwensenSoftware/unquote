@@ -24,9 +24,18 @@ REM zip builds for .NET 4.0...
 
 7z a -tzip builds\Unquote-%versionNumber%.zip staging\*
 
-REM copy builds to nuget package for .NET 4.0...
+REM preparing nuget dirs
+
+mkdir nuget
+mkdir nuget\lib
+mkdir nuget\lib\net40
+mkdir nuget\lib\sl4
 copy LICENSE nuget
 copy NOTICE nuget
+copy Unquote.nuspec nuget
+
+REM copy staging builds to nuget package...
+
 copy staging\net40\Unquote.dll nuget\lib\net40\Unquote.dll
 copy staging\net40\Unquote.xml nuget\lib\net40\Unquote.xml
 copy staging\sl4\Unquote.dll nuget\lib\sl4\Unquote.dll
@@ -37,7 +46,5 @@ REM create nuget package...
 C:\NuGet\nuget.exe pack nuget\Unquote.nuspec
 
 REM cleanup...
-
-rd staging
 
 pause
