@@ -3,6 +3,16 @@
 
 = Release Notes =
 
+== v2.1.0, 8/18/11 ==
+
+Added Silverlight 4 support.
+
+  * 7 Decompiler Bug: precedence of constructor call and other tupled calls not strong enough
+  * 66 If binary operator starts or ends with * must put space between parens when sprinting unapplied lambda
+  * 68 Silverlight version of Unquote
+  * 69 Remove FSharp.PowerPack.Metadata dependency
+
+
 == v2.0.3, 8/7/11 ==
 
 Several high-priority fixes.
