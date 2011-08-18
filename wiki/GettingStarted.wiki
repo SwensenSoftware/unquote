@@ -5,16 +5,16 @@
 
 == Installation == 
 
-Unquote targets the .NET 4.0 runtime and depends on FSharp.Core version 4.0.0.0. 
+Unquote has builds targeting both .NET 4.0 and Silverlight 4.
 
 To use Unquote within an F# unit testing project, you must obtain and add a reference to Unquote.dll. There are two ways to obtain Unquote:
 
-  * Install the latest version of the [http://www.nuget.org/List/Packages/Unquote Unquote NuGet package] to your unit testing project, this will automatically add a reference to Unquote.dll
-  * Download and unzip the featured release of Unquote from the [http://code.google.com/p/unquote/downloads/list Downloads] page and then locate and add a reference to Unquote.dll via the Visual Studio Add Reference dialog.
+  * Install the latest version of the [http://www.nuget.org/List/Packages/Unquote Unquote NuGet package] to your unit testing project, this will automatically add the correct reference to Unquote.dll according to your project type (.NET 4.0 or Silverlight 4).
+  * Download and unzip the featured release of Unquote from the [http://code.google.com/p/unquote/downloads/list Downloads] page and then locate and add a reference to Unquote.dll via the Visual Studio Add Reference dialog. The .NET 4.0 builds are located in the net40 folder, the Silverlight 4 builds are located in the sl4 folder.
 
 You must also obtain and install your unit testing framework of choice, NUnit and xUnit having been given special support.
 
-To use Unquote within FSI, locate and add a reference to Unquote.dll using the `#r` directive.
+To use Unquote within FSI, locate and add a reference to Unquote.dll using the `#r` directive (use the .NET 4.0 build).
 
 == User Guide ==
 
