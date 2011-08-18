@@ -55,17 +55,7 @@ del Unquote.%versionNumber%.nupkg
 
 REM cleanup...
 
-del /q staging\net40\*.*
-del staging\net40
-del /q staging\sl4\*.*
-del staging\sl4
-del staging
-
-del /q nuget\lib\net40\*.*
-del nuget\lib\net40
-del /q nuget\lib\sl4\*.*
-del nuget\lib\sl4
-del nuget\lib
-del staging
+del /q /s staging
+del /q /s nuget
 
 pause
