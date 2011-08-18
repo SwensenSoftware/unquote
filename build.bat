@@ -21,8 +21,9 @@ REM building for sl4
 "C:\Program Files (x86)\Microsoft F#\v4.0\fsc.exe" -o:staging\sl4\Unquote.dll --noframework --define:TRACE --define:SILVERLIGHT --doc:staging\sl4\Unquote.xml --optimize+ -r:"C:\Program Files (x86)\Microsoft F#\Silverlight\Libraries\Client\v4.0\FSharp.Core.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\mscorlib.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\System.Core.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\System.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\System.Net.dll" -r:"C:\Program Files (x86)\Microsoft SDKs\Silverlight\v4.0\Libraries\Client\System.Numerics.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\System.Windows.Browser.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\System.Windows.dll" -r:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0\System.Xml.dll" -r:"staging\sl4\Utils.dll" --target:library --warn:3 --warnaserror:76 --vserrors --LCID:1033 --utf8output --fullpaths --flaterrors --staticlink:Utils "C:\Users\Stephen\AppData\Local\Temp\Silverlight,Version=v4.0.AssemblyAttributes.fs" Unquote\AssemblyInfo.fs Unquote\DynamicOperators.fs Unquote\Evaluation.fs Unquote\OperatorPrecedence.fs Unquote\ExtraReflection.fs Unquote\ExtraPatterns.fs Unquote\Decompilation.fs Unquote\Reduction.fs Unquote\Extensions.fs Unquote\Operators.fs Unquote\Assertions.fs 
 
 REM zip builds for .NET 4.0...
-
-7z a -tzip builds\Unquote-%versionNumber%.zip staging\*
+cd staging
+7z a -tzip ..\builds\Unquote-%versionNumber%.zip *
+cd ..
 
 REM preparing nuget dirs
 
@@ -30,8 +31,6 @@ mkdir nuget
 mkdir nuget\lib
 mkdir nuget\lib\net40
 mkdir nuget\lib\sl4
-copy LICENSE nuget
-copy NOTICE nuget
 copy Unquote.nuspec nuget
 
 REM copy staging builds to nuget package...
@@ -44,6 +43,8 @@ copy staging\sl4\Unquote.xml nuget\lib\sl4\Unquote.xml
 REM create nuget package...
 
 C:\NuGet\nuget.exe pack nuget\Unquote.nuspec
+copy Unquote.%versionNumber%.nupkg builds
+del Unquote.%versionNumber%.nupkg
 
 REM cleanup...
 
