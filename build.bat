@@ -55,7 +55,7 @@ del Unquote.%versionNumber%.nupkg
 
 REM cleanup...
 
-del /q /s staging
-del /q /s nuget
+rd /q /s staging
+rd /q /s nuget
 
 pause
