@@ -1,7 +1,7 @@
 #summary Overview of Silverlight support
 #labels Phase-Implementation
 
-Development for Silverlight 4 support is currently underway. 
+Development for Silverlight 4 support is complete as of Unquote 2.1.0. 
 
 Due to certain issues and limitations of the reduced Silverlight runtime, certain features and performance are lost.
   * [http://stackoverflow.com/questions/7048578/missing-biginteger-features-under-f-silverlight System.Numerics.BigInteger confusion] put us in the position to remove certain static implementations of bigint operators in both Silverlight and non-Silverlight versions. This will come with a performance cost since then the implementation must fall back on reflection.
