@@ -7,6 +7,10 @@ open NUnit.Framework
 
 [<TestFixture>]
 type TestRunner() =
+    //dummy hook ensures Swensen.Utils.dll is registered in this assemblies manifest so that it gets picked up by Statlight
+    //otherwise, quotations may be the only use of Utils and therefore not get stored in this assemblies manifest.
+    let dummy = Swensen.Utils.List.equalsWith
+
     let isFact (attr:obj) =
         match attr with
         | :? Xunit.FactAttribute as attr when attr.Skip = null -> true
