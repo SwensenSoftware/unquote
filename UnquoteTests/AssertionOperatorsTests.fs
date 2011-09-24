@@ -70,7 +70,7 @@ open System
 open System.Reflection
 
 #if DEBUG
-#else
+#else //we do not strip target invocation exceptions when in debug mode
 [<Fact>] 
 let ``Issue 63: natural nested invocation exceptions are stripped`` ()=
     raises<System.NotSupportedException> <@ "Should be a NotSupportedException" |> RaiseException  @>
@@ -86,7 +86,6 @@ let ``Issue 63: synthetic invocation exception is stripped if no inner exception
 [<Fact>] 
 let ``Issue 63: synthetic non invocation exception`` ()=
     raises<ArgumentNullException> <@ raise (ArgumentNullException()) @>
-#endif
 
 [<Fact>] 
 let ``Issue 63: synthetic nested invocation exceptions are not stripped if no inner exception`` ()=
@@ -96,6 +95,8 @@ let ``Issue 63: synthetic nested invocation exceptions are not stripped if no in
 let ``Issue 63: synthetic invocation exception is not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(null)) @>
     
+#if SILVERLIGHT 
+#else //all the following contain nested quotations which aren't supported
 [<Fact>]
 let ``raiseWhen passes`` () =
     raisesWhen<exn>
@@ -140,3 +141,5 @@ let ``raiseWhen fails when no exception thrown`` () =
                 <@ true @>
                 f
         @>
+#endif
+#endif
