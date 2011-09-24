@@ -140,6 +140,6 @@ let reduceFully =
             else loop env nextExpr (nextExpr::acc)
         with
         | ex -> 
-            Expr.Value(ex)::acc
+            Expr.Value(ex, ex.GetType())::acc
 
     fun env expr -> loop env expr [expr] |> List.rev
