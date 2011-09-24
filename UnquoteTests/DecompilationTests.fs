@@ -857,3 +857,11 @@ let ``precedence of partial application in application``() =
 [<Fact>]
 let ``nested dot property indexer calls``() =
     <@ [|[|0|]|].[0].[0] @> |> decompile =? "[|[|0|]|].[0].[0]"
+
+[<Fact(Skip="todo")>]
+let ``NumericLiteralI.FromInt32``() =
+    <@ 1234I @> |> decompile =? "1234I"
+
+[<Fact(Skip="todo")>]
+let ``NumericLiteralI.FromZero``() =
+    <@ 0I @> |> decompile =? "0I"
