@@ -57,8 +57,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="..\Unquote\Prelude.fs">
+      <Link>Prelude.fs</Link>
+    </Compile>
     <Compile Include="..\Unquote\DynamicOperators.fs">
       <Link>DynamicOperators.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\EvaluationException.fs">
+      <Link>EvaluationException.fs</Link>
     </Compile>
     <Compile Include="..\Unquote\Evaluation.fs">
       <Link>Evaluation.fs</Link>
@@ -83,6 +89,9 @@
     </Compile>
     <Compile Include="..\Unquote\Operators.fs">
       <Link>Operators.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\AssertionFailedException.fs">
+      <Link>AssertionFailedException.fs</Link>
     </Compile>
     <Compile Include="..\Unquote\Assertions.fs">
       <Link>Assertions.fs</Link>

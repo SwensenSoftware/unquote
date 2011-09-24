@@ -17,18 +17,15 @@ limitations under the License.
 [<AutoOpen>]
 ///Operators on Expr and Expr<'a> for performing unit test assertions.
 module Swensen.Unquote.Assertions
+open Swensen.Unquote
+
 open System
 open System.Reflection
 open Microsoft.FSharp.Quotations
 
 open Swensen.Utils
-open Swensen.Unquote
 
 #nowarn "44"
-#nowarn "42" //for raises (inline IL)
-
-type AssertionFailedException(msg: string) =
-    inherit Exception(msg)
 
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
@@ -52,12 +49,8 @@ module Internal =
         | Nunit
 //        | Mbunit
 
-    //raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
-    //duplicated from Utils.MiscUtils since we want to keep everything in that assembly internal (using friend assemblies)
-    let inline raise (e: System.Exception) = (# "throw" e : 'U #)
-
     let testFailed =
-        let outputGenericTestFailedMsg = fun msg -> raise <| AssertionFailedException("Test failed:" + msg)
+        let outputGenericTestFailedMsg = fun msg -> raise <| Swensen.Unquote.AssertionFailedException("Test failed:" + msg)
 
         let outputReducedExprsMsg =
             fun outputTestFailedMsg (reducedExprs:Expr list) additionalInfo ->
@@ -160,7 +153,7 @@ let inline raisesWhen<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
             | DerivedPatterns.Bool(true) -> () //the exnWhen condition is true
             | _ ->  
                 try
-                    testFailed reducedExprs (sprintf "Got the expected exception, but the when condition failed:\nWhen Expression:\n\n%s\n\nTest Expression:\n" (reducedExprs |> List.map decompile |> String.concat "\n"))
+                    testFailed reducedExprs (sprintf "Got the expected exception, but the when condition failed:\n\nWhen Expression:\n\n%s\n\nTest Expression:" (exnWhenReducedExprs |> List.map decompile |> String.concat "\n"))
                 with 
                 | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 

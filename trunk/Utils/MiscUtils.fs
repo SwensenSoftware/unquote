@@ -34,5 +34,6 @@ let (|Int|_|) str =
     | true, result -> Some(result)
     | _ -> None
 
-//raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
-let inline raise (e: System.Exception) = (# "throw" e : 'U #)
+//doesn't do any good here since can't inline across friend assemblies
+////raise is not inlined in Core.Operators, so (sometimes) shows up in stack traces.  we inline it here
+//let inline raise (e: System.Exception) = (# "throw" e : 'U #)

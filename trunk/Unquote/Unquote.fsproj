@@ -43,7 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Prelude.fs" />
     <Compile Include="DynamicOperators.fs" />
+    <Compile Include="EvaluationException.fs" />
     <Compile Include="Evaluation.fs" />
     <Compile Include="OperatorPrecedence.fs" />
     <Compile Include="ExtraReflection.fs" />
@@ -52,6 +54,7 @@
     <Compile Include="Reduction.fs" />
     <Compile Include="Extensions.fs" />
     <Compile Include="Operators.fs" />
+    <Compile Include="AssertionFailedException.fs" />
     <Compile Include="Assertions.fs" />
     <None Include="Startup.fsx" />
   </ItemGroup>

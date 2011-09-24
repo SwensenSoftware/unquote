@@ -96,3 +96,47 @@ let ``Issue 63: synthetic nested invocation exceptions are not stripped if no in
 let ``Issue 63: synthetic invocation exception is not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(null)) @>
     
+[<Fact>]
+let ``raiseWhen passes`` () =
+    raisesWhen<exn>
+        <@ raise <| exn("hello world") @>
+        (fun e -> <@ e.Message = "hello world" @>)
+        
+[<Fact>]
+let ``throws EvaluationException because nested quotation references var from outer quotation`` () =
+    raises<Xunit.Sdk.TrueException> 
+        <@
+            raisesWhen<exn>
+                <@ raise <| exn("hello world") @>
+                (fun e -> <@ e.Message = "hello world" @>)
+        @>
+
+[<Fact>]
+let ``raiseWhen fails when exception is correct but when condition is false`` () =
+    let f = (fun (e:exn) -> <@ e.Message = "xxx" @>) //need this outside of the outer quotation or captures Var that can't be accessed
+    raises<Xunit.Sdk.TrueException> 
+        <@
+            raisesWhen<exn>
+                <@ raise <| exn("hello world") @>
+                f
+        @>
+
+[<Fact>]
+let ``raiseWhen fails when exception is incorrect`` () =
+    let f = (fun (e:exn) -> <@ true @>) //need this outside of the outer quotation or captures Var that can't be accessed
+    raises<Xunit.Sdk.TrueException> 
+        <@
+            raisesWhen<System.InvalidOperationException>
+                <@ (null:string).ToString() @>
+                f
+        @>
+
+[<Fact>]
+let ``raiseWhen fails when no exception thrown`` () =
+    let f = (fun (e:exn) -> <@ true @>) //need this outside of the outer quotation or captures Var that can't be accessed
+    raises<Xunit.Sdk.TrueException> 
+        <@
+            raisesWhen<exn>
+                <@ true @>
+                f
+        @>
