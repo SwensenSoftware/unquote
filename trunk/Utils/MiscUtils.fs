@@ -15,7 +15,7 @@ limitations under the License.
 *)
 [<AutoOpen>]
 module internal Swensen.Utils.MiscUtils //want to make this internal, but also use in tests.
-#nowarn "42" //turn off warning for use of inline IL feature
+
 open System
 
 //based on http://stackoverflow.com/questions/833180/handy-f-snippets/851449#851449
