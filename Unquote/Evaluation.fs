@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 module internal Swensen.Unquote.Evaluation
+open Swensen.Unquote
 
 open Swensen
 open Microsoft.FSharp.Quotations
@@ -42,8 +43,6 @@ module DP = DerivedPatterns
 //Real: 00:00:00.212, CPU: 00:00:00.202, GC gen0: 22, gen1: 1, gen2: 0 (50.82 faster)
 //Real: 00:00:00.377, CPU: 00:00:00.374, GC gen0: 29, gen1: 0, gen2: 0 (38.77 faster)
 //Real: 00:00:02.095, CPU: 00:00:02.090, GC gen0: 147, gen1: 0, gen2: 0 (12.98 faster)
-
-let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
 ///Strip possibly nested target invocation exception
 let rec stripTargetInvocationException (e:exn) =
@@ -118,10 +117,14 @@ type EnvVar(name:string, value:obj, ?reraisable:bool) =
     member __.Reraisable = reraisable
     
     static member findByName name (xl:EnvVar list)  =
-        xl |> List.find (fun x -> x.Name = name)
+        match xl |> List.tryFind (fun x -> x.Name = name) with
+        | Some(ev) -> ev
+        | None -> raise <| Swensen.Unquote.EvaluationException(sprintf "Could not find variable '%s' in the environment. If the expression being evaluated is a nested quotation, ensure that it has not captured any Var expressions from the outer quotation" name)
 
     static member findRaisable (xl:EnvVar list) =
-        xl |> List.find (fun x -> x.Reraisable)
+        match xl |> List.tryFind (fun x -> x.Reraisable) with
+        | Some(ev) -> ev
+        | None -> raise <| Swensen.Unquote.EvaluationException("could not find any reraisable variables within the environment")
 
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
