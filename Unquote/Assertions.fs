@@ -130,12 +130,11 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
     let reducedExprs = expr |> reduceFully
     let lastExpr = reducedExprs |> List.rev |> List.head
     match lastExpr with
-    | Patterns.Value(v,_) when v <> null && typeof<exn>.IsAssignableFrom(v.GetType()) -> //it's an exception
-        let vty = v.GetType()
-        if typeof<'a>.IsAssignableFrom(vty) then () //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.IsAssignableFrom(lastValueTy) -> //it's an exception
+        if typeof<'a>.IsAssignableFrom(lastValueTy) then () //it's the correct exception
         else //it's not the correct exception
             try
-                testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (vty.Name))
+                testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (lastValueTy.Name))
             with 
             | e -> raise e
     | _ -> //it's not an exception
@@ -143,6 +142,30 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
             testFailed reducedExprs (sprintf "Expected %s but got nothing" typeof<'a>.Name)
         with 
         | e -> raise e
+
+/////Test wether the given expr fails with the given expected exception (or a subclass thereof) when the additional assertion on the exception object holds.
+//let inline raisesWhen<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
+//    let reducedExprs = expr |> reduceFully
+//    let lastExpr = reducedExprs |> List.rev |> List.head
+//    match lastExpr with
+//    | Patterns.Value(lastValue,_) when lastValue <> null && typeof<exn>.IsAssignableFrom(v.GetType()) -> //it's an exception
+//        let vty = v.GetType()
+//        if typeof<'a>.IsAssignableFrom(vty) then //it's the correct exception
+//            let v = v :?> 'a
+//            let vq = exnWhen v
+//            let reducedExprs = expr |> reduceFully
+//            let lastExpr = reducedExprs |> List.rev |> List.head
+//
+//        else //it's not the correct exception
+//            try
+//                testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (vty.Name))
+//            with 
+//            | e -> raise e
+//    | _ -> //it's not an exception
+//        try
+//            testFailed reducedExprs (sprintf "Expected %s but got nothing" typeof<'a>.Name)
+//        with 
+//        | e -> raise e
     
 let inline (=?) x y = test <@ x = y @>
 let inline (<?) x y = test <@ x < y @>
