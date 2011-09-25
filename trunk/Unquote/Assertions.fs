@@ -140,7 +140,7 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
         | e -> raise e
 
 ///Test wether the given expr fails with the given expected exception (or a subclass thereof) when the additional assertion on the exception object holds.
-let inline raisesWhen<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
+let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
     | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.IsAssignableFrom(lastValueTy) -> //it's an exception
@@ -153,7 +153,7 @@ let inline raisesWhen<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
             | DerivedPatterns.Bool(true) -> () //the exnWhen condition is true
             | _ ->  
                 try
-                    testFailed reducedExprs (sprintf "Got the expected exception, but the when condition failed:\n\nWhen Expression:\n\n%s\n\nTest Expression:" (exnWhenReducedExprs |> List.map decompile |> String.concat "\n"))
+                    testFailed reducedExprs (sprintf "Got the expected exception, but the exception assertion failed:\n\nException Assertion:\n\n%s\n\nTest Expression:" (exnWhenReducedExprs |> List.map decompile |> String.concat "\n"))
                 with 
                 | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
