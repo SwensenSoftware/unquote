@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="MiscUtils.fs" />
+    <Compile Include="Prelude.fs" />
     <Compile Include="RegexUtils.fs" />
     <Compile Include="PrintfUtils.fs" />
     <Compile Include="ListExtensions.fs" />
