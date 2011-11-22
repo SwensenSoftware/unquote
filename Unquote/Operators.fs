@@ -57,4 +57,4 @@ let unquote expr =
     |> reduceFully
     |> List.map decompile 
     |> String.concat "\n" //don't use Environment.NewLine since nprintfn will replace \n with Environment.NewLine already
-    |> nprintfn "\n%s\n"
+    |> Printf.nprintfn "\n%s\n"

@@ -53,17 +53,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="..\Utils\MiscUtils.fs">
-      <Link>MiscUtils.fs</Link>
+    <Compile Include="..\Utils\Prelude.fs">
+      <Link>Prelude.fs</Link>
     </Compile>
-    <Compile Include="..\Utils\RegexUtils.fs">
-      <Link>RegexUtils.fs</Link>
+    <Compile Include="..\Utils\Regex.fs">
+      <Link>Regex.fs</Link>
     </Compile>
-    <Compile Include="..\Utils\PrintfUtils.fs">
-      <Link>PrintfUtils.fs</Link>
+    <Compile Include="..\Utils\Printf.fs">
+      <Link>Printf.fs</Link>
     </Compile>
-    <Compile Include="..\Utils\ListExtensions.fs">
-      <Link>ListExtensions.fs</Link>
+    <Compile Include="..\Utils\List.fs">
+      <Link>List.fs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
