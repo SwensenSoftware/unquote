@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 [<AutoOpen>]
-module internal Swensen.Utils.MiscUtils //want to make this internal, but also use in tests.
+module internal Swensen.Utils.Prelude //want to make this internal, but also use in tests.
 
 open System
 
