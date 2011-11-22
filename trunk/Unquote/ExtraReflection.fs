@@ -89,7 +89,7 @@ let sprintSig (outerTy:Type) =
         | "Microsoft.FSharp.Collections.FSharpList" -> "list"
         | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
         | "System.Collections.Generic.IEnumerable"  -> "seq"
-        | Regex.Compiled.GroupValues @"[\.\+]?([^\.\+]*)$" [name] -> name //short name
+        | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] }-> name //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
     let rec sprintSig context (ty:Type) =
@@ -97,7 +97,7 @@ let sprintSig (outerTy:Type) =
         let cleanName, arrSig = 
             //if is generic type, then doesn't have FullName, need to use just Name
             match (if String.IsNullOrEmpty(ty.FullName) then ty.Name else ty.FullName) with
-            | Regex.Compiled.GroupValues @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" [cleanName;arrSig] -> //long name type encoding left of `, array encoding at end
+            | Regex.Compiled.Match @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" { GroupValues=[cleanName;arrSig] }-> //long name type encoding left of `, array encoding at end
                 cleanName, arrSig
             | _ -> 
                 failwith ("failed to parse type name: " + ty.FullName)
