@@ -7,6 +7,6 @@ Trying to install the Silverlight 4 Tools over VS 2010 SP1 has been a real pain 
 
 The best luck I have had is:
 
-# Repair/reinstall SP1 through appwiz.cpl
-# Download and install 
-# Download Microsoft Silverlight 4 Tools for Visual Studio 2010 (http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=18149). Unzip it (even though it is an exe; running the exe gives me errors sometimes. even if it does succeed, probably didn't install the F# SL tools). Run FSharpRuntimeSL4.msi. Run silverlight_developer.exe. Run silverlight_sdk.msi.
+  # Repair/reinstall SP1 through appwiz.cpl
+  # Download and install 
+  # Download Microsoft Silverlight 4 Tools for Visual Studio 2010 (http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=18149). Unzip it (even though it is an exe; running the exe gives me errors sometimes. even if it does succeed, probably didn't install the F# SL tools). Run FSharpRuntimeSL4.msi. Run silverlight_developer.exe. Run silverlight_sdk.msi.
