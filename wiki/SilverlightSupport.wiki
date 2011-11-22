@@ -1,6 +1,8 @@
 #summary Overview of Silverlight support
 #labels Phase-Implementation
 
+= Silverlight Support =
+
 Development for Silverlight 4 support is complete as of Unquote 2.1.0. 
 
 Due to certain issues and limitations of the reduced Silverlight runtime, certain features and performance are lost.
