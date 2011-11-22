@@ -1,7 +1,9 @@
 #summary Notes for Unquote developers
 #labels Phase-Implementation
 
-= Silverlight Development Setup =
+= Developer Notes =
+
+== Silverlight Development Setup ==
 
 Trying to install the Silverlight 4 Tools over VS 2010 SP1 has been a real pain for me twice. The first time, and then again after uninstalling the VS 11 Developer Preview corrupted my VS 2010 SP1 setup.
 
