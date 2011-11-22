@@ -140,7 +140,7 @@ let decompile expr =
             applyParens OP.MethodCall (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
-            | CompiledMatch(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
+            | Regex.Compiled.Match(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
                 //for UnionCaseTypeTests, require a op_Dynamic implementation
                 sprintf "(%s?%s : %s)" (decompile (OP.Dot,OP.Left) target) pi.Name (pi.PropertyType |> ER.sprintSig)
             | _, [] -> sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) pi.Name //also includes "Item" with zero args

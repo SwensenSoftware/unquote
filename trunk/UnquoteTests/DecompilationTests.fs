@@ -422,7 +422,7 @@ let ``union case test active pattern`` () =
     decompile 
         <@  
             match "hello world" with
-            | InterpretedMatch @"llo" _ -> true
+            | Regex.Interpreted.Match @"llo" _ -> true
             | _ -> false
         @> |> ignore
 
