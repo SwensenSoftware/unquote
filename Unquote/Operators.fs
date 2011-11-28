@@ -24,7 +24,7 @@ open Swensen.Unquote
 open Swensen.Utils
 
 ///Evaluate the given untyped expression.
-let inline evalRaw (expr:Expr) = expr.Eval()
+let inline evalRaw<'a> (expr:Expr) : 'a = expr.Eval()
 ///Evaluate the given typed expression.
 let inline eval (expr:Expr<'a>) = expr.Eval()
 ///Decompile given expression to its source code representation. Sub-expressions which are
@@ -38,7 +38,7 @@ let inline reduce (expr:Expr) = expr.Reduce()
 let inline reduceFully (expr:Expr) = expr.ReduceFully()
 
 ///Evaluate the given untyped expression with the given variable environment.
-let inline evalRawWith env (expr:Expr) = expr.Eval(env)
+let inline evalRawWith<'a> env (expr:Expr) : 'a = expr.Eval(env)
 ///Evaluate the given typed expression with the given variable environment.
 let inline evalWith env (expr:Expr<'a>) = expr.Eval(env)
 ///Reduce the given expression by one step with the given variable environment: convert each branch of the given expression to a Value expression of its 
