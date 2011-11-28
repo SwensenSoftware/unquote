@@ -568,9 +568,9 @@ let ``typed synthetic evaluation`` () =
 
 [<Fact>]
 let ``untyped synthetic evaluation`` () =
-    let evalWithEnv env (expr:Expr) = expr.Eval(env)
+    let evalWithEnv env (expr:Expr) = expr.Eval(env) : int
     let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", box 2)])) = box 2 @>
+    <@ synExpr |> (evalWithEnv (Map.ofList [("x", box 2)])) = 2 @>
 
 //let (|Unbox|_|) x y = 
 //    if y |> unbox = x then
@@ -580,10 +580,10 @@ let ``untyped synthetic evaluation`` () =
 
 #if SILVERLIGHT //VERIFIED
 #else
-let evalUntyped (expr:Expr) = expr.Eval()
+
 [<Fact>]
 let ``raw Quote`` () =
-    let result = <@@ <@@ 1 @@> @@> |> evalUntyped :?> Expr
+    let result = <@@ <@@ 1 @@> @@> |> evalRaw
     let expectedQuotationValue =
         match result with
         | Patterns.Value(x,_) -> Some(x)
