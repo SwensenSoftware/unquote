@@ -417,15 +417,6 @@ let ``union case test requiring op_Dynamic`` () =
 let ``union case test zero arg union`` () =
     decompile <@ match None with | None -> true | _ -> false @> =? "let matchValue = None in (match matchValue with | None -> true | _ -> false) && true"
 
-[<Fact(Skip="Active patterns too much to include in issue #3 for now")>] //issue #3
-let ``union case test active pattern`` () =
-    decompile 
-        <@  
-            match "hello world" with
-            | Regex.Interpreted.Match @"llo" _ -> true
-            | _ -> false
-        @> |> ignore
-
 let (?) (target: obj) (lookup: string): 'TResult =
      failwith "dummy"
   
@@ -865,3 +856,16 @@ let ``NumericLiteralI.FromInt32``() =
 [<Fact(Skip="todo")>]
 let ``NumericLiteralI.FromZero``() =
     <@ 0I @> |> decompile =? "0I"
+
+let (|CAP1|CAP2|) x = if x = 0 then CAP1 else CAP2(x)
+
+[<Fact>]
+let ``issue 11: complete active pattern`` () =
+    test <@ decompile <@ (|CAP1|CAP2|) 0 @> = "(|CAP1|CAP2|) 0" @>
+
+let (|PAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
+
+[<Fact>]
+let ``issue 11: partial active pattern`` () =
+    test <@ decompile <@ (|PAP|_|) 0 1 @> = "(|PAP|_|) 0 1" @>
+
