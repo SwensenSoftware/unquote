@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
+//note: some of this code was collaboratively developed with the folks in the FSharpx project, and has
+//founds its way as a contribution to that project.
+
 namespace Swensen.Utils
 open System.Text.RegularExpressions
 
