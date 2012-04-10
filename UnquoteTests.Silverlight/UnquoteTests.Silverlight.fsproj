@@ -48,23 +48,23 @@
       <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\FSharpPowerPack-2.0.0.0\\Silverlight\v4.0\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Silverlight.Testing">
-      <HintPath>..\..\..\..\..\..\..\..\NUnit.Silverlight.Bin v 2010.11.01\NUnit.Silverlight.Bin\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.Silverlight.Testing.dll</HintPath>
+      <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.Silverlight.Testing.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTesting.Silverlight">
-      <HintPath>..\..\..\..\..\..\..\..\NUnit.Silverlight.Bin v 2010.11.01\NUnit.Silverlight.Bin\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.VisualStudio.QualityTools.UnitTesting.Silverlight.dll</HintPath>
+      <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.VisualStudio.QualityTools.UnitTesting.Silverlight.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core">
       <HintPath>$(ProgramFiles)\Microsoft F#\Silverlight\Libraries\Client\$(SilverlightVersion)\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="NUnit.Silverlight.Compatibility">
-      <HintPath>..\..\..\..\..\..\..\..\NUnit.Silverlight.Bin v 2010.11.01\NUnit.Silverlight.Bin\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Compatibility.dll</HintPath>
+      <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Compatibility.dll</HintPath>
     </Reference>
     <Reference Include="NUnit.Silverlight.Framework">
-      <HintPath>..\..\..\..\..\..\..\..\NUnit.Silverlight.Bin v 2010.11.01\NUnit.Silverlight.Bin\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Framework.dll</HintPath>
+      <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Framework.dll</HintPath>
     </Reference>
     <Reference Include="NUnit.Silverlight.Metadata">
-      <HintPath>..\..\..\..\..\..\..\..\NUnit.Silverlight.Bin v 2010.11.01\NUnit.Silverlight.Bin\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Metadata.dll</HintPath>
+      <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
