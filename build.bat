@@ -49,7 +49,7 @@ copy staging\sl4\Unquote.xml nuget\lib\sl4\Unquote.xml
 
 REM create nuget package...
 
-".nuget\nuget.exe" pack nuget\Unquote.nuspec
+".nuget\nuget.exe" pack nuget\Unquote.nuspec -Version %versionNumber%
 copy Unquote.%versionNumber%.nupkg builds
 del Unquote.%versionNumber%.nupkg
 
