@@ -76,7 +76,7 @@
       <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft SDKs\Silverlight\v4.0\Libraries\Client\System.Xml.Linq.dll</HintPath>
     </Reference>
     <Reference Include="xunit-silverlight4">
-      <HintPath>..\..\..\..\..\..\..\..\xunitcontrib-silverlight.0.2\Silverlight4\xunit-silverlight4.dll</HintPath>
+      <HintPath>..\lib\xunitcontrib-silverlight.0.2\Silverlight4\xunit-silverlight4.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
