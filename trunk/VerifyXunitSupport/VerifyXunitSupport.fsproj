@@ -13,6 +13,8 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <Name>VerifyXunitSupport</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\code\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,6 +65,7 @@
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -71,7 +74,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="xunit">
-      <HintPath>..\..\..\..\..\..\..\..\xunit\xunit.dll</HintPath>
+      <HintPath>..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +85,7 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">
