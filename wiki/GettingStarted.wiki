@@ -138,37 +138,37 @@ val it : unit = ()
 
 The `Swensen.Unquote.Operators` module contains additional functions for decompiling, evaluating, and reducing quotation expressions. The following is a reference of the functions available and some examples:
 
-  * `val decompile : Quotations.Expr -> string`
+  * `val inline decompile : Quotations.Expr -> string`
 {{{
 > decompile <@ (1+2)/3 @>;;
 val it : string = "(1 + 2) / 3"
 }}}
 
-  * `val eval : Quotations.Expr<'a> -> 'a`
+  * `val inline eval : Quotations.Expr<'a> -> 'a`
 {{{
 > eval <@ "Hello World".Length + 20 @>;;
 val it : int = 31
 }}}
 
-  * `val evalRaw : Quotations.Expr -> obj`
+  * `val inline evalRaw : Quotations.Expr -> 'a`
 {{{
-> evalRaw <@@ "Hello World".Length + 20 @@>;;
-val it : obj = 31
+> evalRaw<int> <@@ "Hello World".Length + 20 @@>;;
+val it : int = 31
 }}}
 
-  * `val reduce : Quotations.Expr -> Quotations.Expr`
+  * `val inline reduce : Quotations.Expr -> Quotations.Expr`
 {{{
 > <@ (1+2)/3 @> |> reduce |> source;;
 val it : string = "3 / 3"
 }}}
 
-  * `val reduceFully : Quotations.Expr -> Quotations.Expr list`
+  * `val inline reduceFully : Quotations.Expr -> Quotations.Expr list`
 {{{
 > <@ (1+2)/3 @> |> reduceFully |> List.map source;;
 val it : string list = ["(1 + 2) / 3"; "3 / 3"; "1"]
 }}}
 
-  * `val isReduced : Quotations.Expr -> bool`
+  * `val inline isReduced : Quotations.Expr -> bool`
 {{{
 > <@ (1+2)/3 @> |> isReduced;;
 val it : bool = false
@@ -176,7 +176,7 @@ val it : bool = false
 val it : bool = true
 }}}
 
-  * `val unquote : Quotations.Expr -> unit`
+  * `val inline unquote : Quotations.Expr -> unit`
 {{{
 > unquote <@ (1+2)/3 @>;;
 
@@ -189,10 +189,10 @@ val it : unit = ()
 
 The following are functions which accept a variable environment for processing synthetic expressions with unbound variables (N.B. this API may evolve and should be considered "experimental"):
 
-  * `val evalWith : Map<string,obj> -> Quotations.Expr<'a> -> 'a`
-  * `val evalRawWith : Map<string,obj> -> Quotations.Expr<'a> -> obj`
-  * `val reduceWith : Map<string,obj> -> Quotations.Expr<'a> -> Quotations.Expr`
-  * `val reduceFullyWith : Map<string,obj> -> Quotations.Expr<'a> -> Quotations.Expr list`
+  * `val inline evalWith : Map<string,obj> -> Quotations.Expr<'a> -> 'a`
+  * `val inline evalRawWith : Map<string,obj> -> Expr -> 'a`
+  * `val inline reduceWith : Map<string,obj> -> Quotations.Expr<'a> -> Quotations.Expr`
+  * `val inline reduceFullyWith : Map<string,obj> -> Quotations.Expr<'a> -> Quotations.Expr list`
 
 === Extensions ===
 
