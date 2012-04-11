@@ -105,6 +105,10 @@ module Internal =
         let lastExpr = reducedExprs |> List.rev |> List.head
         reducedExprs, lastExpr
 
+    let inline expectedExnButWrongExnRaisedMsg ty1 ty2 = sprintf "Expected exception of type '%s', but '%s' was raised instead" ty1 ty2
+    let inline expectedExnButNoExnRaisedMsg ty1 = sprintf "Expected exception of type '%s', but no exception was raised" ty1
+    
+
 open Internal
 
 //making inline (together with catch/raise) ensures stacktraces clean in test framework output
@@ -130,12 +134,12 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
         if typeof<'a>.IsAssignableFrom(lastValueTy) then () //it's the correct exception
         else //it's not the correct exception
             try
-                testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (lastValueTy.Name))
+                testFailed reducedExprs (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (lastValueTy.Name))
             with 
             | e -> raise e
     | _ -> //it's not an exception
         try
-            testFailed reducedExprs (sprintf "Expected %s but got nothing" typeof<'a>.Name)
+            testFailed reducedExprs (expectedExnButNoExnRaisedMsg typeof<'a>.Name)
         with 
         | e -> raise e
 
@@ -153,18 +157,18 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
             | DerivedPatterns.Bool(true) -> () //the exnWhen condition is true
             | _ ->  
                 try
-                    testFailed reducedExprs (sprintf "Got the expected exception, but the exception assertion failed:\n\nException Assertion:\n\n%s\n\nTest Expression:" (exnWhenReducedExprs |> List.map decompile |> String.concat "\n"))
+                    testFailed reducedExprs (sprintf "The expected exception was raised, but the exception assertion failed:\n\nException Assertion:\n\n%s\n\nTest Expression:" (exnWhenReducedExprs |> List.map decompile |> String.concat "\n"))
                 with 
                 | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
         else //it's not the correct exception
             try
-                testFailed reducedExprs (sprintf "Expected %s but got %s" typeof<'a>.Name (lastValueTy.Name))
+                testFailed reducedExprs (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (lastValueTy.Name))
             with 
             | e -> raise e
     | _ -> //it's not an exception
         try
-            testFailed reducedExprs (sprintf "Expected %s but got nothing" typeof<'a>.Name)
+            testFailed reducedExprs (expectedExnButNoExnRaisedMsg typeof<'a>.Name)
         with 
         | e -> raise e
     
