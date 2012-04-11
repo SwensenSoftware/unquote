@@ -33,6 +33,10 @@ let isOpenModule (declaringType:Type) =
     |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
     |> (function | Some _ -> true | None -> false)
 
+let activePatternName (name:string) =
+    if name.StartsWith("|") && name.EndsWith("|") then sprintf "(%s)" name
+    else name
+
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
     mi.GetCustomAttributes(true)
@@ -47,9 +51,7 @@ let sourceName (mi:MemberInfo) =
                     None
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
-    |> (fun name -> //issue 11: active pattern function names need to be surrounded by parens
-            if name.StartsWith("|") && name.EndsWith("|") then sprintf "(%s)" name
-            else name)
+    |> activePatternName //issue 11: active pattern function names need to be surrounded by parens
 
 let private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 

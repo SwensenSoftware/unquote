@@ -887,12 +887,12 @@ let ``issue 11: partial active pattern`` () =
 let ``issue 11: partially applied active apptern`` () =
     test <@ decompile <@ (|PAP|_|) 0  @> = "(|PAP|_|) 0" @>
 
-[<Fact(Skip="this is not exclusively an issue 11 problem, local lambdas are sprinted with mangled names in general")>]
+[<Fact>]
 let ``issue 11: local active pattern`` () =
     let (|LAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
     test <@ decompile <@ (|LAP|_|) 0 1 @> = "(|LAP|_|) 0 1" @>
 
-[<Fact(Skip="todo")>]
+[<Fact>]
 let ``issue 79: general local lambda sprinting`` () =
     let myFunc x y = if x = 0 && y = 0 then None else Some(x + y)
     test <@ decompile <@ myFunc 0 1 @> = "myFunc 0 1" @>

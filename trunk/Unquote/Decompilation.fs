@@ -176,8 +176,12 @@ let decompile expr =
         | DP.Unit -> "()" //must come before Value pattern
         | P.Value(o, _) ->
             match o with
-            | null -> "null"
-            | _ -> sprintf "%A" o
+            | null -> "null" //sprint None when ty is option<>
+            | _ -> 
+                match sprintf "%A" o with
+                | Regex.Compiled.Match @"^<fun:(.+)@\d+>$" { GroupValues=[name]} -> //issue 79
+                    ER.activePatternName name //issue 11 (which is taken care of in othercases by use of ER.sourceName)
+                | x -> x
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
