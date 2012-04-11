@@ -47,6 +47,9 @@ let sourceName (mi:MemberInfo) =
                     None
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
+    |> (fun name -> //issue 11: active pattern function names need to be surrounded by parens
+            if name.StartsWith("|") && name.EndsWith("|") then sprintf "(%s)" name
+            else name)
 
 let private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 
