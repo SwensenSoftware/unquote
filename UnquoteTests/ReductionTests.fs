@@ -183,7 +183,7 @@ let ``property get returns null but preserves ret type info and doesnt throw eve
     test <@ steps.Length = 3 @>
     
     let [step1; step2; step3] = steps
-    test <@ step1 =~ @"^null = <fun:doit@\d*> ""asdf""$"@>
+    step1 =? "null = doit \"asdf\""
     step2 =? "null = null"
     step3 =? "true"
 
@@ -202,9 +202,9 @@ let ``multi-var Value lambda application doesn't throw`` () =
     
     //assert expected sprinted reductions while we are at it
     let [step1; step2; step3] = decompiledReductions testExpr
-    test <@ step1 =~ @"^<fun:doit2@\d*> \(<fun:doit1@\d*> ""asdf""\) \(""asdf"" \+ ""asdf""\)$" @>
-    test <@ step2 =~ @"^<fun:doit2@\d*> null ""asdfasdf""$" @>
-    test <@ step3 =~ @"^""asdfasdf""$" @>
+    test <@ step1 = "doit2 (doit1 \"asdf\") (\"asdf\" + \"asdf\")" @>
+    test <@ step2 = "doit2 null \"asdfasdf\"" @>
+    test <@ step3 = "\"asdfasdf\"" @>
 
 [<Fact>]
 let ``multi-var lambda let binding application doesn't throw`` () =
