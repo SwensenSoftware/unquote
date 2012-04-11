@@ -73,17 +73,23 @@ val it : unit = ()
 
 Test failed:
 
-Expected ArgumentException but got NullReferenceException
+Expected exception of type 'ArgumentException', but 'NullReferenceException' was raised instead
 
 null.Length
 System.NullReferenceException: Object reference not set to an instance of an object.
+   at Swensen.Unquote.Evaluation.evalInstance@275(FSharpList`1 env, FSharpOption`1 expr)
+   at Swensen.Unquote.Evaluation.eval@133(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.reduce(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.loop@132(FSharpList`1 env, FSharpExpr expr, FSharpList`1 acc)
 
 val it : unit = ()
 > raises<exn> <@ 3 @>;;
 
 Test failed:
 
-Expected Exception but got nothing
+Expected exception of type 'Exception', but no exception was raised
 
 3
 
