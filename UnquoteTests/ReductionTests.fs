@@ -698,6 +698,15 @@ let ``Issue 62: TryWith with block is followed when exception in body`` () =
                    with e ->
                        called := true @>
     test <@ !called @>
+
+let f4 () = None : option<int>
+
+[<Fact>]
+let ``issue 80: sprint non literal None constructions``() =
+    <@ f4() @> |> decompiledReductions =? [
+        "f4()"
+        "None"
+    ]
     
 //[<Fact>]
 //let ``instance PropertySet`` () =    
