@@ -875,24 +875,44 @@ let (|CAP1|CAP2|) x = if x = 0 then CAP1 else CAP2(x)
 
 [<Fact>]
 let ``issue 11: complete active pattern`` () =
+#if SILVERLIGHT
+    decompile <@ (|CAP1|CAP2|) 0 @> =? "(|CAP1|CAP2|) 0"
+#else
     test <@ decompile <@ (|CAP1|CAP2|) 0 @> = "(|CAP1|CAP2|) 0" @>
+#endif
 
 let (|PAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
 
 [<Fact>]
 let ``issue 11: partial active pattern`` () =
+#if SILVERLIGHT
+    decompile <@ (|PAP|_|) 0 1 @> =? "(|PAP|_|) 0 1"
+#else
     test <@ decompile <@ (|PAP|_|) 0 1 @> = "(|PAP|_|) 0 1" @>
+#endif
 
 [<Fact>]
 let ``issue 11: partially applied active apptern`` () =
+#if SILVERLIGHT
+    decompile <@ (|PAP|_|) 0 @> =? "(|PAP|_|) 0"
+#else
     test <@ decompile <@ (|PAP|_|) 0  @> = "(|PAP|_|) 0" @>
+#endif
 
 [<Fact>]
 let ``issue 11: local active pattern`` () =
     let (|LAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
+#if SILVERLIGHT
+    decompile <@ (|LAP|_|) 0 1 @> =? "(|LAP|_|) 0 1"
+#else
     test <@ decompile <@ (|LAP|_|) 0 1 @> = "(|LAP|_|) 0 1" @>
+#endif
 
 [<Fact>]
 let ``issue 79: general local lambda sprinting`` () =
     let myFunc x y = if x = 0 && y = 0 then None else Some(x + y)
+#if SILVERLIGHT
+    decompile <@ myFunc 0 1 @> =? "myFunc 0 1"
+#else
     test <@ decompile <@ myFunc 0 1 @> = "myFunc 0 1" @>
+#endif
