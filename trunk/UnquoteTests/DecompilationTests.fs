@@ -916,3 +916,33 @@ let ``issue 79: general local lambda sprinting`` () =
 #else
     test <@ decompile <@ myFunc 0 1 @> = "myFunc 0 1" @>
 #endif
+
+[<Fact>]
+let ``issue 80: TupleGet fallback get item1`` () =
+    let input = <@ fun (a:int) (b:int) -> match a,b with | (1,_) -> 1 | _ -> b @>
+    let expected = "fun a b -> let matchValue = (a, b) in if (let t1,_ = matchValue in t1) = 1 then 1 else b"
+#if SILVERLIGHT
+    decompile <@ input @> =? expected
+#else
+    test <@ decompile input = expected @>
+#endif
+
+[<Fact>]
+let ``issue 80: TupleGet fallback get item2`` () =
+    let input = <@ fun (a:int) (b:int) -> match a,b with | (_,1) -> 1 | _ -> b @>
+    let expected = "fun a b -> let matchValue = (a, b) in if (let _,t2 = matchValue in t2) = 1 then 1 else b"
+#if SILVERLIGHT
+    decompile <@ input @> =? expected
+#else
+    test <@ decompile input = expected @>
+#endif
+
+[<Fact>]
+let ``issue 80: TupleGet fallback get item11`` () =
+    let input = <@ fun a -> match a with | (_,_,_,_,_,_,_,_,_,1,_) -> 1 | _ -> 0 @>
+    let expected = "fun a -> if (let _,_,_,_,_,_,_,_,_,t10,_ = a in t10) = 1 then 1 else 0"
+#if SILVERLIGHT
+    decompile <@ input @> =? expected
+#else
+    test <@ decompile input = expected @>
+#endif
