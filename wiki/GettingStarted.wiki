@@ -64,7 +64,6 @@ val it : unit = ()
   * `val inline ( >=? ) : 'a -> 'a -> unit when 'a : comparison`
   * `val inline ( <>? ) : 'a -> 'a -> unit when 'a : equality`
   * `val inline raises<'a when 'a :> exn> : Quotations.Expr -> unit`
-{{{
 > raises<exn> <@ (null:string).Length @>;;
 val it : unit = ()
 > raises<NullReferenceException> <@ (null:string).Length @>;;
@@ -95,7 +94,45 @@ Expected exception of type 'Exception', but no exception was raised
 
 val it : unit = ()
 }}}
+  * `val inline raisesWith : Expr -> (#exn -> Expr<bool>) -> unit`
+{{{
+> raisesWith<System.NullReferenceException> <@ (null:string).Length @> (fun e -> <@ e.ToString() = null @>);;
 
+Test failed:
+
+The expected exception was raised, but the exception assertion failed:
+
+Exception Assertion:
+
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Swensen.Unquote.Evaluation.evalInstance@275(FSharpList`1 env, FSharpOption`1 expr)
+   at Swensen.Unquote.Evaluation.eval@133(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.reduce(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.loop@132(FSharpList`1 env, FSharpExpr expr, FSharpList`1 acc).ToString() = null
+"System.NullReferenceException: Object reference not set to an instance of an object.
+   at Swensen.Unquote.Evaluation.evalInstance@275(FSharpList`1 env, FSharpOption`1 expr)
+   at Swensen.Unquote.Evaluation.eval@133(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.reduce(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.loop@132(FSharpList`1 env, FSharpExpr expr, FSharpList`1 acc)" = null
+false
+
+Test Expression:
+
+null.Length
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Swensen.Unquote.Evaluation.evalInstance@275(FSharpList`1 env, FSharpOption`1 expr)
+   at Swensen.Unquote.Evaluation.eval@133(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Evaluation.eval(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.reduce(FSharpList`1 env, FSharpExpr expr)
+   at Swensen.Unquote.Reduction.loop@132(FSharpList`1 env, FSharpExpr expr, FSharpList`1 acc)
+
+val it : unit = ()
+}}}
 === Operators ===
 
 The `Swensen.Unquote.Operators` module contains additional functions for decompiling, evaluating, and reducing quotation expressions. The following is a reference of the functions available and some examples:
