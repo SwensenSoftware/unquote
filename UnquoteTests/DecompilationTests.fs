@@ -857,6 +857,20 @@ let ``NumericLiteralI.FromInt32``() =
 let ``NumericLiteralI.FromZero``() =
     <@ 0I @> |> decompile =? "0I"
 
+//note: we assume that functions starting and ending with pipes are active patterns.
+//indeed, I discovered the following related bug and reported fsbugs:
+(*
+Using F# 2.0, it is possible to create invalid active patterns by following the active pattern naming convention and using double back-ticks. e.g.
+
+let ``|even|odd|`` input = if input % 2 = 0 then even else odd
+
+compiles fine as an active pattern with the following signature 
+
+val ( |even|odd| ) : int -> Choice<unit,unit>
+
+of course, attempting to create the same active pattern via normal means, i.e. let (|even|odd|) input = ..., would result in a compiler error "error FS0623: Active pattern case identifiers must begin with an uppercase letter". Moreover, attempting to match on our ``|even|odd|`` active pattern will not work, since these lower case active pattern identifiers are not recognized and are instead treated as identifier bindings.
+*)
+
 let (|CAP1|CAP2|) x = if x = 0 then CAP1 else CAP2(x)
 
 [<Fact>]
@@ -868,6 +882,10 @@ let (|PAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
 [<Fact>]
 let ``issue 11: partial active pattern`` () =
     test <@ decompile <@ (|PAP|_|) 0 1 @> = "(|PAP|_|) 0 1" @>
+
+[<Fact>]
+let ``issue 11: partially applied active apptern`` () =
+    test <@ decompile <@ (|PAP|_|) 0  @> = "(|PAP|_|) 0" @>
 
 [<Fact>]
 let ``issue 11: local active pattern`` () =
