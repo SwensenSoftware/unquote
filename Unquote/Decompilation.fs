@@ -174,8 +174,9 @@ let decompile expr =
             //don't know what precedence is
             applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
         | DP.Unit -> "()" //must come before Value pattern
-        | P.Value(o, _) ->
+        | P.Value(o, ty) ->
             match o with
+            | null when ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<option<_>> -> "None"
             | null -> "null" //sprint None when ty is option<>
             | _ -> 
                 match sprintf "%A" o with
