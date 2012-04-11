@@ -11,3 +11,7 @@ The best luck I have had is:
 
   # Repair/reinstall SP1 through appwiz.cpl (if you have no reason to suspect your SP1 installation is corrupt, then this step may be skipped)
   # Download Microsoft Silverlight 4 Tools for Visual Studio 2010 (http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=18149). Unzip it (even though it is an exe; running the exe gives me errors sometimes. even if it does succeed, probably didn't install the F# SL tools). Run FSharpRuntimeSL4.msi. Run silverlight_developer.exe. Run silverlight_sdk.msi.
+
+== NuGet Packages ==
+
+Be very careful about making sure all package metadata is correct before uploading a package (for example, icon and description). See http://nuget.codeplex.com/workitem/2097.
