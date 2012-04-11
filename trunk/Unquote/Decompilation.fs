@@ -284,6 +284,16 @@ let decompile expr =
             applyParens OP.While (sprintf "while %s do %s" (decompile (OP.While,OP.Non) condition) (decompile (OP.Try,OP.Non) body))
         | P.ForIntegerRangeLoop(var,rangeStart,rangeEnd,body) ->
             applyParens OP.For (sprintf "for %s in %s..%s do %s" var.Name (decompile CC.Zero rangeStart) (decompile CC.Zero rangeEnd) (decompile (OP.For,OP.Non) body))
+        | P.TupleGet(tup, index) -> //issue 80: reverted to version 1.2.3 TupleGet sprinting as fallback when TupleLet fails
+            let tupleMatch =
+                Seq.init 
+                    (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length) 
+                    (fun i -> if i=index then (sprintf "t%i" (index+1)) else "_") 
+
+            sprintf "(let %s = %s in %s)"
+                (tupleMatch |> String.concat ",")
+                (decompile CC.Zero tup)
+                (sprintf "t%i" (index+1))
         | _ -> 
             sprintf "%A" (expr)
     and decompileArgs prec delimiter exprs =
