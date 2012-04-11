@@ -11,7 +11,7 @@ New features and bug fixes.
   * Issue 71: Change signatures for raw evaluation to return generic argument type
   * Issue 73: Create assertion function like raises but allowing further assertions on the exception object
   * Issue 76: Consider wording changes for some assertion failure messages
-  * Issue 77: [Decompiler][Patch]Failed around TupleGet pattern
+  * Issue 77: Decompiler Bug: TupleGet pattern missed in match expression
   * Issue 79: Decompiler Bug: local lambdas captured by quotations are sprinted with mangled names
   * Issue 80: Decompiler Bug: do a better job of sprinting None values
 
