@@ -64,6 +64,7 @@ val it : unit = ()
   * `val inline ( >=? ) : 'a -> 'a -> unit when 'a : comparison`
   * `val inline ( <>? ) : 'a -> 'a -> unit when 'a : equality`
   * `val inline raises<'a when 'a :> exn> : Quotations.Expr -> unit`
+{{{
 > raises<exn> <@ (null:string).Length @>;;
 val it : unit = ()
 > raises<NullReferenceException> <@ (null:string).Length @>;;
