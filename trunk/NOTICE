@@ -1,4 +1,2 @@
 Unquote
-Copyright 2011 Stephen Swensen
-
-This software statically links to FSharp.PowerPack.Metadata, a component of Microsoft's F# PowerPack available from http://fsharppowerpack.codeplex.com/
+Copyright 2011-2012 Stephen Swensen
