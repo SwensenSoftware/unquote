@@ -10,15 +10,19 @@ type Regex with
         finally
             System.Environment.CurrentDirectory <- current
 
-let rcis = [|
+let mkCi (name, pat) =
     new RegexCompilationInfo(
-        @"^NumericLiteral([QRZING])$",
-        RegexOptions.None,
-        "NumericLiteralRegex",
-        "Swensen.Unquote.PrecompiledRegexes",
-        true
-    );
-|]
+            pat,
+            RegexOptions.None,
+            name,
+            "Swensen.Unquote.PrecompiledRegexes",
+            true
+        );
+
+let rcis = 
+    [|
+        "NumericLiteralRegex", @"^NumericLiteral([QRZING])$"
+    |] |> Array.map mkCi
 
 let an = new System.Reflection.AssemblyName("Unquote.Regex");
 Regex.CompileToAssembly(rcis, an, __SOURCE_DIRECTORY__)
