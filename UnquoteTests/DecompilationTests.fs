@@ -966,7 +966,13 @@ let ``issue 70: DefaultValue in application`` () =
     let dfInApp x = x + 2I
     <@ dfInApp (new bigint()) @> |> decompile =? "dfInApp (new bigint())"
 
-
+[<Fact>]
+let ``issue 81: mangled lambda name with dashes in number`` () =
+    //only able to reproduce this issue using function name "f" and also with
+    //FSI anonomous lambda expressions, which don't come into play with quotations
+    let f x = x : int
+    let f x = x : int
+    <@ f 2 @> |> decompile =? "f 2"
 
 
 //unquote <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>
