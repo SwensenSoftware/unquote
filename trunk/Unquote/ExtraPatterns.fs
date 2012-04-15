@@ -195,8 +195,9 @@ let (|RangeStep|_|) x =
     | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
         Some("[|", "|]", a,b,c)
     | _ -> None
-          
-let (|NumericLiteral|) x =
+         
+///Match Call(None, ...) patterns for NumericLiterals, returning the literal value as a string and suffix on success
+let (|NumericLiteral|_|) x =
     let (|NumericLiteralMI|_|) (mi:MethodInfo) =
         match mi.DeclaringType.Name with
         | Regex.Compiled.Match @"^NumericLiteral([QRZING])$" {GroupValues=[suffix]} -> Some(suffix)
@@ -205,9 +206,9 @@ let (|NumericLiteral|) x =
     match x with
     | P.Call(None, (NumericLiteralMI(suffix) as mi), args) ->
         match args with
-        | [] when mi.Name = "FromZero" -> "0" + suffix |> Some
-        | [] when mi.Name = "FromOne" -> "1" + suffix |> Some
+        | [] when mi.Name = "FromZero" -> Some("0", suffix)
+        | [] when mi.Name = "FromOne" -> Some("1", suffix)
         | [P.Value(literalValue, _)] -> //FromInt32, FromInt64, FromString
-            literalValue.ToString() + suffix |> Some
+            Some(literalValue.ToString(), suffix)
         | _ -> None //shouldn't be possible at this point
     | _ -> None

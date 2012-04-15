@@ -849,13 +849,25 @@ let ``precedence of partial application in application``() =
 let ``nested dot property indexer calls``() =
     <@ [|[|0|]|].[0].[0] @> |> decompile =? "[|[|0|]|].[0].[0]"
 
-[<Fact(Skip="todo")>]
-let ``NumericLiteralI.FromInt32``() =
+[<Fact>]
+let ``issue 72: NumericLiteralI FromZero``() =
+    <@ 0I @> |> decompile =? "0I"
+
+[<Fact>]
+let ``issue 72: NumericLiteralI FromOne``() =
+    <@ 1I @> |> decompile =? "1I"
+
+[<Fact>]
+let ``issue 72 NumericLiteralI FromInt32``() =
     <@ 1234I @> |> decompile =? "1234I"
 
-[<Fact(Skip="todo")>]
-let ``NumericLiteralI.FromZero``() =
-    <@ 0I @> |> decompile =? "0I"
+[<Fact>]
+let ``issue 72 NumericLiteralI FromInt64``() =
+    <@ 12345678999I @> |> decompile =? "12345678999I"
+
+[<Fact>]
+let ``issue 72 NumericLiteralI FromString``() =
+    <@ 12345678999999999999999999999999999999999999999999999I @> |> decompile =? "12345678999999999999999999999999999999999999999999999I"
 
 //note: we assume that functions starting and ending with pipes are active patterns.
 //indeed, I discovered the following related bug and reported fsbugs:
