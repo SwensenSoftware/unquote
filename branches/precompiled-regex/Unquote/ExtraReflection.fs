@@ -104,7 +104,7 @@ let sprintSig (outerTy:Type) =
         let cleanName, arrSig = 
             //if is generic type, then doesn't have FullName, need to use just Name
             match (if String.IsNullOrEmpty(ty.FullName) then ty.Name else ty.FullName) with
-            | Regex.Compiled.Match @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" { GroupValues=[cleanName;arrSig] }-> //long name type encoding left of `, array encoding at end
+            | RP.DecodeLongName (cleanName, arrSig) -> //long name type encoding left of `, array encoding at end
                 cleanName, arrSig
             | _ -> 
                 failwith ("failed to parse type name: " + ty.FullName)

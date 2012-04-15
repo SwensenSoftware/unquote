@@ -19,3 +19,11 @@ module RegexPatterns =
             match input with 
             | Regex.RegexMatch regex {GroupValues=[shortName]} -> Some(shortName)
             | _ -> None
+
+    ///Decode the type long name returning the clean name and array sig
+    let (|DecodeLongName|_|) =
+        let regex = DecodeLongNameRegex()
+        fun input ->
+            match input with 
+            | Regex.RegexMatch regex {GroupValues=[cleanName;arrSig]} -> Some(cleanName,arrSig)
+            | _ -> None
