@@ -34,3 +34,10 @@ module RegexPatterns =
             match input with 
             | Regex.RegexMatch regex _ -> Some()
             | _ -> None
+
+    let (|ManagledFun|_|) =
+        let regex = MangledFunRegex()
+        fun input ->
+            match input with 
+            | Regex.RegexMatch regex {GroupValues=[name]} -> Some(name)
+            | _ -> None

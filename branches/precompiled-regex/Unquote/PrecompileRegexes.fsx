@@ -25,6 +25,7 @@ let rcis =
         "ShortName", @"[\.\+]?([^\.\+]*)$"
         "DecodeLongName", @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$"
         "UnionCaseItemProperty", @"^Item(\d*)?$"
+        "MangledFun", @"^<fun:(.+)@.+>$"
     |] |> Array.map mkCi
 
 let an = new System.Reflection.AssemblyName("Unquote.Regex");

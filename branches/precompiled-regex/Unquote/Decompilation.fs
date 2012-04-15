@@ -183,7 +183,7 @@ let decompile expr =
             | null -> "null" //sprint None when ty is option<>
             | _ -> 
                 match sprintf "%A" o with
-                | Regex.Compiled.Match @"^<fun:(.+)@.+>$" { GroupValues=[name]} -> //issue 79
+                | RP.ManagledFun name -> //issue 79
                     ER.activePatternName name //issue 11 (which is taken care of in othercases by use of ER.sourceName)
                 | x -> x
         | P.NewTuple(args) -> //tuples have at least two elements
