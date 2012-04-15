@@ -197,12 +197,17 @@ let (|RangeStep|_|) x =
     | _ -> None
           
 let (|NumericLiteral|) x =
-    let (|NumericLiteralMI|) (mi:MethodInfo) =
+    let (|NumericLiteralMI|_|) (mi:MethodInfo) =
         match mi.DeclaringType.Name with
         | Regex.Compiled.Match @"^NumericLiteral([QRZING])$" {GroupValues=[suffix]} -> Some(suffix)
         | _ -> None
 
     match x with
-    | P.Call(None, NumericLiteralMI(suffix), [P.Value(literalValue, _)]) ->
-        Some(literalValue.ToString() + (suffix.Value)) //?!?!?! why is "suffix" being treated as an option type here?
+    | P.Call(None, (NumericLiteralMI(suffix) as mi), args) ->
+        match args with
+        | [] when mi.Name = "FromZero" -> "0" + suffix |> Some
+        | [] when mi.Name = "FromOne" -> "1" + suffix |> Some
+        | [P.Value(literalValue, _)] -> //FromInt32, FromInt64, FromString
+            literalValue.ToString() + suffix |> Some
+        | _ -> None //shouldn't be possible at this point
     | _ -> None
