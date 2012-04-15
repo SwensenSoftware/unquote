@@ -220,12 +220,8 @@ let decompile expr =
             | _ -> sprintf "%s(%s)" uci.Name (decompileTupledArgs args)
         | P.NewObject(ci, args) ->
             applyParens OP.Application (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
-
-//            if typeof<System.IDisposable>.IsAssignableFrom(ci.DeclaringType) then
-//                //not sure what precedence is
-//                applyParens OP.Application (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
-//            else
-//                applyParens OP.MethodCall (sprintf "%s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
+        | P.DefaultValue(ty) ->
+            applyParens OP.Application (sprintf "new %s()" (ER.sprintSig ty))
         | P.Coerce(target, _) ->
             //don't even "mention" anything about the coersion (pass through context)
             decompile (contextOP,contextAssoc) target
