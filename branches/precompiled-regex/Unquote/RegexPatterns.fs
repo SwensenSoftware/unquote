@@ -27,3 +27,10 @@ module RegexPatterns =
             match input with 
             | Regex.RegexMatch regex {GroupValues=[cleanName;arrSig]} -> Some(cleanName,arrSig)
             | _ -> None
+
+    let (|UnionCaseItemProperty|_|) =
+        let regex = UnionCaseItemPropertyRegex()
+        fun input ->
+            match input with 
+            | Regex.RegexMatch regex _ -> Some()
+            | _ -> None

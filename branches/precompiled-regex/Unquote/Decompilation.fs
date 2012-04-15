@@ -27,6 +27,7 @@ open Swensen.Utils
 module EP = Swensen.Unquote.ExtraPatterns
 module ER = Swensen.Unquote.ExtraReflection
 module OP = Swensen.Unquote.OperatorPrecedence
+module RP = Swensen.Unquote.RegexPatterns
 type OP = OP.OperatorPrecedence
 
 module CustomContext =
@@ -142,7 +143,7 @@ let decompile expr =
             applyParens OP.MethodCall (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
         | P.PropertyGet(Some(target), pi, args) -> //instance get
             match pi.Name, args with
-            | Regex.Compiled.Match(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
+            | RP.UnionCaseItemProperty _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
                 //for UnionCaseTypeTests, require a op_Dynamic implementation
                 sprintf "(%s?%s : %s)" (decompile (OP.Dot,OP.Left) target) pi.Name (pi.PropertyType |> ER.sprintSig)
             | _, [] -> sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) pi.Name //also includes "Item" with zero args

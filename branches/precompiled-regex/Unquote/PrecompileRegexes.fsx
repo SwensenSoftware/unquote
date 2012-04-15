@@ -24,6 +24,7 @@ let rcis =
         "NumericLiteral", @"^NumericLiteral([QRZING])$"
         "ShortName", @"[\.\+]?([^\.\+]*)$"
         "DecodeLongName", @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$"
+        "UnionCaseItemProperty", @"^Item(\d*)?$"
     |] |> Array.map mkCi
 
 let an = new System.Reflection.AssemblyName("Unquote.Regex");
