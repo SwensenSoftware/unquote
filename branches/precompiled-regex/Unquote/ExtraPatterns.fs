@@ -24,6 +24,7 @@ open Microsoft.FSharp.Quotations
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
 module OP = Swensen.Unquote.OperatorPrecedence
+module RP = Swensen.Unquote.RegexPatterns
 //module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
@@ -199,9 +200,8 @@ let (|RangeStep|_|) x =
 ///Match Call(None, ...) patterns for NumericLiterals, returning the literal value as a string and suffix on success
 let (|NumericLiteral|_|) x =
     let (|NumericLiteralMI|_|) (mi:MethodInfo) =
-        match mi.DeclaringType.Name with
-        | Regex.Compiled.Match @"^NumericLiteral([QRZING])$" {GroupValues=[suffix]} -> Some(suffix)
-        | _ -> None
+        mi.DeclaringType.Name 
+        |> RP.(|NumericLiteral|_|)
 
     match x with
     | P.Call(None, (NumericLiteralMI(suffix) as mi), args) ->
