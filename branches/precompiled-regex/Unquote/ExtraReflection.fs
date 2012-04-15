@@ -22,6 +22,8 @@ open Microsoft.FSharp.Reflection
 
 open Swensen.Utils
 
+module RP = Swensen.Unquote.RegexPatterns
+
 ///is the top-level FSI module
 let isFsiModule (declaringType:Type) =
     declaringType.Name.StartsWith("FSI_")
@@ -94,7 +96,7 @@ let sprintSig (outerTy:Type) =
         | "Microsoft.FSharp.Collections.FSharpList" -> "list"
         | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
         | "System.Collections.Generic.IEnumerable"  -> "seq"
-        | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] }-> name //short name
+        | RP.ShortName shortName -> shortName
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
     let rec sprintSig context (ty:Type) =

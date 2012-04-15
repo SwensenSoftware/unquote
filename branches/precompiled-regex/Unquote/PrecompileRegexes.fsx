@@ -14,14 +14,15 @@ let mkCi (name, pat) =
     new RegexCompilationInfo(
             pat,
             RegexOptions.None,
-            name,
+            name + "Regex",
             "Swensen.Unquote.PrecompiledRegexes",
             true
         );
 
 let rcis = 
     [|
-        "NumericLiteralRegex", @"^NumericLiteral([QRZING])$"
+        "NumericLiteral", @"^NumericLiteral([QRZING])$"
+        "ShortName", @"[\.\+]?([^\.\+]*)$"
     |] |> Array.map mkCi
 
 let an = new System.Reflection.AssemblyName("Unquote.Regex");
