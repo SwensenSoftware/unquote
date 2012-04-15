@@ -105,6 +105,8 @@ let decompile expr =
             sprintf "%s%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) endToken
         | EP.RangeStep(startToken,endToken,a,b,c) ->
             sprintf "%s%s..%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) (decompile CC.Zero c) endToken
+        | EP.NumericLiteral(literalValue, suffix) ->
+            literalValue + suffix
         | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && mi.Name = "UnboxGeneric" -> //i.e. :?>
             let ty = mi.GetGenericArguments().[0]
             applyParens OP.DynamicCast (sprintf "%s :?> %s" (decompile (OP.DynamicCast,OP.Left) target) (ER.sprintSig ty))
