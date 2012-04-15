@@ -195,6 +195,14 @@ let (|RangeStep|_|) x =
     | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
         Some("[|", "|]", a,b,c)
     | _ -> None
+          
+let (|NumericLiteral|) x =
+    let (|NumericLiteralMI|) (mi:MethodInfo) =
+        match mi.DeclaringType.Name with
+        | Regex.Compiled.Match @"^NumericLiteral([QRZING])$" {GroupValues=[suffix]} -> Some(suffix)
+        | _ -> None
 
-//let (|FunctionCall|_|) = function
-//    | Call(target, mi, args) when ER.isFunction mi -> 
+    match x with
+    | P.Call(None, NumericLiteralMI(suffix), [P.Value(literalValue, _)]) ->
+        Some(literalValue.ToString() + (suffix.Value)) //?!?!?! why is "suffix" being treated as an option type here?
+    | _ -> None
