@@ -25,7 +25,6 @@ module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
 module OP = Swensen.Unquote.OperatorPrecedence
 module RP = Swensen.Unquote.RegexPatterns
-//module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
 
@@ -196,11 +195,11 @@ let (|RangeStep|_|) x =
     | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
         Some("[|", "|]", a,b,c)
     | _ -> None
-         
+
 ///Match Call(None, ...) patterns for NumericLiterals, returning the literal value as a string and suffix on success
 let (|NumericLiteral|_|) x =
     let (|NumericLiteralMI|_|) (mi:MethodInfo) =
-        mi.DeclaringType.Name 
+        mi.DeclaringType.Name
         |> RP.(|NumericLiteral|_|)
 
     match x with

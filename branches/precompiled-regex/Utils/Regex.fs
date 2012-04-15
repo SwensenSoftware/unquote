@@ -33,6 +33,38 @@ module Regex =
         }
 
     ///<summary>
+    ///Test an input string against a regex instance. 
+    ///If the match succeeds, returns an ActiveMatch instance, which can be used for further pattern matching.
+    ///</summary>
+    ///<param name="regex">
+    ///The second argument is the regex instance. Cannot be null. 
+    ///</param>
+    ///<param name="input">
+    ///The last argument is the input string to test. The input
+    ///may be null which would result in a no-match.
+    ///</param>
+    let (|RegexMatch|_|) (regex:Regex) input =
+        match input with
+        | null -> None //Regex.Match will throw with null input, we return None instead
+        | _ ->
+            match regex.Match(input) with
+            | m when m.Success -> 
+                //n.b. the head value of m.Groups is the match itself, which we discard
+                //n.b. if a group is optional and doesn't match, it's Value is ""
+                let groups = [for x in m.Groups -> x].Tail
+                let optionalGroups = groups |> List.map (fun x -> if x.Success then Some(x) else None)
+                let groupValues = groups |> List.map (fun x -> x.Value)
+                let optionalGroupValues = optionalGroups |> List.map (function None -> None | Some(x) -> Some(x.Value))
+
+                Some({ Match=m
+                       MatchValue=m.Value
+                       Groups=groups
+                       OptionalGroups=optionalGroups
+                       GroupValues=groupValues
+                       OptionalGroupValues=optionalGroupValues })
+            | _ -> None
+
+    ///<summary>
     ///Test an input string against a regex pattern using the given RegexOptions flags. 
     ///If the match succeeds, returns an ActiveMatch instance, which can be used for further pattern matching.
     ///Note that the implementation takes advantage of the .NET Regex cache.

@@ -14,8 +14,8 @@ let rcis = [|
     new RegexCompilationInfo(
         @"^NumericLiteral([QRZING])$",
         RegexOptions.None,
-        "NumericLiteral",
-        "Swensen.Unquote.Regex",
+        "NumericLiteralRegex",
+        "Swensen.Unquote.PrecompiledRegexes",
         true
     );
 |]

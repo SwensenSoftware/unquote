@@ -63,6 +63,9 @@
     <Compile Include="..\Unquote\Prelude.fs">
       <Link>Prelude.fs</Link>
     </Compile>
+    <Compile Include="..\Unquote\RegexPatterns.fs">
+      <Link>RegexPatterns.fs</Link>
+    </Compile>
     <Compile Include="..\Unquote\DynamicOperators.fs">
       <Link>DynamicOperators.fs</Link>
     </Compile>

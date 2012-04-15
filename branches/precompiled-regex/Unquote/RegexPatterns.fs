@@ -1,11 +1,12 @@
 ﻿namespace Swensen.Unquote
 
-open Swensen.Unquote.Regex
+open Swensen.Utils
+open Swensen.Unquote.PrecompiledRegexes
+
 module RegexPatterns =
+    ///Match the numeric literal module name pattern and extract the suffix
     let (|NumericLiteral|_|) input =
-        let regex = new NumericLiteral()
-        let m = regex.Match(input)
-        if m.Success then
-            Some(m.Groups.[1].Value)
-        else
-            None
+        let regex = Swensen.Unquote.PrecompiledRegexes.NumericLiteralRegex()
+        match input with 
+        | Regex.RegexMatch regex {GroupValues=[suffix]} -> Some(suffix)
+        | _ -> None
