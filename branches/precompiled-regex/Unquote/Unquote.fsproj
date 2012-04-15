@@ -58,6 +58,7 @@
     <Compile Include="Operators.fs" />
     <Compile Include="AssertionFailedException.fs" />
     <Compile Include="Assertions.fs" />
+    <None Include="PrecompileRegexes.fsx" />
     <None Include="Startup.fsx" />
   </ItemGroup>
   <ItemGroup>
