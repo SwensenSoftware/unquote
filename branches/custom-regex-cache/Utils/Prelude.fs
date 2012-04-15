@@ -23,7 +23,8 @@ let memoize f =
     let cache = System.Collections.Generic.Dictionary<_,_>(HashIdentity.Structural)
     fun x ->
         match cache.TryGetValue(x) with
-        | true, res -> res
+        | true, res -> 
+            res
         | _ -> 
             let res = f x
             cache.[x] <- res

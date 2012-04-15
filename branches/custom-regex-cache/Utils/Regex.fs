@@ -32,6 +32,19 @@ module Regex =
             OptionalGroupValues: (string option) list
         }
 
+    let regexMatch =
+        let mkRegex (pattern,flags) = new Regex(pattern, flags)
+        let mkRegexMem = memoize mkRegex 
+        
+        fun input pattern flags ->
+            if flags &&& RegexOptions.Compiled |> int = 0 then //compiled flag not set, do not cache
+                ((pattern, flags) |> mkRegex).Match(input)
+            else                
+            #if SILVERLIGHT //remove compiled flag if silverlight, since not supported there -- but still cache the created Match instance (save parsing time at least)
+                let flags = flags &&& ~~~RegexOptions.Compiled
+            #endif
+                ((pattern, flags) |> mkRegexMem).Match(input)
+
     ///<summary>
     ///Test an input string against a regex pattern using the given RegexOptions flags. 
     ///If the match succeeds, returns an ActiveMatch instance, which can be used for further pattern matching.
@@ -52,7 +65,7 @@ module Regex =
         | null -> None //Regex.Match will throw with null input, we return None instead
         | _ ->
             //using the static Regex.Match takes advantage of Regex caching
-            match Regex.Match(input, pattern, flags) with
+            match regexMatch input pattern flags with
             | m when m.Success -> 
                 //n.b. the head value of m.Groups is the match itself, which we discard
                 //n.b. if a group is optional and doesn't match, it's Value is ""
@@ -70,17 +83,9 @@ module Regex =
             | _ -> None
 
     ///Convenience versions of our regex active patterns using RegexOptions.Compiled flag.
-    ///If SILVERLIGHT compiler directive defined, then RegexOptions.None flag used.
+    ///If SILVERLIGHT compiler directive defined, then RegexOptions.None flag used (under the covers).
     module Compiled =
-        ///When silverlight mode is None, else is Compiled
-        let private compiledRegexOption = 
-#if SILVERLIGHT
-            RegexOptions.None
-#else
-            RegexOptions.Compiled
-#endif
-
-        let (|Match|_|) = (|Match|_|) compiledRegexOption
+        let (|Match|_|) = (|Match|_|) RegexOptions.Compiled
 
     ///Convenience versions of our regex active patterns using RegexOptions.None flag
     module Interpreted =
