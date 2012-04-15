@@ -30,7 +30,24 @@ module Regex =
             OptionalGroups: (Group option) list
             GroupValues: string list
             OptionalGroupValues: (string option) list
-        }
+        } with
+            static member tryFromMatch (m:Match) =
+                match m with
+                | m when m.Success -> 
+                    //n.b. the head value of m.Groups is the match itself, which we discard
+                    //n.b. if a group is optional and doesn't match, it's Value is ""
+                    let groups = [for x in m.Groups -> x].Tail
+                    let optionalGroups = groups |> List.map (fun x -> if x.Success then Some(x) else None)
+                    let groupValues = groups |> List.map (fun x -> x.Value)
+                    let optionalGroupValues = optionalGroups |> List.map (function None -> None | Some(x) -> Some(x.Value))
+
+                    Some({ Match=m
+                           MatchValue=m.Value
+                           Groups=groups
+                           OptionalGroups=optionalGroups
+                           GroupValues=groupValues
+                           OptionalGroupValues=optionalGroupValues })
+                | _ -> None
 
     ///<summary>
     ///Test an input string against a regex instance. 
@@ -46,23 +63,7 @@ module Regex =
     let (|RegexMatch|_|) (regex:Regex) input =
         match input with
         | null -> None //Regex.Match will throw with null input, we return None instead
-        | _ ->
-            match regex.Match(input) with
-            | m when m.Success -> 
-                //n.b. the head value of m.Groups is the match itself, which we discard
-                //n.b. if a group is optional and doesn't match, it's Value is ""
-                let groups = [for x in m.Groups -> x].Tail
-                let optionalGroups = groups |> List.map (fun x -> if x.Success then Some(x) else None)
-                let groupValues = groups |> List.map (fun x -> x.Value)
-                let optionalGroupValues = optionalGroups |> List.map (function None -> None | Some(x) -> Some(x.Value))
-
-                Some({ Match=m
-                       MatchValue=m.Value
-                       Groups=groups
-                       OptionalGroups=optionalGroups
-                       GroupValues=groupValues
-                       OptionalGroupValues=optionalGroupValues })
-            | _ -> None
+        | _ -> regex.Match(input) |> ActiveMatch.tryFromMatch
 
     ///<summary>
     ///Test an input string against a regex pattern using the given RegexOptions flags. 
@@ -79,27 +80,12 @@ module Regex =
     ///The last argument is the input string to test. The input
     ///may be null which would result in a no-match.
     ///</param>
-    let (|Match|_|) flags pattern input =
+    let (|PatternMatch|_|) flags pattern input =
         match input with
         | null -> None //Regex.Match will throw with null input, we return None instead
         | _ ->
             //using the static Regex.Match takes advantage of Regex caching
-            match Regex.Match(input, pattern, flags) with
-            | m when m.Success -> 
-                //n.b. the head value of m.Groups is the match itself, which we discard
-                //n.b. if a group is optional and doesn't match, it's Value is ""
-                let groups = [for x in m.Groups -> x].Tail
-                let optionalGroups = groups |> List.map (fun x -> if x.Success then Some(x) else None)
-                let groupValues = groups |> List.map (fun x -> x.Value)
-                let optionalGroupValues = optionalGroups |> List.map (function None -> None | Some(x) -> Some(x.Value))
-
-                Some({ Match=m
-                       MatchValue=m.Value
-                       Groups=groups
-                       OptionalGroups=optionalGroups
-                       GroupValues=groupValues
-                       OptionalGroupValues=optionalGroupValues })
-            | _ -> None
+            Regex.Match(input, pattern, flags) |> ActiveMatch.tryFromMatch
 
     ///Convenience versions of our regex active patterns using RegexOptions.Compiled flag.
     ///If SILVERLIGHT compiler directive defined, then RegexOptions.None flag used.
@@ -112,8 +98,8 @@ module Regex =
             RegexOptions.Compiled
 #endif
 
-        let (|Match|_|) = (|Match|_|) compiledRegexOption
+        let (|Match|_|) = (|PatternMatch|_|) compiledRegexOption
 
     ///Convenience versions of our regex active patterns using RegexOptions.None flag
     module Interpreted =
-        let (|Match|_|) = (|Match|_|) RegexOptions.None
+        let (|Match|_|) = (|PatternMatch|_|) RegexOptions.None
