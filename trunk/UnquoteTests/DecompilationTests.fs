@@ -957,4 +957,16 @@ let ``issue 77: TupleGet fallback nested tuple gets`` () =
     test <@ decompile input = expected @>
 #endif
 
+[<Fact>]
+let ``issue 70: DefaultValue standalone`` () =
+    <@ new bigint() @> |> decompile =? "new bigint()"
+
+[<Fact>]
+let ``issue 70: DefaultValue in application`` () =
+    let dfInApp x = x + 2I
+    <@ dfInApp (new bigint()) @> |> decompile =? "dfInApp (new bigint())"
+
+
+
+
 //unquote <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>

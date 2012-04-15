@@ -707,6 +707,14 @@ let ``issue 80: sprint non literal None constructions``() =
         "f4()"
         "None"
     ]
+
+[<Fact>]
+let ``issue 70: DefaultValue reduction``() =
+    <@ new int() @> |> decompiledReductions =? [
+        "new int()"
+        "0"
+    ]
+    
     
 //[<Fact>]
 //let ``instance PropertySet`` () =    
