@@ -16,6 +16,8 @@ You must also obtain and install your unit testing framework of choice, NUnit an
 
 To use Unquote within FSI, locate and add a reference to Unquote.dll using the `#r` directive (use the .NET 4.0 build).
 
+_To use the .NET 4.0 build within a Visual Studio 11 beta library or project, you must add a binding redirect from FSharp.Core 4.0.0.0 to 4.3.0.0. See Issue 78 for more information._
+
 == User Guide ==
 
 The `Swensen.Unquote` namespace contains three `AutoOpen` modules: `Assertions`, `Operators`, and `Extensions`. Therefore you may choose to bring all of Unquote's features into top-level scope simply by opening `Swensen.Unquote` or you may choose to open individual modules or even alias individual modules for a finer level of control.
