@@ -43,9 +43,39 @@
     <DocumentationFile>bin\Release\UnquoteTests.Silverlight.XML</DocumentationFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.Common.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <ItemGroup>
+    <Compile Include="..\UnquoteTests\EvaluationTests.fs">
+      <Link>EvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\DynamicOperatorsEvaluationTests.fs">
+      <Link>DynamicOperatorsEvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\CheckedDynamicOperatorsEvaluationTests.fs">
+      <Link>CheckedDynamicOperatorsEvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\FSharpNameTests.fs">
+      <Link>FSharpNameTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\DecompilationTests.fs">
+      <Link>DecompilationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\ReductionTests.fs">
+      <Link>ReductionTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\AssertionOperatorsTests.fs">
+      <Link>AssertionOperatorsTests.fs</Link>
+    </Compile>
+    <Compile Include="TestRunner.fs" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\FSharpPowerPack-2.0.0.0\\Silverlight\v4.0\FSharp.PowerPack.dll</HintPath>
+      <HintPath>..\packages\FSPowerPack.Core.Community.2.0.0.0\Lib\sl4\FSharp.PowerPack.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Silverlight.Testing">
       <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.Silverlight.Testing.dll</HintPath>
@@ -78,32 +108,6 @@
     <Reference Include="xunit-silverlight4">
       <HintPath>..\lib\xunitcontrib-silverlight.0.2\Silverlight4\xunit-silverlight4.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\UnquoteTests\EvaluationTests.fs">
-      <Link>EvaluationTests.fs</Link>
-    </Compile>
-    <Compile Include="..\UnquoteTests\DynamicOperatorsEvaluationTests.fs">
-      <Link>DynamicOperatorsEvaluationTests.fs</Link>
-    </Compile>
-    <Compile Include="..\UnquoteTests\CheckedDynamicOperatorsEvaluationTests.fs">
-      <Link>CheckedDynamicOperatorsEvaluationTests.fs</Link>
-    </Compile>
-    <Compile Include="..\UnquoteTests\FSharpNameTests.fs">
-      <Link>FSharpNameTests.fs</Link>
-    </Compile>
-    <Compile Include="..\UnquoteTests\DecompilationTests.fs">
-      <Link>DecompilationTests.fs</Link>
-    </Compile>
-    <Compile Include="..\UnquoteTests\ReductionTests.fs">
-      <Link>ReductionTests.fs</Link>
-    </Compile>
-    <Compile Include="..\UnquoteTests\AssertionOperatorsTests.fs">
-      <Link>AssertionOperatorsTests.fs</Link>
-    </Compile>
-    <Compile Include="TestRunner.fs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Unquote.Silverlight\Unquote.Silverlight.fsproj">
       <Name>Unquote.Silverlight</Name>
       <Project>{d9c03ac2-0017-456a-9b01-87e389374e18}</Project>
@@ -115,11 +119,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.Common.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">
