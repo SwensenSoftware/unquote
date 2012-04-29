@@ -33,9 +33,58 @@ let isOpenModule (declaringType:Type) =
     |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
     |> (function | Some _ -> true | None -> false)
 
-let activePatternName (name:string) =
-    if name.StartsWith("|") && name.EndsWith("|") then sprintf "(%s)" name
-    else name
+let sourceNameFromString =
+    let isActivePattern (name: string) = name.StartsWith("|") && name.EndsWith("|")
+    
+    let specialChars = @"~!@#$%^&*()+"".,:;<>\/?{}[]`|".ToCharArray()
+
+    let reservedWords = 
+      set
+        ["atomic"; "break"; "checked"; "component"; "const"; "constraint";
+         "constructor"; "continue"; "eager"; "fixed"; "fori"; "functor"; "include";
+         "measure"; "method"; "mixin"; "object"; "parallel"; "params"; "process";
+         "protected"; "pure"; "recursive"; "sealed"; "tailcall"; "trait";
+         "virtual"; "volatile"]
+
+    let keywords =
+      set
+        ["abstract"; "and"; "as"; "assert"; "base"; "begin"; "class"; "default";
+         "delegate"; "do"; "done"; "downcast"; "downto"; "elif"; "else"; "end";
+         "exception"; "extern"; "false"; "finally"; "for"; "fun"; "function";
+         "global"; "if"; "in"; "inherit"; "inline"; "interface"; "internal";
+         "lazy"; "let"; "match"; "member"; "module"; "mutable"; "namespace"; "new";
+         "null"; "of"; "open"; "or"; "override"; "private"; "public"; "rec";
+         "return"; "sig"; "static"; "struct"; "then"; "to"; "true"; "try"; "type";
+         "upcast"; "use"; "val"; "void"; "when"; "while"; "with"; "yield"]
+
+
+    let hasSpecialChars (name: string) = name.IndexOfAny(specialChars) <> -1
+    let isReservedWord name = reservedWords |> Set.contains name
+    let isKeyword name = keywords |> Set.contains name
+
+    (*
+    let tryMapSymbolic name =
+        match name with
+        | "op_Addition" -> Some("+")
+        | _ -> None 
+    *)
+
+    let parenthesize name = sprintf "(%s)" name 
+    let escape name = sprintf "``%s``" name
+
+    fun name ->
+        if name |> isActivePattern then //n.b. active patterns can't have escaped names
+            parenthesize name
+        elif name |> hasSpecialChars || name |> isReservedWord || name |> isKeyword then //escape because has special char or is reserved word
+            escape name
+        else
+            name
+            (*
+            //actual binary and infix operators are handled else where, these are just symbolic functions, e.g. have 3 or more args
+            match tryMapSymbolic name with
+            | Some(sym) -> parenthesize sym //need to consider things like leading / trailing * and tildas
+            | None -> name
+            *)
 
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
@@ -51,7 +100,7 @@ let sourceName (mi:MemberInfo) =
                     None
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
-    |> activePatternName //issue 11: active pattern function names need to be surrounded by parens
+    |> sourceNameFromString //issue 11: active pattern function names need to be surrounded by parens
 
 let private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 

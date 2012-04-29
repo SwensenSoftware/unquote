@@ -183,7 +183,7 @@ let decompile expr =
             | _ -> 
                 match sprintf "%A" o with
                 | Regex.Compiled.Match @"^<fun:(.+)@.+>$" { GroupValues=[name]} -> //issue 79
-                    ER.activePatternName name //issue 11 (which is taken care of in othercases by use of ER.sourceName)
+                    ER.sourceNameFromString name //issue 11 (which is taken care of in othercases by use of ER.sourceName)
                 | x -> x
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
