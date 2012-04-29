@@ -1030,7 +1030,9 @@ let ``issue 87: keyword in local function name`` () =
     let ``match`` () = 3
     <@ ``match``() @> |> decompile =? "``match`` ()"
 
-
+[<Fact>]
+let ``issue 83: leading tilda for prefix operator lambdas should only be used when the operator can also be a infix operator`` () =
+    <@ (~~~) @> |> decompile =? "(~~~)"
 
 
 //unquote <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>

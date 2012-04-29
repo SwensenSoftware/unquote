@@ -67,7 +67,12 @@ let decompile expr =
                 | _ -> failwithf "partial applied binary op should only have 0 or 1 args but has more: %A" args
             | None ->
                 match EP.unaryOps |> Map.tryFind mi.Name with
-                | Some(symbol) -> sprintf "(~%s)" symbol
+                | Some(symbol) ->
+                    let requireLeadingTilda = set ["%"; "%%"; "&"; "&&"; "+"; "+."; "-"; "-."] //issue 83
+                    if requireLeadingTilda.Contains(symbol) then
+                        sprintf "(~%s)" symbol
+                    else
+                        sprintf "(%s)" symbol
                 | None -> 
                     let sprintFunction (mi:MethodInfo) =
                         if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
