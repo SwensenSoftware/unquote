@@ -986,5 +986,51 @@ let ``issue 81: mangled lambda name with dashes in number`` () =
     let f x = x : int
     <@ f 2 @> |> decompile =? "f 2"
 
+let ``top%level`` () = 3
+
+[<Fact>]
+let ``issue 87: special char in top level function name`` () =
+    <@ ``top%level``() @> |> decompile =? "``top%level``()"
+
+[<Fact>]
+let ``issue 87: special char in local function name`` () =
+    let ``top%level`` () = 3
+    <@ ``top%level``() @> |> decompile =? "``top%level`` ()" //interesting, note difference between top level and local function argument spacing. which makes sense. and is a good way for us to be sure we are testing the right thing.
+
+let ``top@level`` () = 3
+
+[<Fact>]
+let ``issue 87: at symbol in top level function name`` () =
+    <@ ``top@level``() @> |> decompile =? "``top@level``()"
+
+[<Fact>]
+let ``issue 87: at symbol in local function name`` () =
+    let ``top@level`` () = 3
+    <@ ``top@level``() @> |> decompile =? "top ()" //note that sprinting as "top ()" is not what the user expects, but it is a consequence of using "@" in your identifiers!
+
+let ``tailcall`` () = 3
+
+[<Fact>]
+let ``issue 87: reserved word in top level function name`` () =
+    <@ ``tailcall``() @> |> decompile =? "``tailcall``()"
+
+[<Fact>]
+let ``issue 87: reserved word in local function name`` () =
+    let ``tailcall`` () = 3
+    <@ ``tailcall``() @> |> decompile =? "``tailcall`` ()"
+
+let ``match`` () = 3
+
+[<Fact>]
+let ``issue 87: keyword in top level function name`` () =
+    <@ ``match``() @> |> decompile =? "``match``()"
+
+[<Fact>]
+let ``issue 87: keyword in local function name`` () =
+    let ``match`` () = 3
+    <@ ``match``() @> |> decompile =? "``match`` ()"
+
+
+
 
 //unquote <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>
