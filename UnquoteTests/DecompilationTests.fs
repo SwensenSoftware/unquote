@@ -1034,5 +1034,18 @@ let ``issue 87: keyword in local function name`` () =
 let ``issue 83: leading tilda for prefix operator lambdas should only be used when the operator can also be a infix operator`` () =
     <@ (~~~) @> |> decompile =? "(~~~)"
 
+//the following tests need to redefine top level operators within a module to test their case,
+//but then we must take care to only test these in VS with TestDriven.NET by running all tests for the test project
+//otherwise we'll get a false "pass"
+module TopLevelOpIsolation =
+    let (+) x y z = x - y - z
+    [<Fact>]
+    let ``issue 85: partially applied symbolic function causes exception`` () =
+        <@ (+) 3 3 @> |> decompile =? "TopLevelOpIsolation.op_Addition 3 3"
+
+    let (~~~) x y z = x - y - z
+    [<Fact>]
+    let ``issue 86: Partialy applied symbolic function not decompiled correctly`` () =
+        <@ (~~~) 1 1 @> |> decompile =? "TopLevelOpIsolation.op_LogicalNot 1 1"
 
 //unquote <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>
