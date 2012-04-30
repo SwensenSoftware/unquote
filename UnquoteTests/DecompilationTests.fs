@@ -1048,4 +1048,43 @@ module TopLevelOpIsolation =
     let ``issue 86: Partialy applied symbolic function not decompiled correctly`` () =
         <@ (~~~) 1 1 @> |> decompile =? "TopLevelOpIsolation.op_LogicalNot 1 1"
 
-//unquote <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>
+[<Fact(Skip="issue 90")>]
+let ``locally defined standard prefix op sprints leading tilda when required when no args applied`` () =
+    let (~+.) x : int = x
+    <@ (~+.) @> |> decompile =? "(~+.)"
+
+[<Fact(Skip="issue 90")>]
+let ``locally defined standard prefix op sprinted as prefix op when fully applied`` () =
+    let (~+.) x : int = x + x
+    <@ +.1 @> |> decompile =? "+.1"
+
+[<Fact(Skip="issue 90")>]
+let ``locally redefined standard prefix op sprints leading tilda when required when no args applied`` () =
+    let (~-) x : int = x
+    <@ (~-) @> |> decompile =? "(~-)"
+
+[<Fact(Skip="issue 90")>]
+let ``locally redefined standard prefix op sprinted as prefix op when fully applied`` () =
+    let (~-) x : int = x + x
+    let x = 1
+    <@ -x @> |> decompile =? "-x"
+
+[<Fact(Skip="issue 90")>]
+let ``locally redefined standard infix op sprinted as symbol when partially applied`` () =
+    let (+) x y = x + y : int
+    <@ (+) 1 @> |> decompile =? "(+) 1"
+
+[<Fact(Skip="issue 90")>]
+let ``locally redefined standard infix op sprinted as infix op when fully applied`` () =
+    let (+) x y = x + y : int
+    <@ (+) 1 1 @> |> decompile =? "1 + 1"
+
+[<Fact(Skip="issue 90")>]
+let ``locally defined standard infix op sprinted as symbol when partially applied`` () =
+    let (+++) x y = x + y : int
+    <@ (+++) 1 @> |> decompile =? "(+++) 1"
+
+[<Fact(Skip="issue 90")>]
+let ``locally defined standard infix op sprinted as infix op when fully applied`` () =
+    let (+++) x y = x + y : int
+    <@ (+++) 1 1 @> |> decompile =? "1 +++ 1"
