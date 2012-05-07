@@ -24,7 +24,7 @@ open Microsoft.FSharp.Quotations
 module P = Microsoft.FSharp.Quotations.Patterns
 module DP = Microsoft.FSharp.Quotations.DerivedPatterns
 module OP = Swensen.Unquote.OperatorPrecedence
-//module ER = Swensen.Unquote.ExtraReflection
+module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
 
@@ -201,12 +201,10 @@ let private rangeOuterInnerMethodInfos (miOuter:MethodInfo) (miInner:MethodInfo)
     miInner.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" && miInner.Name = "CreateSequence" 
         && miOuter.DeclaringType.FullName = "Microsoft.FSharp.Collections.SeqModule" && miOuter.Name = conversionMiName
 
-//todo: refactor IsGenericType && GetGenericTypeDefinition() pattern into own method
-
 ///Match a sequence, list, or array op_Range expression, return (startToken, endToken, startExpression, endExpression). Must come before Call patterns.
 let (|Range|_|) x =
     let (|RangeOp|_|) = function
-        | P.Call(None, mi, a::b::[]) when mi.Name = "op_Range" && (mi.ReturnType.IsGenericType && mi.ReturnType.GetGenericTypeDefinition() = typedefof<seq<_>>) -> 
+        | P.Call(None, mi, a::b::[]) when mi.Name = "op_Range" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) -> 
             Some(a,b)
         | _ -> None
     
@@ -222,7 +220,7 @@ let (|Range|_|) x =
 ///Match a sequence, list, or array op_RangeStep expression, return (startToken, endToken, startExpression, stepExpression, endExpression). Must come before Call patterns.
 let (|RangeStep|_|) x =
     let (|RangeStepOp|_|) = function
-        | P.Call(None, mi, a::b::c::[]) when mi.Name = "op_RangeStep" && (mi.ReturnType.IsGenericType && mi.ReturnType.GetGenericTypeDefinition() = typedefof<seq<_>>) -> 
+        | P.Call(None, mi, a::b::c::[]) when mi.Name = "op_RangeStep" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) -> 
             Some(a,b,c)
         | _ -> None
 

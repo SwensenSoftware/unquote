@@ -179,7 +179,7 @@ let decompile expr =
         | DP.Unit -> "()" //must come before Value pattern
         | P.Value(o, ty) ->
             match o with
-            | null when ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<option<_>> -> "None"
+            | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None"
             | null -> "null" //sprint None when ty is option<>
             | _ -> 
                 match sprintf "%A" o with
