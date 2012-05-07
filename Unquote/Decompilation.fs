@@ -56,19 +56,17 @@ let decompile expr =
         | EP.IncompleteLambdaCall(target, mi, suppliedArgs) -> //assume lambdas are only part of modules.
             //function name: includes support of first-class infix and prefix operators.
             let funName =
-                match mi.GetParameters().Length, lazy(EP.unaryOps |> Map.tryFind mi.Name), lazy(EP.binaryOps |> Map.tryFind mi.Name) with
-                | 1, Lazy(Some(symbol)), _ ->
-                    let requireLeadingTilda = set ["%"; "%%"; "&"; "&&"; "+"; "+."; "-"; "-."] //issue 83
-                    if requireLeadingTilda.Contains(symbol) then
-                        sprintf "(~%s)" symbol
-                    else
-                        sprintf "(%s)" symbol
-                | 2, _, Lazy(Some(symbol, _)) ->
-                    if symbol.StartsWith("*") || symbol.EndsWith("*") then
+                match mi.GetParameters().Length, lazy(EP.symbolicOps |> Map.tryFind mi.Name) with
+                | 1, Lazy(Some(symbol, EP.Prefix(false))) ->
+                    sprintf "(%s)" symbol
+                | 1, Lazy(Some(symbol, EP.Prefix(true))) ->
+                    sprintf "(~%s)" symbol
+                | 2, Lazy(Some(symbol:string, EP.Infix(_))) ->
+                    if (symbol:string).StartsWith("*") || symbol.EndsWith("*") then
                         sprintf "( %s )" symbol
                     else
                         sprintf "(%s)" symbol
-                | _, _, _ ->
+                |  _, _ ->
                     if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
                     else
                         let decompiledTarget =
@@ -90,10 +88,10 @@ let decompile expr =
                         | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
                 |> String.concat " "
             applyParens OP.Fun (sprintf "fun %s -> %s" sprintedVars (decompile CC.Zero body))
-        | EP.BinaryInfixCall((symbol, prec), lhs, rhs) -> //must come before Call pattern
+        | EP.InfixCall((symbol, prec), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = decompile (prec,OP.Left) lhs, decompile (prec,OP.Right) rhs
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
-        | EP.UnaryPrefixCall(symbol, arg) -> //must come before Call pattern
+        | EP.PrefixCall((symbol,_), arg) -> //must come before Call pattern
             applyParens OP.PrefixOps (sprintf "%s%s" symbol (decompile (OP.PrefixOps,OP.Non) arg))
         | P.Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
             //thinking about making decompile depend on Reduce.isReduced: 
