@@ -29,104 +29,94 @@ module ER = Swensen.Unquote.ExtraReflection
 open Swensen.Utils
 
 type symbolicOp =
-    | Prefix
+    //bool: requires twiddle prefix
+    | Prefix of bool
+    //OP.OperatorPrecedence : op precedence
     | Infix of OP.OperatorPrecedence
-    | PrefixOrInfix of OP.OperatorPrecedence //OP.OperatorPrecedence is for Infix if it is an infix (i.e. 2 args)
-    | NonOp of string * string * int
 
-//let symbolicFunctions =
+let symbolicOps = 
+    [   //boolean ops
+        "op_Equality", ("=", Infix(OP.EqualsOp))
+        "op_GreaterThan", (">", Infix(OP.GreaterThanOp))
+        "op_LessThan", ("<", Infix(OP.LessThanOp))
+        "op_GreaterThanOrEqual", (">=", Infix(OP.GreaterThanOp))
+        "op_LessThanOrEqual", ("<=", Infix(OP.LessThanOp))
+        "op_Inequality", ("<>", Infix(OP.LessThanOp))
+        //pipe ops
+        "op_PipeRight", ("|>", Infix(OP.Pipe)) //might need to be OP.PipeOp
+        "op_PipeRight2", ("||>", Infix(OP.Pipe))
+        "op_PipeRight3", ("|||>", Infix(OP.Pipe))
+        "op_PipeLeft", ("<|", Infix(OP.LessThanOp))
+        "op_PipeLeft2", ("<||", Infix(OP.LessThanOp))
+        "op_PipeLeft3", ("<|||", Infix(OP.LessThanOp))
+        //numeric ops
+        "op_Addition", ("+", Infix(OP.PlusBinaryOp))
+        "op_Subtraction", ("-", Infix(OP.MinusBinaryOp))
+        "op_Division", ("/", Infix(OP.DivideOp))
+        "op_Multiply", ("*", Infix(OP.MultiplyOp))
+        "op_Modulus", ("%", Infix(OP.ModOp))
+        "op_Exponentiation", ("**", Infix(OP.ExponentiationOp))
+        //bit operators
+        "op_BitwiseAnd", ("&&&", Infix(OP.BitwiseAnd))
+        "op_BitwiseOr", ("|||", Infix(OP.BitwiseOr))
+        "op_ExclusiveOr", ("^^^", Infix(OP.ExclusiveOr))
+        "op_LeftShift", ("<<<", Infix(OP.LeftShift))
+        "op_RightShift", (">>>", Infix(OP.RightShift))
 
-//let example = @"""op_Equality"", (""="", OP.EqualsOp)"
-//let regex = @"("".*""), \(("".*""), (.*)\)"
-//let m = System.Text.RegularExpressions.Regex.Match(example, regex)
+        //composition
+        "op_ComposeRight", (">>", Infix(OP.GreaterThanOp))
+        "op_ComposeLeft", ("<<", Infix(OP.LessThanOp))
+        //special
+        "op_Append", ("@", Infix(OP.AppendOp)) //not sure what precedence, falling back on (+))
+        "op_Concatenate", ("^", Infix(OP.ConcatenateOp)) //ocaml style string concatentation
+        //set ref cell
+        "op_ColonEquals", (":=", Infix(OP.RefAssign))
 
-let binaryOps = 
-    [
-    //boolean ops
-    "op_Equality", ("=", OP.EqualsOp)
-    "op_GreaterThan", (">", OP.GreaterThanOp)
-    "op_LessThan", ("<", OP.LessThanOp)
-    "op_GreaterThanOrEqual", (">=", OP.GreaterThanOp)
-    "op_LessThanOrEqual", ("<=", OP.LessThanOp)
-    "op_Inequality", ("<>", OP.LessThanOp)
-    //pipe ops
-    "op_PipeRight", ("|>", OP.Pipe) //might need to be OP.PipeOp
-    "op_PipeRight2", ("||>", OP.Pipe)
-    "op_PipeRight3", ("|||>", OP.Pipe)
-    "op_PipeLeft", ("<|", OP.LessThanOp)
-    "op_PipeLeft2", ("<||", OP.LessThanOp)
-    "op_PipeLeft3", ("<|||", OP.LessThanOp)
-    //numeric ops
-    "op_Addition", ("+", OP.PlusBinaryOp)
-    "op_Subtraction", ("-", OP.MinusBinaryOp)
-    "op_Division", ("/", OP.DivideOp)
-    "op_Multiply", ("*", OP.MultiplyOp)
-    "op_Modulus", ("%", OP.ModOp)
-    "op_Exponentiation", ("**", OP.ExponentiationOp)
-    //bit operators
-    "op_BitwiseAnd", ("&&&", OP.BitwiseAnd)
-    "op_BitwiseOr", ("|||", OP.BitwiseOr)
-    "op_ExclusiveOr", ("^^^", OP.ExclusiveOr)
-    "op_LeftShift", ("<<<", OP.LeftShift)
-    "op_RightShift", (">>>", OP.RightShift)
+        //op assign operators
+        "op_AdditionAssignment", ("+=", Infix(OP.PlusBinaryOp))
+        "op_SubtractionAssignment", ("-=", Infix(OP.MinusBinaryOp))
+        "op_MultiplyAssignment", ("*=", Infix(OP.MultiplyOp))
+        "op_DivisionAssignment", ("/=", Infix(OP.DivideOp))
 
-    //composition
-    "op_ComposeRight", (">>", OP.GreaterThanOp)
-    "op_ComposeLeft", ("<<", OP.LessThanOp)
-    //special
-    "op_Append", ("@", OP.AppendOp) //not sure what precedence, falling back on (+)
-    "op_Concatenate", ("^", OP.ConcatenateOp) //ocaml style string concatentation
-    //set ref cell
-    "op_ColonEquals", (":=", OP.RefAssign)
+        //"", ("",)
+        //some more exotic operators
+        "op_BooleanOr", ("||", Infix(OP.Or))
+        //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
+        "op_BooleanAnd", ("&&", Infix(OP.And))
+        "op_Amp", ("&", Infix(OP.And))
 
-    //op assign operators
-    "op_AdditionAssignment", ("+=", OP.PlusBinaryOp)
-    "op_SubtractionAssignment", ("-=", OP.MinusBinaryOp)
-    "op_MultiplyAssignment", ("*=", OP.MultiplyOp)
-    "op_DivisionAssignment", ("/=", OP.DivideOp)
-
-    //"", ("",)
-    //some more exotic operators
-    "op_BooleanOr", ("||", OP.Or)
-    //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
-    "op_BooleanAnd", ("&&", OP.And)
-    "op_Amp", ("&", OP.And)
-
+        //require leading twidle in first-class use
+        "op_UnaryPlus", ("+", Prefix(true))
+        "op_UnaryNegation", ("-", Prefix(true))
+        "op_Splice", ("%", Prefix(true))
+        "op_SpliceUntyped", ("%%", Prefix(true))
+        "op_AddressOf", ("&", Prefix(true))
+        "op_IntegerAddressOf", ("&&", Prefix(true))
+        "op_TwiddlePlusDot", ("+.", Prefix(true))
+        "op_TwiddleMinusDot", ("-.", Prefix(true))
+    
+        //don't require leading twidle in first-class use
+        "op_LogicalNot", ("~~~", Prefix(false))
+        "op_Dereference", ("!", Prefix(false))
     ] |> Map.ofList
 
 //future feature, support custom ops
 ///Match non-custom binary infix Call patterns.
 ///Must come before Call pattern.
-let (|BinaryInfixCall|_|) = function
+let (|InfixCall|_|) = function
     | P.Call (_, mi, lhs::rhs::[]) ->
-        match binaryOps |> Map.tryFind mi.Name with
-        | Some op -> Some(op,lhs,rhs)
-        | None -> None
+        match symbolicOps |> Map.tryFind mi.Name with
+        | Some(op, Infix(prec)) -> Some((op,prec),lhs,rhs)
+        | _ -> None
     | _ -> None
 
-let unaryOps = 
-    [
-    //require leading twidle in first-class use
-    "op_UnaryPlus", "+"
-    "op_UnaryNegation", "-"
-    "op_Splice", "%"
-    "op_SpliceUntyped", "%%"
-    "op_AddressOf", "&"
-    "op_IntegerAddressOf", "&&"
-    "op_TwiddlePlusDot", "+."
-    "op_TwiddleMinusDot", "-."
-    
-    //don't require leading twidle in first-class use
-    "op_LogicalNot", "~~~"
-    "op_Dereference", "!"
-    ] |> Map.ofList
 
 //all unary ops have precedence of 9
-let (|UnaryPrefixCall|_|) = function
+let (|PrefixCall|_|) = function
     | P.Call (_, mi, arg::[]) ->
-        match unaryOps |> Map.tryFind mi.Name with
-        | Some(op) -> Some(op, arg)
-        | None -> None
+        match symbolicOps |> Map.tryFind mi.Name with
+        | Some(op, Prefix(requiresLeadingTilda)) -> Some((op, requiresLeadingTilda), arg)
+        | _ -> None
     | _ -> None
 
 //suprisingly, this is actually used twice.
