@@ -22,8 +22,11 @@ open Microsoft.FSharp.Reflection
 
 open Swensen.Utils
 
+let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
+    ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<'a>
+
 ///is the top-level FSI module
-let isFsiModule (declaringType:Type) =
+let inline isFsiModule (declaringType:Type) =
     declaringType.Name.StartsWith("FSI_")
 
 //best we can seem to do
@@ -102,7 +105,7 @@ let sourceName (mi:MemberInfo) =
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
     |> sourceNameFromString //issue 11: active pattern function names need to be surrounded by parens
 
-let private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
+let inline private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
 
 //the usefullness of this function makes me think to open up Sprint module (currently just added TypeExt with this feature)
 ///Sprint the F#-style type signature of the given Type.  Handles known type abbreviations,
@@ -194,12 +197,12 @@ let sprintGenericArgs (mi:MethodInfo) =
     sprintf "<%s>" (mi.GetGenericArguments() |> Seq.map sprintSig |> String.concat ", ")
 
 ///sprints the generic arguments of a call if definitely not inferable.
-let sprintGenericArgsIfNotInferable (mi:MethodInfo) =
+let inline sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     if genericArgsInferable mi then ""
     else sprintGenericArgs mi
 
-let isListUnionCase (uci:UnionCaseInfo) = 
-    uci.DeclaringType.IsGenericType && uci.DeclaringType.GetGenericTypeDefinition() = typedefof<list<_>>
+let inline isListUnionCase (uci:UnionCaseInfo) = 
+    uci.DeclaringType |> isGenericTypeDefinedFrom<list<_>>
 
 type fsharpValueType =
     | Function
