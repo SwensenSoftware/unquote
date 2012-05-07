@@ -36,9 +36,9 @@ type symbolicOp =
 
 //let symbolicFunctions =
 
-let example = @"""op_Equality"", (""="", OP.EqualsOp)"
-let regex = @"("".*""), \(("".*""), (.*)\)"
-let m = System.Text.RegularExpressions.Regex.Match(example, regex)
+//let example = @"""op_Equality"", (""="", OP.EqualsOp)"
+//let regex = @"("".*""), \(("".*""), (.*)\)"
+//let m = System.Text.RegularExpressions.Regex.Match(example, regex)
 
 let binaryOps = 
     [
