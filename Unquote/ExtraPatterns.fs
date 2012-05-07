@@ -66,6 +66,18 @@ let binaryOps =
     "op_Concatenate", ("^", OP.ConcatenateOp) //ocaml style string concatentation
     //set ref cell
     "op_ColonEquals", (":=", OP.RefAssign)
+
+    //op assign operators
+    "op_AdditionAssignment", ("+=", OP.PlusBinaryOp)
+    "op_SubtractionAssignment", ("-=", OP.MinusBinaryOp)
+    "op_MultiplyAssignment", ("*=", OP.MultiplyOp)
+    "op_DivisionAssignment", ("/=", OP.DivideOp)
+
+    //"", ("",)
+    //some more exotic operators
+    "op_BooleanOr", ("||", OP.Or)
+    "op_BooleanAnd", ("&&", OP.And)
+
     ] |> Map.ofList
 
 //future feature, support custom ops
@@ -80,8 +92,17 @@ let (|BinaryInfixCall|_|) = function
 
 let unaryOps = 
     [
+    //require leading twidle in first-class use
     "op_UnaryPlus", "+"
     "op_UnaryNegation", "-"
+    "op_Splice", "%"
+    "op_SpliceUntyped", "%%"
+    "op_AddressOf", "&"
+    "op_IntegerAddressOf", "&&"
+    "op_TwiddlePlusDot", "+."
+    "op_TwiddleMinusDot", "-."
+    
+    //don't require leading twidle in first-class use
     "op_LogicalNot", "~~~"
     "op_Dereference", "!"
     ] |> Map.ofList
