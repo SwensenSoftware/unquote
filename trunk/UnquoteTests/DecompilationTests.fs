@@ -1067,23 +1067,23 @@ module TopLevelOpIsolation2 =
     let (..) x y = x + y
     [<Fact>]
     let ``issue 91: op_Range first class syntax for non seq return type`` () =
-        <@ op_Range 1 1 @> |> decompile =? "op_Range 1 1"
+        <@ op_Range 1 1 @> |> decompile =? "TopLevelOpIsolation2.op_Range 1 1"
 
     let (.. ..) x y z = x - y - z
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for non seq return type`` () =
-        <@ op_RangeStep 1 1 1 @> |> decompile =? "op_RangeStep 1 1 1"
+        <@ op_RangeStep 1 1 1 @> |> decompile =? "TopLevelOpIsolation2.op_RangeStep 1 1 1"
 
 module TopLevelOpIsolation3 =
     let (..) x y z = Seq.singleton (x + y + z)
     [<Fact>]
     let ``issue 91: op_Range first class syntax for seq return type but arg mismatch`` () =
-        <@ op_Range 1 1 1 @> |> decompile =? "op_Range 1 1 1"
+        <@ op_Range 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.op_Range 1 1 1"
 
-    let (.. ..) x y z = Seq.singleton (x + y + z)
+    let (.. ..) x y z h = Seq.singleton (x + y + z + h)
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for seq return type but arg mismatch`` () =
-        <@ op_RangeStep 1 1 1 @> |> decompile =? "op_RangeStep 1 1 1"
+        <@ op_RangeStep 1 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.op_RangeStep 1 1 1 1"
 
 [<Fact(Skip="issue 90")>]
 let ``locally defined standard prefix op sprints leading tilda when required when no args applied`` () =

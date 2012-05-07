@@ -201,10 +201,13 @@ let private rangeOuterInnerMethodInfos (miOuter:MethodInfo) (miInner:MethodInfo)
     miInner.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" && miInner.Name = "CreateSequence" 
         && miOuter.DeclaringType.FullName = "Microsoft.FSharp.Collections.SeqModule" && miOuter.Name = conversionMiName
 
+//todo: refactor IsGenericType && GetGenericTypeDefinition() pattern into own method
+
 ///Match a sequence, list, or array op_Range expression, return (startToken, endToken, startExpression, endExpression). Must come before Call patterns.
 let (|Range|_|) x =
     let (|RangeOp|_|) = function
-        | P.Call(None, mi, a::b::_) when mi.Name = "op_Range" -> Some(a,b)
+        | P.Call(None, mi, a::b::[]) when mi.Name = "op_Range" && (mi.ReturnType.IsGenericType && mi.ReturnType.GetGenericTypeDefinition() = typedefof<seq<_>>) -> 
+            Some(a,b)
         | _ -> None
     
     match x with 
@@ -219,7 +222,8 @@ let (|Range|_|) x =
 ///Match a sequence, list, or array op_RangeStep expression, return (startToken, endToken, startExpression, stepExpression, endExpression). Must come before Call patterns.
 let (|RangeStep|_|) x =
     let (|RangeStepOp|_|) = function
-        | P.Call(None, mi, a::b::c::_) when mi.Name = "op_RangeStep" -> Some(a,b,c)
+        | P.Call(None, mi, a::b::c::[]) when mi.Name = "op_RangeStep" && (mi.ReturnType.IsGenericType && mi.ReturnType.GetGenericTypeDefinition() = typedefof<seq<_>>) -> 
+            Some(a,b,c)
         | _ -> None
 
     match x with
