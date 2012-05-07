@@ -28,6 +28,18 @@ module OP = Swensen.Unquote.OperatorPrecedence
 
 open Swensen.Utils
 
+type symbolicOp =
+    | Prefix
+    | Infix of OP.OperatorPrecedence
+    | PrefixOrInfix of OP.OperatorPrecedence //OP.OperatorPrecedence is for Infix if it is an infix (i.e. 2 args)
+    | NonOp of string * string * int
+
+//let symbolicFunctions =
+
+let example = @"""op_Equality"", (""="", OP.EqualsOp)"
+let regex = @"("".*""), \(("".*""), (.*)\)"
+let m = System.Text.RegularExpressions.Regex.Match(example, regex)
+
 let binaryOps = 
     [
     //boolean ops
@@ -76,7 +88,9 @@ let binaryOps =
     //"", ("",)
     //some more exotic operators
     "op_BooleanOr", ("||", OP.Or)
+    //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
     "op_BooleanAnd", ("&&", OP.And)
+    "op_Amp", ("&", OP.And)
 
     ] |> Map.ofList
 
