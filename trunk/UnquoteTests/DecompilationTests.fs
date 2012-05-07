@@ -1040,13 +1040,18 @@ let ``issue 83: leading tilda for prefix operator lambdas should only be used wh
 module TopLevelOpIsolation =
     let (+) x y z = x - y - z
     [<Fact>]
-    let ``issue 85: partially applied symbolic function causes exception`` () =
+    let ``issue 85 (bug): partially applied symbolic function causes exception`` () =
         <@ (+) 3 3 @> |> decompile =? "TopLevelOpIsolation.op_Addition 3 3"
 
     let (~~~) x y z = x - y - z
     [<Fact>]
-    let ``issue 86: Partialy applied symbolic function not decompiled correctly`` () =
+    let ``issue 86 (bug): Partialy applied symbolic function not decompiled correctly`` () =
         <@ (~~~) 1 1 @> |> decompile =? "TopLevelOpIsolation.op_LogicalNot 1 1"
+
+    let (&&) x y = x + y
+    [<Fact>]
+    let ``issue 82: expand standard operator support`` () =
+        <@ 1 && 1 @> |> decompile =? "1 && 1"
 
 [<Fact(Skip="issue 90")>]
 let ``locally defined standard prefix op sprints leading tilda when required when no args applied`` () =
@@ -1080,11 +1085,11 @@ let ``locally redefined standard infix op sprinted as infix op when fully applie
     <@ (+) 1 1 @> |> decompile =? "1 + 1"
 
 [<Fact(Skip="issue 90")>]
-let ``locally defined standard infix op sprinted as symbol when partially applied`` () =
+let ``locally defined nonstandard infix op sprinted as symbol when partially applied`` () =
     let (+++) x y = x + y : int
     <@ (+++) 1 @> |> decompile =? "(+++) 1"
 
 [<Fact(Skip="issue 90")>]
-let ``locally defined standard infix op sprinted as infix op when fully applied`` () =
+let ``locally defined nonstandard infix op sprinted as infix op when fully applied`` () =
     let (+++) x y = x + y : int
     <@ (+++) 1 1 @> |> decompile =? "1 +++ 1"
