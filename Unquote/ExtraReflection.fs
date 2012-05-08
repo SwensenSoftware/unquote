@@ -122,6 +122,7 @@ let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
 let inline isFsiModule (declaringType:Type) =
     declaringType.Name.StartsWith("FSI_")
 
+//maybe consider something involving System.Diagnostics.StackFrame(false).GetMethod() to help out more.
 //best we can seem to do
 let isOpenModule (declaringType:Type) =
     isFsiModule declaringType ||
