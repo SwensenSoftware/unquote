@@ -43,7 +43,7 @@ let (|InfixCall|_|) = function
 let (|PrefixCall|_|) = function
     | P.Call (_, mi, arg::[]) ->
         match ER.symbolicOps |> Map.tryFind mi.Name with
-        | Some(op, ER.Prefix(requiresLeadingTilda)) -> Some((op, requiresLeadingTilda), arg)
+        | Some(op, ER.Prefix(_)) -> Some(op, arg)
         | _ -> None
     | _ -> None
 
