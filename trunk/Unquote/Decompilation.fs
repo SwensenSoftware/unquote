@@ -80,7 +80,7 @@ let decompile expr =
         | EP.InfixCall((symbol, prec), lhs, rhs) -> //must come before Call pattern
             let lhsValue, rhsValue = decompile (prec,OP.Left) lhs, decompile (prec,OP.Right) rhs
             applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
-        | EP.PrefixCall((symbol,_), arg) -> //must come before Call pattern
+        | EP.PrefixCall(symbol, arg) -> //must come before Call pattern
             applyParens OP.PrefixOps (sprintf "%s%s" symbol (decompile (OP.PrefixOps,OP.Non) arg))
         | P.Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
             //thinking about making decompile depend on Reduce.isReduced: 
