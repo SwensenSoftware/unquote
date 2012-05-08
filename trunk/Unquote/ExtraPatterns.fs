@@ -28,94 +28,13 @@ module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
 
-type symbolicOp =
-    //bool: requires twiddle prefix
-    | Prefix of bool
-    //OP.OperatorPrecedence : op precedence
-    | Infix of OP.OperatorPrecedence
-    //neither prefix nor infix
-    | FirstClassOnly
-
-let symbolicOps = 
-    [   //boolean ops
-        "op_Equality", ("=", Infix(OP.EqualsOp))
-        "op_GreaterThan", (">", Infix(OP.GreaterThanOp))
-        "op_LessThan", ("<", Infix(OP.LessThanOp))
-        "op_GreaterThanOrEqual", (">=", Infix(OP.GreaterThanOp))
-        "op_LessThanOrEqual", ("<=", Infix(OP.LessThanOp))
-        "op_Inequality", ("<>", Infix(OP.LessThanOp))
-        //pipe ops
-        "op_PipeRight", ("|>", Infix(OP.Pipe)) //might need to be OP.PipeOp
-        "op_PipeRight2", ("||>", Infix(OP.Pipe))
-        "op_PipeRight3", ("|||>", Infix(OP.Pipe))
-        "op_PipeLeft", ("<|", Infix(OP.LessThanOp))
-        "op_PipeLeft2", ("<||", Infix(OP.LessThanOp))
-        "op_PipeLeft3", ("<|||", Infix(OP.LessThanOp))
-        //numeric ops
-        "op_Addition", ("+", Infix(OP.PlusBinaryOp))
-        "op_Subtraction", ("-", Infix(OP.MinusBinaryOp))
-        "op_Division", ("/", Infix(OP.DivideOp))
-        "op_Multiply", ("*", Infix(OP.MultiplyOp))
-        "op_Modulus", ("%", Infix(OP.ModOp))
-        "op_Exponentiation", ("**", Infix(OP.ExponentiationOp))
-        //bit operators
-        "op_BitwiseAnd", ("&&&", Infix(OP.BitwiseAnd))
-        "op_BitwiseOr", ("|||", Infix(OP.BitwiseOr))
-        "op_ExclusiveOr", ("^^^", Infix(OP.ExclusiveOr))
-        "op_LeftShift", ("<<<", Infix(OP.LeftShift))
-        "op_RightShift", (">>>", Infix(OP.RightShift))
-
-        //composition
-        "op_ComposeRight", (">>", Infix(OP.GreaterThanOp))
-        "op_ComposeLeft", ("<<", Infix(OP.LessThanOp))
-        //special
-        "op_Append", ("@", Infix(OP.AppendOp)) //not sure what precedence, falling back on (+))
-        "op_Concatenate", ("^", Infix(OP.ConcatenateOp)) //ocaml style string concatentation
-        //set ref cell
-        "op_ColonEquals", (":=", Infix(OP.RefAssign))
-
-        //op assign operators
-        "op_AdditionAssignment", ("+=", Infix(OP.PlusBinaryOp))
-        "op_SubtractionAssignment", ("-=", Infix(OP.MinusBinaryOp))
-        "op_MultiplyAssignment", ("*=", Infix(OP.MultiplyOp))
-        "op_DivisionAssignment", ("/=", Infix(OP.DivideOp))
-
-        //"", ("",)
-        //some more exotic operators
-        "op_BooleanOr", ("||", Infix(OP.Or))
-        //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
-        "op_BooleanAnd", ("&&", Infix(OP.And))
-        "op_Amp", ("&", Infix(OP.And))
-
-        //require leading twidle in first-class use
-        "op_UnaryPlus", ("+", Prefix(true))
-        "op_UnaryNegation", ("-", Prefix(true))
-        "op_Splice", ("%", Prefix(true))
-        "op_SpliceUntyped", ("%%", Prefix(true))
-        "op_AddressOf", ("&", Prefix(true))
-        "op_IntegerAddressOf", ("&&", Prefix(true))
-        "op_TwiddlePlusDot", ("+.", Prefix(true))
-        "op_TwiddleMinusDot", ("-.", Prefix(true))
-    
-        //don't require leading twidle in first-class use
-        "op_LogicalNot", ("~~~", Prefix(false))
-        "op_Dereference", ("!", Prefix(false))
-        
-        //first class only operators
-        "op_Range", ("..", FirstClassOnly)
-        "op_RangeStep", (".. ..", FirstClassOnly)
-        "op_Quotation", ("<@ @>", FirstClassOnly)
-        "op_QuotationUntyped", ("<@@ @@>", FirstClassOnly)
-        
-    ] |> Map.ofList
-
 //future feature, support custom ops
 ///Match non-custom binary infix Call patterns.
 ///Must come before Call pattern.
 let (|InfixCall|_|) = function
     | P.Call (_, mi, lhs::rhs::[]) ->
-        match symbolicOps |> Map.tryFind mi.Name with
-        | Some(op, Infix(prec)) -> Some((op,prec),lhs,rhs)
+        match ER.symbolicOps |> Map.tryFind mi.Name with
+        | Some(op, ER.Infix(prec)) -> Some((op,prec),lhs,rhs)
         | _ -> None
     | _ -> None
 
@@ -123,8 +42,8 @@ let (|InfixCall|_|) = function
 //all unary ops have precedence of 9
 let (|PrefixCall|_|) = function
     | P.Call (_, mi, arg::[]) ->
-        match symbolicOps |> Map.tryFind mi.Name with
-        | Some(op, Prefix(requiresLeadingTilda)) -> Some((op, requiresLeadingTilda), arg)
+        match ER.symbolicOps |> Map.tryFind mi.Name with
+        | Some(op, ER.Prefix(requiresLeadingTilda)) -> Some((op, requiresLeadingTilda), arg)
         | _ -> None
     | _ -> None
 

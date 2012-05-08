@@ -56,22 +56,13 @@ let decompile expr =
         | EP.IncompleteLambdaCall(target, mi, suppliedArgs) -> //assume lambdas are only part of modules.
             //function name: includes support of first-class infix and prefix operators.
             let funName =
-                match EP.symbolicOps |> Map.tryFind mi.Name with
-                | Some(symbol, EP.Prefix(true)) ->
-                    sprintf "(~%s)" symbol
-                | Some(symbol:string, _) ->
-                    if (symbol:string).StartsWith("*") || symbol.EndsWith("*") then
-                        sprintf "( %s )" symbol
-                    else
-                        sprintf "(%s)" symbol
-                | _ ->
-                    if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
-                    else
-                        let decompiledTarget =
-                            match target with
-                            | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
-                            | None -> ER.sourceName mi.DeclaringType 
-                        sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
+                if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
+                else
+                    let decompiledTarget =
+                        match target with
+                        | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
+                        | None -> ER.sourceName mi.DeclaringType 
+                    sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
 
             match suppliedArgs.Length with
             | 0 -> funName

@@ -21,6 +21,99 @@ open System.Reflection
 open Microsoft.FSharp.Reflection
 
 open Swensen.Utils
+module OP = OperatorPrecedence
+
+type symbolicOp =
+    //bool: requires twiddle prefix
+    | Prefix of bool
+    //OP.OperatorPrecedence : op precedence
+    | Infix of OP.OperatorPrecedence
+    //neither prefix nor infix
+    | FirstClassOnly
+
+let symbolicOps = 
+    [   //boolean ops
+        "op_Equality", ("=", Infix(OP.EqualsOp))
+        "op_GreaterThan", (">", Infix(OP.GreaterThanOp))
+        "op_LessThan", ("<", Infix(OP.LessThanOp))
+        "op_GreaterThanOrEqual", (">=", Infix(OP.GreaterThanOp))
+        "op_LessThanOrEqual", ("<=", Infix(OP.LessThanOp))
+        "op_Inequality", ("<>", Infix(OP.LessThanOp))
+        //pipe ops
+        "op_PipeRight", ("|>", Infix(OP.Pipe)) //might need to be OP.PipeOp
+        "op_PipeRight2", ("||>", Infix(OP.Pipe))
+        "op_PipeRight3", ("|||>", Infix(OP.Pipe))
+        "op_PipeLeft", ("<|", Infix(OP.LessThanOp))
+        "op_PipeLeft2", ("<||", Infix(OP.LessThanOp))
+        "op_PipeLeft3", ("<|||", Infix(OP.LessThanOp))
+        //numeric ops
+        "op_Addition", ("+", Infix(OP.PlusBinaryOp))
+        "op_Subtraction", ("-", Infix(OP.MinusBinaryOp))
+        "op_Division", ("/", Infix(OP.DivideOp))
+        "op_Multiply", ("*", Infix(OP.MultiplyOp))
+        "op_Modulus", ("%", Infix(OP.ModOp))
+        "op_Exponentiation", ("**", Infix(OP.ExponentiationOp))
+        //bit operators
+        "op_BitwiseAnd", ("&&&", Infix(OP.BitwiseAnd))
+        "op_BitwiseOr", ("|||", Infix(OP.BitwiseOr))
+        "op_ExclusiveOr", ("^^^", Infix(OP.ExclusiveOr))
+        "op_LeftShift", ("<<<", Infix(OP.LeftShift))
+        "op_RightShift", (">>>", Infix(OP.RightShift))
+
+        //composition
+        "op_ComposeRight", (">>", Infix(OP.GreaterThanOp))
+        "op_ComposeLeft", ("<<", Infix(OP.LessThanOp))
+        //special
+        "op_Append", ("@", Infix(OP.AppendOp)) //not sure what precedence, falling back on (+))
+        "op_Concatenate", ("^", Infix(OP.ConcatenateOp)) //ocaml style string concatentation
+        //set ref cell
+        "op_ColonEquals", (":=", Infix(OP.RefAssign))
+
+        //op assign operators
+        "op_AdditionAssignment", ("+=", Infix(OP.PlusBinaryOp))
+        "op_SubtractionAssignment", ("-=", Infix(OP.MinusBinaryOp))
+        "op_MultiplyAssignment", ("*=", Infix(OP.MultiplyOp))
+        "op_DivisionAssignment", ("/=", Infix(OP.DivideOp))
+
+        //"", ("",)
+        //some more exotic operators
+        "op_BooleanOr", ("||", Infix(OP.Or))
+        //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
+        "op_BooleanAnd", ("&&", Infix(OP.And))
+        "op_Amp", ("&", Infix(OP.And))
+
+        //require leading twidle in first-class use
+        "op_UnaryPlus", ("+", Prefix(true))
+        "op_UnaryNegation", ("-", Prefix(true))
+        "op_Splice", ("%", Prefix(true))
+        "op_SpliceUntyped", ("%%", Prefix(true))
+        "op_AddressOf", ("&", Prefix(true))
+        "op_IntegerAddressOf", ("&&", Prefix(true))
+        "op_TwiddlePlusDot", ("+.", Prefix(true))
+        "op_TwiddleMinusDot", ("-.", Prefix(true))
+    
+        //don't require leading twidle in first-class use
+        "op_LogicalNot", ("~~~", Prefix(false))
+        "op_Dereference", ("!", Prefix(false))
+        
+        //first class only operators
+        "op_Range", ("..", FirstClassOnly)
+        "op_RangeStep", (".. ..", FirstClassOnly)
+        "op_Quotation", ("<@ @>", FirstClassOnly)
+        "op_QuotationUntyped", ("<@@ @@>", FirstClassOnly)
+    ] |> Map.ofList
+
+///try to find the first class symbolic function representation of a "op_" function name
+let tryMapSymbolicOpAsFirstClassFun name =
+    match symbolicOps |> Map.tryFind name with
+    | Some(symbol, Prefix(true)) ->
+        Some(sprintf "(~%s)" symbol)
+    | Some(symbol:string, _) ->
+        if (symbol:string).StartsWith("*") || symbol.EndsWith("*") then
+            Some(sprintf "( %s )" symbol)
+        else
+            Some(sprintf "(%s)" symbol)
+    | _ -> None
 
 let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
     ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<'a>
@@ -65,13 +158,6 @@ let sourceNameFromString =
     let isReservedWord name = reservedWords |> Set.contains name
     let isKeyword name = keywords |> Set.contains name
 
-    (*
-    let tryMapSymbolic name =
-        match name with
-        | "op_Addition" -> Some("+")
-        | _ -> None 
-    *)
-
     let parenthesize name = sprintf "(%s)" name 
     let escape name = sprintf "``%s``" name
 
@@ -81,13 +167,9 @@ let sourceNameFromString =
         elif name |> hasSpecialChars || name |> isReservedWord || name |> isKeyword then //escape because has special char or is reserved word
             escape name
         else
-            name
-            (*
-            //actual binary and infix operators are handled else where, these are just symbolic functions, e.g. have 3 or more args
-            match tryMapSymbolic name with
-            | Some(sym) -> parenthesize sym //need to consider things like leading / trailing * and tildas
+            match tryMapSymbolicOpAsFirstClassFun name with
+            | Some(op) -> op
             | None -> name
-            *)
 
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
