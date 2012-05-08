@@ -56,17 +56,15 @@ let decompile expr =
         | EP.IncompleteLambdaCall(target, mi, suppliedArgs) -> //assume lambdas are only part of modules.
             //function name: includes support of first-class infix and prefix operators.
             let funName =
-                match mi.GetParameters().Length, lazy(EP.symbolicOps |> Map.tryFind mi.Name) with
-                | 1, Lazy(Some(symbol, EP.Prefix(false))) ->
-                    sprintf "(%s)" symbol
-                | 1, Lazy(Some(symbol, EP.Prefix(true))) ->
+                match EP.symbolicOps |> Map.tryFind mi.Name with
+                | Some(symbol, EP.Prefix(true)) ->
                     sprintf "(~%s)" symbol
-                | 2, Lazy(Some(symbol:string, EP.Infix(_))) ->
+                | Some(symbol:string, _) ->
                     if (symbol:string).StartsWith("*") || symbol.EndsWith("*") then
                         sprintf "( %s )" symbol
                     else
                         sprintf "(%s)" symbol
-                |  _, _ ->
+                | _ ->
                     if ER.isOpenModule mi.DeclaringType then ER.sourceName mi
                     else
                         let decompiledTarget =
