@@ -33,6 +33,8 @@ type symbolicOp =
     | Prefix of bool
     //OP.OperatorPrecedence : op precedence
     | Infix of OP.OperatorPrecedence
+    //neither prefix nor infix
+    | FirstClassOnly
 
 let symbolicOps = 
     [   //boolean ops
@@ -98,6 +100,13 @@ let symbolicOps =
         //don't require leading twidle in first-class use
         "op_LogicalNot", ("~~~", Prefix(false))
         "op_Dereference", ("!", Prefix(false))
+        
+        //first class only operators
+        "op_Range", ("..", FirstClassOnly)
+        "op_RangeStep", (".. ..", FirstClassOnly)
+        "op_Quotation", ("<@ @>", FirstClassOnly)
+        "op_QuotationUntyped", ("<@@ @@>", FirstClassOnly)
+        
     ] |> Map.ofList
 
 //future feature, support custom ops

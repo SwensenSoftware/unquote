@@ -1041,12 +1041,12 @@ module TopLevelOpIsolation =
     let (+) x y z = x - y - z
     [<Fact>]
     let ``issue 85 (bug): partially applied symbolic function causes exception`` () =
-        <@ (+) 3 3 @> |> decompile =? "TopLevelOpIsolation.op_Addition 3 3"
+        <@ (+) 3 3 @> |> decompile =? "(+) 3 3" //this also supports issue 84
 
     let (~~~) x y z = x - y - z
     [<Fact>]
     let ``issue 86 (bug): Partialy applied symbolic function not decompiled correctly`` () =
-        <@ (~~~) 1 1 @> |> decompile =? "TopLevelOpIsolation.op_LogicalNot 1 1"
+        <@ (~~~) 1 1 @> |> decompile =? "(~~~) 1 1" //this also supports issue 84
 
     let (&&) x y = x + y
     [<Fact>]
