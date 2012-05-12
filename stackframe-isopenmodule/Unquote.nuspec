@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Unquote</id>
+	<version>0.0.0</version> <!-- version is required but we override it in our build script with parameterized version number -->
+    <authors>Stephen Swensen</authors>
+    <owners>Stephen Swensen</owners>
+	<iconUrl>https://unquote.googlecode.com/svn/trunk/logo.png</iconUrl>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://code.google.com/p/unquote/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Unquote is a library for writing unit test assertions as F# quoted expressions and includes additional functionality for decompiling and evaluating quotations.</description>
+  </metadata>
+</package>
