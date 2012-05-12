@@ -1041,12 +1041,12 @@ module TopLevelOpIsolation =
     let (+) x y z = x - y - z
     [<Fact>]
     let ``issue 85 (bug): partially applied symbolic function causes exception`` () =
-        <@ (+) 3 3 @> |> decompile =? "(+) 3 3" //this also supports issue 84
+        <@ (+) 3 3 @> |> decompile =? "TopLevelOpIsolation.(+) 3 3" //this also supports issue 84
 
     let (~~~) x y z = x - y - z
     [<Fact>]
     let ``issue 86 (bug): Partialy applied symbolic function not decompiled correctly`` () =
-        <@ (~~~) 1 1 @> |> decompile =? "(~~~) 1 1" //this also supports issue 84
+        <@ (~~~) 1 1 @> |> decompile =? "TopLevelOpIsolation.(~~~) 1 1" //this also supports issue 84
 
     let (&&) x y = x + y
     [<Fact>]
@@ -1067,23 +1067,35 @@ module TopLevelOpIsolation2 =
     let (..) x y = x + y
     [<Fact>]
     let ``issue 91: op_Range first class syntax for non seq return type`` () =
-        <@ op_Range 1 1 @> |> decompile =? "TopLevelOpIsolation2.op_Range 1 1"
+        <@ (..) 1 1 @> |> decompile =? "TopLevelOpIsolation2.(..) 1 1"
 
     let (.. ..) x y z = x - y - z
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for non seq return type`` () =
-        <@ op_RangeStep 1 1 1 @> |> decompile =? "TopLevelOpIsolation2.op_RangeStep 1 1 1"
+        <@ (.. ..) 1 1 1 @> |> decompile =? "TopLevelOpIsolation2.(.. ..) 1 1 1"
 
 module TopLevelOpIsolation3 =
     let (..) x y z = Seq.singleton (x + y + z)
     [<Fact>]
     let ``issue 91: op_Range first class syntax for seq return type but arg mismatch`` () =
-        <@ op_Range 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.op_Range 1 1 1"
+        <@ (..) 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.(..) 1 1 1"
 
     let (.. ..) x y z h = Seq.singleton (x + y + z + h)
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for seq return type but arg mismatch`` () =
-        <@ op_RangeStep 1 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.op_RangeStep 1 1 1 1"
+        <@ (.. ..) 1 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.(.. ..) 1 1 1 1"
+
+    let (+) x y z = x - y - z
+    let ``issue 84: infix symbol but first class only definition`` () =
+        <@ (+) 3 3 3 @> |> decompile =? "TopLevelOpIsolation3.(+) 3 3 3"
+
+    let (<@@ @@>) x : int = x
+    let ``issue 84: infix only top-level`` () =
+        <@ (<@@ @@>) @> |> decompile =? "(<@@ @@>)"
+
+let ``issue 84: infix only locally`` () =
+    let (<@@ @@>) x : int = x
+    <@ (<@@ @@>) @> |> decompile =? "(<@@ @@>)"
 
 [<Fact(Skip="issue 90")>]
 let ``locally defined standard prefix op sprints leading tilda when required when no args applied`` () =
@@ -1125,3 +1137,4 @@ let ``locally defined nonstandard infix op sprinted as symbol when partially app
 let ``locally defined nonstandard infix op sprinted as infix op when fully applied`` () =
     let (+++) x y = x + y : int
     <@ (+++) 1 1 @> |> decompile =? "1 +++ 1"
+
