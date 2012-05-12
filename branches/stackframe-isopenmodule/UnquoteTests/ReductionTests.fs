@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-[<AutoOpen>]
 module ReductionTests
 open Xunit
 open Swensen.Unquote
 open Swensen.Utils
 
 //we use this since expr don't support structural comparison
-let decompiledReductions expr =
+let inline decompiledReductions expr =
     reduceFully expr |> List.map decompile
 
 [<Fact>]

@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-[<AutoOpen>] //making auto open allows us not to have to fully qualify module properties
 module FSharpNameTests
 open Xunit
 open Swensen.Unquote

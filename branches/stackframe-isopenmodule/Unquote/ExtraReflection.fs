@@ -122,13 +122,30 @@ let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
 let inline isFsiModule (declaringType:Type) =
     declaringType.Name.StartsWith("FSI_")
 
+open System.Diagnostics
+let callStackContainsMethodCallFromDeclaringtype (dt:Type) =
+    let st = new StackTrace(false)
+    st.GetFrames()
+    |> Seq.tryFind (fun sf -> sf.GetMethod().DeclaringType = dt)
+    |> Option.isSome
+
+//let getCallingMethodDeclaringType () =
+//    let curAsm = StackFrame(false).GetMethod().DeclaringType.Assembly
+//    let mutable sf = StackFrame(1, false)
+//    let mutable i = 1
+//    while sf.GetMethod().DeclaringType.Assembly = curAsm do
+//        i <- i + 1
+//        sf <- StackFrame(i, false)
+//    sf.GetMethod().DeclaringType
+        
 //maybe consider something involving System.Diagnostics.StackFrame(false).GetMethod() to help out more.
 //best we can seem to do
 let isOpenModule (declaringType:Type) =
     isFsiModule declaringType ||
-    declaringType.GetCustomAttributes(true)
-    |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
-    |> (function | Some _ -> true | None -> false)
+        declaringType.GetCustomAttributes(true)
+        |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
+        |> (function | Some _ -> true | None -> false) ||
+            callStackContainsMethodCallFromDeclaringtype(declaringType)
 
 let sourceNameFromString =
     let isActivePattern (name: string) = name.StartsWith("|") && name.EndsWith("|")

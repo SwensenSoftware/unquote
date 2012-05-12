@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 *)
 
-[<AutoOpen>]
 module AssertionOperatorsTests
 open Xunit
 open Swensen.Unquote

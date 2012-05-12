@@ -394,19 +394,19 @@ let ``generic NewUnionCase with Value arg`` () =
 let ``generic NewUnionCase with nested construction`` () =
     decompile <@ World(Hello(3)) @> =? "World(Hello(3))"
 
-#if SILVERLIGHT //can't access stack frame
-#else
-//issue #3 -- UnionCaseTests
-//these tests are not as thorough as would like: can't verify op_Dynamic works right
-[<Fact>] 
-let ``union case test list not requiring op_Dynamic`` () = //this test is a little fragile (see sf use; using regex would be too much), but not too fragile
-    let sf = System.Diagnostics.StackFrame(true)
-    #if DEBUG
-    decompile <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 2, 21)
-    #else
-    decompile <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21)
-    #endif
-#endif
+//#if SILVERLIGHT //can't access stack frame
+//#else
+////issue #3 -- UnionCaseTests
+////these tests are not as thorough as would like: can't verify op_Dynamic works right
+//[<Fact>] 
+//let ``union case test list not requiring op_Dynamic`` () = //this test is a little fragile (see sf use; using regex would be too much), but not too fragile
+//    let sf = System.Diagnostics.StackFrame(true)
+//    #if DEBUG
+//    decompile <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 2, 21)
+//    #else
+//    decompile <@ let [a;b] = [1;2] in a,b @> =? String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21)
+//    #endif
+//#endif
 
 let h = World (Hello2(Hello 3, true))
 [<Fact>] //issue #3
@@ -1067,23 +1067,23 @@ module TopLevelOpIsolation2 =
     let (..) x y = x + y
     [<Fact>]
     let ``issue 91: op_Range first class syntax for non seq return type`` () =
-        <@ op_Range 1 1 @> |> decompile =? "TopLevelOpIsolation2.op_Range 1 1"
+        <@ (..) 1 1 @> |> decompile =? "(..) 1 1"
 
     let (.. ..) x y z = x - y - z
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for non seq return type`` () =
-        <@ op_RangeStep 1 1 1 @> |> decompile =? "TopLevelOpIsolation2.op_RangeStep 1 1 1"
+        <@ (.. ..) 1 1 1 @> |> decompile =? "(.. ..) 1 1 1"
 
 module TopLevelOpIsolation3 =
     let (..) x y z = Seq.singleton (x + y + z)
     [<Fact>]
     let ``issue 91: op_Range first class syntax for seq return type but arg mismatch`` () =
-        <@ op_Range 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.op_Range 1 1 1"
+        <@ (..) 1 1 1 @> |> decompile =? "(..) 1 1 1"
 
     let (.. ..) x y z h = Seq.singleton (x + y + z + h)
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for seq return type but arg mismatch`` () =
-        <@ op_RangeStep 1 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.op_RangeStep 1 1 1 1"
+        <@ (.. ..) 1 1 1 1 @> |> decompile =? "(.. ..) 1 1 1 1"
 
 [<Fact(Skip="issue 90")>]
 let ``locally defined standard prefix op sprints leading tilda when required when no args applied`` () =
