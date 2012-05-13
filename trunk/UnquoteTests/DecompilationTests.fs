@@ -1062,6 +1062,17 @@ module TopLevelOpIsolation =
     [<Fact>]
     let ``issue 91: op_RangeStep literal syntax for valid redefinition`` () =
         <@ [1..1..1] @> |> decompile =? "[1..1..1]"
+    
+[<Fact>]
+let ``issue 91 and issue 90: op_Range literal syntax for valid local lambda redefinition`` () =
+    let (..) x y = Seq.singleton (x - y)
+    <@ [1..1] @> |> decompile =? "[1..1]"
+
+    
+[<Fact>]
+let ``issue 91 and issue 90: op_RangeStep literal syntax for valid local lambda redefinition`` () =
+    let (.. ..) x y z = Seq.singleton (x - y - z)
+    <@ [1..1..1] @> |> decompile =? "[1..1..1]"
 
 module TopLevelOpIsolation2 =
     let (..) x y = x + y
@@ -1074,67 +1085,105 @@ module TopLevelOpIsolation2 =
     let ``issue 91: op_RangeStep first class syntax for non seq return type`` () =
         <@ (.. ..) 1 1 1 @> |> decompile =? "TopLevelOpIsolation2.(.. ..) 1 1 1"
 
+    
+[<Fact>]
+let ``issue 91: op_Range first class syntax for non seq return type of local lambda definition`` () =
+    let (..) x y = x + y
+    <@ (..) 1 2 @> |> decompile =? "(..) 1 2"
+
+    
+[<Fact>]
+let ``issue 91: op_RangeStep first class syntax for non seq return type of local lambda definition`` () =
+    let (.. ..) x y z = x - y - z
+    <@ (.. ..) 1 2 3 @> |> decompile =? "(.. ..) 1 2 3"
+
 module TopLevelOpIsolation3 =
     let (..) x y z = Seq.singleton (x + y + z)
     [<Fact>]
     let ``issue 91: op_Range first class syntax for seq return type but arg mismatch`` () =
-        <@ (..) 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.(..) 1 1 1"
+        <@ (..) 1 2 3 @> |> decompile =? "TopLevelOpIsolation3.(..) 1 2 3"
 
     let (.. ..) x y z h = Seq.singleton (x + y + z + h)
     [<Fact>]
     let ``issue 91: op_RangeStep first class syntax for seq return type but arg mismatch`` () =
-        <@ (.. ..) 1 1 1 1 @> |> decompile =? "TopLevelOpIsolation3.(.. ..) 1 1 1 1"
+        <@ (.. ..) 1 2 3 4 @> |> decompile =? "TopLevelOpIsolation3.(.. ..) 1 2 3 4"
 
+
+[<Fact>]
+let ``issue 91: op_Range first class syntax for seq return type but arg mismatch for local lambda definition`` () =
+    let (..) x y z = Seq.singleton (x + y + z)
+    <@ (..) 1 2 3 @> |> decompile =? "(..) 1 2 3"
+
+[<Fact>]
+let ``issue 91: op_RangeStep first class syntax for seq return type but arg mismatch for local lambda definition`` () =
+    let (.. ..) x y z h = Seq.singleton (x + y + z + h)
+    <@ (.. ..) 1 2 3 4 @> |> decompile =? "(.. ..) 1 2 3 4"
+
+module TopLevelIsolation4 = 
     let (+) x y z = x - y - z
     let ``issue 84: infix symbol but first class only definition`` () =
-        <@ (+) 3 3 3 @> |> decompile =? "TopLevelOpIsolation3.(+) 3 3 3"
+        <@ (+) 1 2 3 @> |> decompile =? "TopLevelOpIsolation3.(+) 1 2 3"
 
     let (<@@ @@>) x : int = x
-    let ``issue 84: infix only top-level`` () =
+    let ``issue 84: first class only top-level`` () =
         <@ (<@@ @@>) @> |> decompile =? "(<@@ @@>)"
 
-let ``issue 84: infix only locally`` () =
+let ``issue 84: first class only locally`` () =
     let (<@@ @@>) x : int = x
     <@ (<@@ @@>) @> |> decompile =? "(<@@ @@>)"
 
-[<Fact(Skip="issue 90")>]
-let ``locally defined standard prefix op sprints leading tilda when required when no args applied`` () =
+[<Fact>]
+let ``issue 90: locally defined standard prefix op sprints leading tilda when required when no args applied`` () =
     let (~+.) x : int = x
     <@ (~+.) @> |> decompile =? "(~+.)"
 
-[<Fact(Skip="issue 90")>]
-let ``locally defined standard prefix op sprinted as prefix op when fully applied`` () =
+[<Fact>]
+let ``issue 90: locally defined standard prefix op sprinted as prefix op when fully applied`` () =
     let (~+.) x : int = x + x
     <@ +.1 @> |> decompile =? "+.1"
 
-[<Fact(Skip="issue 90")>]
-let ``locally redefined standard prefix op sprints leading tilda when required when no args applied`` () =
+[<Fact>]
+let ``issue 90: locally redefined standard prefix op sprints leading tilda when required when no args applied`` () =
     let (~-) x : int = x
     <@ (~-) @> |> decompile =? "(~-)"
 
-[<Fact(Skip="issue 90")>]
-let ``locally redefined standard prefix op sprinted as prefix op when fully applied`` () =
-    let (~-) x : int = x + x
-    let x = 1
-    <@ -x @> |> decompile =? "-x"
+[<Fact>]
+let ``issue 90: locally redefined standard prefix op sprinted as prefix op when fully applied`` () =
+    let (~-) x : System.DateTime = x
+    <@ -DateTime.Now @> |> decompile =? "-DateTime.Now"
 
-[<Fact(Skip="issue 90")>]
-let ``locally redefined standard infix op sprinted as symbol when partially applied`` () =
+[<Fact>]
+let ``issue 90: partially applied locally redefined standard prefix op with too many args`` () =
+    let (~-) x y : System.DateTime = x + y
+    <@ -DateTime.Now @> |> decompile =? "-DateTime.Now"
+
+[<Fact>]
+let ``issue 90: locally redefined standard prefix op with too many args sprinted as prefix op with application to result`` () =
+    let (~-) x y : System.DateTime = x + y
+    <@ (-DateTime.Now) TimeSpan.MinValue @> |> decompile =? "-DateTime.Now TimeSpan.MinValue" //incorrect decomplition: should be (-DateTime.Now) TimeSpan.MinValue
+
+[<Fact>]
+let ``issue 90: locally redefined standard infix op sprinted as symbol when partially applied`` () =
     let (+) x y = x + y : int
     <@ (+) 1 @> |> decompile =? "(+) 1"
 
-[<Fact(Skip="issue 90")>]
-let ``locally redefined standard infix op sprinted as infix op when fully applied`` () =
+[<Fact>]
+let ``issue 90: locally redefined standard infix op sprinted as infix op when fully applied`` () =
     let (+) x y = x + y : int
-    <@ (+) 1 1 @> |> decompile =? "1 + 1"
+    <@ 1 + 2@> |> decompile =? "1 + 2"
 
-[<Fact(Skip="issue 90")>]
-let ``locally defined nonstandard infix op sprinted as symbol when partially applied`` () =
+[<Fact>]
+let ``issue 90: locally redefined standard infix operator with 3 args applies its last arg`` () =
+    let (+) x y z = x + y + z : int
+    <@ (1 + 2) 3 @> |> decompile =? "(1 + 2) 3"
+
+[<Fact(Skip="Depends on issue 1")>]
+let ``issue 90: locally defined nonstandard infix op sprinted as symbol when partially applied`` () =
     let (+++) x y = x + y : int
     <@ (+++) 1 @> |> decompile =? "(+++) 1"
 
-[<Fact(Skip="issue 90")>]
-let ``locally defined nonstandard infix op sprinted as infix op when fully applied`` () =
+[<Fact(Skip="Depends on issue 1")>]
+let ``issue 90: locally defined nonstandard infix op sprinted as infix op when fully applied`` () =
     let (+++) x y = x + y : int
-    <@ (+++) 1 1 @> |> decompile =? "1 +++ 1"
+    <@ 1 +++ 2 @> |> decompile =? "1 +++ 2"
 

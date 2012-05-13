@@ -28,21 +28,34 @@ module ER = Swensen.Unquote.ExtraReflection
 
 open Swensen.Utils
 
+let (|MethodInfoName|) (mi:MethodInfo) = mi.Name
+
+///Matches lambda values, returning the demanged (but not source) name of the lambda
+let (|LambdaValue|_|) = function
+    | P.Value(o, ty) when Microsoft.FSharp.Reflection.FSharpType.IsFunction ty ->
+        match sprintf "%A" o with
+        | Regex.Compiled.Match @"^<fun:(.+)@.+>$" { GroupValues=[name]} -> //issue 79
+            Some(name) //issue 11 (which is taken care of in othercases by use of ER.sourceName)
+        | _ -> None
+    | _ -> None
+    
+
 //future feature, support custom ops
 ///Match non-custom binary infix Call patterns.
 ///Must come before Call pattern.
-let (|InfixCall|_|) = function
-    | P.Call (_, mi, lhs::rhs::[]) ->
-        match ER.symbolicOps |> Map.tryFind mi.Name with
+let (|InfixCallOrApplication|_|) = function
+    //when the op is compiled as a property            | when the op is a local lambda
+    | P.Call (_, MethodInfoName(opName), lhs::rhs::[]) | P.Application(P.Application(LambdaValue(opName), lhs), rhs) ->
+        match ER.symbolicOps |> Map.tryFind opName with
         | Some(op, ER.Infix(prec)) -> Some((op,prec),lhs,rhs)
         | _ -> None
     | _ -> None
 
-
 //all unary ops have precedence of 9
-let (|PrefixCall|_|) = function
-    | P.Call (_, mi, arg::[]) ->
-        match ER.symbolicOps |> Map.tryFind mi.Name with
+let (|PrefixCallOrApplication|_|) = function
+    //when the op is compiled as a property       | when the op is a local lambda
+    | P.Call (_, MethodInfoName(opName), arg::[]) | P.Application(LambdaValue(opName), arg)->
+        match ER.symbolicOps |> Map.tryFind opName with
         | Some(op, ER.Prefix(_)) -> Some(op, arg)
         | _ -> None
     | _ -> None
@@ -124,6 +137,8 @@ let (|Range|_|) x =
     let (|RangeOp|_|) = function
         | P.Call(None, mi, a::b::[]) when mi.Name = "op_Range" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) -> 
             Some(a,b)
+        | P.Application(P.Application(LambdaValue("op_Range"), a), b) as x when x.Type |> ER.isGenericTypeDefinedFrom<seq<_>> ->
+            Some(a,b)
         | _ -> None
     
     match x with 
@@ -139,6 +154,8 @@ let (|Range|_|) x =
 let (|RangeStep|_|) x =
     let (|RangeStepOp|_|) = function
         | P.Call(None, mi, a::b::c::[]) when mi.Name = "op_RangeStep" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) -> 
+            Some(a,b,c)
+        | P.Application(P.Application(P.Application(LambdaValue("op_RangeStep"), a), b), c) as x when x.Type |> ER.isGenericTypeDefinedFrom<seq<_>> ->
             Some(a,b,c)
         | _ -> None
 

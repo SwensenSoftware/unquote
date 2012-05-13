@@ -49,6 +49,15 @@ let decompile expr =
             applyParens OP.Semicolon (sprintf "%s; %s" (decompile (OP(10), OP.Non) lhs) (decompile (OP.Semicolon, OP.Right) rhs))
         | P.Sequential(lhs, rhs) -> 
             applyParens OP.Semicolon (sprintf "%s; %s" (decompile (OP.Semicolon, OP.Left) lhs) (decompile (OP.Semicolon, OP.Right) rhs))
+        | EP.Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges. must come before xxxCallOrApplication
+            sprintf "%s%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) endToken
+        | EP.RangeStep(startToken,endToken,a,b,c) -> //must come before xxxCallOrApplication
+            sprintf "%s%s..%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) (decompile CC.Zero c) endToken
+        | EP.InfixCallOrApplication((symbol, prec), lhs, rhs) -> //must come before Call and Application patterns
+            let lhsValue, rhsValue = decompile (prec,OP.Left) lhs, decompile (prec,OP.Right) rhs
+            applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
+        | EP.PrefixCallOrApplication(symbol, arg) -> //must come before Call and Application patterns
+            applyParens OP.PrefixOps (sprintf "%s%s" symbol (decompile (OP.PrefixOps,OP.Non) arg))
         | P.Application(curry, last) -> //application of arguments to a lambda
             applyParens OP.Application (sprintf "%s %s" (decompile (OP.Application, OP.Left) curry) (decompile (OP.Application, OP.Right) last))
         //issue 25 and issue 23: the following "re-sugars" both partially applied and unapplied lambda call expressions
@@ -77,11 +86,6 @@ let decompile expr =
                         | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
                 |> String.concat " "
             applyParens OP.Fun (sprintf "fun %s -> %s" sprintedVars (decompile CC.Zero body))
-        | EP.InfixCall((symbol, prec), lhs, rhs) -> //must come before Call pattern
-            let lhsValue, rhsValue = decompile (prec,OP.Left) lhs, decompile (prec,OP.Right) rhs
-            applyParens prec (sprintf "%s %s %s" lhsValue symbol rhsValue)
-        | EP.PrefixCall(symbol, arg) -> //must come before Call pattern
-            applyParens OP.PrefixOps (sprintf "%s%s" symbol (decompile (OP.PrefixOps,OP.Non) arg))
         | P.Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
             //thinking about making decompile depend on Reduce.isReduced: 
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
@@ -89,10 +93,6 @@ let decompile expr =
             applyParens OP.TypeTest (sprintf "%s :? %s" (decompile (OP.TypeTest,OP.Left) lhs) (ER.sprintSig (mi.GetGenericArguments().[0])))
         | P.TypeTest(lhs, ty) -> //seems to be same as TypeTestGeneric
             applyParens OP.TypeTest (sprintf "%s :? %s" (decompile (OP.TypeTest,OP.Left) lhs) (ER.sprintSig ty))
-        | EP.Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges
-            sprintf "%s%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) endToken
-        | EP.RangeStep(startToken,endToken,a,b,c) ->
-            sprintf "%s%s..%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) (decompile CC.Zero c) endToken
         | EP.NumericLiteral(literalValue, suffix) ->
             literalValue + suffix
         | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && mi.Name = "UnboxGeneric" -> //i.e. :?>
@@ -164,15 +164,12 @@ let decompile expr =
             //don't know what precedence is
             applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
         | DP.Unit -> "()" //must come before Value pattern
+        | EP.LambdaValue(name) -> ER.sourceNameFromString name
         | P.Value(o, ty) ->
             match o with
             | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None"
             | null -> "null" //sprint None when ty is option<>
-            | _ -> 
-                match sprintf "%A" o with
-                | Regex.Compiled.Match @"^<fun:(.+)@.+>$" { GroupValues=[name]} -> //issue 79
-                    ER.sourceNameFromString name //issue 11 (which is taken care of in othercases by use of ER.sourceName)
-                | x -> x
+            | _ -> sprintf "%A" o
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
