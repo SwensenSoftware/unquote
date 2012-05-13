@@ -438,3 +438,45 @@ let decompile expr =
 .. .. op_RangeStep
 
 *)
+
+(*
+4.4.1     Categorization of Symbolic Operators
+The following symbolic-op tokens can be used to form prefix and infix expressions. The marker OP represents all symbolic-op tokens that begin with the indicated prefix, except for tokens that appear elsewhere in the table.
+
+ 
+
+infix-or-prefix-op :=
+
+    +,  -, +., -., %, &, &&
+
+ 
+
+prefix-op :=
+
+    infix-or-prefix-op
+
+    ~ ~~ ~~~                   (and any repetitions of ~)
+
+    !OP                  (except !=)
+
+ 
+
+infix-op :=
+
+    infix-or-prefix-op
+
+    -OP +OP || <OP >OP = |OP &OP ^OP *OP /OP %OP !=OP
+
+                         (or any of these preceded by one or more ‘.’)
+
+    :=
+
+    ::
+
+    $
+
+    or
+
+    ?
+
+*)
