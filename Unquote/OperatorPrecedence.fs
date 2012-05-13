@@ -20,6 +20,7 @@ type assoc =
 | Left
 | Right
 
+///Represents an operator's precedence. The lower the precedence value, the lower the binding.
 type OperatorPrecedence(precedence:int, ?associativity:assoc) = 
     let associativity = match associativity with Some(a) -> a | None -> Non
     ///Precedence
