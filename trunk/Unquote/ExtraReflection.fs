@@ -23,6 +23,9 @@ open Microsoft.FSharp.Reflection
 open Swensen.Utils
 module OP = OperatorPrecedence
 
+open System
+open System.Text.RegularExpressions
+
 type symbolicOp =
     //bool: requires twiddle prefix
     | Prefix of bool
@@ -31,6 +34,7 @@ type symbolicOp =
     //neither prefix nor infix
     | FirstClassOnly
 
+//let tryFindSymbolicOp name =
 let symbolicOps = 
     [   //boolean ops
         "op_Equality", ("=", Infix(OP.EqualsOp))
@@ -102,6 +106,63 @@ let symbolicOps =
         "op_Quotation", ("<@ @>", FirstClassOnly)
         "op_QuotationUntyped", ("<@@ @@>", FirstClassOnly)
     ] |> Map.ofList
+
+//    match symbolicOps |> Map.tryFind name with
+//    | Some(op) -> op
+//    | None ->
+//        if name.StartsWith("op_") then
+//            let opSeq = name.Substring(3)
+//        
+//        let customOpParts =
+//            [
+//                "Greater", (">", Some(OP.GreaterThanOp))
+//                "Less", ("<", Some(OP.LessThanOp))
+//                "Plus", ("+", Some(OP.PlusBinaryOp))
+//                "Minus", ("-", Some(OP.MinusBinaryOp))
+//                "Multiply" ("*", Some(OP.MultiplyOp))
+//                "Equals", ("=", Some(OP.EqualsOp))
+//                "Twiddle" ("~", None)
+//                "Percent", ("%", Some(OP.ModOp))
+//                "Dot", ("." None)
+//
+//                "Amp", ("&", Some(OP.AndOp))
+//                "Bar", ("|", Some(OP.Or))
+//
+//                @    At
+//
+//                #    Hash
+//
+//                ^    Hat
+//
+//                !    Bang
+//
+//                ?    Qmark
+//
+//                /    Divide
+//
+//                .    Dot
+//
+//                :    Colon
+//
+//                (    LParen
+//
+//                ,    Comma
+//
+//                )    RParen
+//
+//                [    LBrack
+//
+//                ]    RBrack
+//            ]
+//
+//            let pat = @"Bar|Greater|Less"
+//            let opSeqMatches = Regex.Matches(opSeq, pat)
+//            if opSeqMatches |> Seq.cast<Match> |> Seq.sumBy (fun m -> m.Value.Length) = opSeq.Length then
+//                Some(opSeqMatches |> Seq.cast<Match> |> Seq.map (fun m -> m.Value) |> String.concat ",")
+//            else
+//                None
+//        else
+//            None
 
 ///try to find the first class symbolic function representation of a "op_" function name
 let tryMapSymbolicOpAsFirstClassFun name =
