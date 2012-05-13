@@ -315,26 +315,28 @@ let decompile expr =
 	12	& , &&	        Left
 	13	< op, >op, =, 
         |op, &op	    Left
-	14	^ op	        Right
-	15	::	            Right
-	16	:?> , :?	    Nonassociative
-	17	- op, +op, 
+    14  &&& , |||, ^^^, Left
+        ~~~, <<<, >>>
+	15	^ op	        Right
+	16	::	            Right
+	17	:?> , :?	    Nonassociative
+	18	- op, +op, 
         (binary)	    Left
-	18	* op, /op, %op	Left
-	19	** op	        Right
-	20	f x (function   Left
+	19	* op, /op, %op	Left
+	20	** op	        Right
+	21	f x (function   Left
         application)
         lazy x
         assert 
-	21	| (pattern 
+	22	| (pattern 
         match)	        Right
-	22	prefix ops 
+	23	prefix ops 
         (+op, -op, %, 
         %%, &, &&, 
         !op, ~op)	    Left
-	23	.	            Left
-	24	f(x)	        Left
-	25	f< types >	    Left
+	24	.	            Left
+	25	f(x)	        Left
+	26	f< types >	    Left
 *)
 
 
