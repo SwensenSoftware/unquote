@@ -322,8 +322,10 @@ let decompile expr =
         (binary)	    Left
 	18	* op, /op, %op	Left
 	19	** op	        Right
-	20	f x (function 
-        application)	Left
+	20	f x (function   Left
+        application)
+        lazy x
+        assert 
 	21	| (pattern 
         match)	        Right
 	22	prefix ops 
@@ -440,6 +442,60 @@ let decompile expr =
 *)
 
 (*
+Compiled names for other symbolic operators are op_N1...Nn where N1 to Nn are the names for the characters as shown in the table below. For example, the symbolic identifier <* has the compiled name op_LessMultiply:
+
+>    Greater
+
+<    Less
+
++    Plus
+
+-    Minus
+
+*    Multiply
+
+=    Equals
+
+~    Twiddle
+
+%    Percent
+
+.    Dot
+
+&    Amp
+
+|    Bar
+
+@    At
+
+#    Hash
+
+^    Hat
+
+!    Bang
+
+?    Qmark
+
+/    Divide
+
+.    Dot
+
+:    Colon
+
+(    LParen
+
+,    Comma
+
+)    RParen
+
+[    LBrack
+
+]    RBrack
+
+*)
+
+(*
+
 4.4.1     Categorization of Symbolic Operators
 The following symbolic-op tokens can be used to form prefix and infix expressions. The marker OP represents all symbolic-op tokens that begin with the indicated prefix, except for tokens that appear elsewhere in the table.
 
@@ -465,7 +521,7 @@ infix-op :=
 
     infix-or-prefix-op
 
-    -OP +OP || <OP >OP = |OP &OP ^OP *OP /OP %OP !=OP
+    -OP +OP || <OP >OP = |OP &OP ^OP *OP /OP %OP != !=OP
 
                          (or any of these preceded by one or more ‘.’)
 
