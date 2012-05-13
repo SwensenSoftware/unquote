@@ -1187,3 +1187,8 @@ let ``issue 90: locally defined nonstandard infix op sprinted as infix op when f
     let (+++) x y = x + y : int
     <@ 1 +++ 2 @> |> decompile =? "1 +++ 2"
 
+open System.Text.RegularExpressions
+
+[<Fact>]
+let ``issue 94: dynamic cast operator is right associative`` () =
+    <@ new obj() :?> Capture :?> Group :?> Match @> |> decompile =? "new obj() :?> Capture :?> Group :?> Match"

@@ -20,6 +20,7 @@ type assoc =
 | Left
 | Right
 
+//note that we deliberately use referential transpency to apply "special" precedence rules. see applyParensForPrecInContext.
 ///Represents an operator's precedence. The lower the precedence value, the lower the binding.
 type OperatorPrecedence(precedence:int, ?associativity:assoc) = 
     let associativity = match associativity with Some(a) -> a | None -> Non
@@ -43,22 +44,22 @@ let RefAssign = OP(9,Right)
 let Comma = OP(10)
 let LogicalOr = OP(11,Left) //note "or" is deprecated form of "||"
 let LogicalAnd = OP(12,Left) //note "&" is deprecated form of "&&"
-//todo: type test operators here!
-let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp = let p() = OP(13,Left) in p(),p(),p(),p(),p()
-let BitwiseAnd,BitwiseOr,ExclusiveOr,LogicalNot,LeftShift,RightShift = let p() = OP(14,Left) in p(),p(),p(),p(),p(),p()
-let ConcatenateOp = OP(15,Right) //OCaml string concat
-let Cons = OP(16,Right)
-let AppendOp = OP(17,Left) //not sure, empirical
-let DynamicCast,TypeTest = let p() = OP(17) in p(),p()
-let MinusBinaryOp,PlusBinaryOp = let p() = OP(18,Left) in p(),p()
-let MultiplyOp,DivideOp,ModOp = let p() = OP(19,Left) in p(),p(),p()
-let ExponentiationOp = OP(20,Right)
-let Application = OP(21,Left)
-let PatternMatch = OP(22,Right)
-let PrefixOps = OP(23,Left)
-let Dot = OP(24,Left)
-let MethodCall = OP(25,Left)
-let TypeArguments = OP(26,Left)
+let StaticCast, DynamicCast = let p() = OP(13, Left) in p(), p()
+let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp = let p() = OP(14,Left) in p(),p(),p(),p(),p()
+let BitwiseAnd,BitwiseOr,ExclusiveOr,LogicalNot,LeftShift,RightShift = let p() = OP(15,Left) in p(),p(),p(),p(),p(),p()
+let ConcatenateOp = OP(16,Right) //OCaml string concat
+let Cons = OP(17,Right)
+let AppendOp = OP(18,Left) //not sure, empirical
+let TypeTest = OP(18)
+let MinusBinaryOp,PlusBinaryOp = let p() = OP(19,Left) in p(),p()
+let MultiplyOp,DivideOp,ModOp = let p() = OP(20,Left) in p(),p(),p()
+let ExponentiationOp = OP(21,Right)
+let Application = OP(22,Left)
+let PatternMatch = OP(23,Right)
+let PrefixOps = OP(24,Left)
+let Dot = OP(25,Left)
+let MethodCall = OP(26,Left)
+let TypeArguments = OP(27,Left)
 
 let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (localOP:OperatorPrecedence) s = 
     if contextOP = Application && localOP = MethodCall then //special rule

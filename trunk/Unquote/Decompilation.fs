@@ -331,7 +331,7 @@ let decompile expr =
 
 14  !=OP <OP >OP = |OP &OP $	Left
 
-13  :> :?>						Right
+13  :> :?>						Left (note: the spec said right, but is incorrect)
 
 12  & &&						Left
 
