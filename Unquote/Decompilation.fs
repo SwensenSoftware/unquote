@@ -231,13 +231,13 @@ let decompile expr =
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; all come as untyped so that's the only kind we can support.
             sprintf "<@ %s @>" (decompile CC.Zero qx) 
         | DP.OrElse(DP.Bool(true), DP.Bool(false)) -> //true || false can't be distinguished from true && true, yet is less likely an expression due to short-circuiting
-            applyParens OP.And "true && true"
+            applyParens OP.LogicalAnd "true && true"
         | DP.AndAlso(DP.Bool(false), DP.Bool(true)) -> //false && true can't be distinguished from false || false, yet is less likely an expression due to short-circuiting
-            applyParens OP.Or "false || false"
+            applyParens OP.LogicalOr "false || false"
         | DP.AndAlso(a,b) -> //must come before if then else
-            applyParens OP.And (sprintf "%s && %s" (decompile (OP.And, OP.Left) a) (decompile (OP.And,OP.Right) b))
+            applyParens OP.LogicalAnd (sprintf "%s && %s" (decompile (OP.LogicalAnd, OP.Left) a) (decompile (OP.LogicalAnd,OP.Right) b))
         | DP.OrElse(a,b) -> //must come before if then else
-            applyParens OP.Or (sprintf "%s || %s" (decompile (OP.Or,OP.Left) a) (decompile (OP.Or,OP.Right) b))
+            applyParens OP.LogicalOr (sprintf "%s || %s" (decompile (OP.LogicalOr,OP.Left) a) (decompile (OP.LogicalOr,OP.Right) b))
         | P.IfThenElse(a,b, DP.Unit) -> //syntax doesn't require else branch when it's nothing but unit
             applyParens OP.If (sprintf "if %s then %s" (decompile (OP.If,OP.Non) a) (decompile (OP.If,OP.Non) b))
         | P.IfThenElse(a,b,c) ->
