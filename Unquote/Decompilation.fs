@@ -299,44 +299,63 @@ let decompile expr =
 //custom operator precedence determined by first op in sequence: http://stackoverflow.com/questions/3347972/f-custom-operators-precedence
 //precedence table: http://msdn.microsoft.com/en-us/library/dd233228.aspx
 (*
-		Operator    	Associativity
-	1	as	            Right
-	2	when	        Right
-	3	| (pipe)	    Left
-	4	;	            Right
-	5	let	            Nonassociative
-	6	function , fun, 
-        match, try	    Nonassociative
-	7	if	            Nonassociative
-	8	->	            Right
-	9	:=	            Right
-	10	,	            Nonassociative
-	11	or , ||	        Left
-	12	& , &&	        Left
-	13	< op, >op, =, 
-        |op, &op	    Left
-    14  &&& , |||, ^^^, Left
-        ~~~, <<<, >>>
-	15	^ op	        Right
-	16	::	            Right
-	17	:?> , :?	    Nonassociative
-	18	- op, +op, 
-        (binary)	    Left
-	19	* op, /op, %op	Left
-	20	** op	        Right
-	21	f x (function   Left
-        application)
-        lazy x
-        assert 
-	22	| (pattern 
-        match)	        Right
-	23	prefix ops 
-        (+op, -op, %, 
-        %%, &, &&, 
-        !op, ~op)	    Left
-	24	.	            Left
-	25	f(x)	        Left
-	26	f< types >	    Left
+    Operator or expression		Associativity		Comments
+
+27  f<types>					Left				High-precedence type application; see §15.3
+
+26  f(x)						Left				High-precedence application; see §15.2
+
+25  .							Left
+
+24  prefix-op					Left				Applies to prefix uses of these symbols (i.e. +OP -OP % %% & && !OP ~OP)
+
+23  "| rule"					Right				Pattern matching rules
+
+22  "f x"                       Left
+    "lazy x"
+    "assert x"					
+
+21  **OP						Right
+
+20  *OP /OP %OP					Left
+
+19  -OP +OP						Left				Applies to infix uses of these symbols
+
+18  :?							Not associative
+
+17  ::							Right
+
+16  ^OP							Right
+
+15  &&& ||| ^^^ ~~~ <<< >>>     Left
+
+14  !=OP <OP >OP = |OP &OP $	Left
+
+13  :> :?>						Right
+
+12  & &&						Left
+
+11  or ||						Left
+
+10  ,							Not associative
+
+9   :=							Right
+
+8   ->							Right
+
+7   if							Not associative
+
+6   function, fun, match, try	Not associative
+
+5   let							Not associative
+
+4   ;							Right
+
+3   |							Left
+
+2    when						Right
+
+1    as							Right
 *)
 
 
