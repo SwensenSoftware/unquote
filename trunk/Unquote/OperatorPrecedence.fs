@@ -40,8 +40,8 @@ let If = OP(7)
 let RightArrow = OP(8,Right)
 let RefAssign = OP(9,Right)
 let Comma = OP(10)
-let Or = OP(11,Left) //note "or" is deprecated form of "||"
-let And = OP(12,Left) //note "&" is deprecated form of "&&"
+let LogicalOr = OP(11,Left) //note "or" is deprecated form of "||"
+let LogicalAnd = OP(12,Left) //note "&" is deprecated form of "&&"
 //todo: type test operators here!
 let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp = let p() = OP(13,Left) in p(),p(),p(),p(),p()
 let BitwiseAnd,BitwiseOr,ExclusiveOr,LogicalNot,LeftShift,RightShift = let p() = OP(14,Left) in p(),p(),p(),p(),p(),p()
