@@ -333,9 +333,9 @@ let decompile expr =
 
 13  :> :?>						Left (note: the spec said right, but is incorrect)
 
-12  & &&						Left
+12  & &&						Left                Logical AND 
 
-11  or ||						Left
+11  or ||						Left                Logical OR
 
 10  ,							Not associative
 

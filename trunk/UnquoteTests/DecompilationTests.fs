@@ -1192,3 +1192,18 @@ open System.Text.RegularExpressions
 [<Fact>]
 let ``issue 94: dynamic cast operator is right associative`` () =
     <@ new obj() :?> Capture :?> Group :?> Match @> |> decompile =? "new obj() :?> Capture :?> Group :?> Match"
+
+#if DEBUG
+#else
+[<Fact>]
+let ``issue 94: dynamic cast binds weaker than <=>`` () =
+    let (<=>) (x:float) (y:obj) = x :> obj
+    raises<InvalidCastException> <@ 1. <=> new obj() :?> int @> 
+#endif
+//[<Fact>] //don't have any infix operators to compare to
+//let ``issue 94: dynamic cast binds stronger than :=`` () =
+//    let (:=) (x:float) (y:obj) = x :> obj
+//    
+//    test <@ (1. := new obj() :?> int) :? float @>
+    
+    //|> decompile =? "new obj() :?> int $ 1"
