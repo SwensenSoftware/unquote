@@ -26,155 +26,157 @@ module OP = OperatorPrecedence
 open System
 open System.Text.RegularExpressions
 
-type symbolicOp =
-    //bool: requires twiddle prefix
-    | Prefix of bool
-    //OP.OperatorPrecedence : op precedence
-    | Infix of OP.OperatorPrecedence
-    //neither prefix nor infix
-    | FirstClassOnly
+module SymbolicOps =
+    type symbolicOp =
+        //bool: requires twiddle prefix
+        | Prefix of bool
+        //OP.OperatorPrecedence : op precedence
+        | Infix of OP.OperatorPrecedence
+        //neither prefix nor infix
+        | FirstClassOnly
 
-//let tryFindSymbolicOp name =
-let symbolicOps = 
-    [   //boolean ops
-        "op_Equality", ("=", Infix(OP.EqualsOp))
-        "op_GreaterThan", (">", Infix(OP.GreaterThanOp))
-        "op_LessThan", ("<", Infix(OP.LessThanOp))
-        "op_GreaterThanOrEqual", (">=", Infix(OP.GreaterThanOp))
-        "op_LessThanOrEqual", ("<=", Infix(OP.LessThanOp))
-        "op_Inequality", ("<>", Infix(OP.LessThanOp))
-        //pipe ops
-        "op_PipeRight", ("|>", Infix(OP.Pipe)) //might need to be OP.PipeOp
-        "op_PipeRight2", ("||>", Infix(OP.Pipe))
-        "op_PipeRight3", ("|||>", Infix(OP.Pipe))
-        "op_PipeLeft", ("<|", Infix(OP.LessThanOp))
-        "op_PipeLeft2", ("<||", Infix(OP.LessThanOp))
-        "op_PipeLeft3", ("<|||", Infix(OP.LessThanOp))
-        //numeric ops
-        "op_Addition", ("+", Infix(OP.PlusBinaryOp))
-        "op_Subtraction", ("-", Infix(OP.MinusBinaryOp))
-        "op_Division", ("/", Infix(OP.DivideOp))
-        "op_Multiply", ("*", Infix(OP.MultiplyOp))
-        "op_Modulus", ("%", Infix(OP.ModOp))
-        "op_Exponentiation", ("**", Infix(OP.ExponentiationOp))
-        //bit operators
-        "op_BitwiseAnd", ("&&&", Infix(OP.BitwiseAnd))
-        "op_BitwiseOr", ("|||", Infix(OP.BitwiseOr))
-        "op_ExclusiveOr", ("^^^", Infix(OP.ExclusiveOr))
-        "op_LeftShift", ("<<<", Infix(OP.LeftShift))
-        "op_RightShift", (">>>", Infix(OP.RightShift))
+    let private symbolicOps = //to do, add op_Dollar to this table
+        [   //boolean ops
+            "op_Equality", ("=", Infix(OP.EqualsOp))
+            "op_GreaterThan", (">", Infix(OP.GreaterThanOp))
+            "op_LessThan", ("<", Infix(OP.LessThanOp))
+            "op_GreaterThanOrEqual", (">=", Infix(OP.GreaterThanOp))
+            "op_LessThanOrEqual", ("<=", Infix(OP.LessThanOp))
+            "op_Inequality", ("<>", Infix(OP.LessThanOp))
+            //pipe ops
+            "op_PipeRight", ("|>", Infix(OP.Pipe)) //might need to be OP.PipeOp
+            "op_PipeRight2", ("||>", Infix(OP.Pipe))
+            "op_PipeRight3", ("|||>", Infix(OP.Pipe))
+            "op_PipeLeft", ("<|", Infix(OP.LessThanOp))
+            "op_PipeLeft2", ("<||", Infix(OP.LessThanOp))
+            "op_PipeLeft3", ("<|||", Infix(OP.LessThanOp))
+            //numeric ops
+            "op_Addition", ("+", Infix(OP.PlusBinaryOp))
+            "op_Subtraction", ("-", Infix(OP.MinusBinaryOp))
+            "op_Division", ("/", Infix(OP.DivideOp))
+            "op_Multiply", ("*", Infix(OP.MultiplyOp))
+            "op_Modulus", ("%", Infix(OP.ModOp))
+            "op_Exponentiation", ("**", Infix(OP.ExponentiationOp))
+            //bit operators
+            "op_BitwiseAnd", ("&&&", Infix(OP.BitwiseAnd))
+            "op_BitwiseOr", ("|||", Infix(OP.BitwiseOr))
+            "op_ExclusiveOr", ("^^^", Infix(OP.ExclusiveOr))
+            "op_LeftShift", ("<<<", Infix(OP.LeftShift))
+            "op_RightShift", (">>>", Infix(OP.RightShift))
 
-        //composition
-        "op_ComposeRight", (">>", Infix(OP.GreaterThanOp))
-        "op_ComposeLeft", ("<<", Infix(OP.LessThanOp))
-        //special
-        "op_Append", ("@", Infix(OP.AppendOp)) //not sure what precedence, falling back on (+))
-        "op_Concatenate", ("^", Infix(OP.ConcatenateOp)) //ocaml style string concatentation
-        //set ref cell
-        "op_ColonEquals", (":=", Infix(OP.RefAssign))
+            //composition
+            "op_ComposeRight", (">>", Infix(OP.GreaterThanOp))
+            "op_ComposeLeft", ("<<", Infix(OP.LessThanOp))
+            //special
+            "op_Append", ("@", Infix(OP.AppendOp)) //not sure what precedence, falling back on (+))
+            "op_Concatenate", ("^", Infix(OP.ConcatenateOp)) //ocaml style string concatentation
+            //set ref cell
+            "op_ColonEquals", (":=", Infix(OP.RefAssign))
 
-        //op assign operators
-        "op_AdditionAssignment", ("+=", Infix(OP.PlusBinaryOp))
-        "op_SubtractionAssignment", ("-=", Infix(OP.MinusBinaryOp))
-        "op_MultiplyAssignment", ("*=", Infix(OP.MultiplyOp))
-        "op_DivisionAssignment", ("/=", Infix(OP.DivideOp))
+            //op assign operators
+            "op_AdditionAssignment", ("+=", Infix(OP.PlusBinaryOp))
+            "op_SubtractionAssignment", ("-=", Infix(OP.MinusBinaryOp))
+            "op_MultiplyAssignment", ("*=", Infix(OP.MultiplyOp))
+            "op_DivisionAssignment", ("/=", Infix(OP.DivideOp))
 
-        //"", ("",)
-        //some more exotic operators
-        "op_BooleanOr", ("||", Infix(OP.LogicalOr))
-        //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
-        "op_BooleanAnd", ("&&", Infix(OP.LogicalAnd))
-        "op_Amp", ("&", Infix(OP.LogicalAnd))
+            //"", ("",)
+            //some more exotic operators
+            "op_BooleanOr", ("||", Infix(OP.LogicalOr))
+            //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
+            "op_BooleanAnd", ("&&", Infix(OP.LogicalAnd))
+            "op_Amp", ("&", Infix(OP.LogicalAnd))
 
-        //require leading twidle in first-class use
-        "op_UnaryPlus", ("+", Prefix(true))
-        "op_UnaryNegation", ("-", Prefix(true))
-        "op_Splice", ("%", Prefix(true))
-        "op_SpliceUntyped", ("%%", Prefix(true))
-        "op_AddressOf", ("&", Prefix(true))
-        "op_IntegerAddressOf", ("&&", Prefix(true))
-        "op_TwiddlePlusDot", ("+.", Prefix(true))
-        "op_TwiddleMinusDot", ("-.", Prefix(true))
+            //require leading twidle in first-class use
+            "op_UnaryPlus", ("+", Prefix(true))
+            "op_UnaryNegation", ("-", Prefix(true))
+            "op_Splice", ("%", Prefix(true))
+            "op_SpliceUntyped", ("%%", Prefix(true))
+            "op_AddressOf", ("&", Prefix(true))
+            "op_IntegerAddressOf", ("&&", Prefix(true))
+            "op_TwiddlePlusDot", ("+.", Prefix(true))
+            "op_TwiddleMinusDot", ("-.", Prefix(true))
     
-        //don't require leading twidle in first-class use
-        "op_LogicalNot", ("~~~", Prefix(false))
-        "op_Dereference", ("!", Prefix(false))
+            //don't require leading twidle in first-class use
+            "op_LogicalNot", ("~~~", Prefix(false))
+            "op_Dereference", ("!", Prefix(false))
         
-        //first class only operators
-        "op_Range", ("..", FirstClassOnly)
-        "op_RangeStep", (".. ..", FirstClassOnly)
-        "op_Quotation", ("<@ @>", FirstClassOnly)
-        "op_QuotationUntyped", ("<@@ @@>", FirstClassOnly)
-    ] |> Map.ofList
+            //first class only operators
+            "op_Range", ("..", FirstClassOnly)
+            "op_RangeStep", (".. ..", FirstClassOnly)
+            "op_Quotation", ("<@ @>", FirstClassOnly)
+            "op_QuotationUntyped", ("<@@ @@>", FirstClassOnly)
+        ] |> Map.ofList
 
-//    match symbolicOps |> Map.tryFind name with
-//    | Some(op) -> op
-//    | None ->
-//        if name.StartsWith("op_") then
-//            let opSeq = name.Substring(3)
-//        
-//        let customOpParts =
-//            [
-//                "Greater", (">", Some(OP.GreaterThanOp))
-//                "Less", ("<", Some(OP.LessThanOp))
-//                "Plus", ("+", Some(OP.PlusBinaryOp))
-//                "Minus", ("-", Some(OP.MinusBinaryOp))
-//                "Multiply" ("*", Some(OP.MultiplyOp))
-//                "Equals", ("=", Some(OP.EqualsOp))
-//                "Twiddle" ("~", None)
-//                "Percent", ("%", Some(OP.ModOp))
-//                "Dot", ("." None)
-//
-//                "Amp", ("&", Some(OP.AndOp))
-//                "Bar", ("|", Some(OP.Or))
-//
-//                @    At
-//
-//                #    Hash
-//
-//                ^    Hat
-//
-//                !    Bang
-//
-//                ?    Qmark
-//
-//                /    Divide
-//
-//                .    Dot
-//
-//                :    Colon
-//
-//                (    LParen
-//
-//                ,    Comma
-//
-//                )    RParen
-//
-//                [    LBrack
-//
-//                ]    RBrack
-//            ]
-//
-//            let pat = @"Bar|Greater|Less"
-//            let opSeqMatches = Regex.Matches(opSeq, pat)
-//            if opSeqMatches |> Seq.cast<Match> |> Seq.sumBy (fun m -> m.Value.Length) = opSeq.Length then
-//                Some(opSeqMatches |> Seq.cast<Match> |> Seq.map (fun m -> m.Value) |> String.concat ",")
-//            else
-//                None
-//        else
-//            None
+    let private customOpParts =
+        [
+            "Greater", (">", Some(OP.GreaterThanOp))
+            "Less", ("<", Some(OP.LessThanOp))
+            "Plus", ("+", Some(OP.PlusBinaryOp))
+            "Minus", ("-", Some(OP.MinusBinaryOp))
+            "Multiply", ("*", Some(OP.MultiplyOp))
+            "Equals", ("=", Some(OP.EqualsOp))
+            "Twiddle", ("~", None)
+            "Percent", ("%", Some(OP.ModOp))
+            "Dot", (".", None)
+            "Amp", ("&", Some(OP.AndOp))
+            "Bar", ("|", Some(OP.PipeOp))
+            "At", ("@", None)
+            "Hash", ("#", None)
+            "Hat", ("^", Some(OP.ConcatenateOp))
+            "Bang", ("!", Some(OP.BangEqualsOp)) //i.e. !=OP infix sequence (!OP is infix only)
+            "Qmark", ("?", None)
+            "Divide", ("/", Some(OP.DivideOp)) 
+            "Dot", (".", None)
+            "Colon", (":", None)
+            "LParen", ("(", None)
+            "Comma", (",", None)
+            "RParen", (")", None)
+            "LBrack", ("[", None)
+            "RBrack", ("]", None)
+        ] |> Map.ofList
 
-///try to find the first class symbolic function representation of a "op_" function name
-let tryMapSymbolicOpAsFirstClassFun name =
-    match symbolicOps |> Map.tryFind name with
-    | Some(symbol, Prefix(true)) ->
-        Some(sprintf "(~%s)" symbol)
-    | Some(symbol:string, _) ->
-        if (symbol:string).StartsWith("*") || symbol.EndsWith("*") then
-            Some(sprintf "( %s )" symbol)
-        else
-            Some(sprintf "(%s)" symbol)
-    | _ -> None
+    let private customOpPattern = customOpParts |> Seq.map (fun kvp -> kvp.Key) |> String.concat "|"
+
+    let tryFindByName name =
+        match symbolicOps |> Map.tryFind name with
+        | Some(op) -> Some(op)
+        | None ->
+            if name.StartsWith("op_") then
+                let opSeq = name.Substring(3)
+
+                let opSeqMatches = Regex.Matches(opSeq, customOpPattern)
+                let opSeqMatchValues = opSeqMatches |> Seq.cast<Match> |> Seq.map (fun m -> m.Value) |> Seq.toList
+                if opSeqMatchValues |> Seq.sumBy String.length = opSeq.Length then //this is an op_XXX sequence we recognize
+                    let opSeqParts = opSeqMatchValues |> Seq.map (fun opName -> customOpParts |> Map.find opName) |> Seq.toList
+                    let opInfo =
+                        match opSeqParts with
+                        | ("~",_)::_ -> Prefix(false)
+                        | ("!",_)::(trailingOp,_)::_ when trailingOp <> "=" -> Prefix(false)
+                        | _ -> 
+                            opSeqParts 
+                            |> Seq.find (fun (opSymbol, _ )-> opSymbol <> ".") //danger!
+                            |> snd 
+                            |> Option.get //danger!
+                            |> symbolicOp.Infix
+
+                    let opSymbol = opSeqParts |> Seq.map fst |> String.concat ""
+                    Some(opSymbol, opInfo)
+                else
+                    None
+            else
+                None
+
+    ///try to find the first class symbolic function representation of a "op_" function name
+    let tryMapAsFirstClassByName name =
+        match tryFindByName name with
+        | Some(symbol, Prefix(true)) ->
+            Some(sprintf "(~%s)" symbol)
+        | Some(symbol:string, _) ->
+            if (symbol:string).StartsWith("*") || symbol.EndsWith("*") then
+                Some(sprintf "( %s )" symbol)
+            else
+                Some(sprintf "(%s)" symbol)
+        | _ -> None
 
 let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
     ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<'a>
@@ -229,7 +231,7 @@ let sourceNameFromString =
         elif name |> hasSpecialChars || name |> isReservedWord || name |> isKeyword then //escape because has special char or is reserved word
             escape name
         else
-            match tryMapSymbolicOpAsFirstClassFun name with
+            match SymbolicOps.tryMapAsFirstClassByName name with
             | Some(op) -> op
             | None -> name
 

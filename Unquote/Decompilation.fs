@@ -307,7 +307,7 @@ let decompile expr =
 
 25  .							Left
 
-24  prefix-op					Left				Applies to prefix uses of these symbols (i.e. +OP -OP % %% & && !OP ~OP)
+24  prefix-op					Left				Applies to prefix uses of these symbols (i.e. +OP -OP % %% & && !OP (except !=) ~OP)
 
 23  "| rule"					Right				Pattern matching rules
 
