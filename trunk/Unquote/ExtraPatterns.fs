@@ -46,8 +46,8 @@ let (|LambdaValue|_|) = function
 let (|InfixCallOrApplication|_|) = function
     //when the op is compiled as a property            | when the op is a local lambda
     | P.Call (_, MethodInfoName(opName), lhs::rhs::[]) | P.Application(P.Application(LambdaValue(opName), lhs), rhs) ->
-        match ER.symbolicOps |> Map.tryFind opName with
-        | Some(op, ER.Infix(prec)) -> Some((op,prec),lhs,rhs)
+        match ER.SymbolicOps.tryFindByName opName with
+        | Some(op, ER.SymbolicOps.Infix(prec)) -> Some((op,prec),lhs,rhs)
         | _ -> None
     | _ -> None
 
@@ -55,8 +55,8 @@ let (|InfixCallOrApplication|_|) = function
 let (|PrefixCallOrApplication|_|) = function
     //when the op is compiled as a property       | when the op is a local lambda
     | P.Call (_, MethodInfoName(opName), arg::[]) | P.Application(LambdaValue(opName), arg)->
-        match ER.symbolicOps |> Map.tryFind opName with
-        | Some(op, ER.Prefix(_)) -> Some(op, arg)
+        match ER.SymbolicOps.tryFindByName opName with
+        | Some(op, ER.SymbolicOps.Prefix(_)) -> Some(op, arg)
         | _ -> None
     | _ -> None
 

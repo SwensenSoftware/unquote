@@ -1177,12 +1177,12 @@ let ``issue 90: locally redefined standard infix operator with 3 args applies it
     let (+) x y z = x + y + z : int
     <@ (1 + 2) 3 @> |> decompile =? "(1 + 2) 3"
 
-[<Fact(Skip="Depends on issue 1")>]
+[<Fact>]
 let ``issue 90: locally defined nonstandard infix op sprinted as symbol when partially applied`` () =
     let (+++) x y = x + y : int
     <@ (+++) 1 @> |> decompile =? "(+++) 1"
 
-[<Fact(Skip="Depends on issue 1")>]
+[<Fact>]
 let ``issue 90: locally defined nonstandard infix op sprinted as infix op when fully applied`` () =
     let (+++) x y = x + y : int
     <@ 1 +++ 2 @> |> decompile =? "1 +++ 2"
@@ -1200,6 +1200,7 @@ let ``issue 94: dynamic cast binds weaker than <=>`` () =
     let (<=>) (x:float) (y:obj) = x :> obj
     raises<InvalidCastException> <@ 1. <=> new obj() :?> int @> 
 #endif
+
 //[<Fact>] //don't have any infix operators to compare to
 //let ``issue 94: dynamic cast binds stronger than :=`` () =
 //    let (:=) (x:float) (y:obj) = x :> obj
@@ -1207,3 +1208,8 @@ let ``issue 94: dynamic cast binds weaker than <=>`` () =
 //    test <@ (1. := new obj() :?> int) :? float @>
     
     //|> decompile =? "new obj() :?> int $ 1"
+
+[<Fact>]
+let ``issue 1: op_Dollar`` () =
+    let ($) x y = x + y
+    <@ ($) @> |> decompile =? "($)"
