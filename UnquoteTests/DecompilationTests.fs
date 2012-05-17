@@ -1210,6 +1210,6 @@ let ``issue 94: dynamic cast binds weaker than <=>`` () =
     //|> decompile =? "new obj() :?> int $ 1"
 
 [<Fact>]
-let ``issue 1: op_Dollar`` () =
+let ``issue 82: op_Dollar`` () =
     let ($) x y = x + y
     <@ ($) @> |> decompile =? "($)"
