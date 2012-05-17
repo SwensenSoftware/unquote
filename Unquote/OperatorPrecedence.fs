@@ -45,7 +45,7 @@ let Comma = OP(10)
 let LogicalOr = OP(11,Left) //note "or" is deprecated form of "||"
 let LogicalAnd = OP(12,Left) //note "&" is deprecated form of "&&"
 let StaticCast, DynamicCast = let p() = OP(13, Left) in p(), p()
-let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp,BangEqualsOp = let p() = OP(14,Left) in p(),p(),p(),p(),p(),p()
+let LessThanOp,GreaterThanOp,EqualsOp,PipeOp,AndOp,BangEqualsOp, DollarOp = let p() = OP(14,Left) in p(),p(),p(),p(),p(),p(),p()
 let BitwiseAnd,BitwiseOr,ExclusiveOr,LogicalNot,LeftShift,RightShift = let p() = OP(15,Left) in p(),p(),p(),p(),p(),p()
 let ConcatenateOp = OP(16,Right) //OCaml string concat
 let Cons = OP(17,Right)

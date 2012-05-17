@@ -85,6 +85,7 @@ module SymbolicOps =
             //we decline to support the "or" infix operator since it doesn't follow "op_" prefix naming convention and thus may lead to ambiguity
             "op_BooleanAnd", ("&&", Infix(OP.LogicalAnd))
             "op_Amp", ("&", Infix(OP.LogicalAnd))
+            "op_Dollar", ("$", Infix(OP.DollarOp))
 
             //require leading twidle in first-class use
             "op_UnaryPlus", ("+", Prefix(true))
