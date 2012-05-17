@@ -1213,3 +1213,108 @@ let ``issue 94: dynamic cast binds weaker than <=>`` () =
 let ``issue 82: op_Dollar`` () =
     let ($) x y = x + y
     <@ ($) @> |> decompile =? "($)"
+
+[<Fact>]
+let ``issue 1: custom tilda sequence op`` () =
+    let (~~~~~) x = x : int
+    <@  ~~~~~1 @> |> decompile =? "~~~~~1"
+
+[<Fact>]
+let ``issue 1: prefix op starting with ! but not !=`` () =
+    let (!+++) x = x : int
+    <@  !+++1 @> |> decompile =? "!+++1"
+
+[<Fact>]
+let ``issue 1: infix !=`` () =
+    let (!=) x y = x + y
+    <@  1 != 2 @> |> decompile =? "1 != 2"
+
+[<Fact>]
+let ``issue 1: custom prefix op as first class`` () =
+    let (~~~~~~~) x :int = x
+    <@  (~~~~~~~) @> |> decompile =? "(~~~~~~~)"
+
+[<Fact>]
+let ``issue 1: custom prefix op as first class and returning lambda`` () =
+    let (~~~~~~~) x y = x + y
+    <@  (~~~~~~~) @> |> decompile =? "(~~~~~~~)"
+
+[<Fact>]
+let ``issue 1: custom infix op taking one arg must be first class`` () =
+    let (<<>>) x :int = x
+    <@  (<<>>) 1 @> |> decompile =? "(<<>>) 1"
+
+[<Fact>]
+let ``issue 1: custom infix op as first class and returning lambda`` () =
+    let (<<>>) x y z :int = x + y + z
+    <@  (<<>>) @> |> decompile =? "(<<>>)"
+
+[<Fact>]
+let ``issue 1: custom infix op as fully applied and returning lambda`` () =
+    let (<<>>) x y z :int = x + y + z
+    <@  (1 <<>> 2) 3 @> |> decompile =? "(1 <<>> 2) 3"
+
+[<Fact>]
+let ``issue 1: custom infix op leading dots not factored into precedence`` () =
+    let (...+) x y :int = x + y
+    <@  1 + (2 ...+ 3) @> |> decompile =? "1 + (2 ...+ 3)"
+
+[<Fact>]
+let ``issue 1: custom infix op precedence taken from leading symbol`` () =
+    let (+++) x y :int = x + y
+    <@  1 + (2 +++ 3) @> |> decompile =? "1 + (2 +++ 3)"
+    <@  1 + 2 +++ 3 @> |> decompile =? "1 + 2 +++ 3"
+
+[<AutoOpen>]
+module Issue1_TopLevel =
+    let (~~~~~) x = x : int
+    [<Fact>]
+    let ``issue 1: custom tilda sequence op`` () =
+        <@  ~~~~~1 @> |> decompile =? "~~~~~1"
+
+    let (!+++) x = x : int
+    [<Fact>]
+    let ``issue 1: prefix op starting with ! but not !=`` () =    
+        <@  !+++1 @> |> decompile =? "!+++1"
+
+    let (!=) x y = x + y
+    [<Fact>]
+    let ``issue 1: infix !=`` () =
+        <@  1 != 2 @> |> decompile =? "1 != 2"
+
+    let (~~~~~~~) x :int = x    
+    [<Fact>]
+    let ``issue 1: custom prefix op as first class`` () =
+        <@  (~~~~~~~) @> |> decompile =? "(~~~~~~~)"
+
+    let (~~~~~~~~) x y = x + y
+    [<Fact>]
+    let ``issue 1: custom prefix op as first class and returning lambda`` () =
+        <@  (~~~~~~~~) @> |> decompile =? "(~~~~~~~~)"
+        
+    let (<<>>) x :int = x
+    [<Fact>]
+    let ``issue 1: custom infix op taking one arg must be first class`` () =
+        <@  (<<>>) 1 @> |> decompile =? "(<<>>) 1"
+
+    let (<<<>>>) x y z :int = x + y + z
+    [<Fact>]
+    let ``issue 1: custom infix op as first class and returning lambda`` () =
+        <@  (<<<>>>) @> |> decompile =? "(<<<>>>)"
+
+    let (<<.>>) x y z :int = x + y + z
+    [<Fact>]
+    let ``issue 1: custom infix op as fully applied and returning lambda`` () =
+        <@  (1 <<.>> 2) 3 @> |> decompile =? "(<<.>>) 1 2 3" //NOTE THIS ONE DIFFERS FROM LOCAL LAMBDA VERSION
+
+    let (...+) x y :int = x + y
+    [<Fact>]
+    let ``issue 1: custom infix op leading dots not factored into precedence`` () =
+        <@  1 + (2 ...+ 3) @> |> decompile =? "1 + (2 ...+ 3)"
+
+    let (+++) x y :int = x + y
+    [<Fact>]
+    let ``issue 1: custom infix op precedence taken from leading symbol`` () =
+        <@  1 + (2 +++ 3) @> |> decompile =? "1 + (2 +++ 3)"
+        <@  1 + 2 +++ 3 @> |> decompile =? "1 + 2 +++ 3"
+
