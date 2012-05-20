@@ -1,0 +1,23 @@
+#summary environment setup instructions for Unquote developers.
+#labels Phase-Implementation
+
+== Visual Studio and F# ==
+
+Development is currently done in VS 11 Beta with the F# 3.0 compiler. But the projects target either .NET 4.0 or Silverlight 4 and the build script still uses the F# 2.0 compiler. That implies that one must have both VS 11 Beta and VS 2010 SP1 installed (in the latter case, it is possible to use the standalone F# 2.0 compiler – and in both cases, any tier of VS will do, including the free Shell).
+
+== Silverlight 4 Tools ==
+
+Silverlight 4 development requires installation of the Silverlight 4 Tools for Visual Studio 2010 (depsite its name, it appears to work with VS 11 just fine too... at least if you installed with with VS 2010 previously). In fact, you can't avoid this even if you don't plan on touching the Unquote Silverlight project since Visual Studio will give you tons of errors upon startup if it is not properly installed.
+
+Installing the tools can be tricky, due to a bug in the installer which doesn't install F# support. However, the following steps should work.
+
+  * Download Microsoft Silverlight 4 Tools for Visual Studio 2010 (http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=18149) and unzip it (even though it is an exe, running the exe can give errors sometimes. Even if it does succeed, it may not install the F# SL tools) 
+  * Run FSharpRuntimeSL4.msi 
+  * Run silverlight_developer.exe
+  * Run silverlight_sdk.msi.
+
+In some instances, Visual Studio errors regarding can be due to a corruption in Visual Studio which may not manifest in other ways. In such a case, try repairing / reinstalling Visual Studio through appwiz.cpl, starting with the Service Packs.
+  
+== Binary Dependencies ==
+
+All 3rd party binary dependencies are resolved through NuGet solution integration. At the time of this writing, the only 3rd party binaries required are within the test projects (Unquote itself has no such dependencies).
