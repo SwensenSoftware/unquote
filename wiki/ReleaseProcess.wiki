@@ -14,7 +14,7 @@ The latest revision in trunk is ready for release and all unit tests pass.
     * Enter the version number when prompted
     * Check output for any errors
     * The NuGet package and Downloads zip will be located at `\builds\Unquote-<version>\Unquote.<version>.nupkg` and `\builds\Unquote-<version>\Unquote-<version>.zip` respectively.
-  # Perform quality assurance (fix and loop steps 2-4 if any problems)
+  # Perform quality assurance
     * Deploy `Unquote.<version>.nupkg` to a local NuGet repository and insure everything works properly through the VS 2010 and VS 11 NuGet Package Managers
     * Unzip and test binaries in `Unquote-<version>.zip` for both F# interactive and normal F# projects.
 
