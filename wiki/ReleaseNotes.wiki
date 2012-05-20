@@ -3,6 +3,26 @@
 
 = Release Notes =
 
+== v2.2.0, 5/20/12 ==
+
+Several enhancements around operator decompilation.
+
+  * Issue 1: Decompiler Feature Request: support custom prefix and infix operators
+  * Issue 70: Support DefaultValue decompilation
+  * Issue 72: Support Custom NumericLiteral Decompilation
+  * Issue 81: Decompiler Bug: the names for some local lambdas captured by quotations are not being demangled properly
+  * Issue 82: Improve support of standard operators
+  * Issue 83: Leading tilda for prefix operator lambdas should only be used when the operator can also be a infix operator
+  * Issue 84: Decompile non-prefix and non-infix functions with operator-based names using operator symbols
+  * Issue 85: Partially applied symbolic function causes exception
+  * Issue 86: Partialy applied symbolic function not decompiled correctly
+  * Issue 87: Support function and value names that require being surrounded by back-ticks
+  * Issue 90: Locally defined / redefined custom and standard operators should be decompiled same as top-level operators
+  * Issue 91: Decompiler bug: op_Range and op_RangeStep sequence construction syntax shouldn't always be used
+  * Issue 94: Fix cast precedence and associativity based on updated F# spec operator precedence table
+  * Issue 95: Unquote.Utils namespace should not be publicly visible
+
+
 == v2.1.1, 4/11/12 ==
 
 New features and bug fixes.
