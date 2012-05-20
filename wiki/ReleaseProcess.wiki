@@ -7,7 +7,7 @@ The latest revision in trunk is ready for release and all unit tests pass.
 
 = Build =
 
-  # Check out the head revision from [https://unquote.googlecode.com/svn/trunk trunk]
+  # `svn checkout` the head revision from [https://unquote.googlecode.com/svn/trunk trunk]
   # Update version numbers (`<monumental>.<significant>.<minor or bug fix>`) and commit changes to trunk
     * `AssemblyVersion` and `AssemblyFileVersion` in `\Unquote\AssemblyInfo.fs` and `\Unquote.Silverlight\AssemblyInfo.fs`
   # Run build.bat
