@@ -21,7 +21,7 @@ namespace Swensen.Utils
 open System.Text.RegularExpressions
 
 ///Regex extensions
-module Regex =
+module internal Regex =
     type ActiveMatch =
         {
             Match: Match
