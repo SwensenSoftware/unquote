@@ -19,6 +19,12 @@ The latest revision in trunk is ready for release and all unit tests pass.
     * Unzip and test binaries in `Unquote-<version>.zip` for both F# interactive and normal F# projects.
 
 = Release =
+  * Update the milestone for all issues which are being included in the release to the proper version number
+    * Search within `All issues` for `-has:milestone status:fixed`
+    * Click `Select: All` to select all of them
+    * Choose action "Bulk edit"
+    * Add the label `Milestone-Release2.2.0`
+    * Click `Update ## Issues` button to save
 
 = Process Improvement =
 
