@@ -11,20 +11,20 @@ The latest revision in trunk is ready for release and all unit tests pass.
   # Update version numbers (`<monumental>.<significant>.<minor or bug fix>`) and commit changes to trunk
     * `AssemblyVersion` and `AssemblyFileVersion` in `\Unquote\AssemblyInfo.fs` and `\Unquote.Silverlight\AssemblyInfo.fs`
   # Run build.bat
-    * Enter the version number when prompted
-    * Check output for any errors
-    * The NuGet package and Downloads zip will be located at `\builds\Unquote-<version>\Unquote.<version>.nupkg` and `\builds\Unquote-<version>\Unquote-<version>.zip` respectively
+    # Enter the version number when prompted
+    # Check output for any errors
+    # The NuGet package and Downloads zip will be located at `\builds\Unquote-<version>\Unquote.<version>.nupkg` and `\builds\Unquote-<version>\Unquote-<version>.zip` respectively
   # Perform quality assurance
     * Deploy `Unquote.<version>.nupkg` to a local NuGet repository and insure everything works properly through the VS 2010 and VS 11 NuGet Package Managers
     * Unzip and test binaries in `Unquote-<version>.zip` for both F# interactive and normal F# projects.
 
 = Release =
   * Update the milestone for all issues which are being included in the release to the proper version number
-    * Search within `All issues` for `-has:milestone status:fixed`
-    * Click `Select: All` to select all of them
-    * Choose action "Bulk edit"
-    * Add the label `Milestone-Release2.2.0`
-    * Click `Update ## Issues` button to save
+    # Search within `All issues` for `-has:milestone status:fixed`
+    # Click `Select: All` to select all of them
+    # Choose action "Bulk edit"
+    # Add the label `Milestone-Release2.2.0`
+    # Click `Update ## Issues` button to save
 
 = Process Improvement =
 
