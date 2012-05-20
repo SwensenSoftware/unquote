@@ -1,4 +1,4 @@
-#summary environment setup instructions for Unquote developers.
+#summary Environment setup instructions for Unquote developers
 #labels Phase-Implementation
 
 == Visual Studio and F# ==
