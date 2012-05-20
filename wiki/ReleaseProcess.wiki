@@ -43,3 +43,6 @@ The latest revision in trunk is ready for release and all unit tests pass.
 The following issues have been created for improving the build and release process
   * Issue 74
   * Issue 75
+
+Other ideas
+  * Consider [http://code.google.com/p/support/wiki/ScriptedUploads scripting the Downloads upload].
