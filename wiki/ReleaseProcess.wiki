@@ -1,0 +1,16 @@
+#summary developer guide for releasing a new version of Unquote
+#labels Phase-Implementation
+
+= Assumptions =
+
+The latest revision in trunk is ready for release and all unit tests pass.
+
+= Build =
+
+= Release =
+
+= Future Improvements =
+
+The following issues have been created for improving the build and release process
+  * Issue 74
+  * Issue 75
