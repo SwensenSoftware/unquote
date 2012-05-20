@@ -31,13 +31,14 @@ The latest revision in trunk is ready for release and all unit tests pass.
     # Open the csv file in Excel
     # Delete all columns except for the ID and Summary columns from the csv
     # Open up the ReleaseNotes wiki page for edit
-    # Copy and paste the records from the csv into the ReleaseNotes following the existing formatting conventions and save.
-  * Upload to Downloads
+    # Copy and paste the records from the csv into the ReleaseNotes following the existing formatting conventions and save
+  * Upload zip to Downloads
     # Open a New Download page
     # Fill out the form following the conventions of previous download versions
     # Apply the `Featured` label
     # Remove the `Featured` label from the previous download version
-  * Upload to NuGet
+  * Publish the NuGet package
+    # Go to https://nuget.org/packages/upload and follow instructions.
 = Process Improvement =
 
 The following issues have been created for improving the build and release process
@@ -45,4 +46,5 @@ The following issues have been created for improving the build and release proce
   * Issue 75
 
 Other ideas
-  * Consider [http://code.google.com/p/support/wiki/ScriptedUploads scripting the Downloads upload].
+  * Consider [http://code.google.com/p/support/wiki/ScriptedUploads scripting the Downloads upload]
+  * Script NuGet package publication.
