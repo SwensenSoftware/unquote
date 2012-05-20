@@ -1,4 +1,4 @@
-#summary developer guide for releasing a new version of Unquote
+#summary Developer guide for releasing a new version of Unquote
 #labels Phase-Implementation
 
 = Assumptions =
