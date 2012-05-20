@@ -25,7 +25,13 @@ The latest revision in trunk is ready for release and all unit tests pass.
     # Choose action "Bulk edit"
     # Add the label `Milestone-Release2.2.0`
     # Click `Update ## Issues` button to save
-
+  * Update the ReleaseNotes
+    # Search within `All issues` for `milestone:Release<version>`
+    # Click `CSV` in the bottom right-hand corner of the issue list to export the issues to a csv file
+    # Open the csv file in Excel
+    # Delete all columns except for the ID and Summary columns from the csv
+    # Open up the ReleaseNotes wiki page for edit
+    # Copy and paste the records from the csv into the ReleaseNotes following the existing formatting conventions.
 = Process Improvement =
 
 The following issues have been created for improving the build and release process
