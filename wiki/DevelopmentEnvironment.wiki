@@ -11,7 +11,7 @@ Silverlight 4 development requires installation of the Silverlight 4 Tools for V
 
 Installing the tools can be tricky, due to a bug in the installer which doesn't install F# support. However, the following steps should work.
 
-  * Download Microsoft Silverlight 4 Tools for Visual Studio 2010 (http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=18149) and unzip it (even though it is an exe, running the exe can give errors sometimes. Even if it does succeed, it may not install the F# SL tools) 
+  * [http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=18149 Download Microsoft Silverlight 4 Tools for Visual Studio 2010] and unzip it (even though it is an exe, running the exe can give errors sometimes. Even if it does succeed, it may not install the F# SL tools) 
   * Run FSharpRuntimeSL4.msi 
   * Run silverlight_developer.exe
   * Run silverlight_sdk.msi.
