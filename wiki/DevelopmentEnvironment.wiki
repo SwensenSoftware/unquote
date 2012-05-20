@@ -20,4 +20,6 @@ In some instances, Visual Studio errors regarding can be due to a corruption in 
   
 == Binary Dependencies ==
 
-All 3rd party binary dependencies are resolved through NuGet solution integration. At the time of this writing, the only 3rd party binaries required are within the test projects (Unquote itself has no such dependencies).
+Most 3rd-party binary dependencies are resolved through NuGet solution integration. However, those which are not available as NuGet packages are placed in the `\lib` folder within the repository.
+
+At the time of this writing, the only 3rd-party binaries required are within the test projects (Unquote itself has no such dependencies).
