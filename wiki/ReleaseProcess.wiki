@@ -32,6 +32,12 @@ The latest revision in trunk is ready for release and all unit tests pass.
     # Delete all columns except for the ID and Summary columns from the csv
     # Open up the ReleaseNotes wiki page for edit
     # Copy and paste the records from the csv into the ReleaseNotes following the existing formatting conventions and save.
+  * Upload to Downloads
+    # Open a New Download page
+    # Fill out the form following the conventions of previous download versions
+    # Apply the `Featured` label
+    # Remove the `Featured` label from the previous download version
+  * Upload to NuGet
 = Process Improvement =
 
 The following issues have been created for improving the build and release process
