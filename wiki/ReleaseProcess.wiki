@@ -39,6 +39,11 @@ The latest revision in trunk is ready for release and all unit tests pass.
     # Remove the `Featured` label from the previous download version
   * Publish the NuGet package
     # Go to https://nuget.org/packages/upload and follow instructions.
+
+= Finalize =
+
+Tag the head revision of the trunk with the name `<version number>`.
+
 = Process Improvement =
 
 The following issues have been created for improving the build and release process
