@@ -23,7 +23,7 @@ The latest revision in trunk is ready for release and all unit tests pass.
     # Search within `All issues` for `-has:milestone status:fixed`
     # Click `Select: All` to select all of them
     # Choose action "Bulk edit"
-    # Add the label `Milestone-Release2.2.0`
+    # Add the label `Milestone-Release<version number>`
     # Click "Update ## Issues" button to save
   * Update the ReleaseNotes
     # Search within `All issues` for `milestone:Release<version>`
