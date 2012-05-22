@@ -22,12 +22,12 @@ The latest revision in trunk is ready for release and all unit tests pass.
   * Update the milestone for all issues which are being included in the release to the proper version number
     # Search within `All issues` for `-has:milestone status:fixed`
     # Click `Select: All` to select all of them
-    # Choose action "Bulk edit"
+    # Choose "Bulk edit" action from the "Actions..." drop-down list.
     # Add the label `Milestone-Release<version number>`
     # Click "Update ## Issues" button to save
   * Update the ReleaseNotes
     # Search within `All issues` for `milestone:Release<version>`
-    # Click `CSV` in the bottom right-hand corner of the issue list to export the issues to a csv file
+    # Click the "CSV" link in the bottom right-hand corner of the issue list to export the issues to a csv file
     # Open the csv file in Excel
     # Delete all columns except for the ID and Summary columns from the csv
     # Open up the ReleaseNotes wiki page for edit
