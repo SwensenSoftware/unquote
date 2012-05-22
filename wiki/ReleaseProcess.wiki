@@ -24,7 +24,7 @@ The latest revision in trunk is ready for release and all unit tests pass.
     # Click `Select: All` to select all of them
     # Choose action "Bulk edit"
     # Add the label `Milestone-Release2.2.0`
-    # Click `Update ## Issues` button to save
+    # Click "Update ## Issues" button to save
   * Update the ReleaseNotes
     # Search within `All issues` for `milestone:Release<version>`
     # Click `CSV` in the bottom right-hand corner of the issue list to export the issues to a csv file
