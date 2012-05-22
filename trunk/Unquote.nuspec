@@ -8,6 +8,7 @@
 	<iconUrl>https://unquote.googlecode.com/svn/trunk/logo.png</iconUrl>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>http://code.google.com/p/unquote/</projectUrl>
+	<tags>F# fsharp unit-testing xunit nunit mbunit quotations</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 	<summary>Write F# unit test assertions as quoted expressions, get step-by-step failure messages for free.</summary>
     <description>Unquote is not just another DSL or API for making unit test assertions. Instead, assertions are written as plain, statically-checked F# quoted expressions and test failure messages are given as step-by-step F# expression evaluations. Unquote integrates configuration-free with all exception-based unit testing frameworks including xUnit.net, NUnit, and MbUnit. Unquote may even be used within FSI sessions, enabling the direct migration of ad-hoc FSI tests during interactive development to formal test suites. In addition to its unit testing features, Unquote includes operators for evaluating, decompiling, and incrementally reducing quoted expressions.</description>
