@@ -41,6 +41,27 @@ let decompile expr =
     let rec decompile (contextOP,contextAssoc) expr =
         let applyParens = OP.applyParensForPrecInContext contextOP contextAssoc
 
+        ///Decompile property access for PropertyGet and PropertySet
+        let decomplePropertyAccess target (pi:PropertyInfo) args =
+            match target with
+            | Some(target) -> //instance get
+                match pi.Name, args with
+                | Regex.Compiled.Match(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
+                    //for UnionCaseTypeTests, require a op_Dynamic implementation
+                    sprintf "(%s?%s : %s)" (decompile (OP.Dot,OP.Left) target) pi.Name (pi.PropertyType |> ER.sprintSig)
+                | _, [] -> sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) pi.Name //also includes "Item" with zero args
+                | "Item", _ -> sprintf "%s.[%s]" (decompile (OP.Dot,OP.Left) target) (decompileTupledArgs args)
+                | _, _ -> applyParens OP.MethodCall (sprintf "%s.%s(%s)" (decompile (OP.Dot,OP.Left) target) pi.Name (decompileTupledArgs args))
+            | None -> //static get (note: can't accept params)
+                let sprintedName =
+                    if ER.isOpenModule pi.DeclaringType then 
+                        sprintf "%s" pi.Name
+                    else
+                        sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+
+                if args.Length = 0 then sprintedName
+                else applyParens OP.MethodCall (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
+
         match expr with
         | P.Sequential(P.Sequential(lhs, DP.Unit), rhs) ->
             //due to quirky nested structure which handles implicit unit return values
@@ -128,30 +149,11 @@ let decompile expr =
                 | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
                 | None -> mi.DeclaringType.Name
             applyParens OP.MethodCall (sprintf "%s.%s%s(%s)" decompiledTarget mi.Name (ER.sprintGenericArgsIfNotInferable mi) (decompileTupledArgs args))
-        | P.PropertyGet(Some(target), pi, args) -> //instance get
-            match pi.Name, args with
-            | Regex.Compiled.Match(@"^Item(\d*)?$") _, _ when pi.DeclaringType |> FSharpType.IsUnion ->
-                //for UnionCaseTypeTests, require a op_Dynamic implementation
-                sprintf "(%s?%s : %s)" (decompile (OP.Dot,OP.Left) target) pi.Name (pi.PropertyType |> ER.sprintSig)
-            | _, [] -> sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) pi.Name //also includes "Item" with zero args
-            | "Item", _ -> sprintf "%s.[%s]" (decompile (OP.Dot,OP.Left) target) (decompileTupledArgs args)
-            | _, _ -> applyParens OP.MethodCall (sprintf "%s.%s(%s)" (decompile (OP.Dot,OP.Left) target) pi.Name (decompileTupledArgs args))
-        | P.PropertyGet(None, pi, args) -> //static get (note: can't accept params)
-            let sprintedName =
-                if ER.isOpenModule pi.DeclaringType then 
-                    sprintf "%s" pi.Name
-                else
-                    sprintf "%s.%s" pi.DeclaringType.Name pi.Name
-
-            if args.Length = 0 then sprintedName
-            else applyParens OP.MethodCall (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
-        | P.PropertySet(target, pi, piArgs, rhs) ->
-            let lhs = //leverage PropertyGet sprinting
-                match target with
-                | Some(instance) -> Expr.PropertyGet(instance, pi, piArgs)
-                | None -> Expr.PropertyGet(pi, piArgs)
+        | P.PropertyGet(target, pi, args) ->
+            decomplePropertyAccess target pi args
+        | P.PropertySet(target, pi, args, rhs) ->
             //don't know what precedence is
-            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
+            applyParens OP.LessThanOp (sprintf "%s <- %s" (decomplePropertyAccess target pi args) (decompile CC.Zero rhs))
         | P.FieldGet(Some(target), fi) ->
             applyParens OP.Dot (sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) fi.Name)
         | P.FieldGet(None, fi) ->
@@ -242,7 +244,6 @@ let decompile expr =
             applyParens OP.If (sprintf "if %s then %s" (decompile (OP.If,OP.Non) a) (decompile (OP.If,OP.Non) b))
         | P.IfThenElse(a,b,c) ->
             applyParens OP.If (sprintf "if %s then %s else %s" (decompile (OP.If,OP.Non) a) (decompile (OP.If,OP.Non) b) (decompile (OP.If,OP.Non) c))
-        //we can't reduce any XXXSet expressions due to limitations of Expr.Eval()
         | P.VarSet(v, arg) ->
             //not sure what precedence should be, using precedence for < op
             applyParens OP.LessThanOp (sprintf "%s <- %s" v.Name (decompile CC.Zero arg)) 
@@ -287,6 +288,7 @@ let decompile expr =
         decompileArgs (OP.Application,OP.Non) " "
     and decompileSequencedArgs =
         decompileArgs (OP.Semicolon,OP.Non) "; "
+
     decompile CC.Zero expr
 
 //-----operator precedence updated April 2011 with bitwise ops-----
