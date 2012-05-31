@@ -17,13 +17,13 @@ let serializeThenDeserialize(x:'a) =
     ms.Seek(0L, SeekOrigin.Begin) |> ignore
     bf.Deserialize(ms) :?> 'a
 
-[<Fact(Skip="todo")>]
+[<Fact>]
 let ``EvaluationException is serializable`` () =
     let ee = new EvaluationException("msg")
     let ee' = serializeThenDeserialize ee
     test <@ ee.Message = ee'.Message @>
 
-[<Fact(Skip="todo")>]
+[<Fact>]
 let ``AssertionFailedException is serializable`` () =
     let ee = new AssertionFailedException("msg")
     let ee' = serializeThenDeserialize ee
