@@ -62,6 +62,13 @@ let decompile expr =
                 if args.Length = 0 then sprintedName
                 else applyParens OP.MethodCall (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
 
+        let decompileFieldAccess target (fi:FieldInfo) =
+            match target with
+            | Some(target) ->
+                applyParens OP.Dot (sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) fi.Name)
+            | None ->
+                applyParens OP.Dot (sprintf "%s.%s" fi.DeclaringType.Name fi.Name)
+
         match expr with
         | P.Sequential(P.Sequential(lhs, DP.Unit), rhs) ->
             //due to quirky nested structure which handles implicit unit return values
@@ -154,17 +161,11 @@ let decompile expr =
         | P.PropertySet(target, pi, args, rhs) ->
             //don't know what precedence is
             applyParens OP.LessThanOp (sprintf "%s <- %s" (decomplePropertyAccess target pi args) (decompile CC.Zero rhs))
-        | P.FieldGet(Some(target), fi) ->
-            applyParens OP.Dot (sprintf "%s.%s" (decompile (OP.Dot,OP.Left) target) fi.Name)
-        | P.FieldGet(None, fi) ->
-            applyParens OP.Dot (sprintf "%s.%s" fi.DeclaringType.Name fi.Name)
+        | P.FieldGet(target, fi) ->
+            decompileFieldAccess target fi
         | P.FieldSet(target, fi, rhs) ->
-            let lhs = //leverage FieldGet sprinting
-                match target with
-                | Some(instance) -> Expr.FieldGet(instance, fi) 
-                | None -> Expr.FieldGet(fi)
             //don't know what precedence is
-            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompile CC.Zero lhs) (decompile CC.Zero rhs))
+            applyParens OP.LessThanOp (sprintf "%s <- %s" (decompileFieldAccess target fi) (decompile CC.Zero rhs))
         | DP.Unit -> "()" //must come before Value pattern
         | EP.LambdaValue(name) -> ER.sourceNameFromString name
         | P.Value(o, ty) ->
