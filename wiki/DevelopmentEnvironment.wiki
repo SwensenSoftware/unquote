@@ -16,7 +16,7 @@ Installing the tools can be tricky, due to a bug in the installer which doesn't 
   * Run silverlight_developer.exe
   * Run silverlight_sdk.msi.
 
-In some instances, Visual Studio errors regarding can be due to a corruption in Visual Studio which may not manifest in other ways. In such a case, try repairing / reinstalling Visual Studio through appwiz.cpl, starting with the Service Packs.
+In some instances, Visual Studio errors regarding Silverlight can be due to a corruption in Visual Studio which may not manifest in other ways. In such a case, try repairing / reinstalling Visual Studio through appwiz.cpl, starting with the Service Packs.
   
 == Binary Dependencies ==
 
