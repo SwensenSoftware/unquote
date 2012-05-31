@@ -62,6 +62,7 @@ let decompile expr =
                 if args.Length = 0 then sprintedName
                 else applyParens OP.MethodCall (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
 
+        ///Decompile field access for PropertyGet and PropertySet
         let decompileFieldAccess target (fi:FieldInfo) =
             match target with
             | Some(target) ->
