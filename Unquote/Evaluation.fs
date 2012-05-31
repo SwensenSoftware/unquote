@@ -69,7 +69,9 @@ let (|BinOp|_|) = function
     |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> 
         match DynamicOperators.binOpLookup.TryGetValue mi.Name with
         | true, op -> 
-            let [|aty;bty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType) //using lhs.Type, rhs.Type has no perf. impact
+            let aty,bty = 
+                let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType) //using lhs.Type, rhs.Type has no perf. impact (but is it the same?)
+                argTys.[0], argTys.[1]
             let cty = mi.ReturnType
             Some(op aty bty cty,lhs,rhs)
         | false, _ -> None
@@ -79,7 +81,7 @@ let (|UnaryOp|_|) = function
     |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> 
         match DynamicOperators.unaryOpLookup.TryGetValue mi.Name with
         | true, op -> 
-            let [|aty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
+            let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
             Some(op aty bty,arg)
         | false, _ -> None
@@ -89,7 +91,9 @@ let (|CheckedBinOp|_|) = function
     |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" -> 
         match DynamicOperators.Checked.binOpLookup.TryGetValue mi.Name with
         | true, op -> 
-            let [|aty;bty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
+            let aty,bty = 
+                let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
+                argTys.[0], argTys.[1]
             let cty = mi.ReturnType
             Some(op aty bty cty,lhs,rhs)
         | false, _ -> None
@@ -99,7 +103,7 @@ let (|CheckedUnaryOp|_|) = function
     |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" -> 
         match DynamicOperators.Checked.unaryOpLookup.TryGetValue mi.Name with
         | true, op -> 
-            let [|aty|] = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
+            let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
             Some(op aty bty,arg)
         | false, _ -> None
