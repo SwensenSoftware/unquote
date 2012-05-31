@@ -69,6 +69,7 @@
     <Compile Include="DecompilationTests.fs" />
     <Compile Include="ReductionTests.fs" />
     <Compile Include="AssertionOperatorsTests.fs" />
+    <Compile Include="CustomExceptionSerializationTests.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
