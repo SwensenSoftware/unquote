@@ -3,7 +3,7 @@
 
 == Visual Studio and F# ==
 
-Development is currently done in VS 11 Beta with the F# 3.0 compiler. But the projects target either .NET 4.0 or Silverlight 4 and the build script still uses the F# 2.0 compiler. That implies that one must have both VS 11 Beta and VS 2010 SP1 installed (in the latter case, it is possible to use the standalone F# 2.0 compiler – and in both cases, any tier of VS will do, including the free Shell).
+Development is currently done in VS 2010 with the F# 2.0 compiler. Any tier of VS will do, including the free Shell (the solution is 100% F#). Note that we cannot use VS 2012 at this time, since F# 3.0 + VS 2012 does not support Silverlight 4.
 
 == Silverlight 4 Tools ==
 
