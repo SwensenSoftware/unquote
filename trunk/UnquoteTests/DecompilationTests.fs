@@ -1334,3 +1334,34 @@ let ``issue 93: lazy application being applied`` () =
 let ``issue 93: lazy application of application`` () =
     <@  lazy (id (3 + 2)) @> |> decompile =? "lazy (id (3 + 2))"
 
+[<Fact>]
+let ``issue 93: assert Call treated like function application`` () =
+#if DEBUG
+    <@  assert true @> |> decompile =? "assert true"    
+#else
+    <@  assert true @> |> decompile =? "()"
+#endif
+
+[<Fact>]
+let ``issue 93: assert application has stronger precedence than plus op`` () =
+#if DEBUG
+    <@  assert (true && true) @> |> decompile =? "assert (true && true)"
+#else
+    <@  assert (true && true) @> |> decompile =? "()"
+#endif
+
+[<Fact>]
+let ``issue 93: assert application being applied`` () =
+#if DEBUG
+    <@  id (assert (true && true)) @> |> decompile =? "id (assert (true && true))"
+#else
+    <@  id (assert (true && true)) @> |> decompile =? "id ()"
+#endif
+
+[<Fact>]
+let ``issue 93: assert application of application`` () =
+#if DEBUG
+    <@  assert (id (true && true)) @> |> decompile =? "assert (id (true && true))"
+#else
+    <@  assert (id (true && true)) @> |> decompile =? "()"
+#endif
