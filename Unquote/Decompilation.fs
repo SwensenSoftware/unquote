@@ -131,6 +131,8 @@ let decompile expr =
             applyParens OP.Dot (sprintf "%s.[%s]" (decompile (OP.Dot, OP.Left) target) (decompileTupledArgs args)) //not sure what precedence is
         | P.Call(None, mi, [P.Lambda(_, arg)]) when mi.Name = "Create" && mi.DeclaringType.FullName = "Microsoft.FSharp.Control.LazyExtensions" -> //System.Lazy.Create treated as function application
             applyParens OP.Application (sprintf "lazy %s" (decompile (OP.Application, OP.Right) arg))
+        | P.Call(None, mi, [arg]) when mi.Name = "Assert" && mi.DeclaringType = typeof<System.Diagnostics.Debug> -> //System.Lazy.Create treated as function application
+            applyParens OP.Application (sprintf "assert %s" (decompile (OP.Application, OP.Right) arg))
         | P.Call(target, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //instance or static call representing an F# function or generic value
             //if mi has generic args which can't be infered, need to sprint them.
             //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
