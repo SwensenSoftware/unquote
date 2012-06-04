@@ -15,8 +15,10 @@ limitations under the License.
 *)
 
 //#r "FSharp.PowerPack.Linq";;
-#r @"C:\Users\Stephen\Documents\Visual Studio 11\Projects\Unquote\code\Unquote\bin\Debug\Unquote.dll"
-#r @"C:\Users\Stephen\Documents\Visual Studio 11\Projects\Unquote\code\Unquote\bin\Release\Unquote.dll"
+#r @"bin\Debug\Unquote.dll"
+open Swensen.Unquote
+
+#r @"bin\Release\Unquote.dll"
 open Swensen.Unquote
 //open Microsoft.FSharp.Quotations
 

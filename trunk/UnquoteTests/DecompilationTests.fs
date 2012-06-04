@@ -1318,3 +1318,19 @@ module Issue1_TopLevel =
         <@  1 + (2 +++ 3) @> |> decompile =? "1 + (2 +++ 3)"
         <@  1 + 2 +++ 3 @> |> decompile =? "1 + 2 +++ 3"
 
+[<Fact>]
+let ``issue 93: lazy Call treated like function application`` () =
+    <@  lazy 3 @> |> decompile =? "lazy 3"
+
+[<Fact>]
+let ``issue 93: lazy application has stronger precedence than plus op`` () =
+    <@  lazy (3 + 2) @> |> decompile =? "lazy (3 + 2)"
+
+[<Fact>]
+let ``issue 93: lazy application being applied`` () =
+    <@  id (lazy (3 + 2)) @> |> decompile =? "id (lazy (3 + 2))"
+
+[<Fact>]
+let ``issue 93: lazy application of application`` () =
+    <@  lazy (id (3 + 2)) @> |> decompile =? "lazy (id (3 + 2))"
+
