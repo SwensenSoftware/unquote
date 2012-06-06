@@ -62,12 +62,15 @@ let MethodCall = OP(26,Left)
 let TypeArguments = OP(27,Left)
 
 let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (localOP:OperatorPrecedence) s = 
-    if contextOP = Application && localOP = MethodCall then //special rule
-        sprintf "(%s)" s
+    let parenthesize = sprintf "(%s)"
+    if contextOP = Application && localOP = MethodCall then //special rule for e.g. "fsFunction (unitCall())"
+        parenthesize s
+    elif contextOP = Application && contextAssoc = Left && localOP = PrefixOps then //special rule for e.g. "(-x) y" application when - is a prefix op returning a function
+        parenthesize s
     else //normal rules
         let context =
             match contextOP.Associativity, contextAssoc with
             | Left, Left | Right, Right -> contextOP.Precedence - 1
             | _ -> contextOP.Precedence
     
-        if localOP.Precedence > context then s else sprintf "(%s)" s
+        if localOP.Precedence > context then s else parenthesize s

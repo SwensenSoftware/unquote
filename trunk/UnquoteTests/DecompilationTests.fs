@@ -1158,9 +1158,16 @@ let ``issue 90: partially applied locally redefined standard prefix op with too 
     <@ -DateTime.Now @> |> decompile =? "-DateTime.Now"
 
 [<Fact>]
-let ``issue 90: locally redefined standard prefix op with too many args sprinted as prefix op with application to result`` () =
+let ``issue 90: locally redefined standard prefix op with too many args sprinted as prefix op with application to result ; issue 92: Prefix operator precedence should be reduced when return value is a lambda which is being applied`` () =
     let (~-) x y : System.DateTime = x + y
-    <@ (-DateTime.Now) TimeSpan.MinValue @> |> decompile =? "-DateTime.Now TimeSpan.MinValue" //incorrect decomplition: should be (-DateTime.Now) TimeSpan.MinValue
+    <@ (-DateTime.Now) TimeSpan.MinValue @> |> decompile =? "(-DateTime.Now) TimeSpan.MinValue"
+
+[<Fact>]
+let ``issue 92: Prefix operator precedence should NOT be reduced when return value is a lambda which is an ARG to an application`` () =
+    let (~-) x y : System.DateTime = x + y
+    let f (g: TimeSpan -> DateTime) = g
+    <@  f -DateTime.Now @> |> decompile =? "f -DateTime.Now"
+
 
 [<Fact>]
 let ``issue 90: locally redefined standard infix op sprinted as symbol when partially applied`` () =
