@@ -1372,3 +1372,27 @@ let ``issue 93: assert application of application`` () =
 #else
     <@  assert (id (true && true)) @> |> decompile =? "()"
 #endif
+
+[<Fact>]
+let ``issue 5: TryWith in stronger precedence context`` () =
+    <@ (try 1 with e -> 2) + 3 @> |> decompile =? "(try 1 with e -> 2) + 3"
+
+[<Fact>]
+let ``issue 5: TryWith in weaker precedence context`` () =
+    <@ let x = try 1 with e -> 2 in x @> |> decompile =? "let x = try 1 with e -> 2 in x"
+
+[<Fact>]
+let ``issue 5: TryWith simple identifier binding`` () =
+    //see issue 99 regarding decompilation of null literals
+    <@ try (null:string).Length with e -> e.ToString().Length @> |> decompile =? 
+      "try null.Length with e -> e.ToString().Length"
+
+[<Fact>]
+let ``issue 5: TryWith wildcard pattern match`` () =
+    <@ try (null:string).Length with _ -> 12345 @> |> decompile =? 
+      "try null.Length with matchValue -> 12345"
+
+[<Fact>]
+let ``issue 5: TryWith complex`` () =
+    <@ try (null:string).Length with | :? System.ArgumentException as e -> 0 | :? exn as j when j.ToString().Length = 1 -> 2 | k -> 3 @> |> decompile =? 
+      "try null.Length with matchValue -> if matchValue :? ArgumentException then (let e = matchValue :?> ArgumentException in 0) else (if matchValue :? Exception then (if (let j = matchValue :?> Exception in j.ToString().Length = 1) then (let j = matchValue :?> Exception in 2) else (let k = matchValue in 3)) else (let k = matchValue in 3))"

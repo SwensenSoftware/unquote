@@ -268,6 +268,8 @@ let decompile expr =
 
             //using same precedence as if, 7, for match xxx with
             applyParens OP.If (sprintf "match %s with | %s -> true | _ -> false" (decompile (OP.If,OP.Non) target) ucMatch)
+        | P.TryWith(tryBody, _, _, catchVar, catchBody) ->
+            applyParens OP.Try (sprintf "try %s with %s -> %s" (decompile (OP.Try,OP.Non) tryBody) catchVar.Name (decompile (OP.Try,OP.Non) catchBody))
         | P.TryFinally(tryBody, finallyBody) ->
             applyParens OP.Try (sprintf "try %s finally %s" (decompile (OP.Try,OP.Non) tryBody) (decompile (OP.Try,OP.Non) finallyBody))
         | P.WhileLoop(condition,body) ->
