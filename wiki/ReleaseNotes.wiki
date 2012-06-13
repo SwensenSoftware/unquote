@@ -5,7 +5,7 @@
 
 == v2.2.1, 5/21/12 ==
 
-The only purpose of this release is to add tags to the NuGet package so that it is easily searchable in the NuGet gallery. The Unquote binary is identical to version 2.2.0, which is a substantial, contemporary release.
+The only purpose of this release is to add tags to the NuGet package so that it is easily searchable in the NuGet gallery. The Unquote binary is identical to version 2.2.0, which was a substantial, contemporary release.
 
   * Issue 96: Add tags to nuspec
 
