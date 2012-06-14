@@ -101,15 +101,28 @@ let rec reduce env (expr:Expr) =
             let reducedTryBody =
                 try 
                     tryBody |> reduce env
-                with e ->
+                with _ ->
                     finallyBody |> Evaluation.eval env |> ignore
                     reraise()
 
             Expr.TryFinally(reducedTryBody, finallyBody)
-    | P.TryWith _ -> 
-        //we don't currently support TryWith reduction, but it could be similar to TryFinally reduction,
-        //however for now we merely wish to completely reduce so with path is always followed (issue 62)
-        evalValue env expr
+    | P.TryWith(tryBody, _, _, catchVar, catchBody) -> 
+        if tryBody |> isReduced then 
+            evalValue env expr
+        else
+            //need to ensure finallyBody is evaluated if tryBody raises an exception during reduction
+            let reducedTryBody =
+                try
+                    reduce env tryBody
+                with e ->
+                    let e =
+                        match Evaluation.stripTargetInvocationException e with
+                        | Some(e) -> e
+                        | None -> e
+                    let env = Evaluation.EnvVar(catchVar.Name, e, true)::env
+                    reduce env catchBody
+
+            Expr.TryFinally(reducedTryBody, catchBody)
     | P.WhileLoop _ ->
         evalValue env expr
     | P.ForIntegerRangeLoop(var, rangeStart, rangeEnd, body) ->

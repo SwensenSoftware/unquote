@@ -52,6 +52,7 @@
     <Compile Include="OperatorPrecedence.fs" />
     <Compile Include="ExtraReflection.fs" />
     <Compile Include="ExtraPatterns.fs" />
+    <Compile Include="Containers.fs" />
     <Compile Include="Decompilation.fs" />
     <Compile Include="Reduction.fs" />
     <Compile Include="Extensions.fs" />
