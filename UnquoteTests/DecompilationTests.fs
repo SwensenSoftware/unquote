@@ -1396,3 +1396,10 @@ let ``issue 5: TryWith wildcard pattern match`` () =
 let ``issue 5: TryWith complex`` () =
     <@ try (null:string).Length with | :? System.ArgumentException as e -> 0 | :? exn as j when j.ToString().Length = 1 -> 2 | k -> 3 @> |> decompile =? 
       "try null.Length with matchValue -> if matchValue :? ArgumentException then (let e = matchValue :?> ArgumentException in 0) else (if matchValue :? Exception then (if (let j = matchValue :?> Exception in j.ToString().Length = 1) then (let j = matchValue :?> Exception in 2) else (let k = matchValue in 3)) else (let k = matchValue in 3))"
+
+[<Fact>]
+let ``issue 5: TryWith reraise is not treated as a generic value`` () =
+    //note the funny sequential expression captured by the quotation around reraise: 
+    //this is not done for other similar scenarios, and i think it is done to supress
+    //warnings suggesting using ignore for functions that return values.
+    <@ try "" with e -> reraise() @> |> decompile =? "try \"\" with e -> ((); reraise())"
