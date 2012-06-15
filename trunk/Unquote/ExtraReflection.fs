@@ -358,8 +358,10 @@ type fsharpValueType =
 let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     //let fallback () =
     if FSharpType.IsModule mi.DeclaringType then
-        if mi.GetParameters().Length = 0 && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) then Some(GenericValue)
-        else Some(Function)
+        if mi.GetParameters().Length = 0 && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) && not (mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators") then
+            Some(GenericValue)
+        else 
+            Some(Function)
     else None
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario

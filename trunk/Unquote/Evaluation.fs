@@ -210,7 +210,7 @@ let eval env expr =
                     | None -> e
                 let env = EnvVar(catchVar.Name, e, true)::env
                 eval env catchBody
-        | P.Call(None, mi, []) when mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" ->
+        | P.Call(None, mi, []) when mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> //could share this test with ExtraReflection module.
             let e = (EnvVar.findRaisable env).Value :?> Exception
             reraisePreserveStackTrace e
         | P.TryFinally(tryBlock, finallyBlock) ->
