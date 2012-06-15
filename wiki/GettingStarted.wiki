@@ -160,13 +160,13 @@ val it : int = 31
 
   * `val inline reduce : Quotations.Expr -> Quotations.Expr`
 {{{
-> <@ (1+2)/3 @> |> reduce |> source;;
+> <@ (1+2)/3 @> |> reduce |> decompile;;
 val it : string = "3 / 3"
 }}}
 
   * `val inline reduceFully : Quotations.Expr -> Quotations.Expr list`
 {{{
-> <@ (1+2)/3 @> |> reduceFully |> List.map source;;
+> <@ (1+2)/3 @> |> reduceFully |> List.map decompile;;
 val it : string list = ["(1 + 2) / 3"; "3 / 3"; "1"]
 }}}
 
