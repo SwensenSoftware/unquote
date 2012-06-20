@@ -15,6 +15,9 @@ limitations under the License.
 *)
 namespace Swensen.Utils
 
+[<System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.0", FrameworkDisplayName=".NET Framework 4")>]
+do ()
+
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
