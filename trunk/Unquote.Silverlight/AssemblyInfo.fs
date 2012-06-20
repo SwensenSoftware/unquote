@@ -15,6 +15,9 @@ limitations under the License.
 *)
 namespace Swensen.Unquote
 
+[<System.Runtime.Versioning.TargetFrameworkAttribute("Silverlight,Version=v4.0", FrameworkDisplayName="Silverlight 4")>]
+do ()
+
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
