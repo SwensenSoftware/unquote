@@ -29,7 +29,7 @@ del staging\sl4\Utils.dll
 
 REM zip builds for .NET 4.0...
 cd staging
-"..\tools\7z\7za.exe" a -tzip ..\builds\Unquote-%versionNumber%.zip *
+"..\tools\7z\7za.exe" a -tzip "..\builds\Unquote-%versionNumber%.zip" *
 cd ..
 
 REM preparing nuget dirs
