@@ -23,3 +23,7 @@ In some instances, Visual Studio errors regarding Silverlight can be due to a co
 Most 3rd-party binary dependencies are resolved through NuGet solution integration. However, those which are not available as NuGet packages are placed in the `\lib` folder within the repository.
 
 At the time of this writing, the only 3rd-party binaries required are within the test projects (Unquote itself has no such dependencies).
+
+== Continuous Integration ==
+
+TeamCity continuous integration is hosted at http://teamcity.codebetter.com/project.html?projectId=project223&tab=projectOverview. Work needs to be done to make this truly functional. For now, all we have is build-ci.bat which compiles the code and packages archives. Our end goal is to have the build server build, run all tests (including silverlight tests), package archives, and possibly deploy archives.
