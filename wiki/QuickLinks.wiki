@@ -6,4 +6,4 @@
   * [https://www.ohloh.net/p/unquote Ohloh Software Directory]
   * [http://nuget.org/packages/Unquote NuGet Package]
   * [http://stackoverflow.com/questions/tagged/unquote Stackoverflow Tag]
-  * [http://swensencode.blogspot.com/search/label/Unquote Blog]
+  * [http://swensencode.blogspot.com/search/label/Unquote Owner Blog Entries]
