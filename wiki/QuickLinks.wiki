@@ -1,5 +1,4 @@
 #summary Quick links for Unquote resources
-#labels Featured
 
 = Quick Links =
 
