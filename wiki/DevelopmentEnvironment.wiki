@@ -7,7 +7,7 @@ Development is currently done in VS 2010 with the F# 2.0 compiler. Any tier of V
 
 == Silverlight 4 Tools ==
 
-Silverlight 4 development requires installation of the Silverlight 4 Tools for Visual Studio 2010 (depsite its name, it appears to work with VS 11 just fine too... at least if you installed with with VS 2010 previously). In fact, you can't avoid this even if you don't plan on touching the Unquote Silverlight project since Visual Studio will give you tons of errors upon startup if it is not properly installed.
+Silverlight 4 development requires installation of the Silverlight 4 Tools for Visual Studio 2010. In fact, you can't avoid this even if you don't plan on touching the Unquote Silverlight project since Visual Studio will give you tons of errors upon startup if it is not properly installed.
 
 Installing the tools can be tricky, due to a bug in the installer which doesn't install F# support. However, the following steps should work.
 
