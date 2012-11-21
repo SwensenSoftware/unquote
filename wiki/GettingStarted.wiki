@@ -18,6 +18,10 @@ To use Unquote within FSI, locate and add a reference to Unquote.dll using the `
 
 _To use the .NET 4.0 build within a Visual Studio 2012 library or project, you must add a binding redirect from FSharp.Core 4.0.0.0 to 4.3.0.0. See Issue 78 for more information._
 
+== Mono Support ==
+
+Unquote is not officially supported on Mono, however, it does not use any native Win32 calls and has been seen working on Mono without any issues. Specifically, the .NET 4.0 build has been seen running on _Mono 2.10.8.1 (Debian 2.10.8.1-5ubuntu1)_ inside a version of the F# 3.0 Interactive built from the github sources.
+
 == User Guide ==
 
 The `Swensen.Unquote` namespace contains three `AutoOpen` modules: `Assertions`, `Operators`, and `Extensions`. Therefore you may choose to bring all of Unquote's features into top-level scope simply by opening `Swensen.Unquote` or you may choose to open individual modules or even alias individual modules for a finer level of control.
