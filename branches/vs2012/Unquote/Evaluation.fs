@@ -73,7 +73,8 @@ let (|BinOp|_|) = function
                 let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType) //using lhs.Type, rhs.Type has no perf. impact (but is it the same?)
                 argTys.[0], argTys.[1]
             let cty = mi.ReturnType
-            Some(op aty bty cty,lhs,rhs)
+            let specificOp = op aty bty cty
+            Some((specificOp:obj->obj->obj),lhs,rhs)
         | false, _ -> None
     | _ -> None
 
@@ -83,7 +84,8 @@ let (|UnaryOp|_|) = function
         | true, op -> 
             let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
-            Some(op aty bty,arg)
+            let specificOp = op aty bty
+            Some((specificOp:obj->obj),arg)
         | false, _ -> None
     | _ -> None
 
@@ -95,7 +97,8 @@ let (|CheckedBinOp|_|) = function
                 let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
                 argTys.[0], argTys.[1]
             let cty = mi.ReturnType
-            Some(op aty bty cty,lhs,rhs)
+            let specificOp = op aty bty cty
+            Some((specificOp:obj->obj->obj),lhs,rhs)
         | false, _ -> None
     | _ -> None
 
@@ -105,7 +108,8 @@ let (|CheckedUnaryOp|_|) = function
         | true, op -> 
             let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
-            Some(op aty bty,arg)
+            let specificOp = op aty bty
+            Some((specificOp:obj->obj),arg)
         | false, _ -> None
     | _ -> None
 
