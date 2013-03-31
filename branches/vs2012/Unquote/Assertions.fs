@@ -31,16 +31,6 @@ open Swensen.Utils
 ///even though we do not want to expose them publically).
 [<System.ObsoleteAttribute>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
 module Internal =
-    let private fsiTestFailed (reducedExprs:Expr list) additionalInfo =
-        Printf.nprintfn "\nTest failed:\n" 
-        if additionalInfo |> String.IsNullOrWhiteSpace |> not then
-             Printf.nprintfn "%s\n" additionalInfo
-
-        for rd in reducedExprs do
-            printfn "%s" (rd |> decompile)
-        
-        printfn ""
-
     open System        
     open System.Reflection
 
@@ -63,6 +53,17 @@ module Internal =
 #if SILVERLIGHT
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
+        //moved from top-level private module function since silverlight does not support printf (i.e. standard out)
+        let fsiTestFailed (reducedExprs:Expr list) additionalInfo =
+            Printf.nprintfn "\nTest failed:\n" 
+            if additionalInfo |> String.IsNullOrWhiteSpace |> not then
+                 Printf.nprintfn "%s\n" additionalInfo
+
+            for rd in reducedExprs do
+                printfn "%s" (rd |> decompile)
+        
+            printfn ""
+
         let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
         if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
             fsiTestFailed

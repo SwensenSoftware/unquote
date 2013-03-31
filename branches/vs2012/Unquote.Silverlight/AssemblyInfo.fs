@@ -15,7 +15,7 @@ limitations under the License.
 *)
 namespace Swensen.Unquote
 
-[<System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.0", FrameworkDisplayName=".NET Framework 4")>]
+[<System.Runtime.Versioning.TargetFrameworkAttribute("Silverlight,Version=v5.0", FrameworkDisplayName="Silverlight 5")>]
 do ()
 
 open System.Reflection
@@ -26,7 +26,7 @@ open System.Runtime.InteropServices
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [<assembly: AssemblyTitle("Unquote")>]
-[<assembly: AssemblyDescription("Unquote for .NET 4.0")>]
+[<assembly: AssemblyDescription("Unquote for Silverlight 5")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]
