@@ -44,7 +44,7 @@ let ``5-tuple`` () =
     decompile <@ (1,2,3,4,5) @> =? "(1, 2, 3, 4, 5)"
 
 [<Fact>]
-let ``tuple of tuples (i.e. tuple containing sub-expressions)`` () =
+let ``tuple with tuple sub expressions`` () =
     decompile <@ ((1,2,3), (2,3)) @> =? "((1, 2, 3), (2, 3))"
 
 [<Fact>]
