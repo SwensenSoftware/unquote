@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Unquote.xml</DocumentationFile>
-    <OtherFlags>--staticlink:Utils</OtherFlags>
+    <OtherFlags></OtherFlags>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -44,6 +44,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utils\Prelude.fs" />
+    <Compile Include="Utils\Regex.fs" />
+    <Compile Include="Utils\Printf.fs" />
+    <Compile Include="Utils\List.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Prelude.fs" />
     <Compile Include="DynamicOperators.fs" />
@@ -59,13 +63,6 @@
     <Compile Include="AssertionFailedException.fs" />
     <Compile Include="Assertions.fs" />
     <None Include="Startup.fsx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Utils\Utils.fsproj">
-      <Name>Utils</Name>
-      <Project>{56f71a1e-1a42-4f00-ab55-5971386668b0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

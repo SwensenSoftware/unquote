@@ -95,11 +95,6 @@
       <Project>{80f427b5-3aed-4d52-bc86-850a40427ecf}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Utils\Utils.fsproj">
-      <Name>Utils</Name>
-      <Project>{56f71a1e-1a42-4f00-ab55-5971386668b0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

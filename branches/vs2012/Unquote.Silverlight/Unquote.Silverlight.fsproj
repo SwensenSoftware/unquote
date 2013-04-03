@@ -37,7 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Unquote.Silverlight.XML</DocumentationFile>
-    <OtherFlags>--staticlink:Utils</OtherFlags>
+    <OtherFlags></OtherFlags>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -46,6 +46,18 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.Common.targets" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="..\Unquote\Utils\Prelude.fs">
+      <Link>Prelude.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Utils\Regex.fs">
+      <Link>Regex.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Utils\Printf.fs">
+      <Link>Printf.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Utils\List.fs">
+      <Link>List.fs</Link>
+    </Compile>
     <Compile Include="..\Unquote\Prelude.fs">
       <Link>Prelude.fs</Link>
     </Compile>
@@ -100,13 +112,6 @@
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Browser" />
     <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Utils.Silverlight\Utils.Silverlight.fsproj">
-      <Name>Utils.Silverlight</Name>
-      <Project>{8527b8a1-6387-4c27-9418-ec77c8c409e4}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -15,15 +15,11 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote", "Unquote\Unquote.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport", "VerifyNonFrameworkSupport\VerifyNonFrameworkSupport.fsproj", "{96699208-E64B-4EDF-95B8-78001CEBC7F8}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils", "Utils\Utils.fsproj", "{56F71A1E-1A42-4F00-AB55-5971386668B0}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnitV3Support", "VerifyMbUnitV3Support\VerifyMbUnitV3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTestsRunner", "UnquoteTestsRunner\UnquoteTestsRunner.fsproj", "{D60ACD76-B383-48EF-95A8-9BBDEF6414AC}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Utils.Silverlight", "Utils.Silverlight\Utils.Silverlight.fsproj", "{8527B8A1-6387-4C27-9418-EC77C8C409E4}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Silverlight", "Unquote.Silverlight\Unquote.Silverlight.fsproj", "{F8102093-CAB1-4746-B486-B9FA5937220F}"
 EndProject
