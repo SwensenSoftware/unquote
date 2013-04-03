@@ -36,8 +36,9 @@
     <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Unquote.Silverlight.XML</DocumentationFile>
-    <OtherFlags></OtherFlags>
+    <DocumentationFile>bin\Release\Unquote.xml</DocumentationFile>
+    <OtherFlags>
+    </OtherFlags>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
