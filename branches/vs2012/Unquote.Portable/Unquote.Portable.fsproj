@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>9d5199db-5c87-4c01-8731-f344f4013270</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unquote.Portable</RootNamespace>
+    <AssemblyName>Unquote</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile47</TargetFrameworkProfile>
+    <Name>Unquote.Portable</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Debug\Unquote.Portable.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\Unquote.Portable.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <Name>FSharp.Core</Name>
+      <AssemblyName>FSharp.Core.dll</AssemblyName>
+      <HintPath>$(MSBuildExtensionsPath32)\..\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\.NETPortable\FSharp.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="..\Unquote\Utils\Prelude.fs">
+      <Link>Prelude.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Utils\Regex.fs">
+      <Link>Regex.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Utils\Printf.fs">
+      <Link>Printf.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Utils\List.fs">
+      <Link>List.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Prelude.fs">
+      <Link>Prelude.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\DynamicOperators.fs">
+      <Link>DynamicOperators.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\EvaluationException.fs">
+      <Link>EvaluationException.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Evaluation.fs">
+      <Link>Evaluation.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\OperatorPrecedence.fs">
+      <Link>OperatorPrecedence.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\ExtraReflection.fs">
+      <Link>ExtraReflection.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\ExtraPatterns.fs">
+      <Link>ExtraPatterns.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Decompilation.fs">
+      <Link>Decompilation.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Reduction.fs">
+      <Link>Reduction.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Extensions.fs">
+      <Link>Extensions.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Operators.fs">
+      <Link>Operators.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\AssertionFailedException.fs">
+      <Link>AssertionFailedException.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\Assertions.fs">
+      <Link>Assertions.fs</Link>
+    </Compile>
+  </ItemGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.Portable.FSharp.Targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

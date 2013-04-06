@@ -5,19 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>a0b839fb-222c-4483-b186-ba8905c2af08</ProjectGuid>
+    <ProjectGuid>923379de-994a-4a0f-9301-33f9ad9a937b</ProjectGuid>
     <OutputType>Library</OutputType>
+    <RootNamespace>UnquoteTests.Portable</RootNamespace>
     <AssemblyName>UnquoteTests</AssemblyName>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
-    <FileAlignment>512</FileAlignment>
-    <AllowCrossTargeting>true</AllowCrossTargeting>
-    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{f2a71f9b-5d33-465a-a702-920d77279786}</ProjectTypeGuids>
-    <Name>UnquoteTests.Silverlight</Name>
-    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
-    <SilverlightApplication>false</SilverlightApplication>
-    <ValidateXaml>true</ValidateXaml>
-    <ThrowErrorsInValidation>false</ThrowErrorsInValidation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile47</TargetFrameworkProfile>
+    <Name>UnquoteTests.Portable</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -25,26 +19,25 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\UnquoteTests.Silverlight.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\UnquoteTests.Portable.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
-    <DocumentationFile>bin\Release\UnquoteTests.Silverlight.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\UnquoteTests.Portable.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.Common.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.Portable.FSharp.Targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
     <Compile Include="..\UnquoteTests\EvaluationTests.fs">
@@ -71,17 +64,16 @@
     <Compile Include="TestRunner.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <Name>FSharp.Core</Name>
+      <AssemblyName>FSharp.Core.dll</AssemblyName>
+      <HintPath>$(MSBuildExtensionsPath32)\..\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\.NETPortable\FSharp.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Silverlight.Testing">
       <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.Silverlight.Testing.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTesting.Silverlight">
       <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\Microsoft.VisualStudio.QualityTools.UnitTesting.Silverlight.dll</HintPath>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core">
-      <Name>FSharp.Core</Name>
-      <AssemblyName>FSharp.Core.dll</AssemblyName>
-      <HintPath>$(MSBuildExtensionsPath32)\..\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\.NETPortable\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="NUnit.Silverlight.Compatibility">
       <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Compatibility.dll</HintPath>
@@ -92,22 +84,13 @@
     <Reference Include="NUnit.Silverlight.Metadata">
       <HintPath>..\lib\Silverlight4-NUnit2.5.8-Apr2010\NUnit.Silverlight.Metadata.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net" />
-    <Reference Include="System.Numerics, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
-    <Reference Include="System.Windows" />
-    <Reference Include="System.Windows.Browser" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="System.Numerics" />
     <Reference Include="xunit-silverlight4">
       <HintPath>..\lib\xunitcontrib-silverlight.0.2\Silverlight4\xunit-silverlight4.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Unquote.Silverlight\Unquote.Silverlight.fsproj">
-      <Name>Unquote.Silverlight</Name>
-      <Project>{f8102093-cab1-4746-b486-b9fa5937220f}</Project>
+    <ProjectReference Include="..\Unquote.Portable\Unquote.Portable.fsproj">
+      <Name>Unquote.Portable</Name>
+      <Project>{9d5199db-5c87-4c01-8731-f344f4013270}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

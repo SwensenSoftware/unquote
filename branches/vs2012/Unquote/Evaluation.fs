@@ -239,7 +239,7 @@ let eval env expr =
 #if SILVERLIGHT
             let lty = if lty.BaseType <> typeof<obj> then lty.BaseType else lty //if local lambda then we want the public base type
 #endif
-            let meth = lty.GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null)
+            let meth = lty.GetMethod("Invoke", [|argTy|])
             let r = meth.Invoke(lambda, [|arg|])
             r
         | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) -> 
