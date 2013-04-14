@@ -20,7 +20,7 @@ _To use the .NET 4.0 build within a Visual Studio 2012 library or project, you m
 
 == Mono Support ==
 
-Unquote is not officially supported on Mono, however, it does not use any native Win32 calls and has been seen working on Mono without any issues. Specifically, the .NET 4.0 build has been seen running on _Mono 2.10.8.1 (Debian 2.10.8.1-5ubuntu1)_ inside a version of the F# 3.0 Interactive built from the github sources.
+Unquote has not been fully tested on Mono, however, it does not use any native Win32 calls and has been seen working on Mono without any issues. Specifically, the .NET 4.0 build has been seen running on _Mono 2.10.8.1 (Debian 2.10.8.1-5ubuntu1)_ inside a version of the F# 3.0 Interactive built from the github sources.
 
 == User Guide ==
 
