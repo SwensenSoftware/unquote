@@ -105,9 +105,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Unquote.Silverlight\Unquote.Silverlight.fsproj">
-      <Name>Unquote.Silverlight</Name>
-      <Project>{f8102093-cab1-4746-b486-b9fa5937220f}</Project>
+    <ProjectReference Include="..\Unquote.Portable\Unquote.Portable.fsproj">
+      <Name>Unquote.Portable</Name>
+      <Project>{9d5199db-5c87-4c01-8731-f344f4013270}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
