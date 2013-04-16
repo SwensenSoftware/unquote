@@ -54,7 +54,7 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
-#if SILVERLIGHT //VERIFIED
+#if PORTABLE
 #else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
@@ -236,7 +236,7 @@ let eval env expr =
             //need to be very exact about GetMethod so won't get AmbiguousMatchException with curried functions
             //(will fail in SL if lambda is a local function and thus implemented as an internal class...maybe can workaround since base type is public?)
             let lty = lambda.GetType()
-#if SILVERLIGHT
+#if PORTABLE
             let lty = if lty.BaseType <> typeof<obj> then lty.BaseType else lty //if local lambda then we want the public base type
 #endif
             let meth = lty.GetMethod("Invoke", [|argTy|])
@@ -247,7 +247,7 @@ let eval env expr =
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> 
-#if SILVERLIGHT //VERIFIED
+#if PORTABLE
             failwithPatternNotSupported "Quote (in Silverlight)" expr
 #else
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 

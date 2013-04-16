@@ -57,7 +57,7 @@ let unquote expr =
     |> reduceFully
     |> List.map decompile 
     |> String.concat "\n" //don't use Environment.NewLine since nprintfn will replace \n with Environment.NewLine already
-    #if SILVERLIGHT
+    #if PORTABLE
     #else
     |> Printf.nprintfn "\n%s\n"
     #endif
