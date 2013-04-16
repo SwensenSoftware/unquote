@@ -19,9 +19,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTest
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnitV3Support", "VerifyMbUnitV3Support\VerifyMbUnitV3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests.Silverlight5", "UnquoteTests.Silverlight\UnquoteTests.Silverlight5.fsproj", "{A0B839FB-222C-4483-B186-BA8905C2AF08}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests.Silverlight5", "UnquoteTests.Silverlight5\UnquoteTests.Silverlight5.fsproj", "{A0B839FB-222C-4483-B186-BA8905C2AF08}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Profile47", "Unquote.Portable\Unquote.Profile47.fsproj", "{9D5199DB-5C87-4C01-8731-F344F4013270}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Profile47", "Unquote.Profile47\Unquote.Profile47.fsproj", "{9D5199DB-5C87-4C01-8731-F344F4013270}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54211C58-167D-40A2-A550-B02876EF0D69}"
 	ProjectSection(SolutionItems) = preProject
