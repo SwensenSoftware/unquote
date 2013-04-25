@@ -40,7 +40,7 @@ module NumericLiteralQ =
 
 let inline testEval expr expected =
     let result = expr |> eval
-    result =? expected
+    result =! expected
 
 //enumerating all the cases for op_Addition goes a long way towards testing all the other numeric binary ops as well due to shared implementation details
 [<Fact>]

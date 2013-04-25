@@ -172,10 +172,20 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
             testFailed reducedExprs (expectedExnButNoExnRaisedMsg typeof<'a>.Name)
         with 
         | e -> raise e
-    
-let inline (=?) x y = test <@ x = y @>
-let inline (<?) x y = test <@ x < y @>
-let inline (>?) x y = test <@ x > y @>
-let inline (<=?) x y = test <@ x <= y @>
-let inline (>=?) x y = test <@ x >= y @>
-let inline (<>?) x y = test <@ x <> y @>
+
+///Truly obsolete, these operators conflict with F# 3.0's nullable operators
+[<System.Obsolete>]
+module Obsolete =
+    let inline (=?) x y = test <@ x = y @>
+    let inline (<?) x y = test <@ x < y @>
+    let inline (>?) x y = test <@ x > y @>
+    let inline (<=?) x y = test <@ x <= y @>
+    let inline (>=?) x y = test <@ x >= y @>
+    let inline (<>?) x y = test <@ x <> y @>
+
+let inline (=!) x y = test <@ x = y @>
+let inline (<!) x y = test <@ x < y @>
+let inline (>!) x y = test <@ x > y @>
+let inline (<=!) x y = test <@ x <= y @>
+let inline (>=!) x y = test <@ x >= y @>
+let inline (<>!) x y = test <@ x <> y @>

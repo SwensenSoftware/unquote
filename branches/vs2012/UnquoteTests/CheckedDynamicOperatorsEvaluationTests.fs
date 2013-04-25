@@ -7,7 +7,7 @@ open System.Reflection
 
 let inline testEval expr expected =
     let result = expr |> eval
-    result =? expected
+    result =! expected
 
 let testEvalCheckedOverflow expr =
     let e = 
