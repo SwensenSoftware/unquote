@@ -1,6 +1,6 @@
 #summary Information about Downloads
 
-As of 2014, Google Code no longer offers hosting Downloads.
+As of 2014, Google Code no longer offers download hosting.
 
 Downloads are now hosted by [http://www.swensensoftware.com Swensen Software] at http://www.swensensoftware.com/unquote/downloads.
 
