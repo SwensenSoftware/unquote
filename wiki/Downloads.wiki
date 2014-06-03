@@ -1,5 +1,5 @@
 #summary Information about Downloads
 
-= Downloads =
+Downloads are now hosted by [http://www.swensensoftware.com Swensen Software] at http://www.swensensoftware.com/unquote/downloads (Google Code no longer offers hosting for downloads). 
 
-Downloads are now hosted by [http://www.swensensoftware.com Swensen Software] at http://www.swensensoftware.com/unquote/downloads (Google Code no longer offers hosting for downloads). NuGet packages are available as usual at 
+NuGet packages are available as usual at https://www.nuget.org/packages/Unquote.
