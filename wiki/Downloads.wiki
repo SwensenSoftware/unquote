@@ -1,7 +1,5 @@
 #summary Information about Downloads
 
-As of 2014, Google Code no longer offers download hosting.
+[http://www.swensensoftware.com/unquote Downloads are now hosted by Swensen Software] (Google Code no longer offers this service).
 
-Downloads are now hosted by [http://www.swensensoftware.com Swensen Software] at http://www.swensensoftware.com/unquote/downloads.
-
-NuGet packages are available as usual at https://www.nuget.org/packages/Unquote.
+[https://www.nuget.org/packages/Unquote NuGet packages are available as usual].
