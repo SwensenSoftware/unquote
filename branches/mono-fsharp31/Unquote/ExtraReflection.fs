@@ -365,7 +365,7 @@ let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     else None
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario
-//#if SILVERLIGHT
+//#if PORTABLE
 //    fallback()
 //#else
 //    try

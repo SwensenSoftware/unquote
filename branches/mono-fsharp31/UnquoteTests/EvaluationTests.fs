@@ -578,7 +578,7 @@ let ``untyped synthetic evaluation`` () =
 //    else
 //        None
 
-#if SILVERLIGHT //VERIFIED
+#if PORTABLE //VERIFIED
 #else
 
 [<Fact>]

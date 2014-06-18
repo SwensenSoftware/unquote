@@ -60,7 +60,7 @@ module Internal =
                             (reducedExprs |> List.map decompile |> String.concat "\n")    
                     outputTestFailedMsg msg
 
-#if SILVERLIGHT
+#if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
         let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()

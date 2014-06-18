@@ -22,7 +22,7 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
     open System.Text.RegularExpressions
 
     let private ro = 
-#if SILVERLIGHT
+#if PORTABLE
         RegexOptions.None
 #else
         RegexOptions.Compiled

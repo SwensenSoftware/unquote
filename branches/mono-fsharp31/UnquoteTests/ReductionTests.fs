@@ -538,7 +538,7 @@ let ``can't differentiate between true || false and true && true``() =
     (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
     (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
 
-#if SILVERLIGHT //QUOTE PROBLEM
+#if PORTABLE //QUOTE PROBLEM
 #else
 [<Fact>]
 let ``Quote, supported typed`` () =

@@ -394,7 +394,7 @@ let ``generic NewUnionCase with Value arg`` () =
 let ``generic NewUnionCase with nested construction`` () =
     decompile <@ World(Hello(3)) @> =? "World(Hello(3))"
 
-#if SILVERLIGHT //can't access stack frame
+#if PORTABLE //can't access stack frame
 #else
 //issue #3 -- UnionCaseTests
 //these tests are not as thorough as would like: can't verify op_Dynamic works right
@@ -431,7 +431,7 @@ let ``Call distinguishes between generic value Call and unit function Call`` () 
     decompile <@ g<int, string> @> =? "g<int, string>"
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario
-//#if SILVERLIGHT //have to take best guess in silverlight since don't have PowerPack.Metadata
+//#if PORTABLE //have to take best guess in silverlight since don't have PowerPack.Metadata
 //#else
 //    decompile <@ g'<int, string>() @> =? "g'<int, string>()"
 //#endif
@@ -715,7 +715,7 @@ let ``false || false is given priority over false && true even though they can't
 let ``true && true is given priority over true || false even though they can't be differentiated``() =
     <@ true && true @> |> decompile =? "true && true"
 
-#if SILVERLIGHT //NESTED QUOTE PROBLEM (not all of these need to use nested quotes to test)
+#if PORTABLE //NESTED QUOTE PROBLEM (not all of these need to use nested quotes to test)
 #else
 [<Fact(Skip="there is a confirmed F# bug which makes this result in a runtime exception")>]
 let ``Raw quoatation nested in typed quotation, confirmed F# bug`` () =
@@ -887,7 +887,7 @@ let (|CAP1|CAP2|) x = if x = 0 then CAP1 else CAP2(x)
 
 [<Fact>]
 let ``issue 11: complete active pattern`` () =
-#if SILVERLIGHT
+#if PORTABLE
     decompile <@ (|CAP1|CAP2|) 0 @> =? "(|CAP1|CAP2|) 0"
 #else
     test <@ decompile <@ (|CAP1|CAP2|) 0 @> = "(|CAP1|CAP2|) 0" @>
@@ -897,7 +897,7 @@ let (|PAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
 
 [<Fact>]
 let ``issue 11: partial active pattern`` () =
-#if SILVERLIGHT
+#if PORTABLE
     decompile <@ (|PAP|_|) 0 1 @> =? "(|PAP|_|) 0 1"
 #else
     test <@ decompile <@ (|PAP|_|) 0 1 @> = "(|PAP|_|) 0 1" @>
@@ -905,7 +905,7 @@ let ``issue 11: partial active pattern`` () =
 
 [<Fact>]
 let ``issue 11: partially applied active apptern`` () =
-#if SILVERLIGHT
+#if PORTABLE
     decompile <@ (|PAP|_|) 0 @> =? "(|PAP|_|) 0"
 #else
     test <@ decompile <@ (|PAP|_|) 0  @> = "(|PAP|_|) 0" @>
@@ -914,7 +914,7 @@ let ``issue 11: partially applied active apptern`` () =
 [<Fact>]
 let ``issue 11: local active pattern`` () =
     let (|LAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
-#if SILVERLIGHT
+#if PORTABLE
     decompile <@ (|LAP|_|) 0 1 @> =? "(|LAP|_|) 0 1"
 #else
     test <@ decompile <@ (|LAP|_|) 0 1 @> = "(|LAP|_|) 0 1" @>
@@ -923,7 +923,7 @@ let ``issue 11: local active pattern`` () =
 [<Fact>]
 let ``issue 79: general local lambda sprinting`` () =
     let myFunc x y = if x = 0 && y = 0 then None else Some(x + y)
-#if SILVERLIGHT
+#if PORTABLE
     decompile <@ myFunc 0 1 @> =? "myFunc 0 1"
 #else
     test <@ decompile <@ myFunc 0 1 @> = "myFunc 0 1" @>
@@ -933,7 +933,7 @@ let ``issue 79: general local lambda sprinting`` () =
 let ``issue 77: TupleGet fallback get item1`` () =
     let input = <@ fun (a:int) (b:int) -> match a,b with | (1,_) -> 1 | _ -> b @>
     let expected = "fun a b -> let matchValue = (a, b) in if (let t1,_ = matchValue in t1) = 1 then 1 else b"
-#if SILVERLIGHT
+#if PORTABLE
     decompile input =? expected
 #else
     test <@ decompile input = expected @>
@@ -943,7 +943,7 @@ let ``issue 77: TupleGet fallback get item1`` () =
 let ``issue 77: TupleGet fallback get item2`` () =
     let input = <@ fun (a:int) (b:int) -> match a,b with | (_,1) -> 1 | _ -> b @>
     let expected = "fun a b -> let matchValue = (a, b) in if (let _,t2 = matchValue in t2) = 1 then 1 else b"
-#if SILVERLIGHT
+#if PORTABLE
     decompile input =? expected
 #else
     test <@ decompile input = expected @>
@@ -953,7 +953,7 @@ let ``issue 77: TupleGet fallback get item2`` () =
 let ``issue 77: TupleGet fallback get item11`` () =
     let input = <@ fun a -> match a with | (_,_,_,_,_,_,_,_,_,1,_) -> 1 | _ -> 0 @>
     let expected = "fun a -> if (let _,_,_,_,_,_,_,_,_,t10,_ = a in t10) = 1 then 1 else 0"
-#if SILVERLIGHT
+#if PORTABLE
     decompile input =? expected
 #else
     test <@ decompile input = expected @>
@@ -963,7 +963,7 @@ let ``issue 77: TupleGet fallback get item11`` () =
 let ``issue 77: TupleGet fallback nested tuple gets`` () =
     let input = <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>
     let expected = "fun a b -> let matchValue = (a, b) in if (let t1,_ = (let _,t2 = matchValue in t2) in t1) = 1 then (if (let _,t2 = (let _,t2 = matchValue in t2) in t2) = 1 then 1 else 0) else 0"
-#if SILVERLIGHT
+#if PORTABLE
     decompile input =? expected
 #else
     test <@ decompile input = expected @>
