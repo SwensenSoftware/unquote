@@ -1,27 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{0E4C6503-6760-4E1F-A682-0CE6459A06DD}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunitSupport", "VerifyXunitSupport\VerifyXunitSupport.fsproj", "{78942CAF-9D8D-4E44-8953-E04E58E27D51}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNunitSupport", "VerifyNunitSupport\VerifyNunitSupport.fsproj", "{6E3F6FDB-A45F-4D07-8735-1CCCD10A7DBA}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote", "Unquote\Unquote.fsproj", "{80F427B5-3AED-4D52-BC86-850A40427ECF}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport", "VerifyNonFrameworkSupport\VerifyNonFrameworkSupport.fsproj", "{96699208-E64B-4EDF-95B8-78001CEBC7F8}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnitV3Support", "VerifyMbUnitV3Support\VerifyMbUnitV3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests.Silverlight5", "UnquoteTests.Silverlight5\UnquoteTests.Silverlight5.fsproj", "{A0B839FB-222C-4483-B186-BA8905C2AF08}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Profile47", "Unquote.Profile47\Unquote.Profile47.fsproj", "{9D5199DB-5C87-4C01-8731-F344F4013270}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54211C58-167D-40A2-A550-B02876EF0D69}"
 	ProjectSection(SolutionItems) = preProject
@@ -38,6 +24,22 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F9C32BC8-6AC9-47E0-9859-3696C06FC112}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "verify", "verify", "{6C77CA49-EACA-4B17-A67B-BBE2B6836640}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunitSupport", "VerifyXunitSupport\VerifyXunitSupport.fsproj", "{78942CAF-9D8D-4E44-8953-E04E58E27D51}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNunitSupport", "VerifyNunitSupport\VerifyNunitSupport.fsproj", "{6E3F6FDB-A45F-4D07-8735-1CCCD10A7DBA}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote", "Unquote\Unquote.fsproj", "{80F427B5-3AED-4D52-BC86-850A40427ECF}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport", "VerifyNonFrameworkSupport\VerifyNonFrameworkSupport.fsproj", "{96699208-E64B-4EDF-95B8-78001CEBC7F8}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnitV3Support", "VerifyMbUnitV3Support\VerifyMbUnitV3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests.Silverlight5", "UnquoteTests.Silverlight5\UnquoteTests.Silverlight5.fsproj", "{A0B839FB-222C-4483-B186-BA8905C2AF08}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Profile47", "Unquote.Profile47\Unquote.Profile47.fsproj", "{9D5199DB-5C87-4C01-8731-F344F4013270}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,13 +132,13 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{80F427B5-3AED-4D52-BC86-850A40427ECF} = {EB32E8B1-DE90-4335-B342-41E3A79D279C}
-		{9D5199DB-5C87-4C01-8731-F344F4013270} = {EB32E8B1-DE90-4335-B342-41E3A79D279C}
-		{110FE67E-4603-4905-8BA0-8B043AAC2677} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
-		{A0B839FB-222C-4483-B186-BA8905C2AF08} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
-		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
-		{96699208-E64B-4EDF-95B8-78001CEBC7F8} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
-		{6E3F6FDB-A45F-4D07-8735-1CCCD10A7DBA} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
 		{78942CAF-9D8D-4E44-8953-E04E58E27D51} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
+		{6E3F6FDB-A45F-4D07-8735-1CCCD10A7DBA} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
+		{80F427B5-3AED-4D52-BC86-850A40427ECF} = {EB32E8B1-DE90-4335-B342-41E3A79D279C}
+		{96699208-E64B-4EDF-95B8-78001CEBC7F8} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
+		{110FE67E-4603-4905-8BA0-8B043AAC2677} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
+		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
+		{A0B839FB-222C-4483-B186-BA8905C2AF08} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
+		{9D5199DB-5C87-4C01-8731-F344F4013270} = {EB32E8B1-DE90-4335-B342-41E3A79D279C}
 	EndGlobalSection
 EndGlobal
