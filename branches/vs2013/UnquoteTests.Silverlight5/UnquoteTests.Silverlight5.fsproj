@@ -116,13 +116,6 @@
       <HintPath>..\lib\xunitcontrib-silverlight.0.2\Silverlight4\xunit-silverlight4.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Unquote.Profile47\Unquote.Profile47.fsproj">
-      <Name>Unquote.Profile47</Name>
-      <Project>{9d5199db-5c87-4c01-8731-f344f4013270}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

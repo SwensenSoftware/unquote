@@ -21,6 +21,7 @@ open Microsoft.FSharp.Quotations
 open System.Reflection
 open Microsoft.FSharp.Reflection
 open System
+open Swensen.Utils
 
 module P = Patterns
 module DP = DerivedPatterns

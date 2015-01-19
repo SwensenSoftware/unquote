@@ -22,6 +22,7 @@ limitations under the License.
 module internal Swensen.Unquote.DynamicOperators
 open System
 open System.Reflection
+open Swensen.Utils
 
 //Note: there is a confusion where the Silverlight 4.0 build of FSharp.Core includes its own System.Numerics.BigInteger implementation yet
 //the standard Silverlight 4.0 libraries include the assembly System.Numerics with the official BigInteger implementation. Moreover, the 

@@ -131,8 +131,8 @@ let inline test (expr:Expr<bool>) =
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
-    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.IsAssignableFrom(lastValueTy) -> //it's an exception
-        if typeof<'a>.IsAssignableFrom(lastValueTy) then () //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) -> //it's an exception
+        if typeof<'a>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) then () //it's the correct exception
         else //it's not the correct exception
             try
                 testFailed reducedExprs (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (lastValueTy.Name))
@@ -148,8 +148,8 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
 let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
-    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.IsAssignableFrom(lastValueTy) -> //it's an exception
-        if typeof<'a>.IsAssignableFrom(lastValueTy) then //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) -> //it's an exception
+        if typeof<'a>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) then //it's the correct exception
             //but we also need to check the exnWhen condition is true
             let lastValue = lastValue :?> 'a
             let exnWhenExpr = exnWhen lastValue

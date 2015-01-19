@@ -26,11 +26,11 @@ open System.Runtime.InteropServices
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [<assembly: AssemblyTitle("Unquote")>]
-[<assembly: AssemblyDescription("Unquote for Portable")>]
+[<assembly: AssemblyDescription("Unquote for Portable Profile 259")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]
-[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2013")>]
+[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2014")>]
 [<assembly: AssemblyTrademark("")>]
 
 [<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("UnquoteTests")>]

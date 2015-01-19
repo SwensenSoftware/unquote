@@ -239,7 +239,7 @@ let sourceNameFromString =
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
     mi.GetCustomAttributes(true)
-    |> Array.tryPick 
+    |> Seq.tryPick 
         (function 
             | :? CompilationSourceNameAttribute as csna -> Some(csna.SourceName)
             | :? CompilationRepresentationAttribute as cra -> 
