@@ -17,7 +17,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <NuGetPackageImportStamp>a662bc79</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>b8fce110</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
