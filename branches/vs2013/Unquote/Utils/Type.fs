@@ -22,18 +22,27 @@ module internal Type =
     type System.Type with
         member this.IsAssignableFrom(other:Type) =
             this.GetTypeInfo().IsAssignableFrom(other.GetTypeInfo())
-        member this.GetMethod(name:String, argTys) =
+        member this.GetMethod(filter, ?ambiguousMatchMsg) =
+            let ambiguousMatchMsg = defaultArg ambiguousMatchMsg "Ambiguous match"
             let matches = 
                 this.GetRuntimeMethods()
-                |> Seq.filter (fun mi -> mi.IsPublic)
+                |> Seq.filter filter
                 |> Seq.toList
 
             match matches with
             | [] -> null
             | [mi] -> mi
-            | _ -> raise <| AmbiguousMatchException(sprintf "methodName=%s, argTys=%A" name argTys)
+            | _ -> raise <| AmbiguousMatchException(ambiguousMatchMsg)
+        member this.GetMethod(name:String, argTys) =
+            this.GetMethod(
+                (fun (mi:MethodInfo) -> mi.Name = name && mi.IsPublic && (mi.GetParameters() |> Array.map (fun pi -> pi.ParameterType) = argTys)),
+                sprintf "methodName=%s, argTys=%A" name argTys
+            )
         member this.GetMethod(name:String) =
-            this.GetMethod(name, [||])
+            this.GetMethod(
+                (fun (mi:MethodInfo) -> mi.Name = name && mi.IsPublic),
+                sprintf "methodName=%s, argTys=<not provided>" name
+            )
         member this.GetMethods() =
             this.GetRuntimeMethods() |> Seq.filter (fun mi -> mi.IsPublic) |> Seq.toArray
         member this.BaseType =
@@ -48,5 +57,3 @@ module internal Type =
             this.GetTypeInfo().GenericTypeArguments
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
-            
-
