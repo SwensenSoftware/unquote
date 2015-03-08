@@ -54,6 +54,13 @@ module internal Type =
         member this.IsGenericTypeDefinition =
             this.GetTypeInfo().IsGenericTypeDefinition
         member this.GetGenericArguments() =
-            this.GetTypeInfo().GenericTypeArguments
+            let gta = this.GetTypeInfo().GenericTypeArguments
+            let gtp = this.GetTypeInfo().GenericTypeParameters
+            if gta.Length > 0 then
+                gta
+            elif gtp.Length > 0 then
+                gtp
+            else
+                [||]
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
