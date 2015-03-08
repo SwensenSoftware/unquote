@@ -16,6 +16,7 @@ limitations under the License.
 namespace Swensen.Utils
 open System
 open System.Reflection
+#if PORTABLE
 [<AutoOpen>]
 module internal Type =
     ///mostly backward compatabile extensions for .net 4.5 / portable profile breaking changes to reflection api
@@ -64,3 +65,4 @@ module internal Type =
                 [||]
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
+#endif
