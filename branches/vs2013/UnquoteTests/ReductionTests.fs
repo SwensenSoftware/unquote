@@ -694,7 +694,7 @@ let ``ForIntegerRangeLoop reduces range start and end but not body``() =
 let ``Issue 62: TryWith with block is followed when exception in body`` () =
     let called = ref false
     reduceFully <@ try
-                       raise (exn())
+                       raise (new System.ArgumentException())
                    with e ->
                        called := true @>
     test <@ !called @>
