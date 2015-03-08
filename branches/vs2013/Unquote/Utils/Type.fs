@@ -54,7 +54,9 @@ module internal Type =
         member this.IsGenericTypeDefinition =
             this.GetTypeInfo().IsGenericTypeDefinition
         member this.GetGenericArguments() =
-            if this.IsGenericTypeDefinition then
+            if this.IsArray then
+                this.GetElementType().GetGenericArguments() //todo: verify the recursive case
+            elif this.IsGenericTypeDefinition then
                 this.GetTypeInfo().GenericTypeParameters
             elif this.IsGenericType then
                 this.GenericTypeArguments
