@@ -15,7 +15,7 @@ limitations under the License.
 *)
 namespace Swensen.Unquote
 
-[<System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.0", FrameworkDisplayName=".NET Framework 4")>]
+[<System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.5", FrameworkDisplayName=".NET Framework 4.5")>]
 do ()
 
 open System.Reflection
@@ -30,7 +30,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]
-[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2014")>]
+[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2015")>]
 [<assembly: AssemblyTrademark("")>]
 
 [<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("UnquoteTests")>]
