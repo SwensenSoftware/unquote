@@ -22,7 +22,7 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
     open System.Text.RegularExpressions
 
     let private ro = 
-#if SILVERLIGHT
+#if PORTABLE
         RegexOptions.None
 #else
         RegexOptions.Compiled
@@ -42,6 +42,8 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
         else
             Printf.ksprintf (fun s -> lfButNotCrLf.Replace(s, "\r\n") |> sprintf "%s") fmt
 
+    #if PORTABLE
+    #else
     ///Normalize newlines to stdout.NewLine: if stdout.NewLine = "\n", then do nothing.
     ///Otherwise replace all occurences of "\n", but not "\r\n", with "\r\n" and then replace
     ///all occurences of "\r\n" with stdout.NewLine.
@@ -68,3 +70,4 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
     //single newline). 
 
     //N.B.: printf prints to stdout
+    #endif

@@ -29,18 +29,8 @@ open Swensen.Utils
 
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
-[<System.ObsoleteAttribute>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
+[<System.Obsolete>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
 module Internal =
-    let private fsiTestFailed (reducedExprs:Expr list) additionalInfo =
-        Printf.nprintfn "\nTest failed:\n" 
-        if additionalInfo |> String.IsNullOrWhiteSpace |> not then
-             Printf.nprintfn "%s\n" additionalInfo
-
-        for rd in reducedExprs do
-            printfn "%s" (rd |> decompile)
-        
-        printfn ""
-
     open System        
     open System.Reflection
 
@@ -60,9 +50,20 @@ module Internal =
                             (reducedExprs |> List.map decompile |> String.concat "\n")    
                     outputTestFailedMsg msg
 
-#if SILVERLIGHT
+#if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
+        //moved from top-level private module function since silverlight does not support printf (i.e. standard out)
+        let fsiTestFailed (reducedExprs:Expr list) additionalInfo =
+            Printf.nprintfn "\nTest failed:\n" 
+            if additionalInfo |> String.IsNullOrWhiteSpace |> not then
+                 Printf.nprintfn "%s\n" additionalInfo
+
+            for rd in reducedExprs do
+                printfn "%s" (rd |> decompile)
+        
+            printfn ""
+
         let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
         if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
             fsiTestFailed
@@ -130,8 +131,8 @@ let inline test (expr:Expr<bool>) =
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
-    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.IsAssignableFrom(lastValueTy) -> //it's an exception
-        if typeof<'a>.IsAssignableFrom(lastValueTy) then () //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) -> //it's an exception
+        if typeof<'a>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) then () //it's the correct exception
         else //it's not the correct exception
             try
                 testFailed reducedExprs (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (lastValueTy.Name))
@@ -147,8 +148,8 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
 let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
-    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.IsAssignableFrom(lastValueTy) -> //it's an exception
-        if typeof<'a>.IsAssignableFrom(lastValueTy) then //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) -> //it's an exception
+        if typeof<'a>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) then //it's the correct exception
             //but we also need to check the exnWhen condition is true
             let lastValue = lastValue :?> 'a
             let exnWhenExpr = exnWhen lastValue
@@ -171,10 +172,20 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
             testFailed reducedExprs (expectedExnButNoExnRaisedMsg typeof<'a>.Name)
         with 
         | e -> raise e
-    
-let inline (=?) x y = test <@ x = y @>
-let inline (<?) x y = test <@ x < y @>
-let inline (>?) x y = test <@ x > y @>
-let inline (<=?) x y = test <@ x <= y @>
-let inline (>=?) x y = test <@ x >= y @>
-let inline (<>?) x y = test <@ x <> y @>
+
+///Truly obsolete, these operators conflict with F# 3.0's nullable operators
+[<System.Obsolete>]
+module Obsolete =
+    let inline (=?) x y = test <@ x = y @>
+    let inline (<?) x y = test <@ x < y @>
+    let inline (>?) x y = test <@ x > y @>
+    let inline (<=?) x y = test <@ x <= y @>
+    let inline (>=?) x y = test <@ x >= y @>
+    let inline (<>?) x y = test <@ x <> y @>
+
+let inline (=!) x y = test <@ x = y @>
+let inline (<!) x y = test <@ x < y @>
+let inline (>!) x y = test <@ x > y @>
+let inline (<=!) x y = test <@ x <= y @>
+let inline (>=!) x y = test <@ x >= y @>
+let inline (<>!) x y = test <@ x <> y @>

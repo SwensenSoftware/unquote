@@ -21,6 +21,7 @@ open Microsoft.FSharp.Quotations
 open System.Reflection
 open Microsoft.FSharp.Reflection
 open System
+open Swensen.Utils
 
 module P = Patterns
 module DP = DerivedPatterns
@@ -54,7 +55,7 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
-#if SILVERLIGHT //VERIFIED
+#if PORTABLE
 #else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
@@ -73,7 +74,8 @@ let (|BinOp|_|) = function
                 let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType) //using lhs.Type, rhs.Type has no perf. impact (but is it the same?)
                 argTys.[0], argTys.[1]
             let cty = mi.ReturnType
-            Some(op aty bty cty,lhs,rhs)
+            let specificOp = op aty bty cty
+            Some((specificOp:obj->obj->obj),lhs,rhs)
         | false, _ -> None
     | _ -> None
 
@@ -83,7 +85,8 @@ let (|UnaryOp|_|) = function
         | true, op -> 
             let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
-            Some(op aty bty,arg)
+            let specificOp = op aty bty
+            Some((specificOp:obj->obj),arg)
         | false, _ -> None
     | _ -> None
 
@@ -95,7 +98,8 @@ let (|CheckedBinOp|_|) = function
                 let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
                 argTys.[0], argTys.[1]
             let cty = mi.ReturnType
-            Some(op aty bty cty,lhs,rhs)
+            let specificOp = op aty bty cty
+            Some((specificOp:obj->obj->obj),lhs,rhs)
         | false, _ -> None
     | _ -> None
 
@@ -105,7 +109,8 @@ let (|CheckedUnaryOp|_|) = function
         | true, op -> 
             let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
-            Some(op aty bty,arg)
+            let specificOp = op aty bty
+            Some((specificOp:obj->obj),arg)
         | false, _ -> None
     | _ -> None
 
@@ -232,10 +237,10 @@ let eval env expr =
             //need to be very exact about GetMethod so won't get AmbiguousMatchException with curried functions
             //(will fail in SL if lambda is a local function and thus implemented as an internal class...maybe can workaround since base type is public?)
             let lty = lambda.GetType()
-#if SILVERLIGHT
+#if PORTABLE
             let lty = if lty.BaseType <> typeof<obj> then lty.BaseType else lty //if local lambda then we want the public base type
 #endif
-            let meth = lty.GetMethod("Invoke", BindingFlags.Instance ||| BindingFlags.Public,null,[|argTy|],null)
+            let meth = lty.GetMethod("Invoke", [|argTy|])
             let r = meth.Invoke(lambda, [|arg|])
             r
         | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) -> 
@@ -243,7 +248,7 @@ let eval env expr =
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> 
-#if SILVERLIGHT //VERIFIED
+#if PORTABLE
             failwithPatternNotSupported "Quote (in Silverlight)" expr
 #else
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 

@@ -6,7 +6,7 @@ open System
 
 let inline testEval expr expected =
     let result = expr |> eval
-    result =? expected
+    result =! expected
 
 [<Fact>]
 let ``Value`` () =
@@ -362,7 +362,7 @@ let ``TryFinally no exception try body returned and finally is called`` () =
 let ``TryFinally exception is thrown and finally is called`` () =
     let finallyCalled = ref false
     raises<exn> <@ try
-                       raise (System.Exception())
+                       raise (new System.ArgumentException())
                    finally
                        finallyCalled := true @>
     test <@ !finallyCalled @>
@@ -378,7 +378,7 @@ let ``TryWith no exception thrown`` () =
 [<Fact>]
 let ``TryWith exception thrown no binding or filtering`` () =
     testEval <@ try
-                    raise (exn())
+                    raise (new System.ArgumentException())
                     false
                 with _ ->
                     true @>
@@ -578,7 +578,7 @@ let ``untyped synthetic evaluation`` () =
 //    else
 //        None
 
-#if SILVERLIGHT //VERIFIED
+#if PORTABLE
 #else
 
 [<Fact>]

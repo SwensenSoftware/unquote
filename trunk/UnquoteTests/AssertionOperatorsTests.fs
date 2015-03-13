@@ -31,7 +31,7 @@ let ``expect base exception`` () =
 let ``test passes`` () =
     test <@ 4 = 4 @>
 
-#if SILVERLIGHT //all nested quotation tests invalid in silverlight
+#if PORTABLE //all nested quotation tests invalid in silverlight
 #else
 [<Fact>]
 let ``expect wrong exception`` () =
@@ -95,7 +95,7 @@ let ``Issue 63: synthetic nested invocation exceptions are not stripped if no in
 let ``Issue 63: synthetic invocation exception is not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(null)) @>
     
-#if SILVERLIGHT 
+#if PORTABLE 
 #else //all the following contain nested quotations which aren't supported
 [<Fact>]
 let ``raiseWhen passes`` () =

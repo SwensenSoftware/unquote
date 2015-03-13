@@ -6,10 +6,41 @@ open Swensen.Unquote
 open System
 open Microsoft.FSharp.Math
 
+open System
+
+type IntRef(it:int) =
+    member __.Value = it
+    static member (/) (a:IntRef, b:IntRef) =
+        IntRef(a.Value / b.Value)
+    static member (*) (a:IntRef, b:IntRef) =
+        IntRef(a.Value * b.Value)
+    static member (+) (a:IntRef, b:IntRef) =
+        IntRef(a.Value + b.Value)
+    static member (-) (a:IntRef, b:IntRef) =
+        IntRef(a.Value - b.Value)
+    static member (=) (a:IntRef, b:IntRef) =
+        a.Value = b.Value
+    static member (~-) (a:IntRef) =
+        IntRef(-a.Value)
+    static member (~+) (a:IntRef) =
+        IntRef(-a.Value)
+    override this.Equals(other:obj) =
+        if other = null || other.GetType() <> typeof<IntRef> then false
+        else (other :?> IntRef).Value = this.Value
+
+module NumericLiteralQ =
+    let inline FromZero() = IntRef(0)
+    let inline FromOne() = IntRef(1)
+    let inline FromString (s:string) =
+        IntRef(Int32.Parse(s))
+    let inline FromInt32 (n:int) =
+        IntRef(n)
+    let inline FromInt64 (n:int64) = 
+        IntRef(n|>int)
 
 let inline testEval expr expected =
     let result = expr |> eval
-    result =? expected
+    result =! expected
 
 //enumerating all the cases for op_Addition goes a long way towards testing all the other numeric binary ops as well due to shared implementation details
 [<Fact>]
@@ -72,7 +103,7 @@ let ``op_Addition bigint`` () =
 
 [<Fact>]
 let ``op_Addition reflective`` () =
-    testEval <@ 12N + 2N @> 14N
+    testEval <@ 12Q + 2Q @> 14Q
 
 [<Fact>]
 let ``op_Addition string`` () =
@@ -84,7 +115,7 @@ let ``op_Subtraction primitive`` () =
 
 [<Fact>]
 let ``op_Subtraction reflective`` () =
-    testEval <@ 1N - 2N @> -1N
+    testEval <@ 1Q - 2Q @> -1Q
 
 [<Fact>]
 let ``op_Division primitive`` () =
@@ -92,7 +123,7 @@ let ``op_Division primitive`` () =
 
 [<Fact>]
 let ``op_Division reflective`` () =
-    testEval <@ 12N / 6N @> 2N
+    testEval <@ 12Q / 6Q @> 2Q
 
 [<Fact>]
 let ``op_Modulus primitive`` () =
@@ -173,7 +204,7 @@ let ``op_Multiply primitive`` () =
 
 [<Fact>]
 let ``op_Multiply reflective`` () =
-    testEval <@ 12N * 2N @> 24N
+    testEval <@ 12Q * 2Q @> 24Q
 
 [<Fact>]
 let ``op_Exponentiation primitive`` () =
@@ -244,7 +275,7 @@ let ``op_UnaryPlus unativeint`` () =
 
 [<Fact>]
 let ``op_UnaryPlus reflective`` () =
-    testEval <@ (~+) 12N @> ((~+) 12N)
+    testEval <@ (~+) 12Q @> ((~+) 12Q)
 
 [<Fact>]
 let ``op_UnaryNegation primitive`` () =
@@ -252,7 +283,7 @@ let ``op_UnaryNegation primitive`` () =
 
 [<Fact>]
 let ``op_UnaryNegation reflective`` () =
-    testEval <@ (~-) 12N @> ((~-) 12N)
+    testEval <@ (~-) 12Q @> ((~-) 12Q)
 
 [<Fact>]
 let ``op_LogicalNot primitive`` () =

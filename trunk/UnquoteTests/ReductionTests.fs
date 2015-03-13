@@ -26,21 +26,21 @@ let decompiledReductions expr =
 
 [<Fact>]
 let ``already reduced`` () =
-    decompiledReductions <@ -18 @> =? ["-18"]
-    decompiledReductions <@ (2, 3) @> =? ["(2, 3)"]
-    decompiledReductions <@ [1;2;3;4] @> =? ["[1; 2; 3; 4]"]
-    decompiledReductions <@ [|1;2;3;4|] @> =? ["[|1; 2; 3; 4|]"]
+    decompiledReductions <@ -18 @> =! ["-18"]
+    decompiledReductions <@ (2, 3) @> =! ["(2, 3)"]
+    decompiledReductions <@ [1;2;3;4] @> =! ["[1; 2; 3; 4]"]
+    decompiledReductions <@ [|1;2;3;4|] @> =! ["[|1; 2; 3; 4|]"]
 
 [<Fact>]
 let ``coerce reduces right`` () =
-    decompiledReductions <@ Set.ofSeq [1;1;2;4] @> =? [
+    decompiledReductions <@ Set.ofSeq [1;1;2;4] @> =! [
         "Set.ofSeq [1; 1; 2; 4]"
         "set [1; 2; 4]"
     ]
 
 [<Fact>]
 let ``arithmetic expressions`` () = 
-    decompiledReductions <@ (2 + (3 - 7)) * 9 @> =? [
+    decompiledReductions <@ (2 + (3 - 7)) * 9 @> =! [
         "(2 + (3 - 7)) * 9"
         "(2 + -4) * 9"
         "-2 * 9"
@@ -49,14 +49,14 @@ let ``arithmetic expressions`` () =
 
 [<Fact>]
 let ``simple lambda with application`` () =
-    decompiledReductions <@ (fun i j -> i + j + 1) 1 2 @> =? [
+    decompiledReductions <@ (fun i j -> i + j + 1) 1 2 @> =! [
         "(fun i j -> i + j + 1) 1 2"
         "4"
     ]
 
 [<Fact>]
 let ``lambda with non-reduced applications`` () =
-    decompiledReductions <@ (fun i j -> i + j + 1) (1 + 2) 2 @> =? [
+    decompiledReductions <@ (fun i j -> i + j + 1) (1 + 2) 2 @> =! [
         "(fun i j -> i + j + 1) (1 + 2) 2"
         "(fun i j -> i + j + 1) 3 2"
         "6"
@@ -64,7 +64,7 @@ let ``lambda with non-reduced applications`` () =
 
 [<Fact>]
 let ``lambda with application on lhs of + op call`` () =
-    decompiledReductions <@ (fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> =? [
+    decompiledReductions <@ (fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12 @> =! [
         "(fun i j k -> i + j + k) (2 + 5) 3 (4 + 17) + 12"
         "(fun i j k -> i + j + k) 7 3 21 + 12"
         "31 + 12" //failing to evaluate this
@@ -74,7 +74,7 @@ let ``lambda with application on lhs of + op call`` () =
 let f i j k = i + j + k
 [<Fact>]
 let ``function with application on lhs of + op call`` () =
-    decompiledReductions <@ f (2 + 5) 3 (4 + 17) + 12 @> =? [
+    decompiledReductions <@ f (2 + 5) 3 (4 + 17) + 12 @> =! [
         "f (2 + 5) 3 (4 + 17) + 12"
         "f 7 3 21 + 12"
         "31 + 12"
@@ -84,14 +84,14 @@ let ``function with application on lhs of + op call`` () =
 let ftuple i j = (i,j)
 [<Fact>]
 let ``function with application returns tuple`` () =
-    decompiledReductions <@ ftuple 1 2 @> =? [
+    decompiledReductions <@ ftuple 1 2 @> =! [
         "ftuple 1 2"
         "(1, 2)"
     ]
 
 [<Fact>]
 let ``function with application compared to tuple`` () =
-    decompiledReductions <@ ftuple 1 2 = (1,2) @> =? [
+    decompiledReductions <@ ftuple 1 2 = (1,2) @> =! [
         "ftuple 1 2 = (1, 2)"
         "(1, 2) = (1, 2)"
         "true"
@@ -99,7 +99,7 @@ let ``function with application compared to tuple`` () =
 
 [<Fact>]
 let ``lambdas are reduced`` () =
-    decompiledReductions <@ List.map (fun i -> i + 1) [1;2;3;4] = [2;3;4;5] @> =? [
+    decompiledReductions <@ List.map (fun i -> i + 1) [1;2;3;4] = [2;3;4;5] @> =! [
         "List.map (fun i -> i + 1) [1; 2; 3; 4] = [2; 3; 4; 5]"
         "[2; 3; 4; 5] = [2; 3; 4; 5]"
         "true"
@@ -107,7 +107,7 @@ let ``lambdas are reduced`` () =
 
 [<Fact>]
 let ``new array with arg sub expressions`` () =
-    decompiledReductions <@ [|1+1;2+(3-1);3|] = [|2;4;3|] @> =? [
+    decompiledReductions <@ [|1+1;2+(3-1);3|] = [|2;4;3|] @> =! [
         "[|1 + 1; 2 + (3 - 1); 3|] = [|2; 4; 3|]"
         "[|2; 2 + 2; 3|] = [|2; 4; 3|]"
         "[|2; 4; 3|] = [|2; 4; 3|]"
@@ -117,7 +117,7 @@ let ``new array with arg sub expressions`` () =
 open System
 [<Fact>]
 let ``new object is not reduced`` () =
-    decompiledReductions <@ new string('c', 3) + "hello" @> =? [
+    decompiledReductions <@ new string('c', 3) + "hello" @> =! [
         "new string('c', 3) + \"hello\""
         "\"ccc\" + \"hello\""
         "\"ccchello\""
@@ -125,12 +125,12 @@ let ``new object is not reduced`` () =
 
 [<Fact>]
 let ``Sequential`` () =
-    decompiledReductions <@ 1; 2; 3 @> =? [
+    decompiledReductions <@ 1; 2; 3 @> =! [
         "1; 2; 3"
         "2; 3"
         "3"
     ]
-    decompiledReductions <@ ignore 1; ignore 2; 3 @> =? [
+    decompiledReductions <@ ignore 1; ignore 2; 3 @> =! [
         "ignore 1; ignore 2; 3"
         "(); ignore 2; 3"
         "ignore 2; 3"
@@ -138,7 +138,7 @@ let ``Sequential`` () =
         "3"
     ]
 
-    decompiledReductions <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =? [
+    decompiledReductions <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =! [
         "1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2"
         "3 + 3 + 4; 1 + 2 + 3; 1 + 2"
         "6 + 4; 1 + 2 + 3; 1 + 2"
@@ -150,13 +150,13 @@ let ``Sequential`` () =
         "3"
     ]
     
-    decompiledReductions <@ (fun x -> x + 1); 2; 3 @> =? [
+    decompiledReductions <@ (fun x -> x + 1); 2; 3 @> =! [
         "(fun x -> x + 1); 2; 3"
         "2; 3"
         "3"
     ]
     
-    decompiledReductions <@ ignore (fun x -> x + 1); ignore 2; 3 @> =? [
+    decompiledReductions <@ ignore (fun x -> x + 1); ignore 2; 3 @> =! [
         "ignore (fun x -> x + 1); ignore 2; 3"
         "(); ignore 2; 3"
         "ignore 2; 3"
@@ -170,8 +170,8 @@ let ``null reference exception`` () =
     let steps = decompiledReductions <@ 3 = (doit null).Length @>
     test <@ steps.Length = 3 @>
     let [step1; step2; step3] = steps
-    step1 =? "3 = (doit null).Length"
-    step2 =? "3 = null.Length"
+    step1 =! "3 = (doit null).Length"
+    step2 =! "3 = null.Length"
     test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
 
 [<Fact>]
@@ -183,9 +183,9 @@ let ``property get returns null but preserves ret type info and doesnt throw eve
     test <@ steps.Length = 3 @>
     
     let [step1; step2; step3] = steps
-    step1 =? "null = doit \"asdf\""
-    step2 =? "null = null"
-    step3 =? "true"
+    step1 =! "null = doit \"asdf\""
+    step2 =! "null = null"
+    step3 =! "true"
 
 [<Fact>]
 let ``nested lambda Value applications don't throw`` () =
@@ -214,14 +214,14 @@ let ``multi-var lambda let binding application doesn't throw`` () =
 let takesNoArgs() = (null:string)
 [<Fact>]
 let ``function with no regular args and no type args`` () =
-    decompiledReductions <@ takesNoArgs() @> =? [
+    decompiledReductions <@ takesNoArgs() @> =! [
         "takesNoArgs()"
         "null"
     ]
 
 [<Fact>]
 let ``new union case list with sequenced arg`` () =
-    decompiledReductions <@ [1; 2 + 3; 4] @> =? [
+    decompiledReductions <@ [1; 2 + 3; 4] @> =! [
         "[1; 2 + 3; 4]"
         "[1; 5; 4]"
     ]
@@ -229,7 +229,7 @@ let ``new union case list with sequenced arg`` () =
 let namedList = [1; 2; 3]
 [<Fact>]
 let ``new union case list compared to named list`` () =
-    decompiledReductions <@ [1; 2; 3]  = namedList @> =? [
+    decompiledReductions <@ [1; 2; 3]  = namedList @> =! [
         "[1; 2; 3] = namedList"
         "[1; 2; 3] = [1; 2; 3]"
         "true"
@@ -237,13 +237,13 @@ let ``new union case list compared to named list`` () =
 
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``incomplete lambda call is reduced`` () =
-    <@ List.map (fun i -> i + 1) @> |> decompiledReductions =? [
+    <@ List.map (fun i -> i + 1) @> |> decompiledReductions =! [
       "List.map (fun i -> i + 1)";
     ]
 
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``incomplete lambda call on right hand side of pipe is not reduced`` () =
-    <@ [1; 2; 3] |> List.map (fun i -> i + 1) @> |> decompiledReductions =? [
+    <@ [1; 2; 3] |> List.map (fun i -> i + 1) @> |> decompiledReductions =! [
       "[1; 2; 3] |> List.map (fun i -> i + 1)"
       "[2; 3; 4]"
     ]
@@ -252,33 +252,33 @@ let f2 a b c d = a + b + c + d
 
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``multi-arg totally incomplete lambda call is reduced`` () =
-    <@ f2 @> |> decompiledReductions =? [
+    <@ f2 @> |> decompiledReductions =! [
       "f2"
     ]
 
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``multi-arg partially incomplete lambda call is reduced`` () =
-    <@ f2 1 2 @> |> decompiledReductions =? [
+    <@ f2 1 2 @> |> decompiledReductions =! [
       "f2 1 2"
     ]
 
 [<Fact>] //issue 24, as part of effort for issue 23
 let ``multi-arg incomplete lambda call has single not reduced arg`` () =
-    <@ f2 (1 + 2) @> |> decompiledReductions =? [
+    <@ f2 (1 + 2) @> |> decompiledReductions =! [
       "f2 (1 + 2)"
       "f2 3"
     ]
 
 [<Fact(Skip="not working right")>] //issue 24, as part of effort for issue 23
 let ``multi-arg incomplete lambda call has two not reduced args`` () =
-    <@ f2 (1 + 2) (3 + 4) @> |> decompiledReductions =? [
+    <@ f2 (1 + 2) (3 + 4) @> |> decompiledReductions =! [
       "f2 (1 + 2) (3 + 4)"
       "f2 3 7"
     ]
 
 [<Fact(Skip="not working right")>] //issue 24, as part of effort for issue 23
 let ``multi-arg incomplete lambda call second arg is not reduced`` () =
-    <@ f2 3 (3 + 4) @> |> decompiledReductions =? [
+    <@ f2 3 (3 + 4) @> |> decompiledReductions =! [
       "f2 3 (3 + 4)"
       "f2 3 7"
     ]
@@ -286,7 +286,7 @@ let ``multi-arg incomplete lambda call second arg is not reduced`` () =
 let arg2 = 5
 [<Fact(Skip="Not working")>] //issue 24, as part of effort for issue 23
 let ``multi-arg incomplete lambda call has two not reduced args, one is a property`` () =
-    <@ f2 (1 + 1) arg2 @> |> decompiledReductions =? [
+    <@ f2 (1 + 1) arg2 @> |> decompiledReductions =! [
       "f2 (1 + 2) 5"
       "f2 3 5"
     ]
@@ -294,7 +294,7 @@ let ``multi-arg incomplete lambda call has two not reduced args, one is a proper
 let t = (1,2)
 [<Fact>]
 let ``TupleLet variation 1`` () =
-    <@ let a, b = t in (a, b) @> |> decompiledReductions =? [
+    <@ let a, b = t in (a, b) @> |> decompiledReductions =! [
       "let a, b = t in (a, b)"
       "let a, b = (1, 2) in (a, b)"
       "(1, 2)"
@@ -302,14 +302,14 @@ let ``TupleLet variation 1`` () =
 
 [<Fact>]
 let ``TupleLet variation 2`` () =
-    <@ let a,b = (1,2) in a,b @> |> decompiledReductions =? [
+    <@ let a,b = (1,2) in a,b @> |> decompiledReductions =! [
       "let a, b = (1, 2) in (a, b)"
       "(1, 2)"
     ]
 
 [<Fact>]
 let ``TupleLet variation 2 multiple unreduced sub exprs`` () =
-    <@ let (x,y,z) = (1 + 3, 2, 3 + 4) in (x, z) @> |> decompiledReductions =? [
+    <@ let (x,y,z) = (1 + 3, 2, 3 + 4) in (x, z) @> |> decompiledReductions =! [
       "let x, y, z = (1 + 3, 2, 3 + 4) in (x, z)"
       "let x, y, z = (4, 2, 7) in (x, z)"
       "(4, 7)"
@@ -317,13 +317,13 @@ let ``TupleLet variation 2 multiple unreduced sub exprs`` () =
 
 [<Fact>] //issue 23
 let ``re-sugar partial application of binary op`` () =
-    <@ (+) 5 @> |> decompiledReductions =? [
+    <@ (+) 5 @> |> decompiledReductions =! [
       "(+) 5"
     ]
 
 [<Fact>] //issue 23
 let ``re-sugar partial application of binary op with unreduced arg`` () =
-    <@ (+) (5 + 1) @> |> decompiledReductions =? [
+    <@ (+) (5 + 1) @> |> decompiledReductions =! [
       "(+) (5 + 1)"
       "(+) 6"
     ]
@@ -331,52 +331,52 @@ let ``re-sugar partial application of binary op with unreduced arg`` () =
 let f3 a b c = a + b + c
 [<Fact>] //issue 23
 let ``re-sugar partial application of 3 arg lambda call with no args`` () =
-    <@ f3 @> |> decompiledReductions =? ["f3"]
+    <@ f3 @> |> decompiledReductions =! ["f3"]
 
 [<Fact>] //issue 23
 let ``re-sugar partial application of 3 arg lambda call with one arg`` () =
-    <@ f3 1 @> |> decompiledReductions =? ["f3 1"]
+    <@ f3 1 @> |> decompiledReductions =! ["f3 1"]
 
 [<Fact>] //issue 23
 let ``re-sugar partial application of 3 arg lambda call with one arg not reduced`` () =
-    <@ f3 (1 + 1) @> |> decompiledReductions =? ["f3 (1 + 1)"; "f3 2"]
+    <@ f3 (1 + 1) @> |> decompiledReductions =! ["f3 (1 + 1)"; "f3 2"]
 
 [<Fact>] //issue 23
 let ``re-sugar partial application of 3 arg lambda call with two args`` () =
-    <@ f3 1 2 @> |> decompiledReductions =? ["f3 1 2"]
+    <@ f3 1 2 @> |> decompiledReductions =! ["f3 1 2"]
 
 [<Fact(Skip="cant do right now")>] //issue 23
 let ``re-sugar partial application of 3 arg lambda call with two args the second not reduced`` () =
-    <@ f3 1 (2 + 3) @> |> decompiledReductions =? ["f3 1 (2 + 3)"; "f3 1 5"]
+    <@ f3 1 (2 + 3) @> |> decompiledReductions =! ["f3 1 (2 + 3)"; "f3 1 5"]
 
 [<Fact(Skip="cant do right now")>] //issue 23
 let ``re-sugar partial application of 3 arg lambda call with two args both not reduced`` () =
-    <@ f3 (1 + 2) (2 + 3) @> |> decompiledReductions =? ["f3 (1 + 2) (2 + 3)"; "f3 3 5"]
+    <@ f3 (1 + 2) (2 + 3) @> |> decompiledReductions =! ["f3 (1 + 2) (2 + 3)"; "f3 3 5"]
 
 [<Fact>] //issue 30
 let ``list range`` () =
-    <@ [1..3] @> |> decompiledReductions =? [
+    <@ [1..3] @> |> decompiledReductions =! [
       "[1..3]"
       "[1; 2; 3]"
     ]
 
 [<Fact>] //issue 30
 let ``list range step`` () =
-    <@ [1..3..9] @> |> decompiledReductions =? [
+    <@ [1..3..9] @> |> decompiledReductions =! [
       "[1..3..9]"
       "[1; 4; 7]"
     ]
 
 [<Fact>] //issue 30
 let ``array range`` () =
-    <@ [|1..3|] @> |> decompiledReductions =? [
+    <@ [|1..3|] @> |> decompiledReductions =! [
       "[|1..3|]"
       "[|1; 2; 3|]"
     ]
 
 [<Fact>] //issue 30
 let ``array range step`` () =
-    <@ [|1..3..9|] @> |> decompiledReductions =? [
+    <@ [|1..3..9|] @> |> decompiledReductions =! [
       "[|1..3..9|]"
       "[|1; 4; 7|]"
     ]
@@ -384,7 +384,7 @@ let ``array range step`` () =
 
 [<Fact>] //issue 30
 let ``list range with sub expr`` () =
-    <@ [0 + 1..0 + 3] @> |> decompiledReductions =? [
+    <@ [0 + 1..0 + 3] @> |> decompiledReductions =! [
       "[0 + 1..0 + 3]"
       "[1..3]"
       "[1; 2; 3]"
@@ -392,7 +392,7 @@ let ``list range with sub expr`` () =
 
 [<Fact>] //issue 30
 let ``list range step with sub expr`` () =
-    <@ [0 + 1..0 + 3..0 + 9] @> |> decompiledReductions =? [
+    <@ [0 + 1..0 + 3..0 + 9] @> |> decompiledReductions =! [
       "[0 + 1..0 + 3..0 + 9]"
       "[1..3..9]"
       "[1; 4; 7]"
@@ -400,7 +400,7 @@ let ``list range step with sub expr`` () =
 
 [<Fact>] //issue 30
 let ``array range with sub expr`` () =
-    <@ [|0 + 1..0 + 3|] @> |> decompiledReductions =? [
+    <@ [|0 + 1..0 + 3|] @> |> decompiledReductions =! [
       "[|0 + 1..0 + 3|]"
       "[|1..3|]"
       "[|1; 2; 3|]"
@@ -408,7 +408,7 @@ let ``array range with sub expr`` () =
 
 [<Fact>] //issue 30
 let ``array range step with sub expr`` () =
-    <@ [|0 + 1..0 + 3..0 + 9|] @> |> decompiledReductions =? [
+    <@ [|0 + 1..0 + 3..0 + 9|] @> |> decompiledReductions =! [
       "[|0 + 1..0 + 3..0 + 9|]"
       "[|1..3..9|]"
       "[|1; 4; 7|]"
@@ -430,7 +430,7 @@ let ``synthetic single reduction`` () =
 
 [<Fact>]
 let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =
-    <@ if 2 = 2 then 1 + 2 else 3 + 4 @> |> decompiledReductions =? [
+    <@ if 2 = 2 then 1 + 2 else 3 + 4 @> |> decompiledReductions =! [
         "if 2 = 2 then 1 + 2 else 3 + 4"
         "if true then 1 + 2 else 3 + 4"
         "1 + 2"
@@ -439,7 +439,7 @@ let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =
 
 [<Fact>]
 let ``IfThenElse predicate is false, then branch is cut and never reduced`` () =
-    <@ if 2 = 1 then 1 + 2 else 3 + 4 @> |> decompiledReductions =? [
+    <@ if 2 = 1 then 1 + 2 else 3 + 4 @> |> decompiledReductions =! [
         "if 2 = 1 then 1 + 2 else 3 + 4"
         "if false then 1 + 2 else 3 + 4"
         "3 + 4"
@@ -448,7 +448,7 @@ let ``IfThenElse predicate is false, then branch is cut and never reduced`` () =
 
 [<Fact>]
 let ``AndAlso short circuit false`` () =
-    <@ 1 = 2 && 1 = 2 @> |> decompiledReductions =? [
+    <@ 1 = 2 && 1 = 2 @> |> decompiledReductions =! [
         "1 = 2 && 1 = 2"
         "false && 1 = 2"
         "false"
@@ -456,7 +456,7 @@ let ``AndAlso short circuit false`` () =
 
 [<Fact>]
 let ``AndAlso no short circuit false`` () =
-    <@ 2 = 2 && 1 = 2 @> |> decompiledReductions =? [
+    <@ 2 = 2 && 1 = 2 @> |> decompiledReductions =! [
         "2 = 2 && 1 = 2"
         "true && 1 = 2"
         "true && false"
@@ -465,7 +465,7 @@ let ``AndAlso no short circuit false`` () =
 
 [<Fact>]
 let ``AndAlso no short circuit true`` () =
-    <@ 2 = 2 && 2 = 2 @> |> decompiledReductions =? [
+    <@ 2 = 2 && 2 = 2 @> |> decompiledReductions =! [
         "2 = 2 && 2 = 2"
         "true && 2 = 2"
         "true && true"
@@ -474,7 +474,7 @@ let ``AndAlso no short circuit true`` () =
 
 [<Fact>]
 let ``AndAlso nested`` () =
-    <@ 1 = 1 && (2 = 2 && 3 = 3) @> |> decompiledReductions =? [
+    <@ 1 = 1 && (2 = 2 && 3 = 3) @> |> decompiledReductions =! [
         "1 = 1 && (2 = 2 && 3 = 3)"
         "true && (2 = 2 && 3 = 3)"
         "true && (true && 3 = 3)"
@@ -485,7 +485,7 @@ let ``AndAlso nested`` () =
 
 [<Fact>]
 let ``OrElse short circuit true`` () =
-    <@ 1 = 1 || 1 = 2 @> |> decompiledReductions =? [
+    <@ 1 = 1 || 1 = 2 @> |> decompiledReductions =! [
         "1 = 1 || 1 = 2"
         "true || 1 = 2"
         "true"
@@ -493,7 +493,7 @@ let ``OrElse short circuit true`` () =
 
 [<Fact>]
 let ``OrElse no short circuit true`` () =
-    <@ 1 = 2 || 1 = 1 @> |> decompiledReductions =? [
+    <@ 1 = 2 || 1 = 1 @> |> decompiledReductions =! [
         "1 = 2 || 1 = 1"
         "false || 1 = 1"
         "false || true"
@@ -502,7 +502,7 @@ let ``OrElse no short circuit true`` () =
 
 [<Fact>]
 let ``OrElse no short circuit false`` () =
-    <@ 1 = 2 || 1 = 2 @> |> decompiledReductions =? [
+    <@ 1 = 2 || 1 = 2 @> |> decompiledReductions =! [
         "1 = 2 || 1 = 2"
         "false || 1 = 2"
         "false || false"
@@ -511,7 +511,7 @@ let ``OrElse no short circuit false`` () =
 
 [<Fact>]
 let ``OrElse nested`` () =
-    <@ 1 = 2 || (2 = 3 || 3 = 4) @> |> decompiledReductions =? [
+    <@ 1 = 2 || (2 = 3 || 3 = 4) @> |> decompiledReductions =! [
         "1 = 2 || (2 = 3 || 3 = 4)"
         "false || (2 = 3 || 3 = 4)"
         "false || (false || 3 = 4)"
@@ -524,25 +524,25 @@ let ``OrElse nested`` () =
 let ``can't differentiate between false || false and false && true``() =
     let q1 = <@ false || false @>
     let q2 = <@ false && true @>
-    (q1 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
-    (q1 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
-    (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
-    (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
+    (q1 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =! true
+    (q1 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =! true
+    (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =! true
+    (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =! true
 
 [<Fact>] //N.B. due to F# lib
 let ``can't differentiate between true || false and true && true``() =
     let q1 = <@ true || false @>
     let q2 = <@ true && true @>
-    (q1 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
-    (q1 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
-    (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =? true
-    (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =? true
+    (q1 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =! true
+    (q1 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =! true
+    (q2 |> function DerivedPatterns.AndAlso(_) -> true | _ -> false) =! true
+    (q2 |> function DerivedPatterns.OrElse(_) -> true | _ -> false) =! true
 
-#if SILVERLIGHT //QUOTE PROBLEM
+#if PORTABLE //QUOTE PROBLEM
 #else
 [<Fact>]
 let ``Quote, supported typed`` () =
-    <@ (<@ <@ 1 @> @> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =? [
+    <@ (<@ <@ 1 @> @> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =! [
         "(<@ <@ 1 @> @> |> decompile) = \"<@ 1 @>\"" //note, we are unable to resugar expressiosn involving lambda applications of coerced values now
         "\"<@ 1 @>\" = \"<@ 1 @>\""
         "true"
@@ -550,7 +550,7 @@ let ``Quote, supported typed`` () =
 
 [<Fact>]
 let ``Quote, unsupported untyped treated as typed`` () =
-    <@ (<@@ <@@ 1 @@> @@> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =? [
+    <@ (<@@ <@@ 1 @@> @@> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =! [
         "(<@ <@ 1 @> @> |> decompile) = \"<@ 1 @>\""
         "\"<@ 1 @>\" = \"<@ 1 @>\""
         "true"
@@ -559,7 +559,7 @@ let ``Quote, unsupported untyped treated as typed`` () =
 
 [<Fact>]
 let ``VarSet`` () =
-    <@ let mutable x = 0 in x <- 1 ; x @> |> decompiledReductions =? [
+    <@ let mutable x = 0 in x <- 1 ; x @> |> decompiledReductions =! [
         "let mutable x = 0 in x <- 1; x"
         "1"
     ]
@@ -567,7 +567,7 @@ let ``VarSet`` () =
 let mutable x= 0
 [<Fact>]
 let ``static PropertySet`` () =    
-    <@ x ; x <- 1 ; x @> |> decompiledReductions =? [
+    <@ x ; x <- 1 ; x @> |> decompiledReductions =! [
         "x; x <- 1; x"
         "0; x <- 1; x"
         "x <- 1; x"
@@ -590,7 +590,7 @@ type SetTest() =
 let st = new SetTest()
 [<Fact>]
 let ``instance FieldSet`` () =    
-    <@ st.x ; st.x <- 1 ; st.x @> |> decompiledReductions =? [
+    <@ st.x ; st.x <- 1 ; st.x @> |> decompiledReductions =! [
         "st.x; st.x <- 1; st.x"
         "{ x = 1 }.x; st.x <- 1; st.x"
         "0; st.x <- 1; st.x"
@@ -605,7 +605,7 @@ let ``instance FieldSet`` () =
 let st2 = new SetTest()
 [<Fact>]
 let ``instance PropertySet`` () =    
-    <@ st2.X ; st2.X <- 1 ; st2.X @> |> decompiledReductions =? [
+    <@ st2.X ; st2.X <- 1 ; st2.X @> |> decompiledReductions =! [
         "st2.X; st2.X <- 1; st2.X"
         "{ x = 1 }.X; st2.X <- 1; st2.X"
         "0; st2.X <- 1; st2.X"
@@ -628,7 +628,7 @@ let ``RecursiveLet mutually recursive funtions``() =
             else even (x-1)
         in
             even 19, odd 20
-    @> |> decompiledReductions =? [
+    @> |> decompiledReductions =! [
         "let rec even = fun x -> x = 0 || odd (x - 1) and odd = fun x -> if x = 0 then false else even (x - 1) in (even 19, odd 20)"
         "(false, false)"
     ]
@@ -641,14 +641,14 @@ let ``RecursiveLet self recursive function``() =
             else countdown (i - steps) steps
         in
             countdown 34 10
-    @> |> decompiledReductions =? [
+    @> |> decompiledReductions =! [
         "let rec countdown = fun i steps -> if i < 0 then i else countdown (i - steps) steps in countdown 34 10"
         "-6"
     ]
 
 [<Fact>] //issue 43
 let ``TryFinally incremental reduction of try body but finally body is never reduced``() =
-    <@ try 2 + 3 finally 2 + 3 |> ignore @> |> decompiledReductions =? [
+    <@ try 2 + 3 finally 2 + 3 |> ignore @> |> decompiledReductions =! [
         "try 2 + 3 finally (2 + 3 |> ignore)"
         "try 5 finally (2 + 3 |> ignore)"
         "5"
@@ -656,35 +656,35 @@ let ``TryFinally incremental reduction of try body but finally body is never red
 
 [<Fact>] //issue 41
 let ``WhileLoop reduces to unit``() =
-    <@ while false do () @> |> decompiledReductions =? [
+    <@ while false do () @> |> decompiledReductions =! [
         "while false do ()"
         "()"
     ]
 
 [<Fact>] //issue 41
 let ``WhileLoop reduces to unit without any sub reductions``() =
-    <@ while 2 + 5 = 0 do 3 |> ignore @> |> decompiledReductions =? [
+    <@ while 2 + 5 = 0 do 3 |> ignore @> |> decompiledReductions =! [
         "while 2 + 5 = 0 do (3 |> ignore)" //precedence in do body is off
         "()"
     ]
 
 [<Fact>] //issue 41
 let ``WhileLoop as subexpression``() =
-    <@ (while false do ()), 3 @> |> decompiledReductions =? [
+    <@ (while false do ()), 3 @> |> decompiledReductions =! [
         "((while false do ()), 3)"
         "((), 3)"
     ]
 
 [<Fact>] //issue 41
 let ``ForIntegerRangeLoop reduces to unit``() =
-    <@ for i in 1..5 do () @> |> decompiledReductions =? [
+    <@ for i in 1..5 do () @> |> decompiledReductions =! [
         "for i in 1..5 do ()"
         "()"
     ]
 
 [<Fact>] //issue 41
 let ``ForIntegerRangeLoop reduces range start and end but not body``() =
-    <@ for i in 1 + 2..5 + 2 do 5 |> ignore @> |> decompiledReductions =? [
+    <@ for i in 1 + 2..5 + 2 do 5 |> ignore @> |> decompiledReductions =! [
         "for i in 1 + 2..5 + 2 do (5 |> ignore)" //precedence in do body is off
         "for i in 3..7 do (5 |> ignore)"
         "()"
@@ -694,7 +694,7 @@ let ``ForIntegerRangeLoop reduces range start and end but not body``() =
 let ``Issue 62: TryWith with block is followed when exception in body`` () =
     let called = ref false
     reduceFully <@ try
-                       raise (exn())
+                       raise (new System.ArgumentException())
                    with e ->
                        called := true @>
     test <@ !called @>
@@ -703,14 +703,14 @@ let f4 () = None : option<int>
 
 [<Fact>]
 let ``issue 80: sprint non literal None constructions``() =
-    <@ f4() @> |> decompiledReductions =? [
+    <@ f4() @> |> decompiledReductions =! [
         "f4()"
         "None"
     ]
 
 [<Fact>]
 let ``issue 70: DefaultValue reduction``() =
-    <@ new int() @> |> decompiledReductions =? [
+    <@ new int() @> |> decompiledReductions =! [
         "new int()"
         "0"
     ]
@@ -728,18 +728,18 @@ let ``issue 5: TryWith simple reduction``() =
 //[<Fact>]
 //let ``instance PropertySet`` () =    
 //    let tt = new TestType(0)
-//    <@ tt.instanceField ; tt.InstancePropNoArgs <- 1 ; tt.instanceField @> |> decompiledReductions =? [
+//    <@ tt.instanceField ; tt.InstancePropNoArgs <- 1 ; tt.instanceField @> |> decompiledReductions =! [
 //
 //    ]
 //
 
 
-//    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
+//    <@ let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =! [
 //        "let x = 2 + 3 in fun j -> j + x"
 //        "let x = 5 in fun j -> j + x"
 //    ]
 //
-//    <@ 23 + 3 + 4 + 1, let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =? [
+//    <@ 23 + 3 + 4 + 1, let x = 2 + 3 in (fun j -> j + x) @> |> decompiledReductions =! [
 //        "(23 + 3 + 4 + 1, (let x = 2 + 3 in fun j -> j + x))"
 //        "(26 + 4 + 1, (let x = 5 in fun j -> j + x))"
 //        "(30 + 1, (let x = 5 in fun j -> j + x))"
@@ -747,7 +747,7 @@ let ``issue 5: TryWith simple reduction``() =
 //    ]
 
 
-//    decompiledReductions <@ [1; 2 + 3; 4] @> =? [
+//    decompiledReductions <@ [1; 2 + 3; 4] @> =! [
 //        "[1; 2 + 3; 4]"
 //        "[1; 5; 4]"
 //    ]
@@ -755,32 +755,32 @@ let ``issue 5: TryWith simple reduction``() =
 
 //[<Fact>]
 //let ``Sequential`` () =
-//    decompiledReductions <@ 1; 2; 3; @> =? [
+//    decompiledReductions <@ 1; 2; 3; @> =! [
 //        "1; 2; 3"
 //        "2; 3"
 //        "3"
 //    ]
 //
-////    decompiledReductions <@ ignore 1; ignore 2; 3 @> =? [
+////    decompiledReductions <@ ignore 1; ignore 2; 3 @> =! [
 ////        "ignore 1; ignore 2; 3"
 ////        "ignore 2; 3"
 ////    ]
-////    source <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =? "1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2"
-////    source <@ (fun x -> x + 1); 2; 3  @> =? "(fun x -> x + 1); 2; 3"
-////    source <@ ignore (fun x -> x + 1); ignore 2; 3  @> =? "ignore (fun x -> x + 1); ignore 2; 3"
+////    source <@ 1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2  @> =! "1 + 2 + 3 + 4; 1 + 2 + 3; 1 + 2"
+////    source <@ (fun x -> x + 1); 2; 3  @> =! "(fun x -> x + 1); 2; 3"
+////    source <@ ignore (fun x -> x + 1); ignore 2; 3  @> =! "ignore (fun x -> x + 1); ignore 2; 3"
 //
 //[<Fact>]
 //let ``unary ops`` () =
-//    decompiledReductions <@ -(2 + 3) @> =? [
+//    decompiledReductions <@ -(2 + 3) @> =! [
 //        "-(2 + 3)"
 //        "-5"
 //    ]
 //
-//    decompiledReductions <@ ~~~(2 + 3) @> =? [
+//    decompiledReductions <@ ~~~(2 + 3) @> =! [
 //        "~~~(2 + 3)"
 //        "~~~5"
 //
 //
-//    //source <@ +(2 + 3) @> =? "+(2 + 3)"; //Power Pack Bug!: System.NotSupportedException: Specified method is not supported.
-//    source <@ ~~~(2 + 3) @> =? "~~~(2 + 3)";
-//    source <@ let x = ref 3 in !x @> =? "let x = ref 3 in !x";
+//    //source <@ +(2 + 3) @> =! "+(2 + 3)"; //Power Pack Bug!: System.NotSupportedException: Specified method is not supported.
+//    source <@ ~~~(2 + 3) @> =! "~~~(2 + 3)";
+//    source <@ let x = ref 3 in !x @> =! "let x = ref 3 in !x";
