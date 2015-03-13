@@ -15,8 +15,8 @@ limitations under the License.
 *)
 namespace Swensen.Unquote
 
-//[<System.Runtime.Versioning.TargetFrameworkAttribute("Silverlight,Version=v5.0", FrameworkDisplayName="Silverlight 5")>]
-//do ()
+[<System.Runtime.Versioning.TargetFrameworkAttribute(".NETPortable,Version=v4.5,Profile=Profile259", FrameworkDisplayName=".NET Portable Subset")>]
+do ()
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -30,7 +30,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]
-[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2014")>]
+[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2015")>]
 [<assembly: AssemblyTrademark("")>]
 
 [<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("UnquoteTests")>]
