@@ -99,7 +99,7 @@ let decompile expr =
                     let decompiledTarget =
                         match target with
                         | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
-                        | None -> ER.sourceName mi.DeclaringType 
+                        | None -> ER.sourceName <| mi.DeclaringType.GetTypeInfo() 
                     sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
 
             match suppliedArgs.Length with
@@ -152,7 +152,7 @@ let decompile expr =
                 let decompiledTarget =
                     match target with
                     | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
-                    | None -> ER.sourceName mi.DeclaringType
+                    | None -> ER.sourceName <| mi.DeclaringType.GetTypeInfo()
 
                 applyParens OP.Application (sprintf "%s.%s%s" decompiledTarget methodName sprintedArgs)
         | P.Call(target, mi, args) -> //a "normal" .net instance or static call

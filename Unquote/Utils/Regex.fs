@@ -70,11 +70,11 @@ module internal Regex =
             | _ -> None
 
     ///Convenience versions of our regex active patterns using RegexOptions.Compiled flag.
-    ///If SILVERLIGHT compiler directive defined, then RegexOptions.None flag used.
+    ///If PORTABLE compiler directive defined, then RegexOptions.None flag used.
     module Compiled =
         ///When silverlight mode is None, else is Compiled
         let private compiledRegexOption = 
-#if SILVERLIGHT
+#if PORTABLE
             RegexOptions.None
 #else
             RegexOptions.Compiled

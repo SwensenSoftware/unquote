@@ -239,7 +239,7 @@ let sourceNameFromString =
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
     mi.GetCustomAttributes(true)
-    |> Array.tryPick 
+    |> Seq.tryPick 
         (function 
             | :? CompilationSourceNameAttribute as csna -> Some(csna.SourceName)
             | :? CompilationRepresentationAttribute as cra -> 
@@ -365,7 +365,7 @@ let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     else None
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario
-//#if SILVERLIGHT
+//#if PORTABLE
 //    fallback()
 //#else
 //    try

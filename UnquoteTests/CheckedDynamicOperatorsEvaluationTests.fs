@@ -7,7 +7,7 @@ open System.Reflection
 
 let inline testEval expr expected =
     let result = expr |> eval
-    result =? expected
+    result =! expected
 
 let testEvalCheckedOverflow expr =
     let e = 
@@ -85,7 +85,7 @@ let ``ToInt32 primitive`` () =
 let ``ToInt primitive`` () =
     testEvalCheckedOverflow <@ Checked.int UInt64.MaxValue @>
 
-#if SILVERLIGHT //bigint issue in silverlight: http://stackoverflow.com/questions/7048578/missing-biginteger-features-under-f-silverlight
+#if PORTABLE //bigint issue in silverlight: http://stackoverflow.com/questions/7048578/missing-biginteger-features-under-f-silverlight
 #else
 [<Fact>]
 let ``ToUInt64 reflective`` () =
