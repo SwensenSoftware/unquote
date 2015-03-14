@@ -27,7 +27,7 @@
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NET40</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Unquote.xml</DocumentationFile>
   </PropertyGroup>
@@ -39,58 +39,58 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Utils\Prelude.fs">
+    <Compile Include="....\Unquote\Utils\Prelude.fs">
       <Link>Prelude.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Utils\Regex.fs">
+    <Compile Include="....\Unquote\Utils\Regex.fs">
       <Link>Regex.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Utils\Printf.fs">
+    <Compile Include="....\Unquote\Utils\Printf.fs">
       <Link>Printf.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Utils\List.fs">
+    <Compile Include="....\Unquote\Utils\List.fs">
       <Link>List.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Utils\Type.fs">
+    <Compile Include="....\Unquote\Utils\Type.fs">
       <Link>Type.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Prelude.fs">
+    <Compile Include="....\Unquote\Prelude.fs">
       <Link>Prelude.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\DynamicOperators.fs">
+    <Compile Include="....\Unquote\DynamicOperators.fs">
       <Link>DynamicOperators.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\EvaluationException.fs">
+    <Compile Include="....\Unquote\EvaluationException.fs">
       <Link>EvaluationException.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Evaluation.fs">
+    <Compile Include="....\Unquote\Evaluation.fs">
       <Link>Evaluation.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\OperatorPrecedence.fs">
+    <Compile Include="....\Unquote\OperatorPrecedence.fs">
       <Link>OperatorPrecedence.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\ExtraReflection.fs">
+    <Compile Include="....\Unquote\ExtraReflection.fs">
       <Link>ExtraReflection.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\ExtraPatterns.fs">
+    <Compile Include="....\Unquote\ExtraPatterns.fs">
       <Link>ExtraPatterns.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Decompilation.fs">
+    <Compile Include="....\Unquote\Decompilation.fs">
       <Link>Decompilation.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Reduction.fs">
+    <Compile Include="....\Unquote\Reduction.fs">
       <Link>Reduction.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Extensions.fs">
+    <Compile Include="....\Unquote\Extensions.fs">
       <Link>Extensions.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Operators.fs">
+    <Compile Include="....\Unquote\Operators.fs">
       <Link>Operators.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\AssertionFailedException.fs">
+    <Compile Include="....\Unquote\AssertionFailedException.fs">
       <Link>AssertionFailedException.fs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\Visual Studio 2013\Projects\Unquote\code\Unquote\Assertions.fs">
+    <Compile Include="....\Unquote\Assertions.fs">
       <Link>Assertions.fs</Link>
     </Compile>
   </ItemGroup>
