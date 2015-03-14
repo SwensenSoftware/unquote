@@ -1,4 +1,4 @@
-#summary Plans for unquote 3
+#summary Plans for unquote 3.0.0, the next major release
 
 = Introduction =
 
