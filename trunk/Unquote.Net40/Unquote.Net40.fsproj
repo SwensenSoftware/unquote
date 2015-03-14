@@ -39,6 +39,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="....\Unquote\Utils\Prelude.fs">
       <Link>Prelude.fs</Link>
     </Compile>
