@@ -396,6 +396,8 @@ let ``generic NewUnionCase with nested construction`` () =
 
 #if PORTABLE //can't access stack frame
 #else
+#if NET40 //relative file names cause issues
+#else
 //issue #3 -- UnionCaseTests
 //these tests are not as thorough as would like: can't verify op_Dynamic works right
 [<Fact>] 
@@ -406,6 +408,7 @@ let ``union case test list not requiring op_Dynamic`` () = //this test is a litt
     #else
     decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21)
     #endif
+#endif
 #endif
 
 let h = World (Hello2(Hello 3, true))
