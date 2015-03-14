@@ -16,5 +16,7 @@ The following are the main features planned for Unquote 3.0.0.
 
 = TODO =
   * Add test cases for net40
+  * Add assembly info for net40
+  * Add net40 to build.bat
   * Add verify project for xunit2
   * Possibly do better automating testing, building, and packing with fake
