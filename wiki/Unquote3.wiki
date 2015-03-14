@@ -12,6 +12,7 @@ The following are the main features planned for Unquote 3.0.0.
   * Continue support for net40 with a secondary vs2010 solution file and projects
   * Deprecate xx? operators (they conflict with F# 3.1 nullable operators) and replace with xx! operators
   * Add support for xunit 2.x
+  * Possibly add FSharp.Core dependencies in NuGet package?
 
 = TODO =
   * Add test cases for net40
