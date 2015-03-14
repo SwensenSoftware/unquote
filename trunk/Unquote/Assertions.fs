@@ -75,7 +75,8 @@ module Internal =
                     seq { 
                         for a in assemblies do
                             match a.GetName().Name with
-                            | "xunit" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit"))
+                            | "xunit" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit")) //xunit 1
+                            | "xunit.assert" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit.assert")) //xunit 2
                             | "nunit.framework" -> yield Some(Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
 //                            | "MbUnit" -> yield Some(Mbunit, Type.GetType("MbUnit.Framework.Assert, MbUnit"))
                             | _ -> ()
@@ -108,6 +109,8 @@ module Internal =
 
     let inline expectedExnButWrongExnRaisedMsg ty1 ty2 = sprintf "Expected exception of type '%s', but '%s' was raised instead" ty1 ty2
     let inline expectedExnButNoExnRaisedMsg ty1 = sprintf "Expected exception of type '%s', but no exception was raised" ty1
+
+    let isAssignableFrom (ty1:Type) (ty2:Type) = ty1.GetTypeInfo().IsAssignableFrom(ty2.GetTypeInfo())
     
 
 open Internal
@@ -131,8 +134,8 @@ let inline test (expr:Expr<bool>) =
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
-    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) -> //it's an exception
-        if typeof<'a>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) then () //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && isAssignableFrom typeof<exn> lastValueTy -> //it's an exception
+        if isAssignableFrom typeof<'a> lastValueTy then () //it's the correct exception
         else //it's not the correct exception
             try
                 testFailed reducedExprs (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (lastValueTy.Name))
@@ -148,8 +151,8 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
 let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
     match lastExpr with
-    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && typeof<exn>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) -> //it's an exception
-        if typeof<'a>.GetTypeInfo().IsAssignableFrom(lastValueTy.GetTypeInfo()) then //it's the correct exception
+    | Patterns.Value(lastValue,lastValueTy) when lastValue <> null && isAssignableFrom typeof<exn> lastValueTy -> //it's an exception
+        if isAssignableFrom typeof<'a> lastValueTy then //it's the correct exception
             //but we also need to check the exnWhen condition is true
             let lastValue = lastValue :?> 'a
             let exnWhenExpr = exnWhen lastValue
