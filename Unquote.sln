@@ -34,7 +34,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNonFrameworkSupport",
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests", "UnquoteTests\UnquoteTests.fsproj", "{110FE67E-4603-4905-8BA0-8B043AAC2677}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnitV3Support", "VerifyMbUnitV3Support\VerifyMbUnitV3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyMbUnit3Support", "VerifyMbUnitV3Support\VerifyMbUnit3Support.fsproj", "{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Profile259", "Unquote.Profile259\Unquote.Profile259.fsproj", "{53511C59-3512-4107-8B8D-1E13E39D4EBF}"
 EndProject

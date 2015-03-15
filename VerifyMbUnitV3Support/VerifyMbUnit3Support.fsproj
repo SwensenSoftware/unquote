@@ -10,7 +10,7 @@
     <RootNamespace>VerifyMbUnitV3Support</RootNamespace>
     <AssemblyName>VerifyMbUnitV3Support</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>VerifyMbUnitV3Support</Name>
+    <Name>VerifyMbUnit3Support</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
@@ -53,7 +53,7 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
-    <Compile Include="VerifyMbUnitV3Support.fs" />
+    <Compile Include="VerifyMbUnit3Support.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
