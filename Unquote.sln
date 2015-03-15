@@ -24,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F9C32BC8-6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "verify", "verify", "{6C77CA49-EACA-4B17-A67B-BBE2B6836640}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunit2Support", "VerifyXunitSupport\VerifyXunit2Support.fsproj", "{78942CAF-9D8D-4E44-8953-E04E58E27D51}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunit2Support", "VerifyXunit2Support\VerifyXunit2Support.fsproj", "{78942CAF-9D8D-4E44-8953-E04E58E27D51}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNunitSupport", "VerifyNunitSupport\VerifyNunitSupport.fsproj", "{6E3F6FDB-A45F-4D07-8735-1CCCD10A7DBA}"
 EndProject
