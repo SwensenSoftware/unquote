@@ -73,15 +73,10 @@ module Internal =
             let outputNonFsiTestFailedMsg =
                 let framework = 
                     seq { 
-                        for a in assemblies do
-                            match a.GetName().Name with
-                            | "xunit" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit")) //xunit 1
-                            | "xunit.assert" -> yield Some(Xunit, Type.GetType("Xunit.Assert, xunit.assert")) //xunit 2
-                            | "nunit.framework" -> yield Some(Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
-//                            | "MbUnit" -> yield Some(Mbunit, Type.GetType("MbUnit.Framework.Assert, MbUnit"))
-                            | _ -> ()
-                        yield None //else none
-                    } |> Seq.head
+                        yield (Xunit, Type.GetType("Xunit.Assert, xunit")) //xunit 1
+                        yield (Xunit, Type.GetType("Xunit.Assert, xunit.assert")) //xunit 2
+                        yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
+                    } |> Seq.tryFind (fun (_,t) -> t <> null)
 
                 match framework with
                 | Some(Xunit, t) -> 
@@ -92,11 +87,7 @@ module Internal =
                     let mi = t.GetMethod("Fail", [|typeof<string>|])
                     let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
                     fun msg -> del.Invoke(msg)
-//                | Some(Mbunit, t) -> 
-//                    let mi = t.GetMethod("Fail", [|typeof<string>;typeof<obj[]>|])
-//                    let del = Delegate.CreateDelegate(typeof<Action<string,obj[]>>, mi) :?> (Action<string,obj[]>)
-//                    fun msg -> del.Invoke(msg,null)
-                | _ ->
+                | None ->
                     outputGenericTestFailedMsg
 
             outputReducedExprsMsg outputNonFsiTestFailedMsg
