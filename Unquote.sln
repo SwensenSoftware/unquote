@@ -40,6 +40,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Unquote.Profile259", "Unquo
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnquoteTests.Profile259", "UnquoteTests.Profile259\UnquoteTests.Profile259.fsproj", "{B832C801-9E32-4AC8-88ED-AEDC27AE8D84}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunit1Support", "VerifyXunit1Support\VerifyXunit1Support.fsproj", "{584E665F-6C3C-4E36-8197-33FC631605EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -126,6 +128,16 @@ Global
 		{B832C801-9E32-4AC8-88ED-AEDC27AE8D84}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{B832C801-9E32-4AC8-88ED-AEDC27AE8D84}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B832C801-9E32-4AC8-88ED-AEDC27AE8D84}.Release|x86.ActiveCfg = Release|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{584E665F-6C3C-4E36-8197-33FC631605EC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,5 +151,6 @@ Global
 		{F785E81B-D1EC-4F0F-BAE7-8C22143C87DF} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
 		{53511C59-3512-4107-8B8D-1E13E39D4EBF} = {EB32E8B1-DE90-4335-B342-41E3A79D279C}
 		{B832C801-9E32-4AC8-88ED-AEDC27AE8D84} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
+		{584E665F-6C3C-4E36-8197-33FC631605EC} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
 	EndGlobalSection
 EndGlobal
