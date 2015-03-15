@@ -176,7 +176,7 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
         with 
         | e -> raise e
 
-///Truly obsolete, these operators conflict with F# 3.0's nullable operators
+///These '?' suffixed operators conflict with F# 3.0's nullable operators and have been replaced by equivalent '!' suffixed operators.
 [<System.Obsolete("These '?' suffixed operators conflict with F# 3.0's nullable operators and have been replaced by equivalent '!' suffixed operators.")>]
 module Obsolete =
     let inline (=?) x y = test <@ x = y @>
