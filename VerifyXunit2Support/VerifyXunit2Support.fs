@@ -32,3 +32,13 @@ let ``test xunit support, raises`` () =
 let ``test xunit support, raisesWith`` () =
     raisesWith<Exception> <@ (null:string).ToString() @>
         (fun e -> <@ e.GetType().Name = "ArgumentException" @>)
+
+[<Fact>]
+let ``test xunit support, reraise within test`` () =
+    test 
+        <@ 
+            try 
+                raise (ArgumentException()); 1 = 2 
+            with e ->
+                reraise()
+        @>
