@@ -55,18 +55,13 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
-#if NET40
+#if PORTABLE
+    raise e
+#else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
     remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
     raise e
-#else 
-#if PORTABLE
-    raise e
-#else
-    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e).Throw()
-    Unchecked.defaultof<'a>
-#endif
 #endif
 
 open System.Collections.Generic
