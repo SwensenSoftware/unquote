@@ -26,6 +26,7 @@ open Microsoft.FSharp.Quotations
 open Swensen.Utils
 
 #nowarn "44"
+#nowarn "42" //for raises (inline IL)
 
 ///Functions and values public inline Operator functions rely on (and therefore must be public,
 ///even though we do not want to expose them publically).
@@ -38,6 +39,9 @@ module Internal =
         | Xunit
         | Nunit
         | Fuchu
+
+    ///raise is not inlined in Core.Operators, so shows up in stack traces.  We inline it here for clean stacktraces.
+    let inline raise (e: System.Exception) = (# "throw" e : 'U #)
 
     let testFailed =
         let outputGenericTestFailedMsg msg =
