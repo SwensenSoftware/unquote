@@ -55,9 +55,6 @@
     <Compile Include="....\Unquote\Utils\Type.fs">
       <Link>Type.fs</Link>
     </Compile>
-    <Compile Include="....\Unquote\Prelude.fs">
-      <Link>Prelude.fs</Link>
-    </Compile>
     <Compile Include="....\Unquote\DynamicOperators.fs">
       <Link>DynamicOperators.fs</Link>
     </Compile>
