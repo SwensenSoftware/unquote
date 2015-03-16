@@ -40,15 +40,16 @@ module Internal =
         | Fuchu
 
     let testFailed =
-        let outputGenericTestFailedMsg = fun msg -> raise <| Swensen.Unquote.AssertionFailedException("Test failed:" + msg)
+        let outputGenericTestFailedMsg msg =
+            raise (Swensen.Unquote.AssertionFailedException("Test failed:" + msg))
+            ()
 
-        let outputReducedExprsMsg =
-            fun outputTestFailedMsg (reducedExprs:Expr list) additionalInfo ->
-                    let msg = 
-                        Printf.nsprintf "\n%s\n%s\n"
-                            (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
-                            (reducedExprs |> List.map decompile |> String.concat "\n")    
-                    outputTestFailedMsg msg
+        let outputReducedExprsMsg (output:string->unit) (reducedExprs:Expr list) additionalInfo =
+            let msg = 
+                Printf.nsprintf "\n%s\n%s\n"
+                    (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
+                    (reducedExprs |> List.map decompile |> String.concat "\n")    
+            output msg
 
 #if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
