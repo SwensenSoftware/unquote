@@ -37,7 +37,7 @@ module Internal =
     type private testFramework =
         | Xunit
         | Nunit
-//        | Mbunit
+        | Fuchu
 
     let testFailed =
         let outputGenericTestFailedMsg = fun msg -> raise <| Swensen.Unquote.AssertionFailedException("Test failed:" + msg)
@@ -76,6 +76,7 @@ module Internal =
                         yield (Xunit, Type.GetType("Xunit.Assert, xunit")) //xunit 1
                         yield (Xunit, Type.GetType("Xunit.Assert, xunit.assert")) //xunit 2
                         yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
+                        yield (Fuchu, Type.GetType("Fuchu.AssertException, Fuchu"))
                     } |> Seq.tryFind (fun (_,t) -> t <> null)
 
                 match framework with
@@ -87,6 +88,8 @@ module Internal =
                     let mi = t.GetMethod("Fail", [|typeof<string>|])
                     let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
                     fun msg -> del.Invoke(msg)
+                | Some(Fuchu, t) ->
+                    fun msg -> raise (Activator.CreateInstance(t, msg) :?> Exception)
                 | None ->
                     outputGenericTestFailedMsg
 
@@ -109,7 +112,7 @@ open Internal
 //making inline (together with catch/raise) ensures stacktraces clean in test framework output
 ///Evaluate the given boolean expression: if false output incremental eval steps using
 ///1) stdout if fsi mode
-///2) framework fail methods if Xunit or Nunit present
+///2) Framework fail methods if xUnit.net (v1 or v2), NUnit, or Fuchu present
 ///3) System.Exception if release mode.
 let inline test (expr:Expr<bool>) =
     let reducedExprs, lastExpr = reduceFullyAndGetLast expr
