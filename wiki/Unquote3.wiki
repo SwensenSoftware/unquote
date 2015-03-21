@@ -7,13 +7,13 @@ It's been over two years since the last release of Unquote. Partly because it is
 = Planned Features =
 
 The following are the main features planned for Unquote 3.0.0.
-  * Drop support for Silverlight4.
+  * (breaking change) Drop support for Silverlight4.
   * Upgrade main solution and projects to 2013 and add support for net45 and portable profile 259
   * Continue support for net40 with a secondary vs2010 solution file and projects
-  * Deprecate '?' suffixed operators (they conflict with F# 3.1 nullable operators) and replace with '!' suffixed operators
+  * (breaking change) Deprecate '?' suffixed operators (they conflict with F# 3.1 nullable operators) and replace with '!' suffixed operators
   * Add support for xunit 2.x
   * Add support for Fuchu
-  * Possibly add FSharp.Core dependencies in NuGet package?
 
 = TODO =
-  * Possibly do better automating testing, building, and packing with fake
+  * (out of scope) Possibly do better automating testing, building, and packing with fake
+  * (no - can have issues) Possibly add FSharp.Core dependencies in NuGet package
