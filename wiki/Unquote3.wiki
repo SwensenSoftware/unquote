@@ -13,6 +13,7 @@ The following are the main features planned for Unquote 3.0.0.
   # (breaking change) Deprecate '?' suffixed operators (they conflict with F# 3.1 nullable operators) and replace with '!' suffixed operators
   # Add xUnit.net 2.x integration
   # Add Fuchu integration
+  # (breaking change - needs issue tracker) `Swensen.Unquote.Operators.unquote` to return first-class object rather than print to stdout (will use `StructuredFormatDisplay` for FSI pretty printing)
 
 = TODO =
   * (out of scope) Possibly do better automating testing, building, and packing with fake
