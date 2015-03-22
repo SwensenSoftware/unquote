@@ -4,7 +4,7 @@ open System
 open System.Runtime.Serialization
 
 ///Exception used to signal assertion failure to be caught by any exception framework
-///(used when not NUnit or xUnit.net or when compiled for Silverlight)
+///(used when not NUnit or xUnit.net or when compiled for framework versions lacking serialization features)
 #if PORTABLE
 #else
 [<Serializable>]
