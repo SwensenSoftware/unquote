@@ -14,6 +14,7 @@ The following are the main features planned for Unquote 3.0.0.
   # Add xUnit.net 2.x integration
   # Add Fuchu integration
   # (breaking change - needs issue tracker) `Swensen.Unquote.Operators.unquote` to return first-class object rather than print to stdout (will use `StructuredFormatDisplay` for FSI pretty printing)
+  # (minor breaking change - needs issue tracker) introduced `ReductionException` for distinguishing between exceptions raised during reduction vs. non-raised exception values. Use this information to do smarter decompilation. Namely, only print stack traces for raised exceptions.
 
 = TODO =
   * (out of scope) Possibly do better automating testing, building, and packing with fake
