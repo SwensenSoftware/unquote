@@ -59,8 +59,10 @@
     <Compile Include="OperatorPrecedence.fs" />
     <Compile Include="ExtraReflection.fs" />
     <Compile Include="ExtraPatterns.fs" />
+    <Compile Include="ReductionException.fs" />
     <Compile Include="Decompilation.fs" />
     <Compile Include="Reduction.fs" />
+    <Compile Include="UnquotedExpression.fs" />
     <Compile Include="Extensions.fs" />
     <Compile Include="Operators.fs" />
     <Compile Include="AssertionFailedException.fs" />

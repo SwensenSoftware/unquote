@@ -1406,3 +1406,15 @@ let ``issue 5: TryWith reraise is not treated as a generic value`` () =
     //this is not done for other similar scenarios, and i think it is done to supress
     //warnings suggesting using ignore for functions that return values.
     <@ try "" with e -> reraise() @> |> decompile =! "try \"\" with e -> ((); reraise())"
+
+[<Fact>]
+let ``exception instance`` () =
+    let x = new System.ArgumentException("bad arg")  
+    <@ x @> |> decompile =! 
+      "System.ArgumentException: bad arg"
+
+[<Fact>]
+let ``reduction exception instance`` () =
+    let x = new ReductionException(new System.ArgumentException("bad arg"))
+    <@ x @> |> decompile =! 
+      "System.ArgumentException: bad arg"

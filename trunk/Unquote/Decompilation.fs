@@ -177,6 +177,10 @@ let decompile expr =
             match o with
             | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None"
             | null -> "null" //sprint None when ty is option<>
+            | :? ReductionException as x ->
+                sprintf "%A" x.InnerException
+            | :? Exception as x ->
+                sprintf "%s: %s" (x.GetType().FullName) x.Message
             | _ -> sprintf "%A" o
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?

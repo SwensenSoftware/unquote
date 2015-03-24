@@ -136,6 +136,9 @@ type EnvVar(name:string, value:obj, ?reraisable:bool) =
         | Some(ev) -> ev
         | None -> raise <| Swensen.Unquote.EvaluationException("could not find any reraisable variables within the environment")
 
+    static member mapEnvVars (xm:Map<string,obj>) =
+        xm |> Map.toSeq |> Seq.map (fun (key, value) -> EnvVar(key, value)) |> Seq.toList
+
 let eval env expr =
     let inline failwithPatternNotSupported name (expr:Expr) =
         raise <| System.NotSupportedException(sprintf "Evaluation of quotation pattern %s not supported: expression = %A" name expr)

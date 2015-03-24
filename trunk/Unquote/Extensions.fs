@@ -20,18 +20,15 @@ module Swensen.Unquote.Extensions
 
 //N.B. Expr<'T> extends Expr
 
-let private mapEnvVars (xm:Map<string,obj>) =
-    xm |> Map.toSeq |> Seq.map (fun (key, value) -> Evaluation.EnvVar(key, value)) |> Seq.toList
-
 type Microsoft.FSharp.Quotations.Expr<'a> with
     ///Evaluate this typed expression.
     member this.Eval() = Evaluation.eval [] this :?> 'a
     ///Evaluate this typed expression with the given variable environment.
-    member this.Eval(env) = Evaluation.eval (mapEnvVars env) this :?> 'a
+    member this.Eval(env) = Evaluation.eval (Evaluation.EnvVar.mapEnvVars env) this :?> 'a
 
 type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable environments
     ///Evaluate this untyped expression with the given variable environment.
-    member this.Eval<'a>(env) = Evaluation.eval (mapEnvVars env) this :?> 'a
+    member this.Eval<'a>(env) = Evaluation.eval (Evaluation.EnvVar.mapEnvVars env) this :?> 'a
 
     ///Evaluate this untyped expression.
     member this.Eval<'a>() = Evaluation.eval [] this :?> 'a
@@ -43,7 +40,7 @@ type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable 
     ///Reduce this expression by one step with the given variable environment: convert each branch of the given expression to a Value expression of its 
     ///evaluation if each sub-branch of the branch is reduced.
     ///If this expression is already reduced, or cannot be reduced, returns itself.
-    member this.Reduce(env) = Reduction.reduce (mapEnvVars env) this
+    member this.Reduce(env) = Reduction.reduce (Evaluation.EnvVar.mapEnvVars env) this
 
     ///Reduce this expression by one step: convert each branch of the given expression to a Value expression of its 
     ///evaluation if each sub-branch of the branch is reduced.
@@ -51,10 +48,10 @@ type Microsoft.FSharp.Quotations.Expr with //give overloads which take variable 
     member this.Reduce() = Reduction.reduce [] this
 
     ///Convert this expression with the given variable environment to a list of all of its Reduce steps in order.
-    member this.ReduceFully(env) = Reduction.reduceFully (mapEnvVars env) this
+    member this.ReduceFully(env) = let (_,_,xs) = Reduction.reduceFully (Evaluation.EnvVar.mapEnvVars env) this in xs
 
     ///Convert the given expression to a list of all of its Reduce steps in order.
-    member this.ReduceFully() = Reduction.reduceFully [] this
+    member this.ReduceFully() = let (_,_,xs) = Reduction.reduceFully [] this in xs
 
     ///Determine whether this expression is reduced.
     member this.IsReduced() = Reduction.isReduced this
