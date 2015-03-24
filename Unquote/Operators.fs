@@ -50,14 +50,7 @@ let inline reduceFullyWith env (expr:Expr) = expr.ReduceFully(env)
 
 ///Determine whether the given expression is reduced.
 let inline isReduced (expr:Expr) = expr.IsReduced()
-
-///Print the newline concated source code reduce steps of the given expression to stdout.
+        
+///Build an UnquotedExpression from the given quotation.
 let unquote expr =
-    expr
-    |> reduceFully
-    |> List.map decompile 
-    |> String.concat "\n" //don't use Environment.NewLine since nprintfn will replace \n with Environment.NewLine already
-    #if PORTABLE
-    #else
-    |> Printf.nprintfn "\n%s\n"
-    #endif
+    UnquotedExpression(expr)

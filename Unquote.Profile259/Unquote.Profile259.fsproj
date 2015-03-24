@@ -76,11 +76,17 @@
     <Compile Include="..\Unquote\ExtraPatterns.fs">
       <Link>ExtraPatterns.fs</Link>
     </Compile>
+    <Compile Include="..\Unquote\ReductionException.fs">
+      <Link>ReductionException.fs</Link>
+    </Compile>
     <Compile Include="..\Unquote\Decompilation.fs">
       <Link>Decompilation.fs</Link>
     </Compile>
     <Compile Include="..\Unquote\Reduction.fs">
       <Link>Reduction.fs</Link>
+    </Compile>
+    <Compile Include="..\Unquote\UnquotedExpression.fs">
+      <Link>UnquotedExpression.fs</Link>
     </Compile>
     <Compile Include="..\Unquote\Extensions.fs">
       <Link>Extensions.fs</Link>

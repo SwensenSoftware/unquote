@@ -125,7 +125,7 @@ let rec reduce env (expr:Expr) =
         else ES.RebuildShapeCombination(o, reduceAll env exprs)
 and reduceAll env exprList =
     exprList |> List.map (reduce env)
-    
+
 //note Expr uses reference equality and comparison, so have to be
 //carefule in reduce algorithm to only rebuild actually reduced parts of an expresion
 let reduceFully =
@@ -133,13 +133,20 @@ let reduceFully =
         try
             let nextExpr = expr |> (reduce env)
             if isReduced nextExpr then //is reduced
-                if nextExpr <> List.head acc then nextExpr::acc //different than last
-                else acc //same as last
+                if nextExpr <> List.head acc then //different than last
+                    (false, nextExpr, nextExpr::acc) 
+                else //same as last
+                    (false, nextExpr, acc) 
             elif nextExpr = List.head acc then //is not reduced and could not reduce
-                (evalValue env nextExpr)::acc
+                let last = (evalValue env nextExpr)
+                (false, last, last::acc)
             else loop env nextExpr (nextExpr::acc)
         with
         | ex -> 
-            Expr.Value(ex, ex.GetType())::acc
+            let re = ReductionException(ex)
+            let last = Expr.Value(re, re.GetType())
+            (true, last, last::acc)
 
-    fun env expr -> loop env expr [expr] |> List.rev
+    fun env expr -> 
+        let (xraised, last, acc) = loop env expr [expr] 
+        (xraised, last, acc |> List.rev)
