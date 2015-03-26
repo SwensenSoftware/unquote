@@ -30,12 +30,6 @@ type Expr with
     static member AndAlso(x,y) = Expr.IfThenElse(x,y,Expr.Value(false)) //see line 1705 in quotations.fs
     static member OrElse(x,y) = Expr.IfThenElse(x,Expr.Value(true),y) //see line 1711 in quotations.fs
 
-//hmmm, looking at this with new eyes, having just implemented the Evaluation module,
-//i don't like how Vars are considered "reduced" and somewhat related the body of of let bindings is not
-//incrementally evaluated.  I think we can have a version of reduce which returns both a reduction
-//and an enviroment to be passed into the next reduction... possibly we can have some "evalWithEnvironment (expr:Expr<'a>) (env) -> ('a, env)"
-//and "reduceWithEnvironment" functions
-
 ///Construct a Value from an evaluated expression
 let evalValue env (expr:Expr) = 
     Expr.Value(Evaluation.eval env expr, expr.Type)
