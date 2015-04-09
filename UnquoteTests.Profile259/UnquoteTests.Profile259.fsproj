@@ -74,6 +74,9 @@
     <Compile Include="..\UnquoteTests\AssertionOperatorsTests.fs">
       <Link>AssertionOperatorsTests.fs</Link>
     </Compile>
+    <Compile Include="..\UnquoteTests\UnquotedExpressionTests.fs">
+      <Link>UnquotedExpressionTests.fs</Link>
+    </Compile>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
