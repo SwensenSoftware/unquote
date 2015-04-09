@@ -67,6 +67,9 @@
     <Compile Include="..\UnquoteTests\CustomExceptionSerializationTests.fs">
       <Link>CustomExceptionSerializationTests.fs</Link>
     </Compile>
+    <Compile Include="..\UnquoteTests\UnquotedExpressionTests.fs">
+      <Link>UnquotedExpressionTests.fs</Link>
+    </Compile>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
