@@ -29,3 +29,12 @@ let ``AssertionFailedException is serializable`` () =
     let ee' = serializeThenDeserialize ee
     test <@ ee.Message = ee'.Message @>
 
+[<Fact>]
+let ``ReductionException is serializable`` () =
+    let e = new Exception("inner exception")
+    let ee = new ReductionException(e)
+    let ee' = serializeThenDeserialize ee
+    test <@ ee.Message = ee'.Message @>
+    test <@ ee.InnerException <> null @>
+    test <@ ee.InnerException.Message = e.Message @>
+
