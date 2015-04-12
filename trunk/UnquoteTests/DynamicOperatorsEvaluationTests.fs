@@ -364,3 +364,16 @@ let ``ToIntPtr primitive`` () =
 [<Fact>]
 let ``ToChar primitive`` () =
     testEval <@ char 1 @> '\001'
+
+//trig operators were implemented in F# 3.x core libs (so we don't have to provide impls any more)
+[<Fact>]
+let ``Tan`` () =
+    testEval <@ tan 1.1 @> (tan 1.1)
+
+[<Fact>]
+let ``Sin`` () =
+    testEval <@ sin 1.1 @> (sin 1.1)
+
+[<Fact>]
+let ``Cos`` () =
+    testEval <@ cos 1.1 @> (cos 1.1)
