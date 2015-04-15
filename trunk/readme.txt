@@ -1,0 +1,3 @@
+These projects allow running test suites with msbuild using the default Build target. This is specifically useful for running tests against mono with xbuild or running tests quicker than the VS test runner does.
+
+To modify the conditions and assemblies that are included in a test run for a given project, (namely if a project reference for a test assembly is added or removed), modify the ExecuteUnitTests target in the project file (which overrides the ExecuteUnitTests task defined in the xunit.MSBuild.targets file provided by the xunit.MSBuild NuGet package).

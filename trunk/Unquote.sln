@@ -44,6 +44,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunit1Support", "Veri
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyFuchuSupport", "VerifyFuchuSupport\VerifyFuchuSupport.fsproj", "{627D7E41-5569-4964-9B57-0B8B6360F5D2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test-run", "test-run", "{1F8ECE19-CCC6-4D30-AFAD-9D5A40770003}"
+	ProjectSection(SolutionItems) = preProject
+		readme.txt = readme.txt
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestRunner", "TestRunner\TestRunner.fsproj", "{709E0376-B839-48E2-BF1C-E116FFBE4472}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -148,6 +155,16 @@ Global
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2}.Release|x86.ActiveCfg = Release|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{709E0376-B839-48E2-BF1C-E116FFBE4472}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,5 +180,6 @@ Global
 		{B832C801-9E32-4AC8-88ED-AEDC27AE8D84} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
 		{584E665F-6C3C-4E36-8197-33FC631605EC} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
+		{709E0376-B839-48E2-BF1C-E116FFBE4472} = {1F8ECE19-CCC6-4D30-AFAD-9D5A40770003}
 	EndGlobalSection
 EndGlobal
