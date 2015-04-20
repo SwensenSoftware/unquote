@@ -306,7 +306,7 @@ let sprintSig (outerTy:Type) =
             | _ -> 
                 failwith ("failed to parse type name: " + ty.FullName)
 
-        match ty.GetGenericArguments() with
+        match ty.GetGenericArgumentsArrayInclusive() with
         | args when args.Length = 0 ->
             (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
         | args when cleanName = "System.Tuple" ->
