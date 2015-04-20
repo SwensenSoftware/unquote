@@ -172,7 +172,7 @@ let ``null reference exception`` () =
     let [step1; step2; step3] = steps
     step1 =! "3 = (doit null).Length"
     step2 =! "3 = null.Length"
-    test <@ step3.StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
+    test <@ step3.StartsWith("System.NullReferenceException: ") @>
 
 [<Fact>]
 let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
