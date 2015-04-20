@@ -720,7 +720,7 @@ let ``issue 5: TryWith simple reduction``() =
     let x = <@ try (null:string).ToString() with e -> (reraise(); "") @> |> decompiledReductions |> Seq.toArray
     test <@ x.Length = 2 @>
     test <@ x.[0] = "try null.ToString() with e -> (((); reraise()); \"\")" @>
-    test <@ x.[1].StartsWith("System.NullReferenceException: Object reference not set to an instance of an object.") @>
+    test <@ x.[1].StartsWith("System.NullReferenceException: ") @>
 
     
     
