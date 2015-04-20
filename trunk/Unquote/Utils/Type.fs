@@ -54,6 +54,8 @@ module internal Type =
             this.GetTypeInfo().GetCustomAttributes(includeInherited) |> Seq.toArray
         member this.IsGenericTypeDefinition =
             this.GetTypeInfo().IsGenericTypeDefinition
+        member this.GetGenericArgumentsArrayInclusive() =
+            this.GetGenericArguments()
         member this.GetGenericArguments() =
             if this.IsArray then
                 this.GetElementType().GetGenericArguments() //todo: verify the recursive case
@@ -66,6 +68,12 @@ module internal Type =
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
     #else //NET40
+        //mono mis-implements GetGenericArguments and doesn't treat arrays correctly
+        member this.GetGenericArgumentsArrayInclusive() =
+            if this.IsArray then
+                this.GetElementType().GetGenericArgumentsArrayInclusive() //todo: verify the recursive case
+            else
+                this.GetGenericArguments()
         member this.GetTypeInfo() =
             this
     #endif
