@@ -7,5 +7,5 @@ mono .nuget/nuget.exe restore Unquote.sln
 
 # run .net 4.0 tests
 xbuild /p:Configuration=Release /t:Clean UnquoteTests.Net40/UnquoteTests.Net40.fsproj
-xbuild /p:Configuration=Release /p:DefineConstants="NET40" UnquoteTests.Net40/UnquoteTests.Net40.fsproj
+xbuild /p:Configuration=Release /p:DefineConstants="NET40%3bMONO" UnquoteTests.Net40/UnquoteTests.Net40.fsproj
 mono tools/xunit-1.9.2/xunit.console.clr4.exe "UnquoteTests.Net40/bin/Release/UnquoteTests.Net40.dll"
