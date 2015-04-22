@@ -15,7 +15,7 @@ let testEvalCheckedOverflow expr =
                %expr |> ignore; null
            with e -> e @> |> eval
 
-    test <@ let ty = e.GetType() in ty = typeof<OverflowException> || ty = typeof<TargetInvocationException> @>
+    test <@ e <> null && let ty = e.GetType() in ty = typeof<OverflowException> || ty = typeof<TargetInvocationException> @>
 
 [<Fact>]
 let ``op_Multiply primitive overflows`` () =
