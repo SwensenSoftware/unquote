@@ -175,8 +175,20 @@ let decompile expr =
         | EP.LambdaValue(name) -> ER.sourceNameFromString name
         | P.Value(o, ty) ->
             match o with
-            | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None"
-            | null -> "null" //sprint None when ty is option<>
+            | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None" //option<_> None is represented as null
+            | null -> "null"
+            | :? String as x ->
+                let pairs = [
+                    ("\\", @"\\")
+                    ("\"", "\\\"")
+                    ("\b", @"\b")
+                    ("\t", @"\t")
+                    ("\r", @"\r")
+                    ("\n", @"\n")]
+                let sb = System.Text.StringBuilder(x.Length + 2 + Math.Min(x.Length, 16))
+                sb.Append('"').Append(x).Append('"') |> ignore
+                pairs |> List.iter(fun (key, value) -> sb.Replace(key, value, 1, sb.Length-2) |> ignore)
+                sb.ToString()
             | :? ReductionException as x ->
                 sprintf "%A" x.InnerException
             | :? Exception as x ->
