@@ -404,9 +404,9 @@ let ``generic NewUnionCase with nested construction`` () =
 let ``union case test list not requiring op_Dynamic`` () = //this test is a little fragile (see sf use; using regex would be too much), but not too fragile
     let sf = System.Diagnostics.StackFrame(true)
     #if DEBUG
-    decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 2, 21)
+    decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 2, 21).Replace("\\", "\\\\")
     #else
-    decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21)
+    decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21).Replace("\\", "\\\\")
     #endif
 #endif
 #endif
@@ -1418,3 +1418,18 @@ let ``reduction exception instance`` () =
     let x = new ReductionException(new System.ArgumentException("bad arg"))
     <@ x @> |> decompile =! 
       "System.ArgumentException: bad arg"
+
+[<Fact>]
+let ``decompile string``() =
+    let in_out = [
+        <@ "" @>, ""
+        <@ "x" @>, "x"
+        <@ "xx" @>, "xx"
+        <@ "\n" @>, "\\n"
+        <@ "\n\n" @>, "\\n\\n"
+        <@ "\\" @>, "\\\\"
+        <@ "\"" @>, "\\\""
+        <@ "\\\n\r\xl\b\t\"" @>, "\\\\\\n\\r\\\\xl\\b\\t" + "\\\""
+    ]
+    let wrap x = "\"" + x + "\""
+    test <@ in_out |> List.map (fun (x,y) -> decompile x, wrap y) |> List.map (fun (x,y) -> x = y) |> List.forall id @>
