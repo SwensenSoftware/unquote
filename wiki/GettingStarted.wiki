@@ -30,7 +30,7 @@ The `Swensen.Unquote` namespace contains three `AutoOpen` modules: `Assertions`,
 
 === Assertions ===
 
-The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and the `xx?` series of binary infix operators. All of these operators can be used within a unit test enabled project or FSI.
+The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and a series of `?` suffixed binary infix operators. All of these operators can be used within a unit test enabled project or FSI.
 
 Unquote chooses its output source as follows
   * if loaded in FSI then print to the console
@@ -55,9 +55,9 @@ false
 val it : unit = ()
 }}}
 
-  * `val inline ( =? ) : 'a -> 'a -> unit when 'a : equality`
+  * `val inline ( =! ) : 'a -> 'a -> unit when 'a : equality`
 {{{
-> [1;2;3;4] =? [4;3;2;1];;
+> [1;2;3;4] =! [4;3;2;1];;
 
 Test failed:
 
@@ -66,11 +66,11 @@ false
 
 val it : unit = ()
 }}}
-  * `val inline ( <? ) : 'a -> 'a -> unit when 'a : comparison`
-  * `val inline ( >? ) : 'a -> 'a -> unit when 'a : comparison`
-  * `val inline ( <=? ) : 'a -> 'a -> unit when 'a : comparison`
-  * `val inline ( >=? ) : 'a -> 'a -> unit when 'a : comparison`
-  * `val inline ( <>? ) : 'a -> 'a -> unit when 'a : equality`
+  * `val inline ( <! ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( >! ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( <=! ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( >=! ) : 'a -> 'a -> unit when 'a : comparison`
+  * `val inline ( <>! ) : 'a -> 'a -> unit when 'a : equality`
   * `val inline raises<'a when 'a :> exn> : Quotations.Expr -> unit`
 {{{
 > raises<exn> <@ (null:string).Length @>;;
@@ -184,9 +184,10 @@ val it : bool = false
 val it : bool = true
 }}}
 
-  * `val inline unquote : Quotations.Expr -> unit`
+  * `val inline unquote : Quotations.Expr -> UnquotedExpression`
 {{{
 > unquote <@ (1+2)/3 @>;;
+val it : UnquotedExpression = 
 
 (1 + 2) / 3
 3 / 3
@@ -195,7 +196,7 @@ val it : bool = true
 val it : unit = ()
 }}}
 
-The following are functions which accept a variable environment for processing synthetic expressions with unbound variables (N.B. this API may evolve and should be considered "experimental"):
+The following are functions which accept a variable environment for processing synthetic expressions with unbound variables:
 
   * `val inline evalWith : Map<string,obj> -> Quotations.Expr<'a> -> 'a`
   * `val inline evalRawWith : Map<string,obj> -> Expr -> 'a`
@@ -204,7 +205,7 @@ The following are functions which accept a variable environment for processing s
 
 === Extensions ===
 
-The `Swensen.Unquote.Extensions` module duplicates functions in the `Swensen.Unquote.Operators` as instance type extensions on `Quotations.Expr` and `Quotations.Expr<'a>`. But it also includes an instance property extension on `System.Type`, `FSharpName`, which returns the F#-style signature of a type (N.B. this feature is out-of-place in Unquote and should be considered "experimental"):
+The `Swensen.Unquote.Extensions` module duplicates functions in the `Swensen.Unquote.Operators` as instance type extensions on `Quotations.Expr` and `Quotations.Expr<'a>`. But it also includes an instance property extension on `System.Type`, `FSharpName`, which returns the F#-style signature of a type:
 
 {{{
 > typeof<int>.FSharpName;;
