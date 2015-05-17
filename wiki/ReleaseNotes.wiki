@@ -5,6 +5,8 @@
 
 == v3.0.0, 5/17/15 ==
 
+Add support for .NET 4.5, Portable Profile 259, and Mono and expands integration with test frameworks including xUnit.net 2.0 and Fuchu. See GettingStarted#Breaking_Changes_from_Unquote_2.x_to_Unquote_3.x for an explanation of breaking changes.
+
   * Issue 16 Decompiler Feature Request: escape chars in strings should be sprinted literally
   * Issue 88 Change assertion operators so that they don't conflict with F# 3.0's NullableOperators
   * Issue 89 Add .NET 4.5 and Portable Profile 259 builds while continuing support for .NET 4.0 and dropping support for Silverlight 4 
