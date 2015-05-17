@@ -3,6 +3,19 @@
 
 = Release Notes =
 
+== v3.0.0, 5/17/15 ==
+
+  * Issue 16 Decompiler Feature Request: escape chars in strings should be sprinted literally
+  * Issue 88 Change assertion operators so that they don't conflict with F# 3.0's NullableOperators
+  * Issue 89 Add .NET 4.5 and Portable Profile 259 builds while continuing support for .NET 4.0 and dropping support for Silverlight 4 
+  * Issue 103 Upgrade solution from F# 2.0 + VS2010 to F# 3.1 + VS2013
+  * Issue 104 Official Mono support
+  * Issue 107 Fuchu integration
+  * Issue 108 xUnit.net 2 integration
+  * Issue 109 Opening Swensen.Unquote should not shadow FSharp.Core.Operators.raise with internal raise implementation
+  * Issue 111 Introduce first-class object UnquotedExpression which will be returned from unquote operator
+  * Issue 112 Distinguish between exception instances and exceptions that are actually raised during reduction
+
 == v2.2.2, 6/14/12 ==
 
 Make all custom exception types serializable so that they may pass AppDomain boundaries. Other minor fixes and enhancements.
