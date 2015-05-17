@@ -5,22 +5,24 @@
 
 == Installation == 
 
-Unquote has builds targeting both .NET 4.0 and Silverlight 4.
+Unquote has builds targeting both .NET 4.0, .NET 4.5, and Portable Profile 259 and is fully supported on Mono.
 
 To use Unquote within an F# unit testing project, you must obtain and add a reference to Unquote.dll. There are two ways to obtain Unquote:
 
-  * Install the latest version of the [http://www.nuget.org/List/Packages/Unquote Unquote NuGet package] to your unit testing project, this will automatically add the correct reference to Unquote.dll according to your project type (.NET 4.0 or Silverlight 4).
-  * Download and unzip the featured release of Unquote from the [https://code.google.com/p/unquote/wiki/Downloads?tm=2 Downloads] page and then locate and add a reference to Unquote.dll via the Visual Studio Add Reference dialog. The .NET 4.0 builds are located in the net40 folder, the Silverlight 4 builds are located in the sl4 folder.
+  * Install the latest version of the [http://www.nuget.org/List/Packages/Unquote Unquote NuGet package] to your unit testing project, this will automatically add the correct reference to Unquote.dll according to your project type.
+  * Download and unzip the featured release of Unquote from the [https://code.google.com/p/unquote/wiki/Downloads?tm=2 Downloads] page and then locate and add a reference to Unquote.dll via the Visual Studio Add Reference dialog. The .NET 4.0 builds are located in the net40 folder, the .NET 4.5 builds are located in the net45 folder, and the Portable Profile 259 builds are located in the profile259 folder.
 
 You must also obtain and install your unit testing framework of choice, NUnit and xUnit having been given special support.
 
-To use Unquote within FSI, locate and add a reference to Unquote.dll using the `#r` directive (use the .NET 4.0 build).
+To use Unquote within FSI, locate and add a reference to Unquote.dll using the `#r` directive (use the .NET 4.0 or .NET 4.5 build).
 
-_The '?' suffixed operators have all been replaced with equivalent '!' suffixed operators in Unquote 3.0.0 in order to avoid conflicts with Nullable operators introduced by F# 3.0. You may open the package `Swensen.Unquote.Assertions.Obsolete` to continue using the now obsolete '?' suffixed operators._
+== Breaking Changes from Unquote 2.x to Unquote 3.x ==
 
-== Mono Support ==
+Support for Silverlight 4 has been dropped.
 
-Unquote has not been fully tested on Mono, however, it does not use any native Win32 calls and has been seen working on Mono without any issues. Specifically, the .NET 4.0 build has been seen running on _Mono 2.10.8.1 (Debian 2.10.8.1-5ubuntu1)_ inside a version of the F# 3.0 Interactive built from the github sources.
+The '?' suffixed operators have all been replaced with equivalent '!' suffixed operators in Unquote 3.0.0 in order to avoid conflicts with Nullable operators introduced by F# 3.0. You may open the package `Swensen.Unquote.Assertions.Obsolete` to continue using the now obsolete '?' suffixed operators.
+
+The signature of `Swensen.Unquote.Operators.unquote` has been changed from `Quotations.Expr -> unit` to `Quotations.Expr -> UnquotedExpression`.
 
 == User Guide ==
 
