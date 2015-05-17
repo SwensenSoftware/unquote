@@ -30,7 +30,7 @@ The `Swensen.Unquote` namespace contains three `AutoOpen` modules: `Assertions`,
 
 === Assertions ===
 
-The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and a series of `?` suffixed binary infix operators. All of these operators can be used within a unit test enabled project or FSI.
+The `Swensen.Unquote.Assertions` module contains all functions used for performing unit testing assertions. These include `test`, `raises`, and a series of '!' suffixed binary infix operators. All of these operators can be used within a unit test enabled project or FSI.
 
 Unquote chooses its output source as follows
   * if loaded in FSI then print to the console
