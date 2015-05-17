@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8f571caf-5aef-4f5d-b524-c08eae85b629}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnquoteTests.Net40</RootNamespace>
+    <AssemblyName>UnquoteTests.Net40</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Name>UnquoteTests.Net40</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Debug\UnquoteTests.Net40.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NET40</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\UnquoteTests.Net40.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\UnquoteTests\EvaluationTests.fs">
+      <Link>EvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\DynamicOperatorsEvaluationTests.fs">
+      <Link>DynamicOperatorsEvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\CheckedDynamicOperatorsEvaluationTests.fs">
+      <Link>CheckedDynamicOperatorsEvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\FSharpNameTests.fs">
+      <Link>FSharpNameTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\DecompilationTests.fs">
+      <Link>DecompilationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\ReductionTests.fs">
+      <Link>ReductionTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\AssertionOperatorsTests.fs">
+      <Link>AssertionOperatorsTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\CustomExceptionSerializationTests.fs">
+      <Link>CustomExceptionSerializationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\UnquotedExpressionTests.fs">
+      <Link>UnquotedExpressionTests.fs</Link>
+    </Compile>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="xunit">
+      <HintPath>..\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Unquote.Net40\Unquote.Net40.fsproj">
+      <Name>Unquote.Net40</Name>
+      <Project>{bdca2201-a8d1-42dc-942e-1fcae24e47c5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	     Other similar extension points exist, see Microsoft.Common.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>
