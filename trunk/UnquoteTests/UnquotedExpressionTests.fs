@@ -21,6 +21,8 @@ let ``framework reduction exception`` () =
     test <@ ux.FinalReduction.Type = typeof<ReductionException> @>
     test <@ ux.Reductions.Length = 4 @>
 
+#if DEBUG
+#else
 [<Fact>]
 let ``non-framework reduction exception`` () =
     let x = <@ failwith "sorry" @>
@@ -28,3 +30,4 @@ let ``non-framework reduction exception`` () =
     test <@ ux.ReductionException.Value.GetType() = typeof<System.Exception> @>
     test <@ ux.FinalReduction.Type = typeof<ReductionException> @>
     test <@ ux.Reductions.Length = 2 @>
+#endif
