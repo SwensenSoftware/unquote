@@ -30,7 +30,7 @@ open Swensen.Utils
 
 let (|MethodInfoName|) (mi:MethodInfo) = mi.Name
 
-///Matches lambda values, returning the demanged (but not source) name of the lambda
+///Matches lambda values, returning the demangled (but not source) name of the lambda
 let (|LambdaValue|_|) = function
     | P.Value(o, ty) when Microsoft.FSharp.Reflection.FSharpType.IsFunction ty ->
         match sprintf "%A" o with
