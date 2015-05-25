@@ -252,8 +252,9 @@ let eval env expr =
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> 
+        //todo not sure if this PORTABLE fallback is required anymore (was for Silverlight 4, but might not be for Portable Profile 259)
 #if PORTABLE
-            failwithPatternNotSupported "Quote (in Silverlight)" expr
+            failwithPatternNotSupported "Quote (in Portable Profile 259)" expr
 #else
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 
             //all Expr are themselves untyped, but their Type property is actually always typed: 
