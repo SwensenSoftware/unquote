@@ -39,8 +39,6 @@ Unquote was inspired by [Groovy Power Asserts](http://dontmindthelanguage.wordpr
 ---
 
 
-&lt;wiki:gadget url="http://www.ohloh.net/p/602891/widgets/project\_factoids.xml" height="195" border="0" width="100%" /&gt;
-
 You are welcome to [Pay What You Want](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZNFZMKQF77YRC) for Unquote via PayPal.
 
 Copyright 2011-2015 [Swensen Software](http://www.swensensoftware.com)
