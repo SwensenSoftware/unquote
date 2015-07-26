@@ -1,3 +1,7 @@
+[User Guide](../../wiki/UserGuide) | [Downloads](http://www.swensensoftware.com/unquote) | [Release Notes](../../wiki/ReleaseNotes) | [Issues](../../issues)
+
+---
+
 Unquote is not just another DSL or API for making unit test assertions. Instead, assertions are written as plain, statically-checked F# [quoted expressions](http://msdn.microsoft.com/en-us/library/dd233212.aspx) and test failure messages are given as step-by-step F# expression evaluations.
 
 Unquote integrates configuration-free with all exception-based unit testing frameworks including xUnit.net, NUnit, MbUnit, Fuchu, and MSTest. For example, the following failing xUnit.net test
