@@ -69,36 +69,33 @@ module Internal =
         
             printfn ""
 
-        let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
-        if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
-            fsiTestFailed
-        else
-            //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
-            ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
-            let outputNonFsiTestFailedMsg =
-                let framework = 
-                    seq { 
-                        yield (Xunit, Type.GetType("Xunit.Assert, xunit")) //xunit 1
-                        yield (Xunit, Type.GetType("Xunit.Assert, xunit.assert")) //xunit 2
-                        yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
-                        yield (Fuchu, Type.GetType("Fuchu.AssertException, Fuchu"))
-                    } |> Seq.tryFind (fun (_,t) -> t <> null)
+        //cached reflection: http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
+        ///A test failed funtion to use in non fsi mode: calls to Xunit or Nunit if present, else Debug.Fail.
+        let framework = 
+            seq { 
+                yield (Xunit, Type.GetType("Xunit.Assert, xunit")) //xunit 1
+                yield (Xunit, Type.GetType("Xunit.Assert, xunit.assert")) //xunit 2
+                yield (Nunit, Type.GetType("NUnit.Framework.Assert, nunit.framework"))
+                yield (Fuchu, Type.GetType("Fuchu.AssertException, Fuchu"))
+            } |> Seq.tryFind (fun (_,t) -> t <> null)
 
-                match framework with
-                | Some(Xunit, t) -> 
-                    let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
-                    let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
-                    fun msg -> del.Invoke(false,msg)
-                | Some(Nunit, t) -> 
-                    let mi = t.GetMethod("Fail", [|typeof<string>|])
-                    let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
-                    fun msg -> del.Invoke(msg)
-                | Some(Fuchu, t) ->
-                    fun msg -> raise (Activator.CreateInstance(t, msg) :?> Exception)
-                | None ->
-                    outputGenericTestFailedMsg
-
-            outputReducedExprsMsg outputNonFsiTestFailedMsg
+        match framework with
+        | Some(Xunit, t) -> 
+            let mi = t.GetMethod("True", [|typeof<bool>;typeof<string>|])
+            let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
+            (fun msg -> del.Invoke(false,msg)) |> outputReducedExprsMsg
+        | Some(Nunit, t) -> 
+            let mi = t.GetMethod("Fail", [|typeof<string>|])
+            let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
+            (fun msg -> del.Invoke(msg)) |> outputReducedExprsMsg
+        | Some(Fuchu, t) ->
+            (fun (msg : string) -> raise (Activator.CreateInstance(t, msg) :?> Exception)) |> outputReducedExprsMsg
+        | None ->
+            let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
+            if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
+                fsiTestFailed
+            else
+                outputGenericTestFailedMsg |> outputReducedExprsMsg
 #endif
 
     let inline expectedExnButWrongExnRaisedMsg ty1 ty2 = sprintf "Expected exception of type '%s', but '%s' was raised instead" ty1 ty2
