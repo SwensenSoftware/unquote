@@ -115,28 +115,28 @@ let (|CheckedUnaryOp|_|) = function
         | false, _ -> None
     | _ -> None
 
-type EnvVar(name:string, value:obj, ?reraisable:bool) =
+type EnvVar(var:Var, value:obj, ?reraisable:bool) =
     let mutable value = value
     let reraisable = defaultArg reraisable false
 
-    member __.Name = name
+    member __.Var = var
     member this.Value
         with get() = value
         and set(value') = value <- value'
     
     member __.Reraisable = reraisable
     
-    static member findByName name (xl:EnvVar list)  =
-        match xl |> List.tryFind (fun x -> x.Name = name) with
+    static member findByVar var (xl:EnvVar list)  =
+        match xl |> List.tryFind (fun x -> x.Var = var) with
         | Some(ev) -> ev
-        | None -> raise <| Swensen.Unquote.EvaluationException(sprintf "Could not find variable '%s' in the environment. If the expression being evaluated is a nested quotation, ensure that it has not captured any Var expressions from the outer quotation" name)
+        | None -> raise <| Swensen.Unquote.EvaluationException(sprintf "Could not find variable '%s' in the environment." var.Name)
 
     static member findRaisable (xl:EnvVar list) =
         match xl |> List.tryFind (fun x -> x.Reraisable) with
         | Some(ev) -> ev
         | None -> raise <| Swensen.Unquote.EvaluationException("could not find any reraisable variables within the environment")
 
-    static member mapEnvVars (xm:Map<string,obj>) =
+    static member mapEnvVars (xm:Map<Var,obj>) =
         xm |> Map.toSeq |> Seq.map (fun (key, value) -> EnvVar(key, value)) |> Seq.toList
 
 let eval env expr =
@@ -146,12 +146,12 @@ let eval env expr =
     let rec eval env expr =
         match expr with
         | P.Let(var, assignment, body) ->
-            let env = EnvVar(var.Name, eval env assignment)::env
+            let env = EnvVar(var, eval env assignment)::env
             eval env body //ref type for future VarSet for mutable let bindings
         | P.Var(var) ->
-            (env |> EnvVar.findByName var.Name).Value
+            (env |> EnvVar.findByVar var).Value
         | P.VarSet(var, assignment) ->
-            (env |> EnvVar.findByName var.Name).Value <- eval env assignment
+            (env |> EnvVar.findByVar var).Value <- eval env assignment
             box ()
         | P.Sequential(lhs, rhs) ->
             eval env lhs |> ignore
@@ -202,7 +202,7 @@ let eval env expr =
             let ifrom = eval env ifrom :?> int
             let ito = eval env ito :?> int
             for i in ifrom..ito do
-                let env =  EnvVar(var.Name,i)::env
+                let env =  EnvVar(var,i)::env
                 eval env body |> ignore
             box ()
         | P.UnionCaseTest(target, uci) ->
@@ -217,7 +217,7 @@ let eval env expr =
                     match stripTargetInvocationException e with
                     | Some(e) -> e
                     | None -> e
-                let env = EnvVar(catchVar.Name, e, true)::env
+                let env = EnvVar(catchVar, e, true)::env
                 eval env catchBody
         | P.Call(None, mi, []) when mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> //could share this test with ExtraReflection module.
             let e = (EnvVar.findRaisable env).Value :?> Exception
@@ -231,7 +231,7 @@ let eval env expr =
             let ty = FSharpType.MakeFunctionType(var.Type, body.Type)
             let impl : obj -> obj = 
                 fun arg ->
-                    let env = EnvVar(var.Name, arg)::env
+                    let env = EnvVar(var, arg)::env
                     eval env body
             FSharpValue.MakeFunction(ty, impl)
         | P.Application(lambda, arg) ->
@@ -268,12 +268,12 @@ let eval env expr =
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.LetRecursive(bindings, finalBody) -> 
             let rec init env = function
-                | (var:Var, _)::rest -> init (EnvVar(var.Name, null)::env) rest
+                | (var:Var, _)::rest -> init (EnvVar(var, null)::env) rest
                 | [] -> env
             let env = init env bindings
                 
             for (var, body) in bindings do
-                (env |> EnvVar.findByName var.Name).Value <- eval env body
+                (env |> EnvVar.findByVar var).Value <- eval env body
 
             eval env finalBody                       
         | P.AddressOf _ -> 

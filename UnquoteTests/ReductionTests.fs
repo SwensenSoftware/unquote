@@ -419,14 +419,16 @@ open Swensen.Unquote
 [<Fact>]
 let ``synthetic full reduction`` () =
     let reduceFullyWithEnv env (expr:Expr) = expr.ReduceFully(env)
-    let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> reduceFullyWithEnv (Map.ofList [("x", 2 |> box)]) |> List.map decompile = ["x"; "2"] @>
+    let var_x = new Var("x", typeof<int>)
+    let synExpr:Expr = Expr.Var(var_x)
+    <@ synExpr |> reduceFullyWithEnv (Map.ofList [(var_x, 2 |> box)]) |> List.map decompile = ["x"; "2"] @>
 
 [<Fact>]
 let ``synthetic single reduction`` () =
     let reduceWithEnv env (expr:Expr) = expr.Reduce(env)
-    let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> reduceWithEnv (Map.ofList [("x", 2 |> box)]) |> decompile = "2" @>
+    let var_x = new Var("x", typeof<int>)
+    let synExpr:Expr = Expr.Var(var_x)
+    <@ synExpr |> reduceWithEnv (Map.ofList [(var_x, 2 |> box)]) |> decompile = "2" @>
 
 [<Fact>]
 let ``IfThenElse predicate is true, else branch is cut and never reduced`` () =

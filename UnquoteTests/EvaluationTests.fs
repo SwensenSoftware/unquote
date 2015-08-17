@@ -563,14 +563,16 @@ open Swensen.Unquote
 [<Fact>]
 let ``typed synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr<int>) = expr.Eval(env)
-    let synExpr:Expr<int> = Expr.Var(new Var("x", typeof<int>)) |> Expr.Cast
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", box 2)])) = 2 @>
+    let var_x = new Var("x", typeof<int>)
+    let synExpr:Expr<int> = Expr.Var(var_x) |> Expr.Cast
+    <@ synExpr |> (evalWithEnv (Map.ofList [(var_x, box 2)])) = 2 @>
 
 [<Fact>]
 let ``untyped synthetic evaluation`` () =
     let evalWithEnv env (expr:Expr) = expr.Eval(env) : int
-    let synExpr:Expr = Expr.Var(new Var("x", typeof<int>))
-    <@ synExpr |> (evalWithEnv (Map.ofList [("x", box 2)])) = 2 @>
+    let var_x = new Var("x", typeof<int>)
+    let synExpr:Expr = Expr.Var(var_x)
+    <@ synExpr |> (evalWithEnv (Map.ofList [(var_x, box 2)])) = 2 @>
 
 //let (|Unbox|_|) x y = 
 //    if y |> unbox = x then
@@ -634,3 +636,10 @@ let ``LetRecursive self recursive function`` () =
                 fib 9
         @>
         34
+
+let coordsEqual (x1,y1) (x2,y2) =
+    x1 = x2 && y1 = y2
+
+[<Fact>]
+let ``multiple tupledArg vars in scope``() =
+    test <@ coordsEqual (1.0,1.0) (id(2.0,2.0)) = false @>
