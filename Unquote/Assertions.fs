@@ -99,7 +99,7 @@ module Internal =
 
                 let ty = Type.GetType("NUnit.Framework.Assert, nunit.framework")
                 if ty <> null then
-                    yield Xunit ty
+                    yield Nunit ty
 
                 yield Generic
             } |> Seq.head

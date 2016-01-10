@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{0E4C6503-6760-4E1F-A682-0CE6459A06DD}"
 	ProjectSection(SolutionItems) = preProject
@@ -43,6 +43,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyXunit1Support", "VerifyXunit1Support\VerifyXunit1Support.fsproj", "{584E665F-6C3C-4E36-8197-33FC631605EC}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyFuchuSupport", "VerifyFuchuSupport\VerifyFuchuSupport.fsproj", "{627D7E41-5569-4964-9B57-0B8B6360F5D2}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VerifyNunit3Support", "VerifyNunit3Support\VerifyNunit3Support.fsproj", "{154CB55A-CBF7-42D6-83E9-B868B3A88A26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -148,6 +150,16 @@ Global
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2}.Release|x86.ActiveCfg = Release|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,5 +175,6 @@ Global
 		{B832C801-9E32-4AC8-88ED-AEDC27AE8D84} = {F9C32BC8-6AC9-47E0-9859-3696C06FC112}
 		{584E665F-6C3C-4E36-8197-33FC631605EC} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
 		{627D7E41-5569-4964-9B57-0B8B6360F5D2} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
+		{154CB55A-CBF7-42D6-83E9-B868B3A88A26} = {6C77CA49-EACA-4B17-A67B-BBE2B6836640}
 	EndGlobalSection
 EndGlobal
