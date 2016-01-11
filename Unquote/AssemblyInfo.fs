@@ -30,7 +30,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]
-[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2015")>]
+[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2016")>]
 [<assembly: AssemblyTrademark("")>]
 
 [<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("UnquoteTests")>]
