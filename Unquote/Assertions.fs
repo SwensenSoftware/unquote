@@ -146,7 +146,7 @@ let inline test (expr:Expr<bool>) =
         with 
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
-///Test wether the given expr fails with the given expected exception (or a subclass thereof).
+///Test whether the given expr fails with the given expected exception (or a subclass thereof).
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let u = unquote expr
     match u.ReductionException with
@@ -164,7 +164,7 @@ let inline raises<'a when 'a :> exn> (expr:Expr) =
         with 
         | e -> raise e
 
-///Test wether the given expr fails with the given expected exception (or a subclass thereof) when the additional assertion on the exception object holds.
+///Test whether the given expr fails with the given expected exception (or a subclass thereof) when the additional assertion on the exception object holds.
 let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
     let u = unquote expr
     match u.ReductionException with
@@ -206,9 +206,15 @@ module Obsolete =
     let inline (>=?) x y = test <@ x >= y @>
     let inline (<>?) x y = test <@ x <> y @>
 
+/// Test the objects with structural equality
 let inline (=!) x y = test <@ x = y @>
+/// Test the objects with structural less-than comparison
 let inline (<!) x y = test <@ x < y @>
+/// Test the objects with structural greater-than comparison
 let inline (>!) x y = test <@ x > y @>
+/// Test the objects with structural less-than-or-equal comparison
 let inline (<=!) x y = test <@ x <= y @>
+/// Test the objects with structural greater-than-or-equal comparison
 let inline (>=!) x y = test <@ x >= y @>
+/// Test the objects with structural inequality
 let inline (<>!) x y = test <@ x <> y @>
