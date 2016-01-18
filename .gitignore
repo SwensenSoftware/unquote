@@ -1,0 +1,7 @@
+bin/
+obj/
+obj/
+builds/
+packages/
+.vs/
+*.suo
