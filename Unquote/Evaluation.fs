@@ -183,9 +183,9 @@ let eval env expr =
             evalAll env args |> Seq.iteri(fun i e -> arrSet.Invoke(arr, [|box i; box e|]) |> ignore)
             box arr
         | P.NewRecord(ty, args) ->
-            FSharpValue.MakeRecord(ty, evalAll env args)
+            FSharpValue.MakeRecord(ty, evalAll env args, true)
         | P.NewUnionCase(uci, args) -> 
-            FSharpValue.MakeUnion(uci, evalAll env args)
+            FSharpValue.MakeUnion(uci, evalAll env args, true)
         | P.NewTuple(args) ->
             FSharpValue.MakeTuple(evalAll env args, expr.Type)
         | P.WhileLoop(condition, body) ->
@@ -207,7 +207,7 @@ let eval env expr =
             box ()
         | P.UnionCaseTest(target, uci) ->
             let targetObj = eval env target
-            let targetUci,_ = FSharpValue.GetUnionFields(targetObj, uci.DeclaringType)
+            let targetUci,_ = FSharpValue.GetUnionFields(targetObj, uci.DeclaringType, true)
             (targetUci.Tag = uci.Tag) |> box
         | P.TryWith(tryBody, _, _, catchVar, catchBody) -> //as far as I can tell the "filter" var and expr exactly the same as the "catch" var and expr except with weird integer return values...
             try
