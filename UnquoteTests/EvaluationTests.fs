@@ -179,6 +179,8 @@ let ``Let and Var with multiple assignments`` () =
 
 type RecordTest = {X:int; Y:string}
 
+type private PrivateRecordTest = {PX:int; PY:string}
+
 [<Fact>]
 let ``NewRecord with fields constructed in order`` () =
     testEval <@ {X=0; Y=""} @> {X=0; Y=""}
@@ -187,6 +189,10 @@ let ``NewRecord with fields constructed in order`` () =
 [<Fact>]
 let ``NewRecord with fields constructed out of order`` () =
     testEval <@ {Y=""; X=0} @> {X=0; Y=""}
+
+[<Fact>]
+let ``NewRecord on private type`` () =
+    testEval <@ {PX=0; PY=""} @> {PX=0; PY=""}
 
 [<Fact>]
 let ``Sequential discards lhs and returns rhs`` () =
@@ -341,11 +347,20 @@ let ``ForIntegerRangeLoop with from and to non-Value expressions`` () =
     <@ for i in (0 + 0)..(0 + 10) do sum := !sum + i @> |> eval
     test <@ !sum = Seq.sum {0..10} @>
 
+type private PrivateUnion = A of int * string | B
+
 [<Fact>]
 let ``UnionCaseTest`` () =
     testEval <@ match Some(3) with
                 | Some(_) -> true
                 | None -> false @>
+             true
+
+[<Fact>]
+let ``PrivateUnionCaseConstruction`` () =
+    testEval <@ match A(2,"") with
+                | A(2,_) -> true
+                | _ -> false @>
              true
 
 [<Fact>]
