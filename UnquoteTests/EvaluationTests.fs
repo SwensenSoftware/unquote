@@ -179,6 +179,13 @@ let ``Let and Var with multiple assignments`` () =
 
 type RecordTest = {X:int; Y:string}
 
+type private PrivateRecordTest = {PX:int; PY:string}
+
+type private PrivateClassTest internal (x : int, y : string) =
+    member internal __.GetY() = y
+    member val internal X = x with get, set
+    static member internal Test() = ()
+
 [<Fact>]
 let ``NewRecord with fields constructed in order`` () =
     testEval <@ {X=0; Y=""} @> {X=0; Y=""}
@@ -187,6 +194,34 @@ let ``NewRecord with fields constructed in order`` () =
 [<Fact>]
 let ``NewRecord with fields constructed out of order`` () =
     testEval <@ {Y=""; X=0} @> {X=0; Y=""}
+
+[<Fact>]
+let ``NewRecord on private type`` () =
+    testEval <@ {PX=0; PY=""} @> {PX=0; PY=""}
+
+[<Fact>]
+let ``Private Class Constructor`` () =
+    testEval <@ new PrivateClassTest(42, "42") |> ignore @> ()
+
+[<Fact>]
+let ``Private Property Getter`` () =
+    let c = new PrivateClassTest(42, "42") 
+    testEval <@ c.X = 42 @> true
+
+[<Fact>]
+let ``Private Property Setter`` () =
+    let c = new PrivateClassTest(42, "42") 
+    testEval <@ c.X <- 0 ; c.X @> 0
+
+[<Fact>]
+let ``Private Instance Method`` () =
+    let c = new PrivateClassTest(42, "42") 
+    testEval <@ c.GetY() @> "42"
+
+[<Fact>]
+let ``Private Static Method`` () =
+    testEval <@ PrivateClassTest.Test() @> ()
+
 
 [<Fact>]
 let ``Sequential discards lhs and returns rhs`` () =
@@ -341,11 +376,20 @@ let ``ForIntegerRangeLoop with from and to non-Value expressions`` () =
     <@ for i in (0 + 0)..(0 + 10) do sum := !sum + i @> |> eval
     test <@ !sum = Seq.sum {0..10} @>
 
+type private PrivateUnion = A of int * string | B
+
 [<Fact>]
 let ``UnionCaseTest`` () =
     testEval <@ match Some(3) with
                 | Some(_) -> true
                 | None -> false @>
+             true
+
+[<Fact>]
+let ``PrivateUnionCaseConstruction`` () =
+    testEval <@ match A(2,"") with
+                | A(2,_) -> true
+                | _ -> false @>
              true
 
 [<Fact>]
