@@ -182,8 +182,11 @@ type RecordTest = {X:int; Y:string}
 type private PrivateRecordTest = {PX:int; PY:string}
 
 type private PrivateClassTest internal (x : int, y : string) =
+    let mutable x = x
     member internal __.GetY() = y
-    member val internal X = x with get, set
+    member internal __.X 
+        with get() = x
+        and set(x') = x <- x'
     static member internal Test() = ()
 
 [<Fact>]
