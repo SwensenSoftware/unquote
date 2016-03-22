@@ -46,4 +46,4 @@ Unquote was inspired by [Groovy Power Asserts](http://dontmindthelanguage.wordpr
 
 You are welcome to [Pay What You Want](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZNFZMKQF77YRC) for Unquote via PayPal.
 
-Copyright 2011-2015 [Swensen Software](http://www.swensensoftware.com)
+Copyright 2011-2016 [Swensen Software](http://www.swensensoftware.com)
