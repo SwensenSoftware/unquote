@@ -179,6 +179,8 @@ module SymbolicOps =
                 Some(sprintf "(%s)" symbol)
         | _ -> None
 
+open System.Reflection
+
 let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
 #if NETSTANDARD1_6
     ty.GetTypeInfo().IsGenericType && ty.GetTypeInfo().GetGenericTypeDefinition() = typedefof<'a>
