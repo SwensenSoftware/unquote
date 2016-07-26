@@ -99,7 +99,11 @@ let decompile expr =
                     let decompiledTarget =
                         match target with
                         | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
+#if NETSTANDARD1_6
+                        | None -> failwith "not implemented"
+#else
                         | None -> ER.sourceName <| mi.DeclaringType.GetTypeInfo() 
+#endif
                     sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
 
             match suppliedArgs.Length with
@@ -152,7 +156,11 @@ let decompile expr =
                 let decompiledTarget =
                     match target with
                     | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
+#if NETSTANDARD1_6
+                    | None -> failwith "not implemented"
+#else
                     | None -> ER.sourceName <| mi.DeclaringType.GetTypeInfo()
+#endif
 
                 applyParens OP.Application (sprintf "%s.%s%s" decompiledTarget methodName sprintedArgs)
         | P.Call(target, mi, args) -> //a "normal" .net instance or static call
