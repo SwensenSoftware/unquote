@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "Utils/Prelude.fs",
+        "Utils/Regex.fs",
+        "Utils/Printf.fs",
+        "Utils/List.fs",
+        "Utils/Type.fs",
+        "AssemblyInfo.fs",
+        "DynamicOperators.fs",
+        "EvaluationException.fs",
+        "Evaluation.fs",
+        "OperatorPrecedence.fs",
+        "ExtraReflection.fs",
+        "ExtraPatterns.fs",
+        "ReductionException.fs",
+        "Decompilation.fs",
+        "Reduction.fs",
+        "UnquotedExpression.fs",
+        "Extensions.fs",
+        "Operators.fs",
+        "AssertionFailedException.fs",
+        "Assertions.fs"
+      ]
+    }
+  },
+  "dependencies": {
+    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-*"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "dependencies": {
+        "NETStandard.Library": "1.6.0"
+      }
+    }
+  },
+  "tools": {
+    "dotnet-compile-fsc": {
+      "version": "1.0.0-preview2-*",
+      "imports": "dnxcore50"
+    }
+  }
+}
