@@ -345,8 +345,13 @@ let genericArgsInferable (mi:MethodInfo) =
             |> Seq.append (Seq.singleton miDefinition.ReturnParameter)
             |> Seq.map 
                 (fun p -> 
-                    if p.ParameterType.IsGenericParameter then [|p.ParameterType|]
-                    elif p.ParameterType.ContainsGenericParameters then p.ParameterType.GetGenericArguments()
+#if NETSTANDARD1_6
+                    let pti = p.ParameterType.GetTypeInfo()
+#else
+                    let pti = p.ParameterType
+#endif
+                    if pti.IsGenericParameter then [|p.ParameterType|]
+                    elif pti.ContainsGenericParameters then pti.GetGenericArguments()
                     else [||]) 
             |> Seq.concat
             |> Seq.map (fun t -> t.Name)
