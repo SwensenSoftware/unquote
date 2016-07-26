@@ -318,7 +318,11 @@ let sprintSig (outerTy:Type) =
 
         match ty.GetGenericArgumentsArrayInclusive() with
         | args when args.Length = 0 ->
+#if NETSTANDARD1_6
+            (if outerTy.GetTypeInfo().IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+#else
             (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+#endif
         | args when cleanName = "System.Tuple" ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
         | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
