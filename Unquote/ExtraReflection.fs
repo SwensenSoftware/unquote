@@ -196,7 +196,11 @@ let inline isFsiModule (declaringType:Type) =
 //best we can seem to do
 let isOpenModule (declaringType:Type) =
     isFsiModule declaringType ||
+#if NETSTANDARD1_6
+    declaringType.GetTypeInfo().GetCustomAttributes(true) |> Array.ofSeq
+#else
     declaringType.GetCustomAttributes(true)
+#endif
     |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
     |> (function | Some _ -> true | None -> false)
 
