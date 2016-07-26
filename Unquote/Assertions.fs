@@ -58,7 +58,7 @@ module Internal =
                     (reducedExprs |> List.map decompile |> String.concat "\n")    
             output msg
 
-#if PORTABLE
+#if PORTABLE || NETSTANDARD1_6
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
         //moved from top-level private module function since silverlight does not support printf (i.e. standard out)
