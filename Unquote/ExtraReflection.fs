@@ -180,7 +180,11 @@ module SymbolicOps =
         | _ -> None
 
 let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
+#if NETSTANDARD1_6
+    ty.GetTypeInfo().IsGenericType && ty.GetTypeInfo().GetGenericTypeDefinition() = typedefof<'a>
+#else
     ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<'a>
+#endif
 
 ///is the top-level FSI module
 let inline isFsiModule (declaringType:Type) =
