@@ -60,7 +60,7 @@ module Internal =
 
 #if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
-#endif
+#else
 #if NETSTANDARD1_6
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
@@ -124,6 +124,7 @@ module Internal =
             (fun msg -> del.Invoke(msg)) |> outputReducedExprsMsg
         | Generic ->
             outputGenericTestFailedMsg |> outputReducedExprsMsg
+#endif
 #endif
 
     let inline expectedExnButWrongExnRaisedMsg ty1 ty2 = sprintf "Expected exception of type '%s', but '%s' was raised instead" ty1 ty2
