@@ -51,7 +51,9 @@ REM create nuget package...
 copy Unquote.%versionNumber%.nupkg builds
 del Unquote.%versionNumber%.nupkg
 
-if "%UNQUOTE_NETCORE%" == "1" (
+REM build .net core if .net core sdk is installed
+dotnet --info
+if "%ERRORLEVEL%" == "0" (
     pushd Unquote
     REM restore packages
     dotnet restore
