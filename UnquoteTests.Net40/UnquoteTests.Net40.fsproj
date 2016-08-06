@@ -23,6 +23,7 @@
     <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\UnquoteTests.Net40.XML</DocumentationFile>
+    <NoWarn>20</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +33,7 @@
     <DefineConstants>TRACE;NET40</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\UnquoteTests.Net40.XML</DocumentationFile>
+    <NoWarn>20</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\UnquoteTests\EvaluationTests.fs">
