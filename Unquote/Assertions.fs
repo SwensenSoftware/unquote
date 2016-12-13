@@ -84,7 +84,7 @@ module Internal =
                     if assemblies |> Seq.exists (fun a -> a.GetName().Name = "Fuchu") then
                         yield Fuchu (Type.GetType("Fuchu.AssertException, Fuchu"))
                     elif assemblies |> Seq.exists (fun a -> a.GetName().Name = "Expecto") then
-                        yield Fuchu (Type.GetType("Expecto.AssertException, Expecto"))
+                        yield Expecto (Type.GetType("Expecto.AssertException, Expecto"))
                     else
                         yield Fsi
 
