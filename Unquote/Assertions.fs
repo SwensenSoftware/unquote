@@ -40,6 +40,7 @@ module Internal =
         | Xunit of Type
         | Nunit of Type
         | Fuchu of Type
+        | Expecto of Type
         | Fsi
         | Generic
 
@@ -82,12 +83,18 @@ module Internal =
                     //issue in vs 2010: http://stackoverflow.com/questions/2024036/strange-fsi-exe-behavior
                     if assemblies |> Seq.exists (fun a -> a.GetName().Name = "Fuchu") then
                         yield Fuchu (Type.GetType("Fuchu.AssertException, Fuchu"))
+                    elif assemblies |> Seq.exists (fun a -> a.GetName().Name = "Expecto") then
+                        yield Expecto (Type.GetType("Expecto.AssertException, Expecto"))
                     else
                         yield Fsi
 
                 let ty = Type.GetType("Fuchu.AssertException, Fuchu")
                 if ty <> null then
                     yield Fuchu ty
+
+                let ty = Type.GetType("Expecto.AssertException, Expecto")
+                if ty <> null then
+                    yield Expecto ty
 
                 let ty = Type.GetType("Xunit.Assert, xunit") //xunit v1
                 if ty <> null then
@@ -108,6 +115,8 @@ module Internal =
         //http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
         match framework with
         | Fuchu ty -> 
+            (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
+        | Expecto ty -> 
             (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
         | Fsi ->
             fsiTestFailed
