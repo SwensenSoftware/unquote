@@ -51,6 +51,19 @@ REM create nuget package...
 copy Unquote.%versionNumber%.nupkg builds
 del Unquote.%versionNumber%.nupkg
 
+REM build .net core if .net core sdk is installed
+dotnet --info
+if "%ERRORLEVEL%" == "0" (
+    pushd Unquote
+    REM restore packages
+    dotnet restore
+    REM build package
+    dotnet pack -c Release
+    REM merge package
+    dotnet mergenupkg --source "..\builds\Unquote.%versionNumber%.nupkg" --other "bin\Release\Unquote.%versionNumber%.nupkg" --framework netstandard1.6
+    popd
+)
+
 REM cleanup...
 
 rd /q /s staging

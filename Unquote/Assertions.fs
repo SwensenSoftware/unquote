@@ -62,6 +62,9 @@ module Internal =
 #if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
+#if NETSTANDARD1_6
+        outputReducedExprsMsg outputGenericTestFailedMsg
+#else
         //moved from top-level private module function since silverlight does not support printf (i.e. standard out)
         let fsiTestFailed (reducedExprs:Expr list) additionalInfo =
             Printf.nprintfn "\nTest failed:\n" 
@@ -130,6 +133,7 @@ module Internal =
             (fun msg -> del.Invoke(msg)) |> outputReducedExprsMsg
         | Generic ->
             outputGenericTestFailedMsg |> outputReducedExprsMsg
+#endif
 #endif
 
     let inline expectedExnButWrongExnRaisedMsg ty1 ty2 = sprintf "Expected exception of type '%s', but '%s' was raised instead" ty1 ty2

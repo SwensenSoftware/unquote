@@ -34,6 +34,9 @@ module CustomContext =
 
 module CC = CustomContext
       
+
+open System.Reflection
+
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style

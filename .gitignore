@@ -5,3 +5,4 @@ builds/
 packages/
 .vs/
 *.suo
+project.lock.json

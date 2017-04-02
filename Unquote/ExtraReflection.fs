@@ -179,8 +179,14 @@ module SymbolicOps =
                 Some(sprintf "(%s)" symbol)
         | _ -> None
 
+open System.Reflection
+
 let inline isGenericTypeDefinedFrom<'a> (ty:Type) =
+#if NETSTANDARD1_6
+    ty.GetTypeInfo().IsGenericType && ty.GetTypeInfo().GetGenericTypeDefinition() = typedefof<'a>
+#else
     ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<'a>
+#endif
 
 ///is the top-level FSI module
 let inline isFsiModule (declaringType:Type) =
@@ -190,7 +196,11 @@ let inline isFsiModule (declaringType:Type) =
 //best we can seem to do
 let isOpenModule (declaringType:Type) =
     isFsiModule declaringType ||
+#if NETSTANDARD1_6
+    declaringType.GetTypeInfo().GetCustomAttributes(true) |> Array.ofSeq
+#else
     declaringType.GetCustomAttributes(true)
+#endif
     |> Array.tryFind (function | :? AutoOpenAttribute -> true | _ -> false)
     |> (function | Some _ -> true | None -> false)
 
@@ -308,7 +318,11 @@ let sprintSig (outerTy:Type) =
 
         match ty.GetGenericArgumentsArrayInclusive() with
         | args when args.Length = 0 ->
+#if NETSTANDARD1_6
+            (if outerTy.GetTypeInfo().IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+#else
             (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+#endif
         | args when cleanName = "System.Tuple" ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
         | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
@@ -331,8 +345,13 @@ let genericArgsInferable (mi:MethodInfo) =
             |> Seq.append (Seq.singleton miDefinition.ReturnParameter)
             |> Seq.map 
                 (fun p -> 
-                    if p.ParameterType.IsGenericParameter then [|p.ParameterType|]
-                    elif p.ParameterType.ContainsGenericParameters then p.ParameterType.GetGenericArguments()
+#if NETSTANDARD1_6
+                    let pti = p.ParameterType.GetTypeInfo()
+#else
+                    let pti = p.ParameterType
+#endif
+                    if pti.IsGenericParameter then [|p.ParameterType|]
+                    elif pti.ContainsGenericParameters then pti.GetGenericArguments()
                     else [||]) 
             |> Seq.concat
             |> Seq.map (fun t -> t.Name)
