@@ -39,5 +39,5 @@ open System.Runtime.InteropServices
 [<assembly: ComVisible(false)>]
 
 //use odd number revision number (fourth position) to indicate pre-release
-[<assembly: AssemblyVersion("3.1.2.2")>]
+[<assembly: AssemblyVersion("3.2.0.0")>]
 ()
