@@ -190,7 +190,7 @@ type private PatDele = Func<Expr, (obj * Type * string) option>
 // without introducing a compile-time dependency to FSharp.Core >= 4.4
 let (|ValueWithNameBackCompat|_|) =
 #if PORTABLE
-    fun (_:Expr) -> Option.None<obj * Type * string>
+    fun (_:Expr) -> Option<obj * Type * string>.None
 #else
     let pmodule = typeof<unit>.Assembly.GetType("Microsoft.FSharp.Quotations.PatternsModule")
     let meth = match pmodule with null -> null | t -> t.GetMethod("ValueWithNamePattern", BindingFlags.Static ||| BindingFlags.Public)
