@@ -173,6 +173,7 @@ let decompile expr =
             applyParens OP.LessThanOp (sprintf "%s <- %s" (decompileFieldAccess target fi) (decompile CC.Zero rhs))
         | DP.Unit -> "()" //must come before Value pattern
         | EP.LambdaValue(name) -> ER.sourceNameFromString name
+        | P.ValueWithNameBackCompat(_,_,id) -> id
         | P.Value(o, ty) ->
             match o with
             | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None" //option<_> None is represented as null

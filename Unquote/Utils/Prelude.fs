@@ -37,3 +37,19 @@ let (|Int|_|) str =
 //http://stackoverflow.com/questions/833180/handy-f-snippets/1477188#1477188
 let (=~) input pattern = 
     input <> null && System.Text.RegularExpressions.Regex.IsMatch(input, pattern)
+
+module P =
+    open System.Reflection
+    open FSharp.Quotations
+
+    type private PatDele = Func<Expr, (obj * Type * string) option>
+    // Exposes a runtime-extracted wrapper for Expr.ValueWithName 
+    // without introducing a compile-time dependency to FSharp.Core >= 4.4
+    let (|ValueWithNameBackCompat|_|) =
+        let pmodule = typeof<unit>.Assembly.GetType("Microsoft.FSharp.Quotations.PatternsModule")
+        let method = match pmodule with null -> null | t -> t.GetMethod("ValueWithNamePattern", BindingFlags.Static ||| BindingFlags.Public)
+        match method with
+        | null -> (fun (_:Expr) -> None)
+        | method -> 
+            let dele = Delegate.CreateDelegate(typeof<PatDele>, method) :?> PatDele
+            dele.Invoke
