@@ -47,9 +47,9 @@ module P =
     // without introducing a compile-time dependency to FSharp.Core >= 4.4
     let (|ValueWithNameBackCompat|_|) =
         let pmodule = typeof<unit>.Assembly.GetType("Microsoft.FSharp.Quotations.PatternsModule")
-        let method = match pmodule with null -> null | t -> t.GetMethod("ValueWithNamePattern", BindingFlags.Static ||| BindingFlags.Public)
-        match method with
+        let meth = match pmodule with null -> null | t -> t.GetMethod("ValueWithNamePattern", BindingFlags.Static ||| BindingFlags.Public)
+        match meth with
         | null -> (fun (_:Expr) -> None)
-        | method -> 
-            let dele = Delegate.CreateDelegate(typeof<PatDele>, method) :?> PatDele
+        | meth -> 
+            let dele = Delegate.CreateDelegate(typeof<PatDele>, meth) :?> PatDele
             dele.Invoke
