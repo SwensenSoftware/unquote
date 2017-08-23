@@ -189,6 +189,9 @@ type private PatDele = Func<Expr, (obj * Type * string) option>
 // Exposes a runtime-extracted wrapper for Expr.ValueWithName 
 // without introducing a compile-time dependency to FSharp.Core >= 4.4
 let (|ValueWithNameBackCompat|_|) =
+#if PORTABLE
+    fun (_:Expr) -> Option.None<obj * Type * string>
+#else
     let pmodule = typeof<unit>.Assembly.GetType("Microsoft.FSharp.Quotations.PatternsModule")
     let meth = match pmodule with null -> null | t -> t.GetMethod("ValueWithNamePattern", BindingFlags.Static ||| BindingFlags.Public)
     match meth with
@@ -196,3 +199,4 @@ let (|ValueWithNameBackCompat|_|) =
     | meth -> 
         let dele = Delegate.CreateDelegate(typeof<PatDele>, meth) :?> PatDele
         dele.Invoke
+#endif
