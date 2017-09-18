@@ -18,6 +18,7 @@ limitations under the License.
 module AssertionOperatorsTests
 open Xunit
 open Swensen.Unquote
+open System
 
 [<Fact>]
 let ``expect exception`` () =
@@ -44,6 +45,15 @@ let ``raises no exception`` () =
 [<Fact>]
 let ``test failes`` () =
     raises<exn> <@ test <@ 4 = 5 @> @>
+
+
+[<Fact>]
+let ``trap succeeds`` () =
+    test <@ trap <@ 1 + 1 @> = 2 @>
+
+[<Fact>]
+let ``trap fails`` () =
+    raises<exn> <@ trap <@ 1 / 0 @> @>
 
 
 type SideEffects() =

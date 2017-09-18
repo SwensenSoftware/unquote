@@ -205,6 +205,20 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
         with 
         | e -> raise e
 
+///Evaluate the given boolean expression: if successful return the value
+///and if exception logs the reduction steps in the following manner
+///1) stdout if fsi mode
+///2) Framework fail methods if xUnit.net (v1 or v2), NUnit, or Fuchu present
+///3) System.Exception if release mode.
+let inline trap (expr:Quotations.Expr<'T>) : 'T =
+    let u = unquote expr
+    match u.ReductionException with
+    | None -> u.FinalReduction |> evalRaw
+    | Some x ->
+        try Internal.testFailed u.Reductions ""
+        with e -> raise e
+        raise x
+
 ///These '?' suffixed operators conflict with F# 3.0's nullable operators and have been replaced by equivalent '!' suffixed operators.
 [<System.Obsolete("These '?' suffixed operators conflict with F# 3.0's nullable operators and have been replaced by equivalent '!' suffixed operators.")>]
 module Obsolete =
