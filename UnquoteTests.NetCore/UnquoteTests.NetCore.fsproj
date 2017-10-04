@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <AssemblyName>UnquoteTests.NetCore</AssemblyName>
+  </PropertyGroup>
+    <ItemGroup>
+    <Compile Include="..\UnquoteTests\EvaluationTests.fs">
+      <Link>EvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\DynamicOperatorsEvaluationTests.fs">
+      <Link>DynamicOperatorsEvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\CheckedDynamicOperatorsEvaluationTests.fs">
+      <Link>CheckedDynamicOperatorsEvaluationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\FSharpNameTests.fs">
+      <Link>FSharpNameTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\DecompilationTests.fs">
+      <Link>DecompilationTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\ReductionTests.fs">
+      <Link>ReductionTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\AssertionOperatorsTests.fs">
+      <Link>AssertionOperatorsTests.fs</Link>
+    </Compile>
+    <Compile Include="..\UnquoteTests\UnquotedExpressionTests.fs">
+      <Link>UnquotedExpressionTests.fs</Link>
+    </Compile>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170517-02" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <ProjectReference Include="..\Unquote.NetStandard\Unquote.NetStandard.fsproj" />
+  </ItemGroup>
+</Project>
