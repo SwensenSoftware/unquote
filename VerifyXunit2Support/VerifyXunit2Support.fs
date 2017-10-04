@@ -18,6 +18,9 @@ module VerifyXunit2Support
 open Swensen.Unquote
 open Xunit
 open System
+#if NETCOREAPP1_1
+open System.Reflection
+#endif
 
 //should fail without exception
 [<Fact>]
@@ -31,7 +34,11 @@ let ``test xunit support, raises`` () =
 [<Fact>]
 let ``test xunit support, raisesWith`` () =
     raisesWith<Exception> <@ (null:string).ToString() @>
+        #if NETCOREAPP1_1
+        (fun e -> <@ e.GetType().GetTypeInfo().Name = "ArgumentException" @>)
+        #else
         (fun e -> <@ e.GetType().Name = "ArgumentException" @>)
+        #endif
 
 [<Fact>]
 let ``test xunit support, reraise within test`` () =
