@@ -67,10 +67,12 @@ module internal Type =
                 [||]
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
-        member this.GetConstructors(bindingFlags) =
+        #if NETSTANDARD1_6
+        member this.GetConstructors(bindingFlags:BindingFlags) =
             this.GetTypeInfo().GetConstructors(bindingFlags)
         member this.GetProperty(name:String, bindingFlags:BindingFlags) =
             this.GetTypeInfo().GetProperty(name, bindingFlags)
+        #endif
 
     #else //NET40
         //mono mis-implements GetGenericArguments and doesn't treat arrays correctly
