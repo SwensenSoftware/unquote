@@ -62,6 +62,39 @@ module Internal =
 #if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
+#if NETSTANDARD1_6
+        //determine the method of output (we use seq expression for short circuit selection).
+        let framework = 
+            seq { 
+                let ty = Type.GetType("Expecto.AssertException, Expecto")
+                if ty <> null then
+                    yield Expecto ty
+
+                let ty = Type.GetType("Xunit.Assert, xunit.assert") //xunit v2
+                if ty <> null then
+                    yield Xunit ty
+
+                let ty = Type.GetType("NUnit.Framework.Assert, nunit.framework")
+                if ty <> null then
+                    yield Nunit ty
+
+                yield Generic
+            } |> Seq.head
+
+        match framework with
+        | Expecto ty -> 
+            (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
+        | Xunit ty -> 
+            let mi = ty.GetMethod("True", [|typeof<bool>;typeof<string>|])
+            let del = mi.CreateDelegate(typeof<Action<bool,string>>) :?> (Action<bool,string>)
+            (fun msg -> del.Invoke(false,msg)) |> outputReducedExprsMsg
+        | Nunit ty -> 
+            let mi = ty.GetMethod("Fail", [|typeof<string>|])
+            let del = mi.CreateDelegate(typeof<Action<string>>) :?> (Action<string>)
+            (fun msg -> del.Invoke(msg)) |> outputReducedExprsMsg
+        | _ ->
+            outputGenericTestFailedMsg |> outputReducedExprsMsg
+#else
         //moved from top-level private module function since silverlight does not support printf (i.e. standard out)
         let fsiTestFailed (reducedExprs:Expr list) additionalInfo =
             Printf.nprintfn "\nTest failed:\n" 
@@ -130,6 +163,7 @@ module Internal =
             (fun msg -> del.Invoke(msg)) |> outputReducedExprsMsg
         | Generic ->
             outputGenericTestFailedMsg |> outputReducedExprsMsg
+#endif
 #endif
 
     let inline expectedExnButWrongExnRaisedMsg ty1 ty2 = sprintf "Expected exception of type '%s', but '%s' was raised instead" ty1 ty2

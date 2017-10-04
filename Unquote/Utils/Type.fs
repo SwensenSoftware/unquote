@@ -20,7 +20,7 @@ open System.Reflection
 module internal Type =
     ///mostly backward compatabile extensions for .net 4.5 / portable profile breaking changes to reflection api
     type System.Type with
-    #if PORTABLE
+    #if PORTABLE || NETSTANDARD1_6
         member this.IsAssignableFrom(other:Type) =
             this.GetTypeInfo().IsAssignableFrom(other.GetTypeInfo())
         member this.GetMethod(filter, ?ambiguousMatchMsg) =
@@ -67,6 +67,11 @@ module internal Type =
                 [||]
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
+        member this.GetConstructors(bindingFlags) =
+            this.GetTypeInfo().GetConstructors(bindingFlags)
+        member this.GetProperty(name:String, bindingFlags:BindingFlags) =
+            this.GetTypeInfo().GetProperty(name, bindingFlags)
+
     #else //NET40
         //mono mis-implements GetGenericArguments and doesn't treat arrays correctly
         member this.GetGenericArgumentsArrayInclusive() =
