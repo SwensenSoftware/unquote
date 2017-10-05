@@ -63,4 +63,7 @@
       <Link>Assertions.fs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-mergenupkg" Version="1.0.*" />
+  </ItemGroup>
 </Project>
