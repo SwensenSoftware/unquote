@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <AssemblyName>VerifyExpectoSupport</AssemblyName>
+    <AssemblyName>Unquote.VerifyNonFrameworkSupport</AssemblyName>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
+    <Compile Include="..\VerifyNonFrameworkSupport\Program.fs">
+      <Link>Program.fs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Expecto" Version="5.0.1" />    
     <ProjectReference Include="..\Unquote.NetStandard\Unquote.NetStandard.fsproj" />
   </ItemGroup>
 </Project>

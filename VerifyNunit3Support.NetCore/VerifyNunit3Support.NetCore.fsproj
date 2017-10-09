@@ -3,12 +3,13 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>VerifyNunit3Support</AssemblyName>
   </PropertyGroup>
-    <ItemGroup>
-    <Compile Include="VerifyNunit3Support.fs" />
+  <ItemGroup>
+    <Compile Include="..\VerifyNunit3Support\VerifyNunit3Support.fs">
+      <Link>VerifyNunit3Support.fs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170517-02" />
-    <PackageReference Include="NUnit" Version="3.7.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
     <ProjectReference Include="..\Unquote.NetStandard\Unquote.NetStandard.fsproj" />
   </ItemGroup>
