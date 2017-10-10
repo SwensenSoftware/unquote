@@ -25,7 +25,7 @@ open System.Runtime.InteropServices
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [<assembly: AssemblyTitle("Unquote")>]
-[<assembly: AssemblyDescription("Unquote for .NET Standard 1.6")>]
+[<assembly: AssemblyDescription("Unquote for .NET Standard 2.0")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]

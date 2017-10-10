@@ -398,7 +398,7 @@ let ``generic NewUnionCase with nested construction`` () =
 #else
 #if PORTABLE //can't access stack frame
 #else
-#if NETCOREAPP1_1 //can't access stack frame
+#if NETCOREAPP2_0
 #else
 #if NET40 //relative file names cause issues
 #else

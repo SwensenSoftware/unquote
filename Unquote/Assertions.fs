@@ -62,7 +62,7 @@ module Internal =
 #if PORTABLE
         outputReducedExprsMsg outputGenericTestFailedMsg
 #else
-#if NETSTANDARD1_6
+#if NETSTANDARD2_0
         //determine the method of output (we use seq expression for short circuit selection).
         let framework = 
             seq { 
@@ -70,7 +70,7 @@ module Internal =
                 if ty <> null then
                     yield Expecto ty
 
-                let ty = Type.GetType("Xunit.Assert, xunit.assert") //xunit v2
+                let ty = Type.GetType("Xunit.Assert, xunit.assert")
                 if ty <> null then
                     yield Xunit ty
 

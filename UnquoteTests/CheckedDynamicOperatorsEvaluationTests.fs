@@ -94,7 +94,7 @@ let ``ToUInt64 reflective`` () =
 
 #if MONO
 #else
-#if NETCOREAPP1_1
+#if NETCOREAPP2_0
 [<Fact(Skip="This fails on .net core, is ok?")>]
 #else
 [<Fact>]

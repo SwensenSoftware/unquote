@@ -63,7 +63,7 @@ if "%ERRORLEVEL%" == "0" (
     dotnet pack -c Release /p:PackageVersion=%versionNumber%
     
     REM merge package
-    dotnet mergenupkg --source "..\builds\Unquote.%versionNumber%.nupkg" --other "bin\Release\Unquote.%versionNumber%.nupkg" --framework netstandard1.6
+    dotnet mergenupkg --source "..\builds\Unquote.%versionNumber%.nupkg" --other "bin\Release\Unquote.%versionNumber%.nupkg" --framework netstandard2.0
     
     popd
 )

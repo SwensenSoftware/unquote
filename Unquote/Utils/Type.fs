@@ -20,16 +20,7 @@ open System.Reflection
 module internal Type =
     ///mostly backward compatabile extensions for .net 4.5 / portable profile breaking changes to reflection api
     type System.Type with
-    #if NET40
-        //mono mis-implements GetGenericArguments and doesn't treat arrays correctly
-        member this.GetGenericArgumentsArrayInclusive() =
-            if this.IsArray then
-                this.GetElementType().GetGenericArgumentsArrayInclusive() //todo: verify the recursive case
-            else
-                this.GetGenericArguments()
-        member this.GetTypeInfo() =
-            this
-    #else //PORTABLE || NETSTANDARD1_6
+    #if PORTABLE
         member this.IsAssignableFrom(other:Type) =
             this.GetTypeInfo().IsAssignableFrom(other.GetTypeInfo())
         member this.GetMethod(filter, ?ambiguousMatchMsg) =
@@ -76,10 +67,13 @@ module internal Type =
                 [||]
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
-        #if NETSTANDARD1_6
-        member this.GetConstructors(bindingFlags:BindingFlags) =
-            this.GetTypeInfo().GetConstructors(bindingFlags)
-        member this.GetProperty(name:String, bindingFlags:BindingFlags) =
-            this.GetTypeInfo().GetProperty(name, bindingFlags)
-        #endif
+    #else //NET40 || NETSTANDARD2_0
+        //mono mis-implements GetGenericArguments and doesn't treat arrays correctly
+        member this.GetGenericArgumentsArrayInclusive() =
+            if this.IsArray then
+                this.GetElementType().GetGenericArgumentsArrayInclusive() //todo: verify the recursive case
+            else
+                this.GetGenericArguments()
+        member this.GetTypeInfo() =
+            this
     #endif
