@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Unquote.VerifyNonFrameworkSupport</AssemblyName>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\VerifyNonFrameworkSupport\Program.fs">
+      <Link>Program.fs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Unquote.NetStandard\Unquote.NetStandard.fsproj" />
+  </ItemGroup>
+</Project>

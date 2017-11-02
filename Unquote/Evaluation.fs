@@ -58,10 +58,14 @@ let inline reraisePreserveStackTrace (e:Exception) =
 #if PORTABLE
     raise e
 #else
+#if NETSTANDARD2_0
+    raise e
+#else
     //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
     remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
     raise e
+#endif
 #endif
 
 open System.Collections.Generic

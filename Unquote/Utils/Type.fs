@@ -67,7 +67,7 @@ module internal Type =
                 [||]
         member this.ContainsGenericParameters =
             this.GetTypeInfo().ContainsGenericParameters
-    #else //NET40
+    #else //NET40 || NETSTANDARD2_0
         //mono mis-implements GetGenericArguments and doesn't treat arrays correctly
         member this.GetGenericArgumentsArrayInclusive() =
             if this.IsArray then
