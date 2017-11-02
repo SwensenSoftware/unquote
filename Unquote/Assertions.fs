@@ -66,11 +66,19 @@ module Internal =
         //determine the method of output (we use seq expression for short circuit selection).
         let framework = 
             seq { 
+                let ty = Type.GetType("Fuchu.AssertException, Fuchu")
+                if ty <> null then
+                    yield Fuchu ty
+
                 let ty = Type.GetType("Expecto.AssertException, Expecto")
                 if ty <> null then
                     yield Expecto ty
 
-                let ty = Type.GetType("Xunit.Assert, xunit.assert")
+                let ty = Type.GetType("Xunit.Assert, xunit") //xunit v1
+                if ty <> null then
+                    yield Xunit ty
+
+                let ty = Type.GetType("Xunit.Assert, xunit.assert") //xunit v2
                 if ty <> null then
                     yield Xunit ty
 
@@ -82,6 +90,8 @@ module Internal =
             } |> Seq.head
 
         match framework with
+        | Fuchu ty -> 
+            (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
         | Expecto ty -> 
             (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
         | Xunit ty -> 
