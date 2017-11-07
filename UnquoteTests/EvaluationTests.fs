@@ -627,9 +627,6 @@ let ``untyped synthetic evaluation`` () =
 //    else
 //        None
 
-#if PORTABLE
-#else
-
 [<Fact>]
 let ``raw Quote`` () =
     let result = <@@ <@@ 1 @@> @@> |> evalRaw
@@ -654,7 +651,6 @@ let ``typed Quote`` () =
 [<Fact>]
 let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
-#endif
 
 [<Fact>]
 let ``LetRecursive mutually recursive functions`` () =

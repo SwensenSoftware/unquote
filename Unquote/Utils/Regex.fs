@@ -70,15 +70,10 @@ module internal Regex =
             | _ -> None
 
     ///Convenience versions of our regex active patterns using RegexOptions.Compiled flag.
-    ///If PORTABLE compiler directive defined, then RegexOptions.None flag used.
     module Compiled =
         ///When silverlight mode is None, else is Compiled
         let private compiledRegexOption = 
-#if PORTABLE
-            RegexOptions.None
-#else
             RegexOptions.Compiled
-#endif
 
         let (|Match|_|) = (|Match|_|) compiledRegexOption
 

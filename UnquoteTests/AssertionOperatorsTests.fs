@@ -32,8 +32,6 @@ let ``expect base exception`` () =
 let ``test passes`` () =
     test <@ 4 = 4 @>
 
-#if PORTABLE //all nested quotation tests invalid in silverlight
-#else
 [<Fact>]
 let ``expect wrong exception`` () =
     raises<exn> <@ raises<System.ArgumentException> <@ (null:string).Length @> @>
@@ -71,8 +69,6 @@ let ``Issue 60: Double evaluation in test internal implementation obscures state
                 e.ToString().Contains("1 = 2") //not "4 = 2"!
         @>
 
-#endif
-
 let RaiseException(message:string)=
     raise (System.NotSupportedException(message))
 
@@ -105,8 +101,6 @@ let ``Issue 63: synthetic nested invocation exceptions are not stripped if no in
 let ``Issue 63: synthetic invocation exception is not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(null)) @>
     
-#if PORTABLE 
-#else //all the following contain nested quotations which aren't supported
 [<Fact>]
 let ``raiseWhen passes`` () =
     raisesWith<exn>
@@ -151,5 +145,4 @@ let ``raiseWhen fails when no exception thrown`` () =
                 <@ true @>
                 f
         @>
-#endif
 #endif

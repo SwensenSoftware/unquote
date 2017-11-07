@@ -365,9 +365,6 @@ let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     else None
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario
-//#if PORTABLE
-//    fallback()
-//#else
 //    try
 //        let mOrV =
 //            FSharpEntity.FromType(mi.DeclaringType).MembersOrValues
@@ -383,4 +380,3 @@ let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
 //    //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
 //    | :? System.NotSupportedException | _  -> 
 //        fallback ()
-//#endif

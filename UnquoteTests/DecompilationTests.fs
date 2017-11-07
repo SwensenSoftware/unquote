@@ -396,11 +396,7 @@ let ``generic NewUnionCase with nested construction`` () =
 
 #if MONO
 #else
-#if PORTABLE //can't access stack frame
-#else
 #if NETCOREAPP2_0
-#else
-#if NET40 //relative file names cause issues
 #else
 //issue #3 -- UnionCaseTests
 //these tests are not as thorough as would like: can't verify op_Dynamic works right
@@ -412,8 +408,6 @@ let ``union case test list not requiring op_Dynamic`` () = //this test is a litt
     #else
     decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21).Replace("\\", "\\\\")
     #endif
-#endif
-#endif
 #endif
 #endif
 
@@ -440,10 +434,7 @@ let ``Call distinguishes between generic value Call and unit function Call`` () 
     decompile <@ g<int, string> @> =! "g<int, string>"
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario
-//#if PORTABLE //have to take best guess in silverlight since don't have PowerPack.Metadata
-//#else
 //    decompile <@ g'<int, string>() @> =! "g'<int, string>()"
-//#endif
 
 [<Fact>] //issue 21
 let ``sprint Lambda Unit vars literally`` () =
@@ -724,8 +715,6 @@ let ``false || false is given priority over false && true even though they can't
 let ``true && true is given priority over true || false even though they can't be differentiated``() =
     <@ true && true @> |> decompile =! "true && true"
 
-#if PORTABLE //NESTED QUOTE PROBLEM (not all of these need to use nested quotes to test)
-#else
 [<Fact(Skip="there is a confirmed F# bug which makes this result in a runtime exception")>]
 let ``Raw quoatation nested in typed quotation, confirmed F# bug`` () =
     <@ <@@ 1 @@> @> //System.ArgumentException: Type mismatch when building 'expr': the expression has the wrong type. Expected 'Microsoft.FSharp.Quotations.FSharpExpr', but received type 'Microsoft.FSharp.Quotations.FSharpExpr`1[System.Int32]'.
@@ -748,7 +737,6 @@ let f' (x:obj) (y:obj) = x |> string
 [<Fact>]
 let ``issue 40: handle lambda re-sugaring when vars are implicitly coerced``() =
     <@ <@ 2 |> f' "2" @> |> decompile = "2 |> f' \"2\"" @> |> test
-#endif
 
 [<Fact>]
 let ``issue 51: RecursiveLet mutually recursive funtions``() =
@@ -896,87 +884,51 @@ let (|CAP1|CAP2|) x = if x = 0 then CAP1 else CAP2(x)
 
 [<Fact>]
 let ``issue 11: complete active pattern`` () =
-#if PORTABLE
-    decompile <@ (|CAP1|CAP2|) 0 @> =! "(|CAP1|CAP2|) 0"
-#else
     test <@ decompile <@ (|CAP1|CAP2|) 0 @> = "(|CAP1|CAP2|) 0" @>
-#endif
 
 let (|PAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
 
 [<Fact>]
 let ``issue 11: partial active pattern`` () =
-#if PORTABLE
-    decompile <@ (|PAP|_|) 0 1 @> =! "(|PAP|_|) 0 1"
-#else
     test <@ decompile <@ (|PAP|_|) 0 1 @> = "(|PAP|_|) 0 1" @>
-#endif
 
 [<Fact>]
 let ``issue 11: partially applied active apptern`` () =
-#if PORTABLE
-    decompile <@ (|PAP|_|) 0 @> =! "(|PAP|_|) 0"
-#else
     test <@ decompile <@ (|PAP|_|) 0  @> = "(|PAP|_|) 0" @>
-#endif
 
 [<Fact>]
 let ``issue 11: local active pattern`` () =
     let (|LAP|_|) x y = if x = 0 && y = 0 then None else Some(x + y)
-#if PORTABLE
-    decompile <@ (|LAP|_|) 0 1 @> =! "(|LAP|_|) 0 1"
-#else
     test <@ decompile <@ (|LAP|_|) 0 1 @> = "(|LAP|_|) 0 1" @>
-#endif
 
 [<Fact>]
 let ``issue 79: general local lambda sprinting`` () =
     let myFunc x y = if x = 0 && y = 0 then None else Some(x + y)
-#if PORTABLE
-    decompile <@ myFunc 0 1 @> =! "myFunc 0 1"
-#else
     test <@ decompile <@ myFunc 0 1 @> = "myFunc 0 1" @>
-#endif
 
 [<Fact>]
 let ``issue 77: TupleGet fallback get item1`` () =
     let input = <@ fun (a:int) (b:int) -> match a,b with | (1,_) -> 1 | _ -> b @>
     let expected = "fun a b -> let matchValue = (a, b) in if (let t1,_ = matchValue in t1) = 1 then 1 else b"
-#if PORTABLE
-    decompile input =! expected
-#else
     test <@ decompile input = expected @>
-#endif
 
 [<Fact>]
 let ``issue 77: TupleGet fallback get item2`` () =
     let input = <@ fun (a:int) (b:int) -> match a,b with | (_,1) -> 1 | _ -> b @>
     let expected = "fun a b -> let matchValue = (a, b) in if (let _,t2 = matchValue in t2) = 1 then 1 else b"
-#if PORTABLE
-    decompile input =! expected
-#else
     test <@ decompile input = expected @>
-#endif
 
 [<Fact>]
 let ``issue 77: TupleGet fallback get item11`` () =
     let input = <@ fun a -> match a with | (_,_,_,_,_,_,_,_,_,1,_) -> 1 | _ -> 0 @>
     let expected = "fun a -> if (let _,_,_,_,_,_,_,_,_,t10,_ = a in t10) = 1 then 1 else 0"
-#if PORTABLE
-    decompile input =! expected
-#else
     test <@ decompile input = expected @>
-#endif
 
 [<Fact>]
 let ``issue 77: TupleGet fallback nested tuple gets`` () =
     let input = <@ fun a b -> match a,b with | (_, (1,1)) -> 1 | _ -> 0 @>
     let expected = "fun a b -> let matchValue = (a, b) in if (let t1,_ = (let _,t2 = matchValue in t2) in t1) = 1 then (if (let _,t2 = (let _,t2 = matchValue in t2) in t2) = 1 then 1 else 0) else 0"
-#if PORTABLE
-    decompile input =! expected
-#else
     test <@ decompile input = expected @>
-#endif
 
 [<Fact>]
 let ``issue 70: DefaultValue standalone`` () =

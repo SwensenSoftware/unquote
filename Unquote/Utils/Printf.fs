@@ -22,11 +22,7 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
     open System.Text.RegularExpressions
 
     let private ro = 
-#if PORTABLE
-        RegexOptions.None
-#else
         RegexOptions.Compiled
-#endif
 
     ///Matches "\n", but not "\r\n"
     let private lfButNotCrLf = Regex(@"(?<!\r)\n", ro)
@@ -42,8 +38,6 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
         else
             Printf.ksprintf (fun s -> lfButNotCrLf.Replace(s, "\r\n") |> sprintf "%s") fmt
 
-    #if PORTABLE
-    #else
     ///Normalize newlines to stdout.NewLine: if stdout.NewLine = "\n", then do nothing.
     ///Otherwise replace all occurences of "\n", but not "\r\n", with "\r\n" and then replace
     ///all occurences of "\r\n" with stdout.NewLine.
@@ -68,6 +62,3 @@ module internal Printf = //should make as extension to Microsoft.FSharp.Core.Pri
 
     //N.B.: FSI appears to accept either "\r\n", "\r", or "\n" as newlines (so "\r\n" is treated as 
     //single newline). 
-
-    //N.B.: printf prints to stdout
-    #endif

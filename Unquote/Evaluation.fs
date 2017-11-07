@@ -55,9 +55,6 @@ let rec stripTargetInvocationException (e:exn) =
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
 let inline reraisePreserveStackTrace (e:Exception) =
-#if PORTABLE
-    raise e
-#else
 #if NETSTANDARD2_0
     raise e
 #else
@@ -65,7 +62,6 @@ let inline reraisePreserveStackTrace (e:Exception) =
     let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
     remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
     raise e
-#endif
 #endif
 
 open System.Collections.Generic
@@ -187,17 +183,9 @@ let eval env expr =
             evalAll env args |> Seq.iteri(fun i e -> arrSet.Invoke(arr, [|box i; box e|]) |> ignore)
             box arr
         | P.NewRecord(ty, args) ->
-            #if NET40
-            FSharpValue.MakeRecord(ty, evalAll env args, BindingFlags.NonPublic ||| BindingFlags.Public)
-            #else
             FSharpValue.MakeRecord(ty, evalAll env args, true)
-            #endif
         | P.NewUnionCase(uci, args) -> 
-            #if NET40
-            FSharpValue.MakeUnion(uci, evalAll env args, BindingFlags.NonPublic ||| BindingFlags.Public)
-            #else
             FSharpValue.MakeUnion(uci, evalAll env args, true)
-            #endif
         | P.NewTuple(args) ->
             FSharpValue.MakeTuple(evalAll env args, expr.Type)
         | P.WhileLoop(condition, body) ->
@@ -219,12 +207,7 @@ let eval env expr =
             box ()
         | P.UnionCaseTest(target, uci) ->
             let targetObj = eval env target
-            #if NET40
-            let targetUci,_ = FSharpValue.GetUnionFields(targetObj, uci.DeclaringType, BindingFlags.NonPublic ||| BindingFlags.Public)
-            #else
             let targetUci,_ = FSharpValue.GetUnionFields(targetObj, uci.DeclaringType, true)
-            #endif
-
             (targetUci.Tag = uci.Tag) |> box
         | P.TryWith(tryBody, _, _, catchVar, catchBody) -> //as far as I can tell the "filter" var and expr exactly the same as the "catch" var and expr except with weird integer return values...
             try
@@ -258,9 +241,6 @@ let eval env expr =
             //need to be very exact about GetMethod so won't get AmbiguousMatchException with curried functions
             //(will fail in SL if lambda is a local function and thus implemented as an internal class...maybe can workaround since base type is public?)
             let lty = lambda.GetType()
-#if PORTABLE
-            let lty = if lty.BaseType <> typeof<obj> then lty.BaseType else lty //if local lambda then we want the public base type
-#endif
             let meth = lty.GetMethod("Invoke", [|argTy|])
             let r = meth.Invoke(lambda, [|arg|])
             r
@@ -269,10 +249,6 @@ let eval env expr =
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
         | P.Quote(captured) -> 
-        //todo not sure if this PORTABLE fallback is required anymore (was for Silverlight 4, but might not be for Portable Profile 259)
-#if PORTABLE
-            failwithPatternNotSupported "Quote (in Portable Profile 259)" expr
-#else
             //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 
             //all Expr are themselves untyped, but their Type property is actually always typed: 
             //we assume the frequency of typed Quote expressions is more common then untyped and convert all (untyped) Expr to typed using the Type property
@@ -280,7 +256,6 @@ let eval env expr =
             let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
             let generic = ctor.Invoke([|tree; expr.CustomAttributes|])
             box generic
-#endif
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
         | P.LetRecursive(bindings, finalBody) -> 

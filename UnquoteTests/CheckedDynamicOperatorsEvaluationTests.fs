@@ -85,17 +85,14 @@ let ``ToInt32 primitive`` () =
 let ``ToInt primitive`` () =
     testEvalCheckedOverflow <@ Checked.int UInt64.MaxValue @>
 
-#if PORTABLE //bigint issue in silverlight: http://stackoverflow.com/questions/7048578/missing-biginteger-features-under-f-silverlight
-#else
 [<Fact>]
 let ``ToUInt64 reflective`` () =
     testEvalCheckedOverflow <@ Checked.uint64 (bigint(UInt64.MaxValue) + 1I) @>
-#endif
 
 #if MONO
 #else
 #if NETCOREAPP2_0
-[<Fact(Skip="This fails on .net core, is ok?")>]
+[<Fact(Skip="This fails on .net core")>]
 #else
 [<Fact>]
 #endif
