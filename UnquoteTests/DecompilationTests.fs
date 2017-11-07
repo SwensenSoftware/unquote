@@ -541,12 +541,12 @@ let ``re-sugar partial application of 3 arg lambda call with two args both not r
     <@ f3 (1 + 2) (2 + 3) @> |> decompile =! "f3 (1 + 2) (2 + 3)"
 
 let ftupled (a,b) c d = a + b + c + d + 1
-[<Fact>] //issue 23
+[<Fact(Skip="F# 4.1 breaking change: https://github.com/SwensenSoftware/unquote/issues/137")>] //issue 23
 let ``re-sugar partial application with first, single tuple arg applied`` () =
     <@ ftupled (1,2) @> |> decompile =! "ftupled (1, 2)"
 
 let ftupled2 j (a,b) c d = j + a + b + c + d + 1
-[<Fact>] //issue 23
+[<Fact(Skip="F# 4.1 breaking change: https://github.com/SwensenSoftware/unquote/issues/137")>] //issue 23
 let ``re-sugar partial application with first single arg applied and second tuple arg applied`` () =
     <@ ftupled2 3 (1,2) @> |> decompile =! "ftupled2 3 (1, 2)"
 
