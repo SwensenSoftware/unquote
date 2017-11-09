@@ -30,7 +30,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Unquote")>]
-[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2016")>]
+[<assembly: AssemblyCopyright("Copyright © Stephen Swensen 2011-2017")>]
 [<assembly: AssemblyTrademark("")>]
 
 [<assembly:System.Runtime.CompilerServices.InternalsVisibleTo("UnquoteTests")>]
@@ -41,5 +41,5 @@ open System.Runtime.InteropServices
 [<assembly: ComVisible(false)>]
 
 //use odd number revision number (fourth position) to indicate pre-release
-[<assembly: AssemblyVersion("3.2.0.0")>]
+[<assembly: AssemblyVersion("4.0.0.0")>]
 ()

@@ -7,7 +7,7 @@
     <owners>Stephen Swensen</owners>
 	<iconUrl>http://www.swensensoftware.com/static/unquote-logo-55x55.png</iconUrl>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-    <projectUrl>http://www.swensensoftware.com/unquote</projectUrl>
+    <projectUrl>https://github.com/SwensenSoftware/unquote</projectUrl>
 	<tags>F# fsharp unit-testing xunit nunit mbunit quotations tdd fsi fuchu</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 	<summary>Write F# unit test assertions as quoted expressions, get step-by-step failure messages for free.</summary>
