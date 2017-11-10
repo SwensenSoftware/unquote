@@ -215,16 +215,6 @@ let inline trap (expr:Quotations.Expr<'T>) : 'T =
         with e -> raise e
         raise x
 
-///These '?' suffixed operators conflict with F# 3.0's nullable operators and have been replaced by equivalent '!' suffixed operators.
-[<System.Obsolete("These '?' suffixed operators conflict with F# 3.0's nullable operators and have been replaced by equivalent '!' suffixed operators.")>]
-module Obsolete =
-    let inline (=?) x y = test <@ x = y @>
-    let inline (<?) x y = test <@ x < y @>
-    let inline (>?) x y = test <@ x > y @>
-    let inline (<=?) x y = test <@ x <= y @>
-    let inline (>=?) x y = test <@ x >= y @>
-    let inline (<>?) x y = test <@ x <> y @>
-
 /// Test the objects with structural equality
 let inline (=!) x y = test <@ x = y @>
 /// Test the objects with structural less-than comparison
