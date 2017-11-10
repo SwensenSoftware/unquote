@@ -58,5 +58,3 @@ REM cleanup...
 
 rd /q /s staging
 rd /q /s nuget
-
-pause
