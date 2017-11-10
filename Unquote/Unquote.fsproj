@@ -67,7 +67,6 @@
     <Compile Include="Operators.fs" />
     <Compile Include="AssertionFailedException.fs" />
     <Compile Include="Assertions.fs" />
-    <None Include="Startup.fsx" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
