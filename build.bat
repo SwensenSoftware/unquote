@@ -1,5 +1,10 @@
 set versionNumber=%1
 
+REM cleanup...
+
+rd /q /s nuget
+rd /q /s staging
+
 del builds\Unquote-%versionNumber%.zip
 del builds\Unquote.%versionNumber%.nupkg
 
@@ -53,8 +58,3 @@ if "%ERRORLEVEL%" == "0" (
     
     popd
 )
-
-REM cleanup...
-
-rd /q /s staging
-rd /q /s nuget
