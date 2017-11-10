@@ -201,11 +201,8 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
         with 
         | e -> raise e
 
-///Evaluate the given boolean expression: if successful return the value
-///and if exception logs the reduction steps in the following manner
-///1) stdout if fsi mode
-///2) Framework fail methods if xUnit.net (v1 or v2), NUnit, or Fuchu present
-///3) System.Exception if release mode.
+///Evaluate the given expression and return its value; but if the expression raises an exception,
+///output incremental eval steps leading to the exception like the `test` operator. 
 let inline trap (expr:Quotations.Expr<'T>) : 'T =
     let u = unquote expr
     match u.ReductionException with
