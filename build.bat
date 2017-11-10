@@ -1,4 +1,4 @@
-set /p versionNumber=
+set versionNumber=%1
 
 del builds\Unquote-%versionNumber%.zip
 del builds\Unquote.%versionNumber%.nupkg
