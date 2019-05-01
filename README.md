@@ -1,4 +1,4 @@
-[User Guide](../../wiki/UserGuide) | [Downloads](http://www.swensensoftware.com/unquote) | [Release Notes](../../wiki/ReleaseNotes) | [Issues](../../issues)
+[User Guide](../../wiki/UserGuide) | [NuGet](https://www.nuget.org/packages/Unquote/) | [Release Notes](../../wiki/ReleaseNotes) | [Issues](../../issues)
 
 ---
 
