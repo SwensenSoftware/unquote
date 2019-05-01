@@ -1234,6 +1234,15 @@ let ``issue 1: custom infix op precedence taken from leading symbol`` () =
     <@  1 + 2 +++ 3 @> |> decompile =! "1 + 2 +++ 3"
 
 [<AutoOpen>]
+module EqualTest =
+    let (==) = (=)
+
+[<Fact>]
+let ``issue 144 : custom operator defined as point free function`` () =
+    <@ 1 == 2 @> |> decompile =! "1 == 2"
+
+
+[<AutoOpen>]
 module Issue1_TopLevel =
     let (~~~~~) x = x : int
     [<Fact>]

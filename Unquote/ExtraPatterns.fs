@@ -45,7 +45,9 @@ let (|LambdaValue|_|) = function
 ///Must come before Call pattern.
 let (|InfixCallOrApplication|_|) = function
     //when the op is compiled as a property            | when the op is a local lambda
-    | P.Call (_, MethodInfoName(opName), lhs::rhs::[]) | P.Application(P.Application(LambdaValue(opName), lhs), rhs) ->
+    | P.Call (_, MethodInfoName(opName), lhs::rhs::[]) 
+    | P.Application(P.Application(LambdaValue(opName), lhs), rhs)
+    | P.Application(P.Application(P.Call(_, MethodInfoName(opName), []), lhs), rhs) ->
         match ER.SymbolicOps.tryFindByName opName with
         | Some(op, ER.SymbolicOps.Infix(prec)) -> Some((op,prec),lhs,rhs)
         | _ -> None
