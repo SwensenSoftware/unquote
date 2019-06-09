@@ -124,7 +124,7 @@ and reduceAll env exprList =
     exprList |> List.map (reduce env)
 
 //note: for consistency, we use reference equality with Expr, so have to be
-//carefule in reduce algorithm to only rebuild actually reduced parts of an expresion.
+//careful in reduce algorithm to only rebuild actually reduced parts of an expresion.
 //To illuminate the inconsistency: Expr.Equal moslty uses reference equality, except for some special cases, namely
 //for ValueOp (i.e. Value and ValueWithName)!: https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/quotations.fs#L206
 let reduceFully =
