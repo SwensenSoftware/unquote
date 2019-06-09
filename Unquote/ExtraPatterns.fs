@@ -146,10 +146,14 @@ let (|Range|_|) x =
     match x with 
     | RangeOp(a,b) -> 
         Some("{","}",a,b)
-    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeOp(a,b)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToList" -> 
-        Some("[","]",a,b)
-    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeOp(a,b)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
-        Some("[|", "|]", a,b)
+    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeOp(a,b)])])
+    | P.Call(None, miOuter, [P.Coerce(P.Call(None, miInner, [RangeOp(a,b)]), _)]) ->
+        if rangeOuterInnerMethodInfos miOuter miInner "ToList" then
+            Some("[","]",a,b)
+        elif rangeOuterInnerMethodInfos miOuter miInner "ToArray" then
+            Some("[|", "|]", a,b)
+        else
+            None
     | _ -> None
 
 ///Match a sequence, list, or array op_RangeStep expression, return (startToken, endToken, startExpression, stepExpression, endExpression). Must come before Call patterns.
@@ -164,10 +168,14 @@ let (|RangeStep|_|) x =
     match x with
     | RangeStepOp(a,b,c) -> 
         Some("{","}",a,b,c)
-    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToList" -> 
-        Some("[","]",a,b,c)
-    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) when rangeOuterInnerMethodInfos miOuter miInner "ToArray" -> 
-        Some("[|", "|]", a,b,c)
+    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) 
+    | P.Call(None, miOuter, [P.Coerce(P.Call(None, miInner, [RangeStepOp(a,b,c)]), _)]) ->
+        if rangeOuterInnerMethodInfos miOuter miInner "ToList" then
+            Some("[","]",a,b,c)
+        elif rangeOuterInnerMethodInfos miOuter miInner "ToArray" then
+            Some("[|", "|]", a,b,c)
+        else
+            None
     | _ -> None
          
 ///Match Call(None, ...) patterns for NumericLiterals, returning the literal value as a string and suffix on success
