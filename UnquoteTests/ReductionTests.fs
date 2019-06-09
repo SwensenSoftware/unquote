@@ -721,9 +721,32 @@ let ``issue 5: TryWith simple reduction``() =
     test <@ x.[0] = "try null.ToString() with e -> (((); reraise()); \"\")" @>
     test <@ x.[1].StartsWith("System.NullReferenceException: ") @>
 
-    
-    
-    
+[<Fact>]
+let ``ValueWithName reduces to Value``() =
+    let x = 3
+    <@ x @> |> decompiledReductions =! [
+        "x"
+        "3"
+    ]
+
+[<Fact>]
+let ``ValueWithName reduces to value in complex exprssion`` () =    
+    let x = [1;2;3]
+    <@ 5::x @> |> decompiledReductions =! [
+        "5::x"
+        "5::[1; 2; 3]"
+    ]
+
+[<Fact>]
+let ``readme example`` () =    
+    let x = [1;2;3]
+    <@ ([3; 2; 1; 0] |> List.map ((+) 1)) = [1 + 3..1 + 0] @> |> decompiledReductions =! [
+        "([3; 2; 1; 0] |> List.map ((+) 1)) = [1 + 3..1 + 0]"
+        "[4; 3; 2; 1] = [4..1]"
+        "[4; 3; 2; 1] = []"
+        "false"
+    ]
+
 //[<Fact>]
 //let ``instance PropertySet`` () =    
 //    let tt = new TestType(0)

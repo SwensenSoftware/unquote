@@ -20,6 +20,10 @@ open Xunit
 open Swensen.Unquote
 open Swensen.Utils
 
+let toTypedExprValue<'a> (x: 'a) : Microsoft.FSharp.Quotations.Expr<'a> =
+    let x = Microsoft.FSharp.Quotations.Expr.Value(x)
+    <@ (%%x:'a) @>
+
 //I would love to see using test to test itself, but for now, Eval() can't handle qouted qoutations.
 //would love to create F# specific unit testing framework.
 
@@ -83,8 +87,8 @@ let ``simple let binding`` () =
 
 [<Fact>]
 let ``PropertyGet: instance Item getter with single arg`` () =
-    let table = System.Collections.Generic.Dictionary<int,int>()
-    decompile <@ table.[0] @> =! "seq [].[0]" //might want to fix up dict value sourceing later
+    let table = System.Collections.Generic.Dictionary<int,int>() |> toTypedExprValue
+    decompile <@ (%table).[0] @> =! "seq [].[0]" //might want to fix up dict value sourceing later
 
 [<Fact>]
 let ``PropertyGet: named instace getter with single arg`` () =
@@ -329,8 +333,8 @@ let ``NewUnionCase literal list from literal list mixed with cons at constructio
 
 [<Fact>]
 let ``NewUnionCase literal list from literal list mixed with cons local value`` () =    
-    let x = [1;2;3]
-    decompile <@ 5::x @> =! "5::[1; 2; 3]" //fair enough
+    let x = [1;2;3] |> toTypedExprValue
+    <@ 5::(%x) @> |> decompile =! "5::[1; 2; 3]"
 
 let namedList = [1; 2; 3]
 [<Fact>]
@@ -1376,15 +1380,13 @@ let ``issue 5: TryWith reraise is not treated as a generic value`` () =
 
 [<Fact>]
 let ``exception instance`` () =
-    let x = new System.ArgumentException("bad arg")  
-    <@ x @> |> decompile =! 
-      "System.ArgumentException: bad arg"
-
+    let x = new System.ArgumentException("bad arg") |> toTypedExprValue
+    x |> decompile =! "System.ArgumentException: bad arg"
+    
 [<Fact>]
 let ``reduction exception instance`` () =
-    let x = new ReductionException(new System.ArgumentException("bad arg"))
-    <@ x @> |> decompile =! 
-      "System.ArgumentException: bad arg"
+    let x = new ReductionException(new System.ArgumentException("bad arg")) |> toTypedExprValue
+    x |> decompile =! "System.ArgumentException: bad arg"
 
 [<Fact>]
 let ``decompile string``() =
@@ -1400,3 +1402,8 @@ let ``decompile string``() =
     ]
     let wrap x = "\"" + x + "\""
     test <@ in_out |> List.map (fun (x,y) -> decompile x, wrap y) |> List.map (fun (x,y) -> x = y) |> List.forall id @>
+
+[<Fact>]
+let ``decompile ValueWithName`` () =
+    let x = 23
+    <@ x @> |> decompile =! "x"

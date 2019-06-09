@@ -38,6 +38,7 @@ let evalValue env (expr:Expr) =
 //note: only immutable expressions should be considered reduced
 let rec isReduced = function
     //| P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name)
+    | P.ValueWithName (_,_,_) -> false //this expression also matches P.Value but it is not reduce (it reduces to Expr.Value!)
     | P.Value _ | P.Lambda _ | DP.Unit | P.Quote _ -> true
     | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,_,args) when args |> allReduced -> true //might need a separate case for instance incompletelambda calls so that the instance must be reduced too
     | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
@@ -111,6 +112,8 @@ let rec reduce env (expr:Expr) =
             evalValue env expr
         else
             Expr.ForIntegerRangeLoop(var,reduce env rangeStart, reduce env rangeEnd, body)
+    | P.ValueWithName (o, ty, name) ->
+        Expr.Value(o, ty)
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 
@@ -120,18 +123,20 @@ let rec reduce env (expr:Expr) =
 and reduceAll env exprList =
     exprList |> List.map (reduce env)
 
-//note Expr uses reference equality and comparison, so have to be
-//carefule in reduce algorithm to only rebuild actually reduced parts of an expresion
+//note: for consistency, we use reference equality with Expr, so have to be
+//carefule in reduce algorithm to only rebuild actually reduced parts of an expresion.
+//To illuminate the inconsistency: Expr.Equal moslty uses reference equality, except for some special cases, namely
+//for ValueOp (i.e. Value and ValueWithName)!: https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/quotations.fs#L206
 let reduceFully =
     let rec loop env expr acc =
         try
             let nextExpr = expr |> (reduce env)
-            if isReduced nextExpr then //is reduced
-                if nextExpr <> List.head acc then //different than last
+            if isReduced nextExpr then //is reduced, maybe prepend as last if not same as previous
+                if obj.ReferenceEquals(nextExpr, List.head acc) |> not then //different than last, prepend it
                     (false, nextExpr, nextExpr::acc) 
-                else //same as last
+                else //same as last, don't prepend it
                     (false, nextExpr, acc) 
-            elif nextExpr = List.head acc then //is not reduced and could not reduce
+            elif obj.ReferenceEquals(nextExpr, List.head acc) then //is not reduced and could not reduce, eval and call it last
                 let last = (evalValue env nextExpr)
                 (false, last, last::acc)
             else loop env nextExpr (nextExpr::acc)

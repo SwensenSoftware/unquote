@@ -212,15 +212,23 @@ let inline trap (expr:Quotations.Expr<'T>) : 'T =
         with e -> raise e
         raise x
 
+//n.b. we splice x and y as Value expressions in the following operations so that we _don't_ capture and decompile as ValueWithName
+
 /// Test the objects with structural equality
-let inline (=!) x y = test <@ x = y @>
+let inline (=!) (x: 'a when 'a : equality) (y: 'a) = 
+    test <@ (%%Expr.Value<'a>(x) : 'a) = (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural less-than comparison
-let inline (<!) x y = test <@ x < y @>
+let inline (<!) (x: 'a when 'a : comparison) (y: 'a) = 
+    test <@ (%%Expr.Value<'a>(x) : 'a) < (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural greater-than comparison
-let inline (>!) x y = test <@ x > y @>
+let inline (>!) (x: 'a when 'a : comparison) (y: 'a) = 
+    test <@ (%%Expr.Value<'a>(x) : 'a) > (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural less-than-or-equal comparison
-let inline (<=!) x y = test <@ x <= y @>
+let inline (<=!) (x: 'a when 'a : comparison) (y: 'a) = 
+    test <@ (%%Expr.Value<'a>(x) : 'a) <= (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural greater-than-or-equal comparison
-let inline (>=!) x y = test <@ x >= y @>
+let inline (>=!) (x: 'a when 'a : comparison) (y: 'a) = 
+    test <@ (%%Expr.Value<'a>(x) : 'a) >= (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural inequality
-let inline (<>!) x y = test <@ x <> y @>
+let inline (<>!) (x: 'a when 'a : equality) (y: 'a) = 
+    test <@ (%%Expr.Value<'a>(x) : 'a) <> (%%Expr.Value<'a>(y) : 'a) @>

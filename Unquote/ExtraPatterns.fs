@@ -194,3 +194,12 @@ let (|NumericLiteral|_|) x =
             Some(literalValue.ToString(), suffix)
         | _ -> None //shouldn't be possible at this point
     | _ -> None
+
+
+///Matches ValueWithName unless the name starts with an "__" (this provides a way to decompile the value without its name)
+let (|VisibleValueWithName|) = function
+    | P.ValueWithName(o,ty,name) when name.StartsWith("__") |> not ->
+        Some(o,ty,name)
+    | _ ->
+        None
+
