@@ -174,7 +174,7 @@ let decompile expr =
         | DP.Unit -> "()" //must come before Value pattern
         | EP.LambdaValue(name) -> ER.sourceNameFromString name
         | P.ValueWithName(_, _, name) ->
-            name
+            ER.sourceNameFromString name
         | P.Value(o, ty) ->
             match o with
             | null when ty |> ER.isGenericTypeDefinedFrom<option<_>> -> "None" //option<_> None is represented as null
