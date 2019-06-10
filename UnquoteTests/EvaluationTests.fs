@@ -686,3 +686,17 @@ let coordsEqual (x1,y1) (x2,y2) =
 [<Fact>]
 let ``multiple tupledArg vars in scope``() =
     test <@ coordsEqual (1.0,1.0) (id(2.0,2.0)) = false @>
+
+type Issue142 =
+    static member test_rd_false ([<ReflectedDefinition(false)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Operators.eval x
+    static member test_rd_true ([<ReflectedDefinition(true)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Operators.eval x
+
+[<Fact>]
+let ``Issue 142: ReflectDefinitions(false)`` () =
+    let state = 1        
+    Issue142.test_rd_false ((state = 1)) =! true
+
+[<Fact>]
+let ``Issue 142: ReflectDefinitions(true)`` () =
+    let state = 1        
+    Issue142.test_rd_true ((state = 1)) =! true

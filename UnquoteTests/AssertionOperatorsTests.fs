@@ -70,20 +70,18 @@ let ``Issue 60: Double evaluation in test internal implementation obscures state
         @>
 
 type Issue142 =
-    static member test1 ([<ReflectedDefinition(false)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Assertions.test x
-    static member test2 ([<ReflectedDefinition(true)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Assertions.test x
-    static member test2_unquote ([<ReflectedDefinition(true)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Operators.unquote x
+    static member test_rd_false ([<ReflectedDefinition(false)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Assertions.test x
+    static member test_rd_true ([<ReflectedDefinition(true)>] x:Microsoft.FSharp.Quotations.Expr<bool>) = Swensen.Unquote.Assertions.test x
 
 [<Fact>]
-let ``Issue 142: ReflectDefinitions(false)`` () =
+let ``Issue 142: ReflectDefinitions false`` () =
     let state = 1        
-    Issue142.test1 ((state = 1))
+    Issue142.test_rd_false ((state = 1))
 
 [<Fact>]
-let ``Issue 142: ReflectDefinitions(true)`` () =
+let ``Issue 142: ReflectDefinitions true`` () =
     let state = 1        
-    let u = Issue142.test2_unquote ((state = 1))
-    Issue142.test2 ((state = 1))
+    Issue142.test_rd_true ((state = 1))
 
 let RaiseException(message:string)=
     raise (System.NotSupportedException(message))
