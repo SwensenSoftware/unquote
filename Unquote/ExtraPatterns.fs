@@ -65,7 +65,7 @@ let (|PrefixCallOrApplication|_|) = function
 //suprisingly, this is actually used twice.
 ///Test whether the Expr is a Var and equals the given Var property-wise
 let private isVarOfExpr (x:Var) = function
-    | P.Var y | P.Coerce(P.Var y,_) -> x.Name = y.Name && x.Type = y.Type && x.IsMutable = y.IsMutable
+    | P.Var y | P.Coerce(P.Var y,_) | P.WithValue(_, _, P.Var y) -> x.Name = y.Name && x.Type = y.Type && x.IsMutable = y.IsMutable
     | _ -> false
 
 ///Test whether the given expression represents a tuple let binding: e.g. let x,y = 1,2.

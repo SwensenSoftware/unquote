@@ -114,6 +114,9 @@ let rec reduce env (expr:Expr) =
             Expr.ForIntegerRangeLoop(var,reduce env rangeStart, reduce env rangeEnd, body)
     | P.ValueWithName (o, ty, name) ->
         Expr.Value(o, ty)
+    | P.WithValue(_, _, x) ->
+        //these expressions exist only as the outermost... discard it
+        reduce env x
     | ES.ShapeVar _ -> expr
     | ES.ShapeLambda _ -> expr
     | ES.ShapeCombination (o, exprs) -> 

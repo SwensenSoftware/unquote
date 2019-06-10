@@ -196,6 +196,8 @@ let eval env expr =
             FSharpValue.GetTupleField(eval env tuple, index)
         | P.Coerce(target, ty) ->    
             eval env target         
+        | P.WithValue(o, _, _) ->    
+            o
         | P.TypeTest(target, ty) ->
             ty.IsAssignableFrom((eval env target).GetType()) |> box
         | P.ForIntegerRangeLoop(var, ifrom, ito, body) ->

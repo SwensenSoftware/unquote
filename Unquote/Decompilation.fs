@@ -235,7 +235,7 @@ let decompile expr =
             applyParens OP.Application (sprintf "new %s(%s)" (ER.sprintSig ci.DeclaringType) (decompileTupledArgs args))
         | P.DefaultValue(ty) ->
             applyParens OP.Application (sprintf "new %s()" (ER.sprintSig ty))
-        | P.Coerce(target, _) ->
+        | P.Coerce(target, _) | P.WithValue(_, _, target) ->
             //don't even "mention" anything about the coersion (pass through context)
             decompile (contextOP,contextAssoc) target
         | EP.TupleLet(vars, e1, e2) ->
