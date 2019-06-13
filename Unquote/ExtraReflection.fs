@@ -358,7 +358,9 @@ type fsharpValueType =
 let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     //let fallback () =
     if FSharpType.IsModule mi.DeclaringType then
-        if mi.GetParameters().Length = 0 && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) && not (mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators") then
+        if mi.GetParameters().Length = 0 
+           && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) 
+           && not (mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators") then
             Some(GenericValue)
         else 
             Some(Function)
