@@ -25,6 +25,10 @@ let ``test xunit support, this should fail with clean stack trace`` () =
     test <@ 22 + 2 = 5 @>
 
 [<Fact>]
+let ``test xunit support, this should fail simply with clean stack trace`` () =
+    testSimple <@ 22 + 2 = 5 @>
+
+[<Fact>]
 let ``test xunit support, raises`` () =
     raises<ArgumentException> <@ (null:string).ToString() @>
 

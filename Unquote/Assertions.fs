@@ -151,6 +151,17 @@ let inline test (expr:Expr<bool>) =
         with 
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
+///Like `test`, but we only output the source expression without incremental evaluation steps.
+let inline testSimple (expr:Expr<bool>) =
+    let u = unquote expr
+    match u.FinalReduction with
+    | DerivedPatterns.Bool(true) -> ()
+    | _ ->  
+        try
+            testFailed [u.Reductions.Head] ""
+        with 
+        | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
+
 ///Test whether the given expr fails with the given expected exception (or a subclass thereof).
 let inline raises<'a when 'a :> exn> (expr:Expr) = 
     let u = unquote expr
