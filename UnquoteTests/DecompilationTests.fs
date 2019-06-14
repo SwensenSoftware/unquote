@@ -1391,3 +1391,12 @@ let ``decompile string``() =
     ]
     let wrap x = "\"" + x + "\""
     test <@ in_out |> List.map (fun (x,y) -> decompile x, wrap y) |> List.map (fun (x,y) -> x = y) |> List.forall id @>
+
+type TestRecord =
+    { Text: string
+      Value: int }
+
+[<Fact>]
+let ``decompile record construction``() =
+    <@ { Text = "Hello"; Value = 42 } @>
+    |> decompile =! """{ Text = "Hello"; Value = 42 }"""
