@@ -1412,3 +1412,13 @@ let ``decompile ValueWithName`` () =
 let ``ValueWithName surround name with backticks when appropriate`` () =
     let ``top%level`` = 3
     <@ ``top%level`` @> |> decompile =! "``top%level``"
+
+type TestRecord =
+    { Text: string
+      Value: int }
+
+[<Fact>]
+let ``decompile record construction``() =
+    <@ { Text = "Hello"; Value = 42 } @>
+    |> decompile =! """{ Text = "Hello"; Value = 42 }"""
+

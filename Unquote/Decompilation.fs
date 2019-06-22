@@ -200,6 +200,14 @@ let decompile expr =
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
             args |> decompileSequencedArgs |> sprintf "[|%s|]"
+        | P.NewRecord(t,args) ->
+            let fields = FSharpType.GetRecordFields(t)
+            (fields,args)
+            ||> Seq.map2 (fun f x -> sprintf "%s = %s" f.Name (decompile (OP.Semicolon, OP.Non) x))
+            |> String.concat "; "
+            |> sprintf "{ %s }"
+
+
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.
         | P.NewUnionCase(uci,args) when uci |> ER.isListUnionCase ->
