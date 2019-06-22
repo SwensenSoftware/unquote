@@ -1423,7 +1423,24 @@ let ``decompile record construction``() =
     |> decompile =! """{ Text = "Hello"; Value = 42 }"""
 
 [<Fact>]
+let ``decompile WITH record construction``() =
+    let x = { Text = "Hello"; Value = 42 }
+    <@ { x with Value = 43 } @>
+    |> decompile =! "let Value = 43 in { Text = x.Text; Value = Value }"
+
+[<Fact>]
 let ``decompile anonymous record construction``() =
     <@ {| Txt = "Hello"; Val = 42 |} @>
     |> decompile =! """{| Txt = "Hello"; Val = 42 |}"""
 
+[<Fact>]
+let ``decompile pure WITH anonymous record construction with multiple values``() =
+    let x = {| Txt = "Hello"; Val = 42 |}
+    <@ {| x with Val = 43; SecondVal = 44 |} @>
+    |> decompile =! "{| SecondVal = 44; Txt = x.Txt; Val = 43 |}"
+
+[<Fact>]
+let ``decompile mixed WITH anonymous record construction with multiple values``() =
+    let x = { Text = "Hello"; Value = 42 }
+    <@ {| x with Value = 43; SecondVal = 44 |} @>
+    |> decompile =! "{| SecondVal = 44; Text = x.Text; Value = 43 |}"
