@@ -1422,3 +1422,8 @@ let ``decompile record construction``() =
     <@ { Text = "Hello"; Value = 42 } @>
     |> decompile =! """{ Text = "Hello"; Value = 42 }"""
 
+[<Fact>]
+let ``decompile anonymous record construction``() =
+    <@ {| Txt = "Hello"; Val = 42 |} @>
+    |> decompile =! """{| Txt = "Hello"; Val = 42 |}"""
+

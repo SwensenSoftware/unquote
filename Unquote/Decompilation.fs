@@ -200,13 +200,19 @@ let decompile expr =
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
             args |> decompileSequencedArgs |> sprintf "[|%s|]"
-        | P.NewRecord(t,args) ->
-            let fields = FSharpType.GetRecordFields(t)
-            (fields,args)
-            ||> Seq.map2 (fun f x -> sprintf "%s = %s" f.Name (decompile (OP.Semicolon, OP.Non) x))
-            |> String.concat "; "
-            |> sprintf "{ %s }"
+        | P.NewRecord(ty,args) ->
+            let isAnon =
+                ty.FullName.Contains("AnonymousType") &&
+                ty.GetCustomAttributes(typeof<System.Runtime.CompilerServices.CompilerGeneratedAttribute>, false).Length > 0
 
+            let body = 
+                let fields = FSharpType.GetRecordFields(ty)
+                (fields,args)
+                ||> Seq.map2 (fun f x -> sprintf "%s = %s" f.Name (decompile (OP.Semicolon, OP.Non) x))
+                |> String.concat "; "
+            
+            let maybePipe = if isAnon then "|" else ""
+            sprintf "{%s %s %s}" maybePipe body maybePipe
 
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.
