@@ -1417,6 +1417,11 @@ type TestRecord =
     { Text: string
       Value: int }
 
+type TestRecord2 =
+    { Text: string
+      Value: int
+      SecondValue: int }
+
 [<Fact>]
 let ``decompile record construction``() =
     <@ { Text = "Hello"; Value = 42 } @>
@@ -1427,6 +1432,12 @@ let ``decompile WITH record construction``() =
     let x = { Text = "Hello"; Value = 42 }
     <@ { x with Value = 43 } @>
     |> decompile =! "let Value = 43 in { Text = x.Text; Value = Value }"
+
+[<Fact>]
+let ``decompile WITH record construction with multiple values``() =
+    let x = { Text = "Hello"; Value = 42; SecondValue = 43 }
+    <@ { x with Value = 43; SecondValue = 44 } @>
+    |> decompile =! "let Value = 43 in let SecondValue = 44 in { Text = x.Text; Value = Value; SecondValue = SecondValue }"
 
 [<Fact>]
 let ``decompile anonymous record construction``() =
