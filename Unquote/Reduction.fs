@@ -38,11 +38,26 @@ let evalValue env (expr:Expr) =
 //note: only immutable expressions should be considered reduced
 let rec isReduced = function
     //| P.Var v -> env |> List.exists (fun (name,_) -> name = v.Name)
-    | P.ValueWithName (_,_,_) -> false //this expression also matches P.Value but it is not reduce (it reduces to Expr.Value!)
-    | P.Value _ | P.Lambda _ | DP.Unit | P.Quote _ -> true
-    | P.NewUnionCase(_,args) | P.NewTuple(args) | P.NewArray(_,args) | EP.IncompleteLambdaCall(_,_,args) when args |> allReduced -> true //might need a separate case for instance incompletelambda calls so that the instance must be reduced too
-    | P.Coerce(arg,_) | P.TupleGet(arg, _) when arg |> isReduced -> true //TupleGet here helps TupleLet expressions reduce correctly
-    | _ -> false
+    | P.ValueWithName (_,_,_) -> 
+        false //this expression also matches P.Value but it is not reduce (it reduces to Expr.Value!)
+    | P.Value _ 
+    | P.Lambda _ 
+    | DP.Unit 
+    | P.Quote _ -> 
+        true
+    | P.NewUnionCase(_,args) 
+    | P.NewTuple(args) 
+    | P.NewArray(_,args) 
+    | P.NewRecord(_,args) 
+    //might need a separate case for instance incompletelambda calls so that the instance must be reduced too
+    | EP.IncompleteLambdaCall(_,_,args) when args |> allReduced -> 
+        true 
+    | P.Coerce(arg,_) 
+    //TupleGet here helps TupleLet expressions reduce correctly
+    | P.TupleGet(arg, _) when arg |> isReduced -> 
+        true 
+    | _ -> 
+        false
 and allReduced exprs = 
     exprs |> List.forall isReduced
 

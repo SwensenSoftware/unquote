@@ -747,6 +747,15 @@ let ``readme example`` () =
         "false"
     ]
 
+type R = { X: int; Y:int }
+[<Fact>]
+let ``NewRecord is considered reduced`` () =    
+    <@ { X = 2; Y = 3 }.X = 4 @> |> decompiledReductions =! [
+        "{ X = 2; Y = 3 }.X = 4"
+        "2 = 4"
+        "false"
+    ]
+
 //[<Fact>]
 //let ``instance PropertySet`` () =    
 //    let tt = new TestType(0)
