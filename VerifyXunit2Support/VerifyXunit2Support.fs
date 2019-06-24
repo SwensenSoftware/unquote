@@ -46,3 +46,14 @@ let ``test xunit support, reraise within test`` () =
             with e ->
                 reraise()
         @>
+
+let bar n =
+    failwithf "blub %i" n
+
+let foo n =
+    bar (n+1)
+    
+[<Fact>]
+let ``missing stack trace`` () =
+    test <@ foo 5 = 5 @>
+

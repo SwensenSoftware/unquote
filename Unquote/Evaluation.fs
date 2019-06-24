@@ -54,17 +54,12 @@ let rec stripTargetInvocationException (e:exn) =
     | _ -> Some(e) //the real user code exception
 
 ///"reraise" the given exception, preserving the stacktrace (e.g. for InnerExceptions of TargetInvocation exceptions)
-let inline reraisePreserveStackTrace (e:Exception) =
-#if NETSTANDARD2_0
-    raise e
-#else
-    //http://iridescence.no/post/Preserving-Stack-Traces-When-Re-Throwing-Inner-Exceptions.aspx
-    let remoteStackTraceString = typeof<exn>.GetField("_remoteStackTraceString", BindingFlags.Instance ||| BindingFlags.NonPublic);
-    remoteStackTraceString.SetValue(e, e.StackTrace + Environment.NewLine);
-    raise e
-#endif
+let inline reraisePreserveStackTrace (ex:Exception) =
+    //see https://stackoverflow.com/a/41202215/236255, credit to Abel: https://stackoverflow.com/users/111575/abel
+    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture ex
+    |> fun disp -> disp.Throw()
+    failwith "Unreachable code reached."
 
-open System.Collections.Generic
 //N.B. using hashset of known ops instead of mi.GetCustomAttributes(false) |> Array.exists (fun attr -> attr.GetType() = typeof<NoDynamicInvocationAttribute>)
 //is about 4 times faster
 let (|BinOp|_|) = function
@@ -288,13 +283,9 @@ let eval env expr =
             | null -> raise (System.NullReferenceException()) //otherwise will get misleading System.Reflection.TargetException: Non-static method requires a target.
             | result -> result
 
-#if DEBUG 
-    eval env expr
-#else
     try
         eval env expr
     with e ->        
         match stripTargetInvocationException e with
         | Some(e) -> reraisePreserveStackTrace e
         | None -> reraise()
-#endif
