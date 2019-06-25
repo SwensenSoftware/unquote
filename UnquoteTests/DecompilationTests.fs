@@ -719,23 +719,27 @@ let ``false || false is given priority over false && true even though they can't
 let ``true && true is given priority over true || false even though they can't be differentiated``() =
     <@ true && true @> |> decompile =! "true && true"
 
-[<Fact(Skip="there is a confirmed F# bug which makes this result in a runtime exception")>]
+[<Fact>]
 let ``Raw quoatation nested in typed quotation, confirmed F# bug`` () =
+    //there WAS a confirmed F# bug which makes this result in a runtime exception
     <@ <@@ 1 @@> @> //System.ArgumentException: Type mismatch when building 'expr': the expression has the wrong type. Expected 'Microsoft.FSharp.Quotations.FSharpExpr', but received type 'Microsoft.FSharp.Quotations.FSharpExpr`1[System.Int32]'.
+    1 =! 1
 
 [<Fact>]
-let ``Quote, supported typed`` () =
+let ``QuoteTyped`` () =
     //whoa, now we're talking!
     test <@ <@ <@ 1 @> @> |> decompile = "<@ 1 @>" @>
     //or 
     <@ <@ 1 @> @> |> decompile =! "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
 
 [<Fact>]
-let ``Quote, unsupported untyped treated as typed`` () =
+let ``QuoteRaw`` () =
     //whoa, now we're talking!
-    test <@ <@@ <@@ 1 @@> @@> |> decompile = "<@ 1 @>" @>
+    test <@ <@@ <@@ 1 @@> @@> |> decompile = "<@@ 1 @@>" @>
+    test <@ <@ <@@ 1 @@> @> |> decompile = "<@@ 1 @@>" @>
     //or 
-    <@@ <@@ 1 @@> @@> |> decompile =! "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
+    <@@ <@@ 1 @@> @@> |> decompile =! "<@@ 1 @@>" //double test, since kinda unsure about the above level of self-testing right now
+    <@ <@@ 1 @@> @> |> decompile =! "<@@ 1 @@>"
 
 let f' (x:obj) (y:obj) = x |> string
 [<Fact>]

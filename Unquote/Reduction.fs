@@ -43,7 +43,8 @@ let rec isReduced = function
     | P.Value _ 
     | P.Lambda _ 
     | DP.Unit 
-    | P.Quote _ -> 
+    | P.QuoteTyped _
+    | P.QuoteRaw _ -> 
         true
     | P.NewUnionCase(_,args) 
     | P.NewTuple(args) 
