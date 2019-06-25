@@ -245,10 +245,11 @@ let eval env expr =
             op (eval env lhs) (eval env rhs)
         | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
             op (eval env arg)
-        | P.Quote(captured) -> 
-            //N.B. we have no way of differentiating betweened typed and untyped inner quotations; 
+        | P.QuoteRaw(captured) ->
+            box captured
+        | P.QuoteTyped(captured) -> 
             //all Expr are themselves untyped, but their Type property is actually always typed: 
-            //we assume the frequency of typed Quote expressions is more common then untyped and convert all (untyped) Expr to typed using the Type property
+            //so we have to convert our untyped Expr to typed using the Type property
             let ctor = expr.Type.GetConstructors(BindingFlags.NonPublic ||| BindingFlags.Instance).[0]
             let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
             let generic = ctor.Invoke([|tree; expr.CustomAttributes|])

@@ -637,7 +637,6 @@ let ``raw Quote`` () =
 
     test <@ expectedQuotationValue.Value :?> int = 1 @>
 
-
 [<Fact>]
 let ``typed Quote`` () =
     let result = <@ <@ 1 @> @> |> eval :?> Expr<int>
@@ -651,6 +650,10 @@ let ``typed Quote`` () =
 [<Fact>]
 let ``nested typed Quote`` () =
     test <@ eval <@ eval <@ eval <@ 1 @> @> @> = 1 @> 
+
+[<Fact>]
+let ``nested untyped Quote`` () =
+    test <@ eval <@ eval <@ evalRaw <@@ 1 @@> @> @> = 1 @> 
 
 [<Fact>]
 let ``LetRecursive mutually recursive functions`` () =
