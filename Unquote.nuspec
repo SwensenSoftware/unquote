@@ -21,5 +21,6 @@ In addition to its unit testing features, Unquote includes operators for evaluat
       <dependency id="FSharp.Core" version="4.6.2"></dependency>
     </group>
   </dependencies>
+  <releaseNotes>https://github.com/SwensenSoftware/unquote/wiki/ReleaseNotes</releaseNotes>
   </metadata>
 </package>
