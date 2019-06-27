@@ -5,10 +5,10 @@
 	<version>0.0.0</version> <!-- version is required but we override it in our build script with parameterized version number -->
     <authors>Stephen Swensen</authors>
     <owners>Stephen Swensen</owners>
-	<iconUrl>http://www.swensensoftware.com/static/unquote-logo-55x55.png</iconUrl>
+	<iconUrl>https://raw.githubusercontent.com/SwensenSoftware/unquote/master/logo.png</iconUrl>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/SwensenSoftware/unquote</projectUrl>
-	<tags>F# fsharp unit-testing xunit nunit mbunit quotations tdd fsi fuchu expecto fscheck</tags>
+	<tags>f# fsharp test testing assert unit xunit nunit expecto fscheck quote unquote quotations decompile eval</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 	<summary>Write F# unit test assertions as quoted expressions, get step-by-step failure messages for free.</summary>
     <description>Unquote is not just another DSL or API for making unit test assertions. Instead, assertions are written as plain, statically-checked F# quoted expressions and test failure messages are given as step-by-step F# expression evaluations.
