@@ -44,7 +44,7 @@ module SymbolicOps =
             "op_LessThanOrEqual", ("<=", Infix(OP.LessThanOp))
             "op_Inequality", ("<>", Infix(OP.LessThanOp))
             //pipe ops
-            "op_PipeRight", ("|>", Infix(OP.Pipe)) //might need to be OP.PipeOp
+            "op_PipeRight", ("|>", Infix(OP.PipeOp))
             "op_PipeRight2", ("||>", Infix(OP.Pipe))
             "op_PipeRight3", ("|||>", Infix(OP.Pipe))
             "op_PipeLeft", ("<|", Infix(OP.LessThanOp))

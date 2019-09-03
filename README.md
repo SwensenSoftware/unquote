@@ -9,7 +9,7 @@ Unquote integrates configuration-free with all exception-based unit testing fram
 ```
 [<Fact>]
 let ``demo Unquote xUnit support`` () =
-    test <@ ([3; 2; 1; 0] |> List.map ((+) 1)) = [1 + 3..1 + 0] @>
+    test <@ [3; 2; 1; 0] |> List.map ((+) 1) = [1 + 3..1 + 0] @>
 ```
 
 produces the following failure message
@@ -17,7 +17,7 @@ produces the following failure message
 ```
 Test 'Module.demo Unquote xUnit support' failed: 
 
-([3; 2; 1; 0] |> List.map ((+) 1)) = [1 + 3..1 + 0]
+[3; 2; 1; 0] |> List.map ((+) 1) = [1 + 3..1 + 0]
 [4; 3; 2; 1] = [4..1]
 [4; 3; 2; 1] = []
 false

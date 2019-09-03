@@ -450,9 +450,14 @@ let ``backwards pipe precedence`` () =
       "List.sum <| (List.map id <| [1; 2; 3])"
 
 [<Fact>]
-let ``forward pipe precedence`` () =
+let ``forward pipe precedence 1`` () =
     <@ [1; 2; 3] |> List.map id |> List.sum @> |> decompile =!
       "[1; 2; 3] |> List.map id |> List.sum"
+
+[<Fact>] //issue #113
+let ``forward pipe precedence 2`` () =
+    <@ 2 |> id = 2 @> |> decompile =!
+      "2 |> id = 2"
 
 [<Fact>] //issue 9
 let ``generic list value literal`` () =

@@ -542,16 +542,16 @@ let ``can't differentiate between true || false and true && true``() =
 
 [<Fact>]
 let ``QuoteTyped`` () =
-    <@ (<@ <@ 1 @> @> |> decompile) = "<@ 1 @>" @> |> decompiledReductions =! [
-        "(<@ <@ 1 @> @> |> decompile) = \"<@ 1 @>\"" //note, we are unable to resugar expressiosn involving lambda applications of coerced values now
+    <@ <@ <@ 1 @> @> |> decompile = "<@ 1 @>" @> |> decompiledReductions =! [
+        "<@ <@ 1 @> @> |> decompile = \"<@ 1 @>\"" //note, we are unable to resugar expressiosn involving lambda applications of coerced values now
         "\"<@ 1 @>\" = \"<@ 1 @>\""
         "true"
     ]
 
 [<Fact>]
 let ``QuoteRaw`` () =
-    <@ (<@@ <@@ 1 @@> @@> |> decompile) = "<@@ 1 @@>" @> |> decompiledReductions =! [
-        "(<@@ <@@ 1 @@> @@> |> decompile) = \"<@@ 1 @@>\""
+    <@ <@@ <@@ 1 @@> @@> |> decompile = "<@@ 1 @@>" @> |> decompiledReductions =! [
+        "<@@ <@@ 1 @@> @@> |> decompile = \"<@@ 1 @@>\""
         "\"<@@ 1 @@>\" = \"<@@ 1 @@>\""
         "true"
     ]
@@ -648,8 +648,8 @@ let ``RecursiveLet self recursive function``() =
 [<Fact>] //issue 43
 let ``TryFinally incremental reduction of try body but finally body is never reduced``() =
     <@ try 2 + 3 finally 2 + 3 |> ignore @> |> decompiledReductions =! [
-        "try 2 + 3 finally (2 + 3 |> ignore)"
-        "try 5 finally (2 + 3 |> ignore)"
+        "try 2 + 3 finally 2 + 3 |> ignore"
+        "try 5 finally 2 + 3 |> ignore"
         "5"
     ]
 
@@ -663,7 +663,7 @@ let ``WhileLoop reduces to unit``() =
 [<Fact>] //issue 41
 let ``WhileLoop reduces to unit without any sub reductions``() =
     <@ while 2 + 5 = 0 do 3 |> ignore @> |> decompiledReductions =! [
-        "while 2 + 5 = 0 do (3 |> ignore)" //precedence in do body is off
+        "while 2 + 5 = 0 do 3 |> ignore"
         "()"
     ]
 
@@ -684,8 +684,8 @@ let ``ForIntegerRangeLoop reduces to unit``() =
 [<Fact>] //issue 41
 let ``ForIntegerRangeLoop reduces range start and end but not body``() =
     <@ for i in 1 + 2..5 + 2 do 5 |> ignore @> |> decompiledReductions =! [
-        "for i in 1 + 2..5 + 2 do (5 |> ignore)" //precedence in do body is off
-        "for i in 3..7 do (5 |> ignore)"
+        "for i in 1 + 2..5 + 2 do 5 |> ignore"
+        "for i in 3..7 do 5 |> ignore"
         "()"
     ]
 
@@ -740,8 +740,8 @@ let ``ValueWithName reduces to value in complex exprssion`` () =
 [<Fact>]
 let ``readme example`` () =    
     let x = [1;2;3]
-    <@ ([3; 2; 1; 0] |> List.map ((+) 1)) = [1 + 3..1 + 0] @> |> decompiledReductions =! [
-        "([3; 2; 1; 0] |> List.map ((+) 1)) = [1 + 3..1 + 0]"
+    <@ [3; 2; 1; 0] |> List.map ((+) 1) = [1 + 3..1 + 0] @> |> decompiledReductions =! [
+        "[3; 2; 1; 0] |> List.map ((+) 1) = [1 + 3..1 + 0]"
         "[4; 3; 2; 1] = [4..1]"
         "[4; 3; 2; 1] = []"
         "false"
