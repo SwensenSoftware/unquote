@@ -274,47 +274,47 @@ let ``new object precence in left dot context`` () =
 [<Fact>]
 let ``new object precence in left dot context in left arrow context`` () =
     decompile <@ (new Foo()).Add(new Foo()).X <- 5 @> =! "(new Foo()).Add(new Foo()).X <- 5"
-    
-[<Fact>]    
+
+[<Fact>]
 let ``Issue 7: method call precedence in left dot context`` () =
     decompile <@ "abcdefg".Substring(0, 5).Substring(0, 2) @> =! "\"abcdefg\".Substring(0, 5).Substring(0, 2)"
 
-[<Fact>]    
+[<Fact>]
 let ``Issue 7: new object precedence weaker than left dot`` () =
     decompile <@ (new string([|'h'; 'i'|])).Length @> =! "(new string([|'h'; 'i'|])).Length"
 
-[<Fact>]    
+[<Fact>]
 let ``Issue 7: method call precedence stronger than left dot`` () =
     decompile <@ "asdf".Substring(1, 2).Length @> =! "\"asdf\".Substring(1, 2).Length"
 
-[<Fact>]    
+[<Fact>]
 let ``Issue 7: method call precedence weakend within application context`` () =
     decompile <@ String.length ("asdf".Substring(1, 2)) @> =! "String.length (\"asdf\".Substring(1, 2))"
 
 let t = (1,2)
 [<Fact>]
 let ``TupleLet variation 1`` () =
-    decompile <@ let a,b = t in a,b @> =! 
+    decompile <@ let a,b = t in a,b @> =!
         "let a, b = t in (a, b)"
 
 [<Fact>]
 let ``TupleLet variation 2`` () =
-    decompile <@ let a,b = (1,2) in a,b @> =! 
+    decompile <@ let a,b = (1,2) in a,b @> =!
         "let a, b = (1, 2) in (a, b)"
 
 [<Fact>]
 let ``mutable TupleLet`` () =
-    decompile <@ let mutable a, b = (1,2) in a,b @> =! 
+    decompile <@ let mutable a, b = (1,2) in a,b @> =!
         "let mutable a, b = (1, 2) in (a, b)"
 
 [<Fact>]
 let ``TupleLet variation 1 preceded and followed by non-tupled let`` () =
-    decompile <@ let j = 3 in let a, b = t in let k = 2 in () @> =! 
+    decompile <@ let j = 3 in let a, b = t in let k = 2 in () @> =!
         "let j = 3 in let a, b = t in let k = 2 in ()"
 
 [<Fact>]
 let ``TupleLet variation 2 preceded and followed by non-tupled let`` () =
-    decompile <@ let j = 3 in let a, b = (1, 2) in let k = 2 in () @> =! 
+    decompile <@ let j = 3 in let a, b = (1, 2) in let k = 2 in () @> =!
         "let j = 3 in let a, b = (1, 2) in let k = 2 in ()"
 
 let longTuple = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)
@@ -332,25 +332,25 @@ let ``NewUnionCase literal list from literal list mixed with cons at constructio
     decompile <@ 5::[1; 2; 3] @> =! "[5; 1; 2; 3]" //this we consider acceptable
 
 [<Fact>]
-let ``NewUnionCase literal list from literal list mixed with cons local value`` () =    
+let ``NewUnionCase literal list from literal list mixed with cons local value`` () =
     let x = [1;2;3] |> toTypedExprValue
     <@ 5::(%x) @> |> decompile =! "5::[1; 2; 3]"
 
 let namedList = [1; 2; 3]
 [<Fact>]
-let ``NewUnionCase Value cons list property`` () =    
+let ``NewUnionCase Value cons list property`` () =
     decompile <@ 5::namedList @> =! "5::namedList"
 
 [<Fact>]
-let ``NewUnionCase Value cons Value cons list property`` () =    
+let ``NewUnionCase Value cons Value cons list property`` () =
     decompile <@ 6::5::namedList @> =! "6::5::namedList"
 
 [<Fact>]
-let ``NewUnionCase Value cons Expression cons list property`` () =    
+let ``NewUnionCase Value cons Expression cons list property`` () =
     decompile <@ 7::5 + 1::5::namedList @> =! "7::5 + 1::5::namedList"
 
 [<Fact>]
-let ``PropertyGet on NewUnionCase Value cons Expression cons list property`` () =    
+let ``PropertyGet on NewUnionCase Value cons Expression cons list property`` () =
     decompile <@ (7::5 + 1::5::namedList).Length @> =! "(7::5 + 1::5::namedList).Length"
 
 let namedListOfList = [[1]]
@@ -398,22 +398,16 @@ let ``generic NewUnionCase with Value arg`` () =
 let ``generic NewUnionCase with nested construction`` () =
     decompile <@ World(Hello(3)) @> =! "World(Hello(3))"
 
-#if MONO
-#else
-#if NETCOREAPP2_0
-#else
 //issue #3 -- UnionCaseTests
 //these tests are not as thorough as would like: can't verify op_Dynamic works right
-[<Fact>] 
+[<Fact>]
 let ``union case test list not requiring op_Dynamic`` () = //this test is a little fragile (see sf use; using regex would be too much), but not too fragile
     let sf = System.Diagnostics.StackFrame(true)
     #if DEBUG
     decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 2, 21).Replace("\\", "\\\\")
     #else
-    decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber(), 21).Replace("\\", "\\\\")
+    decompile <@ let [a;b] = [1;2] in a,b @> =! String.Format(@"let patternInput = [1; 2] in if (match patternInput with | _::_ -> true | _ -> false) then (if (match patternInput.Tail with | _::_ -> true | _ -> false) then (if (match patternInput.Tail.Tail with | [] -> true | _ -> false) then (let a = patternInput.Head in let b = patternInput.Tail.Head in (a, b)) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))) else raise (new MatchFailureException(""{0}"", {1}, {2}))", sf.GetFileName(), sf.GetFileLineNumber() + 4, 21).Replace("\\", "\\\\")
     #endif
-#endif
-#endif
 
 let h = World (Hello2(Hello 3, true))
 [<Fact>] //issue #3
@@ -426,7 +420,7 @@ let ``union case test zero arg union`` () =
 
 let (?) (target: obj) (lookup: string): 'TResult =
      failwith "dummy"
-  
+
 [<Fact>]
 let ``op_Dynamic is not treated as binary infix op`` () =
     decompile <@ let x : string = "asdf"?Substring(0,2) in x @> =! @"let x = (let clo2 = op_Dynamic ""asdf"" ""Substring"" in fun (arg20, arg21) -> clo2 (arg20, arg21)) (0, 2) in x"
@@ -434,7 +428,7 @@ let ``op_Dynamic is not treated as binary infix op`` () =
 let g<'a,'b> = typeof<'a>.Name, typeof<'b>.Name
 let g'<'a,'b>() = typeof<'a>.Name, typeof<'b>.Name
 [<Fact>]
-let ``Call distinguishes between generic value Call and unit function Call`` () =    
+let ``Call distinguishes between generic value Call and unit function Call`` () =
     decompile <@ g<int, string> @> =! "g<int, string>"
 
 //Issue 68: removing Metadata dependency, not worth it for this one scenario
@@ -470,7 +464,7 @@ let ``generic list value property`` () =
 
 //xunit respects nested inner classes, and so does TestDriven when you run the entire test project,
 //but TestDriven cannot run a single teste in a nested module.
-//module UnappliedLambdaResugaring = 
+//module UnappliedLambdaResugaring =
 [<Fact>] //issue 25
 let ``re-sugar unapplied lambda: built-in binary op`` () =
     <@ (+) @> |> decompile =! "(+)"
@@ -556,18 +550,18 @@ let ``re-sugar partial application with first tuple arg applied and second non-t
 
 [<Fact(Skip="cant do right now")>] //issue 23
 let ``would like to be able to distinguish between superfluous lambda expression and unapplied lambda call`` () =
-    <@ (fun x y -> x + y) @> |> decompile <>! "(+)" 
-    <@ (fun x y -> x + y) @> |> decompile =! "(fun x y -> x + y)" 
+    <@ (fun x y -> x + y) @> |> decompile <>! "(+)"
+    <@ (fun x y -> x + y) @> |> decompile =! "(fun x y -> x + y)"
 
 [<Fact(Skip="cant do right now")>] //issue 23
 let ``would like to be able to distinguish between superfluous lambda expression and partially applied lambda call`` () =
-    <@ (fun x y -> x + y) 1 @> |> decompile <>! "(+) 1" 
-    <@ (fun x y -> x + y) 1 @> |> decompile =! "(fun x y -> x + y) 1" 
+    <@ (fun x y -> x + y) 1 @> |> decompile <>! "(+) 1"
+    <@ (fun x y -> x + y) 1 @> |> decompile =! "(fun x y -> x + y) 1"
 
 [<Fact(Skip="cant do right now")>] //issue 23
 let ``would like to be able to distinguish between superfluous lambda expression and fully applied lambda call`` () =
-    <@ (fun x y -> x + y) 1 2 @> |> decompile <>! "(+) 1 2" 
-    <@ (fun x y -> x + y) 1 2 @> |> decompile =! "(fun x y -> x + y) 1 2" 
+    <@ (fun x y -> x + y) 1 2 @> |> decompile <>! "(+) 1 2"
+    <@ (fun x y -> x + y) 1 2 @> |> decompile =! "(fun x y -> x + y) 1 2"
 
 //--- List and Array Range and RangeSet
 
@@ -589,7 +583,7 @@ let ``array range step`` () =
 
 //--- PropertyGet and PropertySet
 
-type PropType() = 
+type PropType() =
     member this.Item
         with get(index) = 3
         and set index value = ()
@@ -602,7 +596,7 @@ type PropType() =
 
     static member StaticPropNoArgs
         with get () = 3
-        and  set (value:int) = ()    
+        and  set (value:int) = ()
 
     static member StaticPropOneArg
         with get (x:int) = 3
@@ -617,43 +611,43 @@ let pt = new PropType()
 
 //--- PropertyGet
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet indexed instance`` () =
     <@ pt.[1] @> |> decompile =! "pt.[1]"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet indexed instance, arg not reduced`` () =
     <@ pt.[1 + 2] @> |> decompile =! "pt.[1 + 2]"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet instance one arg`` () =
     <@ pt.InstancePropOneArg(1) @> |> decompile =! "pt.InstancePropOneArg(1)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet instance one arg, arg not reduced`` () =
     <@ pt.InstancePropOneArg(1 + 2) @> |> decompile =! "pt.InstancePropOneArg(1 + 2)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet instance two args`` () =
     <@ pt.InstancePropTwoArgs(1, 2) @> |> decompile =! "pt.InstancePropTwoArgs(1, 2)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet instance two args, args not reduced`` () =
     <@ pt.InstancePropTwoArgs(1 + 1, 2 + 1) @> |> decompile =! "pt.InstancePropTwoArgs(1 + 1, 2 + 1)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet Static one arg`` () =
     <@ PropType.StaticPropOneArg(1) @> |> decompile =! "PropType.StaticPropOneArg(1)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet Static one arg, arg not reduced`` () =
     <@ PropType.StaticPropOneArg(1 + 2) @> |> decompile =! "PropType.StaticPropOneArg(1 + 2)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet Static two args`` () =
     <@ PropType.StaticPropTwoArgs(1, 2) @> |> decompile =! "PropType.StaticPropTwoArgs(1, 2)"
 
-[<Fact>] 
+[<Fact>]
 let ``issue 31: PropertyGet Static two args, args not reduced`` () =
     <@ PropType.StaticPropTwoArgs(1 + 1, 2 + 1) @> |> decompile =! "PropType.StaticPropTwoArgs(1 + 1, 2 + 1)"
 
@@ -734,7 +728,7 @@ let ``Raw quoatation nested in typed quotation, confirmed F# bug`` () =
 let ``QuoteTyped`` () =
     //whoa, now we're talking!
     test <@ <@ <@ 1 @> @> |> decompile = "<@ 1 @>" @>
-    //or 
+    //or
     <@ <@ 1 @> @> |> decompile =! "<@ 1 @>" //double test, since kinda unsure about the above level of self-testing right now
 
 [<Fact>]
@@ -742,7 +736,7 @@ let ``QuoteRaw`` () =
     //whoa, now we're talking!
     test <@ <@@ <@@ 1 @@> @@> |> decompile = "<@@ 1 @@>" @>
     test <@ <@ <@@ 1 @@> @> |> decompile = "<@@ 1 @@>" @>
-    //or 
+    //or
     <@@ <@@ 1 @@> @@> |> decompile =! "<@@ 1 @@>" //double test, since kinda unsure about the above level of self-testing right now
     <@ <@@ 1 @@> @> |> decompile =! "<@@ 1 @@>"
 
@@ -753,7 +747,7 @@ let ``issue 40: handle lambda re-sugaring when vars are implicitly coerced``() =
 
 [<Fact>]
 let ``issue 51: RecursiveLet mutually recursive funtions``() =
-    <@    
+    <@
         let rec even x =
             if x = 0 then true
             else odd (x-1)
@@ -766,7 +760,7 @@ let ``issue 51: RecursiveLet mutually recursive funtions``() =
 
 [<Fact>]
 let ``issue 51: RecursiveLet self recursive function``() =
-    <@    
+    <@
         let rec countdown i steps  =
             if i < 0 then i
             else countdown (i - steps) steps
@@ -830,7 +824,7 @@ type TypeWithFunctionMembers() =
 [<Fact>]
 let ``issue 58: static member function call`` () =
     <@ TypeWithFunctionMembers.g 1 2 @> |> decompile =! "TypeWithFunctionMembers.g 1 2"
-        
+
 let twfm = TypeWithFunctionMembers()
 [<Fact>]
 let ``issue 58: instance member function call`` () =
@@ -886,7 +880,7 @@ Using F# 2.0, it is possible to create invalid active patterns by following the 
 
 let ``|even|odd|`` input = if input % 2 = 0 then even else odd
 
-compiles fine as an active pattern with the following signature 
+compiles fine as an active pattern with the following signature
 
 val ( |even|odd| ) : int -> Choice<unit,unit>
 
@@ -1036,13 +1030,13 @@ module TopLevelOpIsolation =
     [<Fact>]
     let ``issue 91: op_RangeStep literal syntax for valid redefinition`` () =
         <@ [1..1..1] @> |> decompile =! "[1..1..1]"
-    
+
 [<Fact>]
 let ``issue 91 and issue 90: op_Range literal syntax for valid local lambda redefinition`` () =
     let (..) x y = Seq.singleton (x - y)
     <@ [1..1] @> |> decompile =! "[1..1]"
 
-    
+
 [<Fact>]
 let ``issue 91 and issue 90: op_RangeStep literal syntax for valid local lambda redefinition`` () =
     let (.. ..) x y z = Seq.singleton (x - y - z)
@@ -1059,13 +1053,13 @@ module TopLevelOpIsolation2 =
     let ``issue 91: op_RangeStep first class syntax for non seq return type`` () =
         <@ (.. ..) 1 1 1 @> |> decompile =! "TopLevelOpIsolation2.(.. ..) 1 1 1"
 
-    
+
 [<Fact>]
 let ``issue 91: op_Range first class syntax for non seq return type of local lambda definition`` () =
     let (..) x y = x + y
     <@ (..) 1 2 @> |> decompile =! "(..) 1 2"
 
-    
+
 [<Fact>]
 let ``issue 91: op_RangeStep first class syntax for non seq return type of local lambda definition`` () =
     let (.. ..) x y z = x - y - z
@@ -1093,7 +1087,7 @@ let ``issue 91: op_RangeStep first class syntax for seq return type but arg mism
     let (.. ..) x y z h = Seq.singleton (x + y + z + h)
     <@ (.. ..) 1 2 3 4 @> |> decompile =! "(.. ..) 1 2 3 4"
 
-module TopLevelIsolation4 = 
+module TopLevelIsolation4 =
     let (+) x y z = x - y - z
     let ``issue 84: infix symbol but first class only definition`` () =
         <@ (+) 1 2 3 @> |> decompile =! "TopLevelOpIsolation3.(+) 1 2 3"
@@ -1179,15 +1173,15 @@ let ``issue 94: dynamic cast operator is right associative`` () =
 [<Fact>]
 let ``issue 94: dynamic cast binds weaker than <=>`` () =
     let (<=>) (x:float) (y:obj) = x :> obj
-    raises<InvalidCastException> <@ 1. <=> new obj() :?> int @> 
+    raises<InvalidCastException> <@ 1. <=> new obj() :?> int @>
 #endif
 
 //[<Fact>] //don't have any infix operators to compare to
 //let ``issue 94: dynamic cast binds stronger than :=`` () =
 //    let (:=) (x:float) (y:obj) = x :> obj
-//    
+//
 //    test <@ (1. := new obj() :?> int) :? float @>
-    
+
     //|> decompile =! "new obj() :?> int $ 1"
 
 [<Fact>]
@@ -1264,7 +1258,7 @@ module Issue1_TopLevel =
 
     let (!+++) x = x : int
     [<Fact>]
-    let ``issue 1: prefix op starting with ! but not !=`` () =    
+    let ``issue 1: prefix op starting with ! but not !=`` () =
         <@  !+++1 @> |> decompile =! "!+++1"
 
     let (!=) x y = x + y
@@ -1272,7 +1266,7 @@ module Issue1_TopLevel =
     let ``issue 1: infix !=`` () =
         <@  1 != 2 @> |> decompile =! "1 != 2"
 
-    let (~~~~~~~) x :int = x    
+    let (~~~~~~~) x :int = x
     [<Fact>]
     let ``issue 1: custom prefix op as first class`` () =
         <@  (~~~~~~~) @> |> decompile =! "(~~~~~~~)"
@@ -1281,7 +1275,7 @@ module Issue1_TopLevel =
     [<Fact>]
     let ``issue 1: custom prefix op as first class and returning lambda`` () =
         <@  (~~~~~~~~) @> |> decompile =! "(~~~~~~~~)"
-        
+
     let (<<>>) x :int = x
     [<Fact>]
     let ``issue 1: custom infix op taking one arg must be first class`` () =
@@ -1327,7 +1321,7 @@ let ``issue 93: lazy application of application`` () =
 [<Fact>]
 let ``issue 93: assert Call treated like function application`` () =
 #if DEBUG
-    <@  assert true @> |> decompile =! "assert true"    
+    <@  assert true @> |> decompile =! "assert true"
 #else
     <@  assert true @> |> decompile =! "()"
 #endif
@@ -1367,22 +1361,22 @@ let ``issue 5: TryWith in weaker precedence context`` () =
 [<Fact>]
 let ``issue 5: TryWith simple identifier binding`` () =
     //see issue 99 regarding decompilation of null literals
-    <@ try (null:string).Length with e -> e.ToString().Length @> |> decompile =! 
+    <@ try (null:string).Length with e -> e.ToString().Length @> |> decompile =!
       "try null.Length with e -> e.ToString().Length"
 
 [<Fact>]
 let ``issue 5: TryWith wildcard pattern match`` () =
-    <@ try (null:string).Length with _ -> 12345 @> |> decompile =! 
+    <@ try (null:string).Length with _ -> 12345 @> |> decompile =!
       "try null.Length with matchValue -> 12345"
 
 [<Fact>]
 let ``issue 5: TryWith complex`` () =
-    <@ try (null:string).Length with | :? System.ArgumentException as e -> 0 | :? exn as j when j.ToString().Length = 1 -> 2 | k -> 3 @> |> decompile =! 
+    <@ try (null:string).Length with | :? System.ArgumentException as e -> 0 | :? exn as j when j.ToString().Length = 1 -> 2 | k -> 3 @> |> decompile =!
       "try null.Length with matchValue -> if matchValue :? ArgumentException then (let e = matchValue :?> ArgumentException in 0) else (if matchValue :? Exception then (if (let j = matchValue :?> Exception in j.ToString().Length = 1) then (let j = matchValue :?> Exception in 2) else (let k = matchValue in 3)) else (let k = matchValue in 3))"
 
 [<Fact>]
 let ``issue 5: TryWith reraise is not treated as a generic value`` () =
-    //note the funny sequential expression captured by the quotation around reraise: 
+    //note the funny sequential expression captured by the quotation around reraise:
     //this is not done for other similar scenarios, and i think it is done to supress
     //warnings suggesting using ignore for functions that return values.
     <@ try "" with e -> reraise() @> |> decompile =! "try \"\" with e -> ((); reraise())"
@@ -1391,7 +1385,7 @@ let ``issue 5: TryWith reraise is not treated as a generic value`` () =
 let ``exception instance`` () =
     let x = new System.ArgumentException("bad arg") |> toTypedExprValue
     x |> decompile =! "System.ArgumentException: bad arg"
-    
+
 [<Fact>]
 let ``reduction exception instance`` () =
     let x = new ReductionException(new System.ArgumentException("bad arg")) |> toTypedExprValue
@@ -1457,10 +1451,10 @@ let ``decompile anonymous record construction``() =
 let ``decompile pure WITH anonymous record construction with multiple values``() =
     let x = {| Txt = "Hello"; Val = 42 |}
     <@ {| x with Val = 43; SecondVal = 44 |} @>
-    |> decompile =! "{| SecondVal = 44; Txt = x.Txt; Val = 43 |}"
+    |> decompile =! "let Val = 43 in {| SecondVal = 44; Txt = x.Txt; Val = Val |}"
 
 [<Fact>]
 let ``decompile mixed WITH anonymous record construction with multiple values``() =
     let x = { Text = "Hello"; Value = 42 }
     <@ {| x with Value = 43; SecondVal = 44 |} @>
-    |> decompile =! "{| SecondVal = 44; Text = x.Text; Value = 43 |}"
+    |> decompile =! "let Value = 43 in {| SecondVal = 44; Text = x.Text; Value = Value |}"

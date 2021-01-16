@@ -10,8 +10,8 @@ let inline testEval expr expected =
     result =! expected
 
 let testEvalCheckedOverflow expr =
-    let e = 
-        <@ try 
+    let e =
+        <@ try
                %expr |> ignore; null
            with e -> e @> |> eval
 
@@ -89,21 +89,14 @@ let ``ToInt primitive`` () =
 let ``ToUInt64 reflective`` () =
     testEvalCheckedOverflow <@ Checked.uint64 (bigint(UInt64.MaxValue) + 1I) @>
 
-#if MONO
-#else
-#if NETCOREAPP2_0
 [<Fact(Skip="This fails on .net core")>]
-#else
-[<Fact>]
-#endif
 let ``ToUIntPtr primitive`` () =
     testEvalCheckedOverflow <@ Checked.unativeint UInt64.MaxValue @>
-#endif
 
 [<Fact>]
 let ``ToIntPtr primitive`` () =
-    testEvalCheckedOverflow <@ Checked.nativeint UInt64.MaxValue @>    
+    testEvalCheckedOverflow <@ Checked.nativeint UInt64.MaxValue @>
 
 [<Fact>]
 let ``ToChar primitive`` () =
-    testEvalCheckedOverflow <@ Checked.char UInt64.MaxValue @>    
+    testEvalCheckedOverflow <@ Checked.char UInt64.MaxValue @>
