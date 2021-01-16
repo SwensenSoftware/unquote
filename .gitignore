@@ -6,3 +6,5 @@ packages/
 .vs/
 *.suo
 .ionide
+
+.fake
