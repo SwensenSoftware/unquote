@@ -10,7 +10,6 @@
     <Compile Include="Utils\Printf.fs" />
     <Compile Include="Utils\List.fs" />
     <Compile Include="Utils\Type.fs" />
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="DynamicOperators.fs" />
     <Compile Include="EvaluationException.fs" />
     <Compile Include="Evaluation.fs" />
