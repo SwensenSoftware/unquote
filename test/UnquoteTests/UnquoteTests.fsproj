@@ -8,6 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="EvaluationTests.fs" />
+    <Compile Include="DynamicOperatorsEvaluationTests.fs" />
+    <Compile Include="CheckedDynamicOperatorsEvaluationTests.fs" />
+    <Compile Include="FSharpNameTests.fs" />
+    <Compile Include="DecompilationTests.fs" />
+    <Compile Include="ReductionTests.fs" />
+    <Compile Include="AssertionOperatorsTests.fs" />
+    <Compile Include="CustomExceptionSerializationTests.fs" />
+    <Compile Include="UnquotedExpressionTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -22,6 +31,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Unquote/Unquote.fsproj" />
   </ItemGroup>
 
 </Project>
