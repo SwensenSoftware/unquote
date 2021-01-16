@@ -5,7 +5,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-
+    <Compile Include="Utils\Prelude.fs" />
+    <Compile Include="Utils\Regex.fs" />
+    <Compile Include="Utils\Printf.fs" />
+    <Compile Include="Utils\List.fs" />
+    <Compile Include="Utils\Type.fs" />
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="DynamicOperators.fs" />
+    <Compile Include="EvaluationException.fs" />
+    <Compile Include="Evaluation.fs" />
+    <Compile Include="OperatorPrecedence.fs" />
+    <Compile Include="ExtraReflection.fs" />
+    <Compile Include="ExtraPatterns.fs" />
+    <Compile Include="ReductionException.fs" />
+    <Compile Include="Decompilation.fs" />
+    <Compile Include="Reduction.fs" />
+    <Compile Include="UnquotedExpression.fs" />
+    <Compile Include="Extensions.fs" />
+    <Compile Include="Operators.fs" />
+    <Compile Include="AssertionFailedException.fs" />
+    <Compile Include="Assertions.fs" />
+    <Content Include="packages.config" />
   </ItemGroup>
 
 </Project>
