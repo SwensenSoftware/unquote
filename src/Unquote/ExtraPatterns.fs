@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-///Extra Quoation patterns for sprinting and reducing Quotation Expressions
+﻿///Extra Quoation patterns for sprinting and reducing Quotation Expressions
 module internal Swensen.Unquote.ExtraPatterns
 open System
 open System.Reflection
@@ -38,14 +22,14 @@ let (|LambdaValue|_|) = function
             Some(name) //issue 11 (which is taken care of in othercases by use of ER.sourceName)
         | _ -> None
     | _ -> None
-    
+
 
 //future feature, support custom ops
 ///Match non-custom binary infix Call patterns.
 ///Must come before Call pattern.
 let (|InfixCallOrApplication|_|) = function
     //when the op is compiled as a property            | when the op is a local lambda
-    | P.Call (_, MethodInfoName(opName), lhs::rhs::[]) 
+    | P.Call (_, MethodInfoName(opName), lhs::rhs::[])
     | P.Application(P.Application(LambdaValue(opName), lhs), rhs)
     | P.Application(P.Application(P.Call(_, MethodInfoName(opName), []), lhs), rhs) ->
         match ER.SymbolicOps.tryFindByName opName with
@@ -97,7 +81,7 @@ let (|TupleLet|_|) x =
                 tupledVars.[index] <- Some(var)
                 fillVarsAndGetBody next
             | final -> final
-        
+
         let body = fillVarsAndGetBody bindings
 
         Some(tupledVars |> Array.toList, tuple, body)
@@ -112,39 +96,39 @@ let (|IncompleteLambdaCall|_|) x =
     match x with
     | (P.Let _ | P.Lambda _) -> //this is definately not a complete lambda call
         let rec gatherLetBindings varsList bindingList = function
-            | TupleLet(vars, binding, body) -> 
+            | TupleLet(vars, binding, body) ->
                 gatherLetBindings ((vars |> List.choose id)::varsList) (binding::bindingList) body
-            | P.Let(var, binding, body) -> 
+            | P.Let(var, binding, body) ->
                 gatherLetBindings ([var]::varsList) (binding::bindingList) body
-            | final -> 
+            | final ->
                 varsList |> List.rev, bindingList |> List.rev, final
 
         let varsList, bindingList, final = gatherLetBindings [] [] x
 
         match final with
-        | DP.Lambdas(lambdaVarsList, P.Call(target, mi, callArgs)) 
-            //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args **    
-            when List.equalsWith isVarOfExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs -> 
+        | DP.Lambdas(lambdaVarsList, P.Call(target, mi, callArgs))
+            //requiring all callArgs to be Vars is a temp cheat till we know how to deal with properties in call args **
+            when List.equalsWith isVarOfExpr ((varsList |> List.concat) @ (lambdaVarsList |> List.concat)) callArgs ->
                 Some(target, mi, bindingList)
         | _ -> None
     | _ -> None
 
 //only used by Range and RangeStep
 let private rangeOuterInnerMethodInfos (miOuter:MethodInfo) (miInner:MethodInfo) conversionMiName =
-    miInner.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" && miInner.Name = "CreateSequence" 
+    miInner.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" && miInner.Name = "CreateSequence"
         && miOuter.DeclaringType.FullName = "Microsoft.FSharp.Collections.SeqModule" && miOuter.Name = conversionMiName
 
 ///Match a sequence, list, or array op_Range expression, return (startToken, endToken, startExpression, endExpression). Must come before Call patterns.
 let (|Range|_|) x =
     let (|RangeOp|_|) = function
-        | P.Call(None, mi, a::b::[]) when mi.Name = "op_Range" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) -> 
+        | P.Call(None, mi, a::b::[]) when mi.Name = "op_Range" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) ->
             Some(a,b)
         | P.Application(P.Application(LambdaValue("op_Range"), a), b) as x when x.Type |> ER.isGenericTypeDefinedFrom<seq<_>> ->
             Some(a,b)
         | _ -> None
-    
-    match x with 
-    | RangeOp(a,b) -> 
+
+    match x with
+    | RangeOp(a,b) ->
         Some("{","}",a,b)
     | P.Call(None, miOuter, [P.Call(None, miInner, [RangeOp(a,b)])])
     | P.Call(None, miOuter, [P.Coerce(P.Call(None, miInner, [RangeOp(a,b)]), _)]) ->
@@ -159,16 +143,16 @@ let (|Range|_|) x =
 ///Match a sequence, list, or array op_RangeStep expression, return (startToken, endToken, startExpression, stepExpression, endExpression). Must come before Call patterns.
 let (|RangeStep|_|) x =
     let (|RangeStepOp|_|) = function
-        | P.Call(None, mi, a::b::c::[]) when mi.Name = "op_RangeStep" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) -> 
+        | P.Call(None, mi, a::b::c::[]) when mi.Name = "op_RangeStep" && (mi.ReturnType |> ER.isGenericTypeDefinedFrom<seq<_>>) ->
             Some(a,b,c)
         | P.Application(P.Application(P.Application(LambdaValue("op_RangeStep"), a), b), c) as x when x.Type |> ER.isGenericTypeDefinedFrom<seq<_>> ->
             Some(a,b,c)
         | _ -> None
 
     match x with
-    | RangeStepOp(a,b,c) -> 
+    | RangeStepOp(a,b,c) ->
         Some("{","}",a,b,c)
-    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])]) 
+    | P.Call(None, miOuter, [P.Call(None, miInner, [RangeStepOp(a,b,c)])])
     | P.Call(None, miOuter, [P.Coerce(P.Call(None, miInner, [RangeStepOp(a,b,c)]), _)]) ->
         if rangeOuterInnerMethodInfos miOuter miInner "ToList" then
             Some("[","]",a,b,c)
@@ -177,7 +161,7 @@ let (|RangeStep|_|) x =
         else
             None
     | _ -> None
-         
+
 ///Match Call(None, ...) patterns for NumericLiterals, returning the literal value as a string and suffix on success
 let (|NumericLiteral|_|) x =
     let (|NumericLiteralMI|_|) (mi:MethodInfo) =

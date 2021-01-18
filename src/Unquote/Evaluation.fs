@@ -1,19 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-module internal Swensen.Unquote.Evaluation
+﻿module internal Swensen.Unquote.Evaluation
 open Swensen.Unquote
 
 open Swensen
@@ -30,8 +15,8 @@ module DP = DerivedPatterns
 //so we give native impls even for ops given dynamic implementations by F# (e.g. while (+) is given dynamic impl, for whatever reason (/) isn't)
 
 //let x = <@ 10 + 10 @>
-//let x = <@ "asdf".Substring(0,2) @> 
-//let x = <@ "asdf".Substring(0,2).Length * 5 + 2 / 23 = 4 + 2 @> 
+//let x = <@ "asdf".Substring(0,2) @>
+//let x = <@ "asdf".Substring(0,2).Length * 5 + 2 / 23 = 4 + 2 @>
 
 //PowerPack's Eval:
 //{0..100000} |> Seq.iter (fun _ -> Microsoft.FSharp.Linq.QuotationEvaluator.Evaluate x |> ignore);;
@@ -48,7 +33,7 @@ module DP = DerivedPatterns
 ///Strip possibly nested target invocation exception
 let rec stripTargetInvocationException (e:exn) =
     match e with
-    | :? TargetInvocationException -> 
+    | :? TargetInvocationException ->
         if e.InnerException = null then None //user code threw TargetInvocationException
         else stripTargetInvocationException e.InnerException //recursively find first non-TargetInvocationException InnerException (the real user code exception)
     | _ -> Some(e) //the real user code exception
@@ -63,10 +48,10 @@ let inline reraisePreserveStackTrace (ex:Exception) =
 //N.B. using hashset of known ops instead of mi.GetCustomAttributes(false) |> Array.exists (fun attr -> attr.GetType() = typeof<NoDynamicInvocationAttribute>)
 //is about 4 times faster
 let (|BinOp|_|) = function
-    |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> 
+    |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" ->
         match DynamicOperators.binOpLookup.TryGetValue mi.Name with
-        | true, op -> 
-            let aty,bty = 
+        | true, op ->
+            let aty,bty =
                 let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType) //using lhs.Type, rhs.Type has no perf. impact (but is it the same?)
                 argTys.[0], argTys.[1]
             let cty = mi.ReturnType
@@ -76,9 +61,9 @@ let (|BinOp|_|) = function
     | _ -> None
 
 let (|UnaryOp|_|) = function
-    |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" -> 
+    |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators" ->
         match DynamicOperators.unaryOpLookup.TryGetValue mi.Name with
-        | true, op -> 
+        | true, op ->
             let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
             let specificOp = op aty bty
@@ -87,10 +72,10 @@ let (|UnaryOp|_|) = function
     | _ -> None
 
 let (|CheckedBinOp|_|) = function
-    |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" -> 
+    |P.Call(None, mi, [lhs;rhs]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" ->
         match DynamicOperators.Checked.binOpLookup.TryGetValue mi.Name with
-        | true, op -> 
-            let aty,bty = 
+        | true, op ->
+            let aty,bty =
                 let argTys = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
                 argTys.[0], argTys.[1]
             let cty = mi.ReturnType
@@ -100,9 +85,9 @@ let (|CheckedBinOp|_|) = function
     | _ -> None
 
 let (|CheckedUnaryOp|_|) = function
-    |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" -> 
+    |P.Call(None, mi, [arg]) when mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators+Checked" ->
         match DynamicOperators.Checked.unaryOpLookup.TryGetValue mi.Name with
-        | true, op -> 
+        | true, op ->
             let aty = (mi.GetParameters() |> Array.map (fun p -> p.ParameterType)).[0]
             let bty = mi.ReturnType
             let specificOp = op aty bty
@@ -118,9 +103,9 @@ type EnvVar(var:Var, value:obj, ?reraisable:bool) =
     member this.Value
         with get() = value
         and set(value') = value <- value'
-    
+
     member __.Reraisable = reraisable
-    
+
     static member findByVar var (xl:EnvVar list)  =
         match xl |> List.tryFind (fun x -> x.Var = var) with
         | Some(ev) -> ev
@@ -154,7 +139,7 @@ let eval env expr =
         | P.IfThenElse(condition, success, failure) ->
             let result:bool = eval env condition |> unbox
             if result then eval env success else eval env failure
-        | P.Value(value,_) -> 
+        | P.Value(value,_) ->
             value
         | P.FieldGet(instance, fi) ->
             fi.GetValue(evalInstance env instance)
@@ -170,7 +155,7 @@ let eval env expr =
         | P.DefaultValue(ty) ->
             //N.B. ValueTypes in C# and f# can't implement constructors since efficient initialization of "zeroed-out" structs is enabled
             Activator.CreateInstance(ty)
-        | P.NewObject(ci, args) -> 
+        | P.NewObject(ci, args) ->
             ci.Invoke(evalAll env args)
         | P.NewArray(ty, args) ->
             let arr = Array.CreateInstance(ty, args.Length)
@@ -179,7 +164,7 @@ let eval env expr =
             box arr
         | P.NewRecord(ty, args) ->
             FSharpValue.MakeRecord(ty, evalAll env args, true)
-        | P.NewUnionCase(uci, args) -> 
+        | P.NewUnionCase(uci, args) ->
             FSharpValue.MakeUnion(uci, evalAll env args, true)
         | P.NewTuple(args) ->
             FSharpValue.MakeTuple(evalAll env args, expr.Type)
@@ -189,9 +174,9 @@ let eval env expr =
             box ()
         | P.TupleGet(tuple, index) ->
             FSharpValue.GetTupleField(eval env tuple, index)
-        | P.Coerce(target, ty) ->    
-            eval env target         
-        | P.WithValue(o, _, _) ->    
+        | P.Coerce(target, ty) ->
+            eval env target
+        | P.WithValue(o, _, _) ->
             o
         | P.TypeTest(target, ty) ->
             ty.IsAssignableFrom((eval env target).GetType()) |> box
@@ -226,7 +211,7 @@ let eval env expr =
                 eval env finallyBlock |> ignore
         | P.Lambda(var, body) ->
             let ty = FSharpType.MakeFunctionType(var.Type, body.Type)
-            let impl : obj -> obj = 
+            let impl : obj -> obj =
                 fun arg ->
                     let env = EnvVar(var, arg)::env
                     eval env body
@@ -241,14 +226,14 @@ let eval env expr =
             let meth = lty.GetMethod("Invoke", [|argTy|])
             let r = meth.Invoke(lambda, [|arg|])
             r
-        | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) -> 
+        | BinOp(op, lhs, rhs) | CheckedBinOp(op, lhs, rhs) ->
             op (eval env lhs) (eval env rhs)
-        | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) -> 
+        | UnaryOp(op, arg) | CheckedUnaryOp(op, arg) ->
             op (eval env arg)
         | P.QuoteRaw(captured) ->
             box captured
-        | P.QuoteTyped(captured) -> 
-            //all Expr are themselves untyped, but their Type property is actually always typed: 
+        | P.QuoteTyped(captured) ->
+            //all Expr are themselves untyped, but their Type property is actually always typed:
             //so we have to convert our untyped Expr to typed using the Type property
             let ctor = expr.Type.GetConstructors(BindingFlags.NonPublic ||| BindingFlags.Instance).[0]
             let tree = expr.GetType().GetProperty("Tree", BindingFlags.NonPublic ||| BindingFlags.Instance).GetValue(captured, null)
@@ -256,37 +241,37 @@ let eval env expr =
             box generic
         | P.Call(instance, mi, args) ->
             mi.Invoke(evalInstance env instance, evalAll env args)
-        | P.LetRecursive(bindings, finalBody) -> 
+        | P.LetRecursive(bindings, finalBody) ->
             let rec init env = function
                 | (var:Var, _)::rest -> init (EnvVar(var, null)::env) rest
                 | [] -> env
             let env = init env bindings
-                
+
             for (var, body) in bindings do
                 (env |> EnvVar.findByVar var).Value <- eval env body
 
-            eval env finalBody                       
-        | P.AddressOf _ -> 
+            eval env finalBody
+        | P.AddressOf _ ->
             failwithPatternNotSupported "AddressOf" expr
-        | P.AddressSet _ -> 
+        | P.AddressSet _ ->
             failwithPatternNotSupported "AddressSet" expr
-        | P.NewDelegate _ -> 
+        | P.NewDelegate _ ->
             failwithPatternNotSupported "NewDelegate" expr
-        | _ -> 
-            failwithf "this expression should not be possible: %A" expr 
+        | _ ->
+            failwithf "this expression should not be possible: %A" expr
     and evalAll env exprs =
         exprs |> Seq.map (eval env) |> Seq.toArray
     and evalInstance env expr =
         match expr with
-        | None -> null 
-        | Some(instance) -> 
+        | None -> null
+        | Some(instance) ->
             match eval env instance with
             | null -> raise (System.NullReferenceException()) //otherwise will get misleading System.Reflection.TargetException: Non-static method requires a target.
             | result -> result
 
     try
         eval env expr
-    with e ->        
+    with e ->
         match stripTargetInvocationException e with
         | Some(e) -> reraisePreserveStackTrace e
         | None -> reraise()

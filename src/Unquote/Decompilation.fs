@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-module internal Swensen.Unquote.Decompilation
+﻿module internal Swensen.Unquote.Decompilation
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
@@ -33,7 +17,7 @@ module CustomContext =
     let Zero = (OP(0),OP.Non)
 
 module CC = CustomContext
-      
+
 //todo:
 //  precedence applied to lhs of . not right, see skipped SourceOpTests
 //  note: Dictionary<_,_> values are not sprinted as nicely as in FSI, consider using FSI style
@@ -54,7 +38,7 @@ let decompile expr =
                 | _, _ -> applyParens OP.MethodCall (sprintf "%s.%s(%s)" (decompile (OP.Dot,OP.Left) target) pi.Name (decompileTupledArgs args))
             | None -> //static get (note: can't accept params)
                 let sprintedName =
-                    if ER.isOpenModule pi.DeclaringType then 
+                    if ER.isOpenModule pi.DeclaringType then
                         sprintf "%s" pi.Name
                     else
                         sprintf "%s.%s" pi.DeclaringType.Name pi.Name
@@ -76,7 +60,7 @@ let decompile expr =
             //need to hack precedence / application of parenthisizes.  we give
             //lhs anecdotally higher precedence context of 10.
             applyParens OP.Semicolon (sprintf "%s; %s" (decompile (OP(10), OP.Non) lhs) (decompile (OP.Semicolon, OP.Right) rhs))
-        | P.Sequential(lhs, rhs) -> 
+        | P.Sequential(lhs, rhs) ->
             applyParens OP.Semicolon (sprintf "%s; %s" (decompile (OP.Semicolon, OP.Left) lhs) (decompile (OP.Semicolon, OP.Right) rhs))
         | EP.Range(startToken,endToken,a,b) -> //not sure about precedence for op ranges. must come before xxxCallOrApplication
             sprintf "%s%s..%s%s" startToken (decompile CC.Zero a) (decompile CC.Zero b) endToken
@@ -99,7 +83,7 @@ let decompile expr =
                     let decompiledTarget =
                         match target with
                         | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
-                        | None -> ER.sourceName <| mi.DeclaringType.GetTypeInfo() 
+                        | None -> ER.sourceName <| mi.DeclaringType.GetTypeInfo()
                     sprintf "%s.%s" decompiledTarget (ER.sourceName mi)
 
             match suppliedArgs.Length with
@@ -109,14 +93,14 @@ let decompile expr =
             let sprintSingleVar (var:Var) = if var.Type = typeof<Unit> then "()" else var.Name
             let sprintedVars =
                 vars
-                |> List.map  
-                    (function 
-                        | [var] -> sprintSingleVar var 
+                |> List.map
+                    (function
+                        | [var] -> sprintSingleVar var
                         | tupledVars -> sprintf "(%s)" (tupledVars |> List.map sprintSingleVar |> String.concat ", "))
                 |> String.concat " "
             applyParens OP.Fun (sprintf "fun %s -> %s" sprintedVars (decompile CC.Zero body))
         | P.Call(None, mi, [lhs]) when mi.Name = "TypeTestGeneric" ->
-            //thinking about making decompile depend on Reduce.isReduced: 
+            //thinking about making decompile depend on Reduce.isReduced:
             //so that when lhs |> isReduced, print type info for lhs (since would be helpful here)
             //but I think the sprinting of lhs it is reduced conveys type info sufficiently enough
             applyParens OP.TypeTest (sprintf "%s :? %s" (decompile (OP.TypeTest,OP.Left) lhs) (ER.sprintSig (mi.GetGenericArguments().[0])))
@@ -136,19 +120,19 @@ let decompile expr =
         | P.Call(target, (ER.FunctionOrGenericValue(fOrGV) as mi), args) -> //instance or static call representing an F# function or generic value
             //if mi has generic args which can't be infered, need to sprint them.
             //if mi takes no arguments, then need to decompile "()", unless mi is an F# value, in which case we omit ()
-            let sprintedArgs = 
+            let sprintedArgs =
                 sprintf "%s%s"
-                    (if ER.genericArgsInferable mi then "" else ER.sprintGenericArgs mi) 
-                    (if args.Length = 0 then 
+                    (if ER.genericArgsInferable mi then "" else ER.sprintGenericArgs mi)
+                    (if args.Length = 0 then
                         match fOrGV with
                         | ER.GenericValue -> ""
                         | ER.Function -> "()"
                      else " " + decompileCurriedArgs args)
-            
-            let methodName = ER.sourceName mi    
-            if ER.isOpenModule mi.DeclaringType then 
+
+            let methodName = ER.sourceName mi
+            if ER.isOpenModule mi.DeclaringType then
                 applyParens OP.Application (sprintf "%s%s" methodName sprintedArgs)
-            else 
+            else
                 let decompiledTarget =
                     match target with
                     | Some(target) -> (decompile (OP.Dot,OP.Left) target) //instance
@@ -205,12 +189,12 @@ let decompile expr =
                 ty.FullName.Contains("AnonymousType") &&
                 ty.GetCustomAttributes(typeof<System.Runtime.CompilerServices.CompilerGeneratedAttribute>, false).Length > 0
 
-            let body = 
+            let body =
                 let fields = FSharpType.GetRecordFields(ty)
                 (fields,args)
                 ||> Seq.map2 (fun f x -> sprintf "%s = %s" f.Name (decompile (OP.Semicolon, OP.Non) x))
                 |> String.concat "; "
-            
+
             let maybePipe = if isAnon then "|" else ""
             sprintf "{%s %s %s}" maybePipe body maybePipe
 
@@ -235,8 +219,8 @@ let decompile expr =
                             sprintf "%s; %s" (decompile (OP.Semicolon,OP.Non) lhs) (sprintLiteralConstructionArgs rhs)
                         | _ -> failwith "unexpected list union case"
                     sprintf "[%s]" (sprintLiteralConstructionArgs expr)
-                else 
-                    //would like to optimize somehow so isLiteralConstruction is not called with every recursive 
+                else
+                    //would like to optimize somehow so isLiteralConstruction is not called with every recursive
                     //decompile of non literal constructions.
                     match args with
                     | lhs::rhs::[] -> applyParens OP.Cons (sprintf "%s::%s" (decompile (OP.Cons,OP.Left) lhs) (decompile (OP.Cons,OP.Right) rhs))
@@ -268,9 +252,9 @@ let decompile expr =
             //todo: this needs to be handled better for curried functions
             applyParens OP.Let (sprintf "let%s%s = %s in %s" (if var.IsMutable then " mutable " else " ") var.Name (decompile CC.Zero e1) (decompile CC.Zero e2))
         | P.QuoteTyped(qx) ->
-            sprintf "<@ %s @>" (decompile CC.Zero qx) 
+            sprintf "<@ %s @>" (decompile CC.Zero qx)
         | P.QuoteRaw(qx) ->
-            sprintf "<@@ %s @@>" (decompile CC.Zero qx) 
+            sprintf "<@@ %s @@>" (decompile CC.Zero qx)
         | DP.OrElse(DP.Bool(true), DP.Bool(false)) -> //true || false can't be distinguished from true && true, yet is less likely an expression due to short-circuiting
             applyParens OP.LogicalAnd "true && true"
         | DP.AndAlso(DP.Bool(false), DP.Bool(true)) -> //false && true can't be distinguished from false || false, yet is less likely an expression due to short-circuiting
@@ -285,7 +269,7 @@ let decompile expr =
             applyParens OP.If (sprintf "if %s then %s else %s" (decompile (OP.If,OP.Non) a) (decompile (OP.If,OP.Non) b) (decompile (OP.If,OP.Non) c))
         | P.VarSet(v, arg) ->
             //not sure what precedence should be, using precedence for < op
-            applyParens OP.LessThanOp (sprintf "%s <- %s" v.Name (decompile CC.Zero arg)) 
+            applyParens OP.LessThanOp (sprintf "%s <- %s" v.Name (decompile CC.Zero arg))
         //extremely verbose
         | P.UnionCaseTest(target, uci) ->
             let ucMatch =
@@ -311,19 +295,19 @@ let decompile expr =
             applyParens OP.For (sprintf "for %s in %s..%s do %s" var.Name (decompile CC.Zero rangeStart) (decompile CC.Zero rangeEnd) (decompile (OP.For,OP.Non) body))
         | P.TupleGet(tup, index) -> //issue 80: reverted to version 1.2.3 TupleGet sprinting as fallback when TupleLet fails
             let tupleMatch =
-                Seq.init 
-                    (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length) 
-                    (fun i -> if i=index then (sprintf "t%i" (index+1)) else "_") 
+                Seq.init
+                    (Microsoft.FSharp.Reflection.FSharpType.GetTupleElements(tup.Type).Length)
+                    (fun i -> if i=index then (sprintf "t%i" (index+1)) else "_")
 
             sprintf "(let %s = %s in %s)"
                 (tupleMatch |> String.concat ",")
                 (decompile CC.Zero tup)
                 (sprintf "t%i" (index+1))
-        | _ -> 
+        | _ ->
             sprintf "%A" (expr)
     and decompileArgs prec delimiter exprs =
         exprs |> List.map (decompile prec) |> String.concat delimiter
-    and decompileTupledArgs = 
+    and decompileTupledArgs =
         decompileArgs (OP.Comma,OP.Non) ", "
     and decompileCurriedArgs = //application of arguments to a function
         decompileArgs (OP.Application,OP.Non) " "
@@ -356,7 +340,7 @@ let decompile expr =
 
 22  "f x"                       Left
     "lazy x"
-    "assert x"					
+    "assert x"
 
 21  **OP						Right
 
@@ -376,7 +360,7 @@ let decompile expr =
 
 13  :> :?>						Left (note: the spec said right, but is incorrect)
 
-12  & &&						Left                Logical AND 
+12  & &&						Left                Logical AND
 
 11  or ||						Left                Logical OR
 
@@ -419,9 +403,9 @@ let decompile expr =
 
 **    op_Exponentiation
 
-@     op_Append       
+@     op_Append
 
-^     op_Concatenate  
+^     op_Concatenate
 
 %     op_Modulus
 
@@ -563,13 +547,13 @@ Compiled names for other symbolic operators are op_N1...Nn where N1 to Nn are th
 4.4.1     Categorization of Symbolic Operators
 The following symbolic-op tokens can be used to form prefix and infix expressions. The marker OP represents all symbolic-op tokens that begin with the indicated prefix, except for tokens that appear elsewhere in the table.
 
- 
+
 
 infix-or-prefix-op :=
 
     +,  -, +., -., %, &, &&
 
- 
+
 
 prefix-op :=
 
@@ -579,7 +563,7 @@ prefix-op :=
 
     !OP                  (except !=)
 
- 
+
 
 infix-op :=
 

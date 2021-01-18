@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-//Based on Microsoft's FSharp.Core\prim-types.fs, Apache License, Version 2.0
+﻿//Based on Microsoft's FSharp.Core\prim-types.fs, Apache License, Version 2.0
 
 ///The purpose of these operator implementations is two fold 1) many F# operators do not include dynamic impls,
 ///so we must give them. 2) even those operators which are given dynamic impls do not perform well since they
@@ -25,7 +9,7 @@ open System.Reflection
 open Swensen.Utils
 
 //Note: there is a confusion where the Silverlight 4.0 build of FSharp.Core includes its own System.Numerics.BigInteger implementation yet
-//the standard Silverlight 4.0 libraries include the assembly System.Numerics with the official BigInteger implementation. Moreover, the 
+//the standard Silverlight 4.0 libraries include the assembly System.Numerics with the official BigInteger implementation. Moreover, the
 //FSharp.Core version does not include all of the op_Explicit and other members included in the official implementation. For these reasons,
 //we wlll not include any big integer implementations here (so they will suffer Reflection performance penalty).
 
@@ -36,7 +20,7 @@ open Swensen.Utils
 let invokeBinOpDynamic name (aty:Type) (bty:Type) (x:obj) (y:obj) =
     let ameth = aty.GetMethod(name,[| aty; bty |])
     let bmeth = if aty.Equals(bty) then null else bty.GetMethod(name,[| aty; bty |])
-    match ameth,bmeth  with 
+    match ameth,bmeth  with
     | null, null -> raise (NotSupportedException ())
     | m,null | null,m -> m.Invoke(null,[| x; y |])
     | _ -> raise (NotSupportedException ())
@@ -50,16 +34,16 @@ let inline (|InvokeOptionalBinOpStatic|_|) (op:('a->'a->'a) option) (aty:Type, x
     | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x) (unbox<'a> y))
     | _ -> None
 
-let inline invokeBinOp 
-    name 
-    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 
+let inline invokeBinOp
+    name
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
     op11 op12 op13 op14 op15 //non-integral types and string types not always supported
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
     let dyn() = invokeBinOpDynamic name aty bty x y
     if aty.Equals(bty) && bty.Equals(cty) then //NOT TRUE FOR EXPLICIT OPS
         match aty, x, y with
         | InvokeBinOpStatic op1 (r:sbyte) -> box r
-        | InvokeBinOpStatic op2 (r:int16) -> box r 
+        | InvokeBinOpStatic op2 (r:int16) -> box r
         | InvokeBinOpStatic op3 (r:int32) -> box r
         | InvokeBinOpStatic op4 (r:int64) -> box r
         | InvokeBinOpStatic op5 (r:nativeint) -> box r
@@ -91,15 +75,15 @@ let inline (|InvokeShiftBinOpStatic|_|) (op:'a->int->'a) (aty:Type, x:obj, y:obj
     else None
 
 ///Binary ops of the form 'a->int->'a
-let inline invokeShiftBinOp 
-    name 
+let inline invokeShiftBinOp
+    name
     op1 op2 op3 op4 op5 op6 op7 op8 op9 op10
     (aty:Type) (bty:Type) (cty:Type) (x:obj) (y:obj) : obj =
     let dyn() = invokeBinOpDynamic name aty bty x y //invokeBinOpDynamic works fine both for invokeBinOp and invokeShiftBinOp
     if aty.Equals(cty) && bty.Equals(typeof<int>) then
         match aty, x, y with
         | InvokeShiftBinOpStatic op1 (r:sbyte) -> box r
-        | InvokeShiftBinOpStatic op2 (r:int16) -> box r 
+        | InvokeShiftBinOpStatic op2 (r:int16) -> box r
         | InvokeShiftBinOpStatic op3 (r:int32) -> box r
         | InvokeShiftBinOpStatic op4 (r:int64) -> box r
         | InvokeShiftBinOpStatic op5 (r:nativeint) -> box r
@@ -114,7 +98,7 @@ let inline invokeShiftBinOp
 let op_LeftShift = invokeShiftBinOp "op_LeftShift" (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<) (<<<)
 let op_RightShift = invokeShiftBinOp "op_RightShift" (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>) (>>>)
 
-let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
+let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> =
     dict
         [("op_Addition", op_Addition)
          ("op_Multiply", op_Multiply)
@@ -130,7 +114,7 @@ let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Ty
 ///name is the name of the unary op method, aty is the arg type, x is the arg
 let invokeUnaryOpDynamic name (aty:Type) (x:obj) =
     let ameth = aty.GetMethod(name,[| aty |])
-    match ameth  with 
+    match ameth  with
     | null -> raise (NotSupportedException ())
     | m -> m.Invoke(null,[| x |])
 
@@ -143,9 +127,9 @@ let inline (|InvokeOptionalUnaryOpStatic|_|) (op:('a->'a) option) (aty:Type, x:o
     | Some(op) when aty.Equals(typeof<'a>) -> Some(op (unbox<'a> x))
     | _ -> None
 
-let inline invokeUnaryOp 
-    name 
-    op1 op2 op3 op4 op5 op6 
+let inline invokeUnaryOp
+    name
+    op1 op2 op3 op4 op5 op6
     op7 op8 op9 op10 //non-integral types not supported by LogicalNot
     op11 op12 op13 op14 //unsigned types (which includes byte) not always supported
     (aty:Type) (bty:Type) (x:obj) : obj =
@@ -153,7 +137,7 @@ let inline invokeUnaryOp
     if aty.Equals(bty) then
         match aty, x with
         | InvokeUnaryOpStatic op1 (r:sbyte) -> box r
-        | InvokeUnaryOpStatic op2 (r:int16) -> box r 
+        | InvokeUnaryOpStatic op2 (r:int16) -> box r
         | InvokeUnaryOpStatic op3 (r:int32) -> box r
         | InvokeUnaryOpStatic op4 (r:int64) -> box r
         | InvokeUnaryOpStatic op5 (r:nativeint) -> box r
@@ -176,7 +160,7 @@ let op_LogicalNot = invokeUnaryOp "op_LogicalNot" (~~~) (~~~) (~~~) (~~~) (~~~) 
 ///aty is the arg type, bty is the return type, x is the arg
 let invokeExplicitOpDynamic (aty:Type) (bty:Type) (x:obj) =
     let ameth = aty.GetMethods() |> Array.find (fun m -> m.Name = "op_Explicit" && ((m.GetParameters() |> Array.map(fun p -> p.ParameterType)) = [| aty |]) && m.ReturnType = bty)
-    match ameth  with 
+    match ameth  with
     | null -> raise (NotSupportedException ())
     | m -> m.Invoke(null,[| x |])
 
@@ -190,13 +174,13 @@ let inline (|InvokeOptionalExplicitOpStatic|_|) (op:('a->'b) option) (aty:Type, 
     | _ -> None
 
 let inline invokeExplicitOp //string and decimal are optional
-    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 op12 op13 op14 
+    op1 op2 op3 op4 op5 op6 op7 op8 op9 op10 op11 op12 op13 op14
     op15 op16 //string and char not always supported
     (aty:Type) (bty:Type) (x:obj) : obj =
     let dyn() = invokeExplicitOpDynamic aty bty x
     match aty, x with //note: writing the op type as <type>->'a instead of <type>->_ gives us extra static type checking in partial applications to help prevent typos
     | InvokeExplicitOpStatic (op1:sbyte->'a) r -> box r
-    | InvokeExplicitOpStatic (op2:int16->'a) r -> box r 
+    | InvokeExplicitOpStatic (op2:int16->'a) r -> box r
     | InvokeExplicitOpStatic (op3:int32->'a) r -> box r
     | InvokeExplicitOpStatic (op4:int64->'a) r -> box r
     | InvokeExplicitOpStatic (op5:nativeint->'a) r -> box r
@@ -229,7 +213,7 @@ let ToUIntPtr = invokeExplicitOp unativeint unativeint unativeint unativeint una
 let ToIntPtr = invokeExplicitOp nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint None None None (Some(nativeint))
 let ToChar = invokeExplicitOp char char char char char char char char char char char char None (Some(char)) (Some(char)) (Some(char))
 
-let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->obj->obj)> = 
+let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->obj->obj)> =
     dict
         [("op_UnaryNegation",op_UnaryNegation)
          ("op_UnaryPlus", op_UnaryPlus)
@@ -256,7 +240,7 @@ module Checked =
     let op_Multiply = invokeBinOp "op_Multiply" (*) (*) (*) (*) (*) (*) (*) (*) (*) (*) (Some(*)) (Some(*)) (Some(*)) (Some(*)) None
     let op_Subtraction = invokeBinOp "op_Subtraction" (-) (-) (-) (-) (-) (-) (-) (-) (-) (-) (Some(-)) (Some(-)) (Some(-)) (Some(-)) None
 
-    let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> = 
+    let binOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->Type->obj->obj->obj)> =
         dict
             [("op_Addition", op_Addition)
              ("op_Subtraction", op_Subtraction)
@@ -278,7 +262,7 @@ module Checked =
     let ToIntPtr = invokeExplicitOp nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint nativeint None None None (Some(nativeint))
     let ToChar = invokeExplicitOp char char char char char char char char char char char char None (Some(char)) (Some(char)) (Some(char))
 
-    let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->obj->obj)> = 
+    let unaryOpLookup : System.Collections.Generic.IDictionary<string, (Type->Type->obj->obj)> =
         dict
             [("op_UnaryNegation",op_UnaryNegation)
              ("ToByte", ToByte)

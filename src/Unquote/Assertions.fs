@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-[<AutoOpen>]
+﻿[<AutoOpen>]
 ///Operators on Expr and Expr<'a> for performing unit test assertions.
 module Swensen.Unquote.Assertions
 open Swensen.Unquote
@@ -32,7 +16,7 @@ open Swensen.Utils
 ///even though we do not want to expose them publically).
 [<System.Obsolete>] //marking as obsolete is a workaround F# not honoring EditorBrowsable(EditorBrowsableState.Never) to hide intellisense discoverability, thanks to Tomas Petricek's answer on SO: http://stackoverflow.com/questions/6527141/is-it-possible-to-mark-a-module-function-as-hidden-from-intellisense-discovery/6527933#6527933
 module Internal =
-    open System        
+    open System
     open System.Reflection
 
     type private testFramework =
@@ -49,27 +33,27 @@ module Internal =
             ()
 
         let outputReducedExprsMsg (output:string->unit) (reducedExprs:Expr list) additionalInfo =
-            let msg = 
+            let msg =
                 Printf.nsprintf "\n%s\n%s\n"
                     (if additionalInfo |> String.IsNullOrWhiteSpace then "" else sprintf "\n%s\n" additionalInfo)
-                    (reducedExprs |> List.map decompile |> String.concat "\n")    
+                    (reducedExprs |> List.map decompile |> String.concat "\n")
             output msg
 
         //moved from top-level private module function since silverlight does not support printf (i.e. standard out)
         let fsiTestFailed (reducedExprs:Expr list) additionalInfo =
-            Printf.nprintfn "\nTest failed:\n" 
+            Printf.nprintfn "\nTest failed:\n"
             if additionalInfo |> String.IsNullOrWhiteSpace |> not then
                  Printf.nprintfn "%s\n" additionalInfo
 
             for rd in reducedExprs do
                 printfn "%s" (rd |> decompile)
-        
+
             printfn ""
 
         //determine the method of output (we use seq expression for short circuit selection).
         //order is deliberate to allow use of Fuchu within FSI, but to avoid binding and using GAC installed NUnit within FSI
-        let framework = 
-            seq { 
+        let framework =
+            seq {
                 let assemblies = System.AppDomain.CurrentDomain.GetAssemblies()
                 if assemblies |> Seq.exists (fun a -> a.GetName().Name = "FSI-ASSEMBLY") then
                     //need to resolve FSI-ASSEMBLY first then test for presence of Fuchu or else we run into MagicAssemblyResolution
@@ -104,20 +88,20 @@ module Internal =
                 yield Generic
             } |> Seq.head
 
-        //Note use of Delegate.CreateDelegate for cached reflection: 
+        //Note use of Delegate.CreateDelegate for cached reflection:
         //http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
         match framework with
-        | Fuchu ty -> 
+        | Fuchu ty ->
             (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
-        | Expecto ty -> 
+        | Expecto ty ->
             (fun (msg : string) -> raise (Activator.CreateInstance(ty, msg) :?> Exception)) |> outputReducedExprsMsg
         | Fsi ->
             fsiTestFailed
-        | Xunit ty -> 
+        | Xunit ty ->
             let mi = ty.GetMethod("True", [|typeof<bool>;typeof<string>|])
             let del = Delegate.CreateDelegate(typeof<Action<bool,string>>, mi) :?> (Action<bool,string>)
             (fun msg -> del.Invoke(false,msg)) |> outputReducedExprsMsg
-        | Nunit ty -> 
+        | Nunit ty ->
             let mi = ty.GetMethod("Fail", [|typeof<string>|])
             let del = Delegate.CreateDelegate(typeof<Action<string>>, mi) :?> (Action<string>)
             (fun msg -> del.Invoke(msg)) |> outputReducedExprsMsg
@@ -128,7 +112,7 @@ module Internal =
     let inline expectedExnButNoExnRaisedMsg ty1 = sprintf "Expected exception of type '%s', but no exception was raised" ty1
 
     let isAssignableFrom (ty1:Type) (ty2:Type) = ty1.GetTypeInfo().IsAssignableFrom(ty2.GetTypeInfo())
-    
+
 
 open Internal
 
@@ -141,10 +125,10 @@ let inline test (expr:Expr<bool>) =
     let u = unquote expr
     match u.FinalReduction with
     | DerivedPatterns.Bool(true) -> ()
-    | _ ->  
+    | _ ->
         try
             testFailed u.Reductions ""
-        with 
+        with
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
 ///Like `test`, but we only output the source expression without incremental evaluation steps.
@@ -152,32 +136,32 @@ let inline testSimple (expr:Expr<bool>) =
     let u = unquote expr
     match u.FinalReduction with
     | DerivedPatterns.Bool(true) -> ()
-    | _ ->  
+    | _ ->
         try
             testFailed [u.Reductions.Head] ""
-        with 
+        with
         | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
 ///Test whether the given expr fails with the given expected exception (or a subclass thereof).
-let inline raises<'a when 'a :> exn> (expr:Expr) = 
+let inline raises<'a when 'a :> exn> (expr:Expr) =
     let u = unquote expr
     match u.ReductionException with
     | Some(x) -> //it's an exception
         if isAssignableFrom typeof<'a> (x.GetType()) then //it's the correct exception
-            () 
+            ()
         else //it's not the correct exception
             try
                 testFailed u.Reductions (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (x.GetType().Name))
-            with 
+            with
             | e -> raise e
     | None -> //it's not an exception
         try
             testFailed u.Reductions (expectedExnButNoExnRaisedMsg typeof<'a>.Name)
-        with 
+        with
         | e -> raise e
 
 ///Test whether the given expr fails with the given expected exception (or a subclass thereof) when the additional assertion on the exception object holds.
-let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) = 
+let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>) =
     let u = unquote expr
     match u.ReductionException with
     | Some(x) -> //it's an exception
@@ -187,29 +171,29 @@ let inline raisesWith<'a when 'a :> exn> (expr:Expr) (exnWhen: 'a -> Expr<bool>)
             let uWhen = unquote exnWhenExpr
             match uWhen.FinalReduction with
             | DerivedPatterns.Bool(true) -> () //the exnWhen condition is true
-            | _ ->  
+            | _ ->
                 try
-                    testFailed 
-                        u.Reductions 
-                        (sprintf 
-                            "The expected exception was raised, but the exception assertion failed:\n\nException Assertion:\n\n%s\n\nTest Expression:" 
+                    testFailed
+                        u.Reductions
+                        (sprintf
+                            "The expected exception was raised, but the exception assertion failed:\n\nException Assertion:\n\n%s\n\nTest Expression:"
                             (uWhen.DecompiledReductions |> String.concat "\n"))
-                with 
+                with
                 | e -> raise e //we catch and raise e here to hide stack traces for clean test framework output
 
         else //it's not the correct exception
             try
                 testFailed u.Reductions (expectedExnButWrongExnRaisedMsg typeof<'a>.Name (x.GetType().Name))
-            with 
+            with
             | e -> raise e
     | _ -> //it's not an exception
         try
             testFailed u.Reductions (expectedExnButNoExnRaisedMsg typeof<'a>.Name)
-        with 
+        with
         | e -> raise e
 
 ///Evaluate the given expression and return its value; but if the expression raises an exception,
-///output incremental eval steps leading to the exception like the `test` operator. 
+///output incremental eval steps leading to the exception like the `test` operator.
 let inline trap (expr:Quotations.Expr<'T>) : 'T =
     let u = unquote expr
     match u.ReductionException with
@@ -222,20 +206,20 @@ let inline trap (expr:Quotations.Expr<'T>) : 'T =
 //n.b. we splice x and y as Value expressions in the following operations so that we _don't_ capture and decompile as ValueWithName
 
 /// Test the objects with structural equality
-let inline (=!) (x: 'a when 'a : equality) (y: 'a) = 
+let inline (=!) (x: 'a when 'a : equality) (y: 'a) =
     test <@ (%%Expr.Value<'a>(x) : 'a) = (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural less-than comparison
-let inline (<!) (x: 'a when 'a : comparison) (y: 'a) = 
+let inline (<!) (x: 'a when 'a : comparison) (y: 'a) =
     test <@ (%%Expr.Value<'a>(x) : 'a) < (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural greater-than comparison
-let inline (>!) (x: 'a when 'a : comparison) (y: 'a) = 
+let inline (>!) (x: 'a when 'a : comparison) (y: 'a) =
     test <@ (%%Expr.Value<'a>(x) : 'a) > (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural less-than-or-equal comparison
-let inline (<=!) (x: 'a when 'a : comparison) (y: 'a) = 
+let inline (<=!) (x: 'a when 'a : comparison) (y: 'a) =
     test <@ (%%Expr.Value<'a>(x) : 'a) <= (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural greater-than-or-equal comparison
-let inline (>=!) (x: 'a when 'a : comparison) (y: 'a) = 
+let inline (>=!) (x: 'a when 'a : comparison) (y: 'a) =
     test <@ (%%Expr.Value<'a>(x) : 'a) >= (%%Expr.Value<'a>(y) : 'a) @>
 /// Test the objects with structural inequality
-let inline (<>!) (x: 'a when 'a : equality) (y: 'a) = 
+let inline (<>!) (x: 'a when 'a : equality) (y: 'a) =
     test <@ (%%Expr.Value<'a>(x) : 'a) <> (%%Expr.Value<'a>(y) : 'a) @>

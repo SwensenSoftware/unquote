@@ -1,19 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-module internal Swensen.Unquote.OperatorPrecedence
+﻿module internal Swensen.Unquote.OperatorPrecedence
 
 type assoc =
 | Non
@@ -22,7 +7,7 @@ type assoc =
 
 //note that we deliberately use referential transpency to apply "special" precedence rules. see applyParensForPrecInContext.
 ///Represents an operator's precedence. The lower the precedence value, the lower the binding.
-type OperatorPrecedence(precedence:int, ?associativity:assoc) = 
+type OperatorPrecedence(precedence:int, ?associativity:assoc) =
     let associativity = match associativity with Some(a) -> a | None -> Non
     ///Precedence
     member __.Precedence = precedence
@@ -60,7 +45,7 @@ let Dot = OP(25,Left)
 let MethodCall = OP(26,Left)
 let TypeArguments = OP(27,Left)
 
-let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (localOP:OperatorPrecedence) s = 
+let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (localOP:OperatorPrecedence) s =
     let parenthesize = sprintf "(%s)"
     if contextOP = Application && localOP = MethodCall then //special rule for e.g. "fsFunction (unitCall())"
         parenthesize s
@@ -71,5 +56,5 @@ let applyParensForPrecInContext (contextOP:OperatorPrecedence) contextAssoc (loc
             match contextOP.Associativity, contextAssoc with
             | Left, Left | Right, Right -> contextOP.Precedence - 1
             | _ -> contextOP.Precedence
-    
+
         if localOP.Precedence > context then s else parenthesize s

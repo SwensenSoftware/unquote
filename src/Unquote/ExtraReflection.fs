@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-///Extra reflection functions sprinting and reducing Quotation Expressions
+﻿///Extra reflection functions sprinting and reducing Quotation Expressions
 module internal Swensen.Unquote.ExtraReflection
 open System
 open System.Reflection
@@ -96,11 +80,11 @@ module SymbolicOps =
             "op_IntegerAddressOf", ("&&", Prefix(true))
             "op_TwiddlePlusDot", ("+.", Prefix(true))
             "op_TwiddleMinusDot", ("-.", Prefix(true))
-    
+
             //don't require leading twidle in first-class use
             "op_LogicalNot", ("~~~", Prefix(false))
             "op_Dereference", ("!", Prefix(false))
-        
+
             //first class only operators
             "op_Range", ("..", FirstClassOnly)
             "op_RangeStep", (".. ..", FirstClassOnly)
@@ -126,7 +110,7 @@ module SymbolicOps =
             "Hat", ("^", Some(OP.ConcatenateOp))
             "Bang", ("!", Some(OP.BangEqualsOp)) //i.e. !=OP infix sequence (!OP is infix only)
             "Qmark", ("?", None)
-            "Divide", ("/", Some(OP.DivideOp)) 
+            "Divide", ("/", Some(OP.DivideOp))
             "Dot", (".", None)
             "Colon", (":", None)
             "LParen", ("(", None)
@@ -153,10 +137,10 @@ module SymbolicOps =
                         match opSeqParts with
                         | ("~",_)::_ -> Prefix(false)
                         | ("!",_)::(trailingOp,_)::_ when trailingOp <> "=" -> Prefix(false)
-                        | _ -> 
-                            opSeqParts 
+                        | _ ->
+                            opSeqParts
                             |> Seq.find (fun (opSymbol, _ )-> opSymbol <> ".") //danger!
-                            |> snd 
+                            |> snd
                             |> Option.get //danger!
                             |> symbolicOp.Infix
 
@@ -196,10 +180,10 @@ let isOpenModule (declaringType:Type) =
 
 let sourceNameFromString =
     let isActivePattern (name: string) = name.StartsWith("|") && name.EndsWith("|")
-    
+
     let specialChars = @"~!@#$%^&*()+"".,:;<>\/?{}[]`|".ToCharArray()
 
-    let reservedWords = 
+    let reservedWords =
       set
         ["atomic"; "break"; "checked"; "component"; "const"; "constraint";
          "constructor"; "continue"; "eager"; "fixed"; "fori"; "functor"; "include";
@@ -223,7 +207,7 @@ let sourceNameFromString =
     let isReservedWord name = reservedWords |> Set.contains name
     let isKeyword name = keywords |> Set.contains name
 
-    let parenthesize name = sprintf "(%s)" name 
+    let parenthesize name = sprintf "(%s)" name
     let escape name = sprintf "``%s``" name
 
     fun name ->
@@ -239,14 +223,14 @@ let sourceNameFromString =
 ///get the source name for the Module or F# Function represented by the given MemberInfo
 let sourceName (mi:MemberInfo) =
     mi.GetCustomAttributes(true)
-    |> Seq.tryPick 
-        (function 
+    |> Seq.tryPick
+        (function
             | :? CompilationSourceNameAttribute as csna -> Some(csna.SourceName)
-            | :? CompilationRepresentationAttribute as cra -> 
+            | :? CompilationRepresentationAttribute as cra ->
                 //seems sufficient, but may not be as robust as FSharpEntity.DisplayName
-                if cra.Flags = CompilationRepresentationFlags.ModuleSuffix then 
+                if cra.Flags = CompilationRepresentationFlags.ModuleSuffix then
                     Some(mi.Name.Substring(0, mi.Name.Length - 6))
-                else 
+                else
                     None
             | _ -> None)
     |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
@@ -267,18 +251,18 @@ let sprintSig (outerTy:Type) =
         | "System.Char"     -> "char"
         | "System.Boolean"  -> "bool"
         | "System.Decimal"  -> "decimal"
-        
+
         | "System.Int16"    -> "int16"
         | "System.Int32"    -> "int"//int32
         | "System.Int64"    -> "int64"
-        
+
         | "System.UInt16"   -> "uint16"
         | "System.UInt32"   -> "uint32"
         | "System.UInt64"   -> "uint64"
-        
+
         | "System.Single"   -> "float32"//single
         | "System.Double"   -> "float"//double
-        
+
         | "System.Byte"     -> "byte"//uint8
         | "System.SByte"    -> "sbyte"//int8
 
@@ -298,12 +282,12 @@ let sprintSig (outerTy:Type) =
 
     let rec sprintSig context (ty:Type) =
         let applyParens = applyParensForPrecInContext context
-        let cleanName, arrSig = 
+        let cleanName, arrSig =
             //if is generic type, then doesn't have FullName, need to use just Name
             match (if String.IsNullOrEmpty(ty.FullName) then ty.Name else ty.FullName) with
             | Regex.Compiled.Match @"^([^`\[]*)`?.*?(\[[\[\],]*\])?$" { GroupValues=[cleanName;arrSig] }-> //long name type encoding left of `, array encoding at end
                 cleanName, arrSig
-            | _ -> 
+            | _ ->
                 failwith ("failed to parse type name: " + ty.FullName)
 
         match ty.GetGenericArgumentsArrayInclusive() with
@@ -312,28 +296,28 @@ let sprintSig (outerTy:Type) =
         | args when cleanName = "System.Tuple" ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
         | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
-            (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig            
+            (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
         | args ->
             sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
-    
+
     sprintSig 0 outerTy
 
 //If the method is not generic, returns true. If the function is generic,
 //the current algorithm tests whether the type parameters are a subset of those
 //type parameters which are supplied by method parameters or method return type.
 ///Determine whether the generic args for a call are inferable
-let genericArgsInferable (mi:MethodInfo) = 
+let genericArgsInferable (mi:MethodInfo) =
     (mi.IsGenericMethod |> not) ||
         let miDefinition = mi.GetGenericMethodDefinition()
-        let needed = miDefinition.GetGenericArguments() |> Array.map(fun arg -> arg.Name) |> set 
-        let inferable = 
-            miDefinition.GetParameters() 
+        let needed = miDefinition.GetGenericArguments() |> Array.map(fun arg -> arg.Name) |> set
+        let inferable =
+            miDefinition.GetParameters()
             |> Seq.append (Seq.singleton miDefinition.ReturnParameter)
-            |> Seq.map 
-                (fun p -> 
+            |> Seq.map
+                (fun p ->
                     if p.ParameterType.IsGenericParameter then [|p.ParameterType|]
                     elif p.ParameterType.ContainsGenericParameters then p.ParameterType.GetGenericArguments()
-                    else [||]) 
+                    else [||])
             |> Seq.concat
             |> Seq.map (fun t -> t.Name)
             |> set
@@ -348,7 +332,7 @@ let inline sprintGenericArgsIfNotInferable (mi:MethodInfo) =
     if genericArgsInferable mi then ""
     else sprintGenericArgs mi
 
-let inline isListUnionCase (uci:UnionCaseInfo) = 
+let inline isListUnionCase (uci:UnionCaseInfo) =
     uci.DeclaringType |> isGenericTypeDefinedFrom<list<_>>
 
 type fsharpValueType =
@@ -358,11 +342,11 @@ type fsharpValueType =
 let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
     //let fallback () =
     if FSharpType.IsModule mi.DeclaringType then
-        if mi.GetParameters().Length = 0 
-           && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0) 
+        if mi.GetParameters().Length = 0
+           && (mi.IsGenericMethod && mi.GetGenericArguments().Length > 0)
            && not (mi.Name = "Reraise" && mi.DeclaringType.FullName = "Microsoft.FSharp.Core.Operators") then
             Some(GenericValue)
-        else 
+        else
             Some(Function)
     else None
 
@@ -380,5 +364,5 @@ let (|FunctionOrGenericValue|_|) (mi:MethodInfo) =
 //    //PowerPack MetadataReader throws NotSupported Exception in dynamic assemblies like FSI
 //    //and also more worrying it throws internal exceptions sometimes in other cases (should file bug!)
 //    //so we need to take empirical guesses as to whether the given mi represents a Function or GenericValue
-//    | :? System.NotSupportedException | _  -> 
+//    | :? System.NotSupportedException | _  ->
 //        fallback ()
