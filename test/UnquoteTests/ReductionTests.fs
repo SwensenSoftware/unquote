@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-[<AutoOpen>]
+﻿[<AutoOpen>]
 module ReductionTests
 open Xunit
 open Swensen.Unquote
@@ -39,7 +23,7 @@ let ``coerce reduces right`` () =
     ]
 
 [<Fact>]
-let ``arithmetic expressions`` () = 
+let ``arithmetic expressions`` () =
     decompiledReductions <@ (2 + (3 - 7)) * 9 @> =! [
         "(2 + (3 - 7)) * 9"
         "(2 + -4) * 9"
@@ -149,13 +133,13 @@ let ``Sequential`` () =
         "1 + 2"
         "3"
     ]
-    
+
     decompiledReductions <@ (fun x -> x + 1); 2; 3 @> =! [
         "(fun x -> x + 1); 2; 3"
         "2; 3"
         "3"
     ]
-    
+
     decompiledReductions <@ ignore (fun x -> x + 1); ignore 2; 3 @> =! [
         "ignore (fun x -> x + 1); ignore 2; 3"
         "(); ignore 2; 3"
@@ -177,11 +161,11 @@ let ``null reference exception`` () =
 [<Fact>]
 let ``property get returns null but preserves ret type info and doesnt throw even though using Value lambda`` () =
     let doit (x:string) = (null:string)
-    
+
     let steps = decompiledReductions <@ null = doit "asdf" @>
-    
+
     test <@ steps.Length = 3 @>
-    
+
     let [step1; step2; step3] = steps
     step1 =! "null = doit \"asdf\""
     step2 =! "null = null"
@@ -197,9 +181,9 @@ let ``multi-var Value lambda application doesn't throw`` () =
     let doit1 (x:string) = (null:string)
     let doit2 (x:string) (y:string) = x + y
     let testExpr = <@ doit2 (doit1 "asdf") ("asdf" + "asdf")  @>
-    
+
     reduceFully testExpr //shouldn't throw
-    
+
     //assert expected sprinted reductions while we are at it
     let [step1; step2; step3] = decompiledReductions testExpr
     test <@ step1 = "doit2 (doit1 \"asdf\") (\"asdf\" + \"asdf\")" @>
@@ -210,7 +194,7 @@ let ``multi-var Value lambda application doesn't throw`` () =
 let ``multi-var lambda let binding application doesn't throw`` () =
     let doit2 (x:string) (y:string) = x + y
     reduceFully <@ doit2 (let x = "asdf" in x) ("asdf" + "asdf")  @>
-    
+
 let takesNoArgs() = (null:string)
 [<Fact>]
 let ``function with no regular args and no type args`` () =
@@ -565,7 +549,7 @@ let ``VarSet`` () =
 
 let mutable x= 0
 [<Fact>]
-let ``static PropertySet`` () =    
+let ``static PropertySet`` () =
     <@ x ; x <- 1 ; x @> |> decompiledReductions =! [
         "x; x <- 1; x"
         "0; x <- 1; x"
@@ -588,7 +572,7 @@ type SetTest() =
 
 let st = new SetTest()
 [<Fact>]
-let ``instance FieldSet`` () =    
+let ``instance FieldSet`` () =
     <@ st.x ; st.x <- 1 ; st.x @> |> decompiledReductions =! [
         "st.x; st.x <- 1; st.x"
         "{ x = 1 }.x; st.x <- 1; st.x"
@@ -603,7 +587,7 @@ let ``instance FieldSet`` () =
 
 let st2 = new SetTest()
 [<Fact>]
-let ``instance PropertySet`` () =    
+let ``instance PropertySet`` () =
     <@ st2.X ; st2.X <- 1 ; st2.X @> |> decompiledReductions =! [
         "st2.X; st2.X <- 1; st2.X"
         "{ x = 1 }.X; st2.X <- 1; st2.X"
@@ -618,7 +602,7 @@ let ``instance PropertySet`` () =
 
 [<Fact>] //issue 51
 let ``RecursiveLet mutually recursive funtions``() =
-    <@    
+    <@
         let rec even x =
             if x = 0 then true
             else odd (x-1)
@@ -634,7 +618,7 @@ let ``RecursiveLet mutually recursive funtions``() =
 
 [<Fact>] //issue 51
 let ``RecursiveLet self recursive function``() =
-    <@    
+    <@
         let rec countdown i steps  =
             if i < 0 then i
             else countdown (i - steps) steps
@@ -730,7 +714,7 @@ let ``ValueWithName reduces to Value``() =
     ]
 
 [<Fact>]
-let ``ValueWithName reduces to value in complex exprssion`` () =    
+let ``ValueWithName reduces to value in complex exprssion`` () =
     let x = [1;2;3]
     <@ 5::x @> |> decompiledReductions =! [
         "5::x"
@@ -738,7 +722,7 @@ let ``ValueWithName reduces to value in complex exprssion`` () =
     ]
 
 [<Fact>]
-let ``readme example`` () =    
+let ``readme example`` () =
     let x = [1;2;3]
     <@ [3; 2; 1; 0] |> List.map ((+) 1) = [1 + 3..1 + 0] @> |> decompiledReductions =! [
         "[3; 2; 1; 0] |> List.map ((+) 1) = [1 + 3..1 + 0]"
@@ -749,7 +733,7 @@ let ``readme example`` () =
 
 type R = { X: int; Y:int }
 [<Fact>]
-let ``NewRecord is considered reduced`` () =    
+let ``NewRecord is considered reduced`` () =
     <@ { X = 2; Y = 3 }.X = 4 @> |> decompiledReductions =! [
         "{ X = 2; Y = 3 }.X = 4"
         "2 = 4"
@@ -757,7 +741,7 @@ let ``NewRecord is considered reduced`` () =
     ]
 
 //[<Fact>]
-//let ``instance PropertySet`` () =    
+//let ``instance PropertySet`` () =
 //    let tt = new TestType(0)
 //    <@ tt.instanceField ; tt.InstancePropNoArgs <- 1 ; tt.instanceField @> |> decompiledReductions =! [
 //

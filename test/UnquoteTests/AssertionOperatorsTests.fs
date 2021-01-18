@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-[<AutoOpen>]
+﻿[<AutoOpen>]
 module AssertionOperatorsTests
 open Xunit
 open Swensen.Unquote
@@ -61,8 +45,8 @@ type SideEffects() =
 [<Fact>]
 let ``Issue 60: Double evaluation in test internal implementation obscures state related test failure causes`` () =
     let _se = SideEffects()
-    test 
-        <@ 
+    test
+        <@
             try
                 test <@ _se.X = 2 @> ; false
             with e ->
@@ -75,12 +59,12 @@ type Issue142 =
 
 [<Fact>]
 let ``Issue 142: ReflectDefinitions false`` () =
-    let state = 1        
+    let state = 1
     Issue142.test_rd_false ((state = 1))
 
 [<Fact>]
 let ``Issue 142: ReflectDefinitions true`` () =
-    let state = 1        
+    let state = 1
     Issue142.test_rd_true ((state = 1))
 
 let RaiseException(message:string)=
@@ -91,39 +75,39 @@ open System.Reflection
 
 #if DEBUG
 #else //we do not strip target invocation exceptions when in debug mode
-[<Fact>] 
+[<Fact>]
 let ``Issue 63: natural nested invocation exceptions are stripped`` ()=
     raises<System.NotSupportedException> <@ "Should be a NotSupportedException" |> RaiseException  @>
 
-[<Fact>] 
+[<Fact>]
 let ``Issue 63: synthetic nested invocation exceptions are stripped if no inner exception`` ()=
     raises<ArgumentNullException> <@ raise (TargetInvocationException(TargetInvocationException(ArgumentNullException())))  @>
 
-[<Fact>] 
+[<Fact>]
 let ``Issue 63: synthetic invocation exception is stripped if no inner exception`` ()=
     raises<ArgumentNullException> <@ raise (TargetInvocationException(ArgumentNullException()))  @>
 
-[<Fact>] 
+[<Fact>]
 let ``Issue 63: synthetic non invocation exception`` ()=
     raises<ArgumentNullException> <@ raise (ArgumentNullException()) @>
 
-[<Fact>] 
+[<Fact>]
 let ``Issue 63: synthetic nested invocation exceptions are not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(TargetInvocationException(null)))  @>
 
-[<Fact>] 
+[<Fact>]
 let ``Issue 63: synthetic invocation exception is not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(null)) @>
-    
+
 [<Fact>]
 let ``raiseWhen passes`` () =
     raisesWith<exn>
         <@ raise <| exn("hello world") @>
         (fun e -> <@ e.Message = "hello world" @>)
-        
+
 [<Fact>]
 let ``throws EvaluationException because nested quotation references var from outer quotation`` () =
-    raises<Xunit.Sdk.TrueException> 
+    raises<Xunit.Sdk.TrueException>
         <@
             raisesWith<exn>
                 <@ raise <| exn("hello world") @>
@@ -133,7 +117,7 @@ let ``throws EvaluationException because nested quotation references var from ou
 [<Fact>]
 let ``raiseWhen fails when exception is correct but when condition is false`` () =
     let f = (fun (e:exn) -> <@ e.Message = "xxx" @>) //need this outside of the outer quotation or captures Var that can't be accessed
-    raises<Xunit.Sdk.TrueException> 
+    raises<Xunit.Sdk.TrueException>
         <@
             raisesWith<exn>
                 <@ raise <| exn("hello world") @>
@@ -143,7 +127,7 @@ let ``raiseWhen fails when exception is correct but when condition is false`` ()
 [<Fact>]
 let ``raiseWhen fails when exception is incorrect`` () =
     let f = (fun (e:exn) -> <@ true @>) //need this outside of the outer quotation or captures Var that can't be accessed
-    raises<Xunit.Sdk.TrueException> 
+    raises<Xunit.Sdk.TrueException>
         <@
             raisesWith<System.InvalidOperationException>
                 <@ (null:string).ToString() @>
@@ -153,7 +137,7 @@ let ``raiseWhen fails when exception is incorrect`` () =
 [<Fact>]
 let ``raiseWhen fails when no exception thrown`` () =
     let f = (fun (e:exn) -> <@ true @>) //need this outside of the outer quotation or captures Var that can't be accessed
-    raises<Xunit.Sdk.TrueException> 
+    raises<Xunit.Sdk.TrueException>
         <@
             raisesWith<exn>
                 <@ true @>

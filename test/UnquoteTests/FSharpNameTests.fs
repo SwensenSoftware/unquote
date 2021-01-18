@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-[<AutoOpen>] //making auto open allows us not to have to fully qualify module properties
+﻿[<AutoOpen>] //making auto open allows us not to have to fully qualify module properties
 module FSharpNameTests
 open Xunit
 open Swensen.Unquote
@@ -53,11 +37,11 @@ let ``dynamic type test with complex type: nested and tuple precedence`` () =
 
 [<Fact>]
 let ``single dimimensional array of type alias`` () =
-    typeof<int[]>.FSharpName =! "int[]";        
+    typeof<int[]>.FSharpName =! "int[]";
 
 [<Fact>]
 let ``multi dimimensional array of type alias`` () =
-    typeof<int[,,]>.FSharpName =! "int[,,]";        
+    typeof<int[,,]>.FSharpName =! "int[,,]";
 
 [<Fact>]
 let ``jagged array of type alias`` () =
@@ -104,10 +88,10 @@ let ``generic type definition: seq of nested list, no such thing as "partially o
 let ``generic type definition: 1d array, arrays are not generic`` () =
     typedefof<_[]>.FSharpName =! "obj[]" //sorry, arrays just aren't generic
 
-module Module = 
-    type Hello(x:int) = 
+module Module =
+    type Hello(x:int) =
         let x = x
 
-[<Fact>] //issue #10 
+[<Fact>] //issue #10
 let ``types in modules`` () =
     typeof<Module.Hello>.FSharpName =! "Hello"
