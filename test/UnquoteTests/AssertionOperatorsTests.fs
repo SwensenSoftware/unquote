@@ -73,8 +73,6 @@ let RaiseException(message:string)=
 open System
 open System.Reflection
 
-#if DEBUG
-#else //we do not strip target invocation exceptions when in debug mode
 [<Fact>]
 let ``Issue 63: natural nested invocation exceptions are stripped`` ()=
     raises<System.NotSupportedException> <@ "Should be a NotSupportedException" |> RaiseException  @>
@@ -98,7 +96,6 @@ let ``Issue 63: synthetic nested invocation exceptions are not stripped if no in
 [<Fact>]
 let ``Issue 63: synthetic invocation exception is not stripped if no inner exception`` ()=
     raises<TargetInvocationException> <@ raise (TargetInvocationException(null)) @>
-#endif
 
 [<Fact>]
 let ``raiseWhen passes`` () =
@@ -144,4 +141,3 @@ let ``raiseWhen fails when no exception thrown`` () =
                 <@ true @>
                 f
         @>
-//#endif
