@@ -8,3 +8,5 @@ packages/
 .ionide
 
 .fake
+
+**/TestResults
