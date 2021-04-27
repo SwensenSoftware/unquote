@@ -1,7 +1,12 @@
-.PHONY: clean build pack
+.PHONY: clean build pack test
 
-all:
+all: clean build test
+
+build:
 	dotnet build -c Release
+
+build:
+	dotnet test -c Release
 
 clean:
 	dotnet clean
