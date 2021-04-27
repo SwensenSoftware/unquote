@@ -9,7 +9,8 @@ build:
 	dotnet test -c Release
 
 clean:
-	dotnet clean
+	dotnet clean -c Release
+	rm -f src/Unquote/bin/Release/*.nupkg
 
 pack: clean
 	dotnet pack -c Release
