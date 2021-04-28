@@ -1,11 +1,11 @@
-.PHONY: clean build pack test
+.PHONY: clean build pack test verify
 
 all: clean build test
 
 build:
 	dotnet build -c Release
 
-build:
+test:
 	dotnet test -c Release
 
 clean:
@@ -14,3 +14,6 @@ clean:
 
 pack: clean
 	dotnet pack -c Release
+
+verify:
+	dotnet run --project verify/noframework/noframework.fsproj
