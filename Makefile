@@ -16,4 +16,5 @@ pack: clean
 	dotnet pack -c Release
 
 verify:
-	dotnet run --project verify/noframework/noframework.fsproj
+	-dotnet run --project verify/expecto9/expecto9.fsproj
+	-dotnet run --project verify/noframework/noframework.fsproj
