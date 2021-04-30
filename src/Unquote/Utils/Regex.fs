@@ -1,20 +1,4 @@
-﻿(*
-Copyright 2011 Stephen Swensen
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*)
-
-//note: some of this code was collaboratively developed with the folks in the FSharpx project, and has
+﻿//note: some of this code was collaboratively developed with the folks in the FSharpx project, and has
 //founds its way as a contribution to that project.
 
 namespace Swensen.Utils
@@ -33,15 +17,15 @@ module internal Regex =
         }
 
     ///<summary>
-    ///Test an input string against a regex pattern using the given RegexOptions flags. 
+    ///Test an input string against a regex pattern using the given RegexOptions flags.
     ///If the match succeeds, returns an ActiveMatch instance, which can be used for further pattern matching.
     ///Note that the implementation takes advantage of the .NET Regex cache.
     ///</summary>
     ///<param name="flags">
-    ///The first argument allows you pass in RegexOptions flags. 
+    ///The first argument allows you pass in RegexOptions flags.
     ///</param>
     ///<param name="pattern">
-    ///The second argument is the regex pattern. Cannot be null. 
+    ///The second argument is the regex pattern. Cannot be null.
     ///</param>
     ///<param name="input">
     ///The last argument is the input string to test. The input
@@ -53,7 +37,7 @@ module internal Regex =
         | _ ->
             //using the static Regex.Match takes advantage of Regex caching
             match Regex.Match(input, pattern, flags) with
-            | m when m.Success -> 
+            | m when m.Success ->
                 //n.b. the head value of m.Groups is the match itself, which we discard
                 //n.b. if a group is optional and doesn't match, it's Value is ""
                 let groups = [for x in m.Groups -> x].Tail
@@ -72,7 +56,7 @@ module internal Regex =
     ///Convenience versions of our regex active patterns using RegexOptions.Compiled flag.
     module Compiled =
         ///When silverlight mode is None, else is Compiled
-        let private compiledRegexOption = 
+        let private compiledRegexOption =
             RegexOptions.Compiled
 
         let (|Match|_|) = (|Match|_|) compiledRegexOption
