@@ -1,6 +1,6 @@
-.PHONY: clean build pack test verify
+.PHONY: restore build test clean pack push verify
 
-all: clean build test restore pack verify push
+all: clean test
 
 restore:
 	dotnet restore --locked-mode
