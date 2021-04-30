@@ -33,17 +33,12 @@ At the heart of Unquote, are (public) operators for decompiling, evaluating, and
 
 The incremental evaluator performs reduction steps until a non-reducible expression is reached. During a reduction step, an expression will be reduced if all of its subexpressions are already reduced, recursively reducing the sub-expressions otherwise. Hence order of evaluation is not strictly adhered to, but shouldn't be a problem in practice since assertion expressions are not expected to depend on order of evaluation side effects. Except for sequential expressions, which are evaluated from left to right, and control structures and boolean operator expressions, which follow valid branch paths and short-circuiting rules. If a test expression throws an exception, the test will fail and print each reduction step up to the point of the exception, and then print the exception.
 
-As of version 2.0.0, reduction no longer depends on the [F# Power Pack](http://fsharppowerpack.codeplex.com/) expression evaluator and instead uses a new custom reflection-based evaluator. The Unquote evaluator can be up to 50 times faster than the PowerPack evaluator, and was able to increase the execution speed of Unquote's own suite of 400+ self-hosted unit tests by about 4 times. It also supports more quotation expressions than PowerPack, such as variable, property, and field set expressions, loop expressions, and nested quotation expressions.
-
 Please see the Wiki page GettingStarted for a simple guide to getting started with Unquote.
 
 Unquote was inspired by [Groovy Power Asserts](http://dontmindthelanguage.wordpress.com/2009/12/11/groovy-1-7-power-assert/).
 
-
 ---
-
-[![Build status](https://ci.appveyor.com/api/projects/status/02wsx2wsoj31a2g7?svg=true)](https://ci.appveyor.com/project/stephen-swensen/unquote)
 
 You are welcome to [Pay What You Want](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZNFZMKQF77YRC) for Unquote via PayPal.
 
-Copyright 2011-2016 [Swensen Software](http://www.swensensoftware.com)
+Copyright 2011-2021 [Swensen Software](http://www.swensensoftware.com)
