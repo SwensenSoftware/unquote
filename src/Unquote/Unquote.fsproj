@@ -5,6 +5,7 @@
     <NuSpecFile>Unquote.nuspec</NuSpecFile>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <Version>6.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
