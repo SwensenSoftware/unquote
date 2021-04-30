@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Unquote</id>
+    <version>6.0.0</version>
+    <authors>Stephen Swensen</authors>
+    <owners>Stephen Swensen</owners>
+    <icon>images/logo.png</icon>
+    <iconUrl>https://raw.githubusercontent.com/SwensenSoftware/unquote/master/logo.png</iconUrl>
+    <license type="expression">Apache-2.0</license>
+    <projectUrl>https://github.com/SwensenSoftware/unquote</projectUrl>
+    <tags>f# fsharp test testing assert unit xunit nunit expecto fscheck quote unquote quotations decompile eval</tags>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Write F# unit test assertions as quoted expressions, get step-by-step failure messages for free.</summary>
+    <description>Unquote is not just another DSL or API for making unit test assertions. Instead, assertions are written as plain, statically-checked F# quoted expressions and test failure messages are given as step-by-step F# expression evaluations.
+
+Unquote integrates configuration-free with all exception-based unit testing frameworks including xUnit.net, NUnit, and Expecto. Unquote may even be used within FSI sessions, enabling the direct migration of ad-hoc FSI tests during interactive development to formal test suites.
+
+In addition to its unit testing features, Unquote includes operators for evaluating, decompiling, and incrementally reducing quoted expressions.</description>
+    <dependencies>
+      <group targetFramework="netstandard2.0">
+        <dependency id="FSharp.Core" version="4.7.2"></dependency>
+      </group>
+    </dependencies>
+    <releaseNotes>https://github.com/SwensenSoftware/unquote/wiki/ReleaseNotes</releaseNotes>
+  </metadata>
+  <files>
+    <file src="bin\Release\netstandard2.0\Unquote.dll" target="lib\netstandard2.0" />
+    <file src="..\..\logo.png" target="images\logo.png" />
+  </files>
+</package>

@@ -5,3 +5,8 @@ builds/
 packages/
 .vs/
 *.suo
+.ionide
+
+.fake
+
+**/TestResults
