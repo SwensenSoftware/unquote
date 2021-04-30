@@ -8,8 +8,8 @@ restore:
 build: restore
 	dotnet build -c Release --no-restore
 
-test:
-	dotnet test test/UnquoteTests/UnquoteTests.fsproj -c Release
+test: build
+	dotnet test test/UnquoteTests/UnquoteTests.fsproj -c Release --no-build
 
 clean:
 	dotnet clean -c Release
