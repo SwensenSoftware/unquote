@@ -1,4 +1,4 @@
-[User Guide](../../wiki/UserGuide) | [NuGet](https://www.nuget.org/packages/Unquote/) | [Release Notes](../../wiki/ReleaseNotes) | [Issues](../../issues)
+[User Guide](../../wiki/UserGuide) | [NuGet](https://www.nuget.org/packages/Unquote/) | [Release Notes](../../wiki/ReleaseNotes) | [Issues](../../issues) | [Contributing](../../wiki/Contributing)
 
 ---
 
@@ -32,6 +32,12 @@ In addition to `test : Quotations.Expr<bool> -> unit` used for performing most a
 At the heart of Unquote, are (public) operators for decompiling, evaluating, and incrementally reducing F# Quotations. Unquote can decompile many F# quoted expressions as single line, non-light syntax strings. See [Decompiler Features](../../wiki/DecompilerFeatures) for a list of notable decompiler features.
 
 The incremental evaluator performs reduction steps until a non-reducible expression is reached. During a reduction step, an expression will be reduced if all of its subexpressions are already reduced, recursively reducing the sub-expressions otherwise. Hence order of evaluation is not strictly adhered to, but shouldn't be a problem in practice since assertion expressions are not expected to depend on order of evaluation side effects. Except for sequential expressions, which are evaluated from left to right, and control structures and boolean operator expressions, which follow valid branch paths and short-circuiting rules. If a test expression throws an exception, the test will fail and print each reduction step up to the point of the exception, and then print the exception.
+
+---
+
+To learn more about how to use Unquote, see [User Guide](../../wiki/UserGuide)
+
+To learn about how you can contribute to Unquote's development, see [Contributing](../../wiki/Contributing)
 
 ---
 
