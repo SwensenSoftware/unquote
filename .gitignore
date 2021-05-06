@@ -6,7 +6,7 @@ packages/
 .vs/
 *.suo
 .ionide
-
+.idea
 .fake
-
+*.user
 **/TestResults
