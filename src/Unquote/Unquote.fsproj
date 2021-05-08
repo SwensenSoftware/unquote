@@ -28,7 +28,6 @@
     <Compile Include="Operators.fs" />
     <Compile Include="AssertionFailedException.fs" />
     <Compile Include="Assertions.fs" />
-    <Content Include="packages.config" />
     <None Include="Unquote.nuspec" />
   </ItemGroup>
 
