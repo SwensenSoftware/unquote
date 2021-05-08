@@ -179,6 +179,8 @@ let decompile expr =
                 sprintf "%A" x.InnerException
             | :? Exception as x ->
                 sprintf "%s: %s" (x.GetType().FullName) x.Message
+            | :? DateTime as x ->
+                x.ToUniversalTime().ToString("o", System.Globalization.CultureInfo.InvariantCulture)
             | _ -> sprintf "%A" o
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
