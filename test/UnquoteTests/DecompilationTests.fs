@@ -2,7 +2,10 @@
 module DecompilationTests
 open Xunit
 open Swensen.Unquote
-open Swensen.Utils
+
+let decompiledReductionAt i q =
+    let unquoted = q |> unquote
+    unquoted.DecompiledReductions.[i]
 
 let toTypedExprValue<'a> (x: 'a) : Microsoft.FSharp.Quotations.Expr<'a> =
     let x = Microsoft.FSharp.Quotations.Expr.Value(x)
@@ -1439,3 +1442,9 @@ let ``decompile mixed WITH anonymous record construction with multiple values``(
     let x = { Text = "Hello"; Value = 42 }
     <@ {| x with Value = 43; SecondVal = 44 |} @>
     |> decompile =! "let Value = 43 in {| SecondVal = 44; Text = x.Text; Value = Value |}"
+
+[<Fact>]
+let ``issue 115: higher precision DateTime decompilation`` () =
+    let expected = "2021-05-18T12:06:18.1234567Z"
+    let dt = DateTime.Parse(expected)
+    test <@ <@ dt @> |> decompiledReductionAt 1 = expected @>
