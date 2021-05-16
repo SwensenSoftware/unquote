@@ -1444,7 +1444,15 @@ let ``decompile mixed WITH anonymous record construction with multiple values``(
     |> decompile =! "let Value = 43 in {| SecondVal = 44; Text = x.Text; Value = Value |}"
 
 [<Fact>]
-let ``issue 115: higher precision DateTime decompilation`` () =
-    let expected = "2021-05-18T12:06:18.1234567Z"
-    let dt = DateTime.Parse(expected)
+let ``issue 115: higher precision DateTime decompilation with Kind`` () =
+    let input = "2021-05-18T12:06:18.1234567Z"
+    let dt = DateTimeOffset.Parse(input).UtcDateTime
+    let expected = input + " (Utc)"
+    test <@ <@ dt @> |> decompiledReductionAt 1 = expected @>
+
+[<Fact>]
+let ``issue 115: higher precision DateTimeOffset decompilation`` () =
+    let input = "2021-05-18T12:06:18.1234567+00:00"
+    let dt = DateTimeOffset.Parse(input)
+    let expected = input
     test <@ <@ dt @> |> decompiledReductionAt 1 = expected @>
