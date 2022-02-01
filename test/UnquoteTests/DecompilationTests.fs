@@ -1456,3 +1456,42 @@ let ``issue 115: higher precision DateTimeOffset decompilation`` () =
     let dt = DateTimeOffset.Parse(input)
     let expected = input
     test <@ <@ dt @> |> decompiledReductionAt 1 = expected @>
+
+type SomeCollidedName =
+    static member A = 1
+    static member B x = x
+module SomeCollidedName =
+    let a = 2
+    let b x = x
+[<Fact>]
+let ``type and module name collision: Type Property`` () =
+    <@ SomeCollidedName.A @>
+    |> decompile =! "SomeCollidedName.A"
+[<Fact>]
+let ``type and module name collision: Module Value`` () =
+    <@ SomeCollidedName.a @>
+    |> decompile =! "SomeCollidedName.a"
+[<Fact>]
+let ``type and module name collision: Type Method`` () =
+    <@ SomeCollidedName.B @>
+    |> decompile =! "SomeCollidedName.B"
+[<Fact>]
+let ``type and module name collision: Module Function`` () =
+    <@ SomeCollidedName.b @>
+    |> decompile =! "SomeCollidedName.b"
+[<Fact>]
+let ``Pretty-print ResizeArray and ValueOption`` () =
+    <@ ResizeArray<int ValueOption> 2 @>
+    |> decompile =! "new ResizeArray<voption<int>>(2)"
+[<Fact>]
+let ``Pretty-print Set and Result`` () =
+    <@ Set [Ok 1; Error 2; Ok 3] @>
+    |> decompile =! "new Set<Result<int, int>>([Ok(1); Error(2); Ok(3)])"
+[<Fact>]
+let ``Pretty-print ValueTuples`` () =
+    <@ Map [struct(1, 2), struct(1, 2, 3)], struct(1, 2, 3, 4) @>
+    |> decompile =! "(new Map<struct(int * int), struct(int * int * int)>([(struct(1, 2), struct(1, 2, 3))]), struct(1, 2, 3, 4))"
+[<Fact>]
+let ``decompile Tuples and ValueTuples of 0 or 1 arity correctly`` () =
+    <@ Map[(System.Tuple.Create(1), System.ValueTuple.Create(), System.Tuple.Create(1, 2)), System.ValueTuple.Create(2)] @>
+    |> decompile =! "new Map<Tuple<int> * ValueTuple * (int * int), ValueTuple<int>>([((Tuple.Create(1), ValueTuple.Create(), Tuple.Create(1, 2)), ValueTuple.Create(2))])"

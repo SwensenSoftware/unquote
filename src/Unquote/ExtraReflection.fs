@@ -233,7 +233,17 @@ let sourceName (mi:MemberInfo) =
                 else
                     None
             | _ -> None)
-    |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
+    |> function
+    | Some sourceName -> sourceName
+    | None ->
+        match mi with
+        // https://github.com/fsharp/fslang-design/blob/main/FSharp-4.1/FS-1019-implicitly-add-the-module-suffix.md
+        | :? Type as t when FSharpType.IsModule t && t.Name.EndsWith "Module" ->
+            // There is a type collision. Assume that the module and the type names overlapped causing an implicit 'Module' suffix to be added.
+            match t.Assembly.GetType(t.FullName.Substring(0, t.FullName.Length - 6)) with
+            | null -> mi.Name
+            | _ -> t.Name.Substring(0, t.Name.Length - 6)
+        | _ -> mi.Name
     |> sourceNameFromString //issue 11: active pattern function names need to be surrounded by parens
 
 let inline private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
@@ -273,10 +283,14 @@ let sprintSig (outerTy:Type) =
         | "Microsoft.FSharp.Core.Unit"  -> "unit"
         | "Microsoft.FSharp.Math.BigRational"   -> "BigNum"
         | "Microsoft.FSharp.Core.FSharpRef"     -> "ref"
+        | "Microsoft.FSharp.Core.FSharpResult"     -> "Result"
         | "Microsoft.FSharp.Core.FSharpOption"  -> "option"
+        | "Microsoft.FSharp.Core.FSharpValueOption"  -> "voption"
         | "Microsoft.FSharp.Collections.FSharpList" -> "list"
         | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
+        | "Microsoft.FSharp.Collections.FSharpSet"  -> "Set"
         | "System.Collections.Generic.IEnumerable"  -> "seq"
+        | "System.Collections.Generic.List"  -> "ResizeArray"
         | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] }-> name //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
@@ -293,8 +307,10 @@ let sprintSig (outerTy:Type) =
         match ty.GetGenericArgumentsArrayInclusive() with
         | args when args.Length = 0 ->
             (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
-        | args when cleanName = "System.Tuple" ->
+        | args when cleanName = "System.Tuple" && args.Length >= 2 ->
             (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+        | args when cleanName = "System.ValueTuple" && args.Length >= 2 ->
+            "struct" + (applyParens 0 (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
         | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
             (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
         | args ->
