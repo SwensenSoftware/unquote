@@ -1495,3 +1495,11 @@ let ``Pretty-print ValueTuples`` () =
 let ``decompile Tuples and ValueTuples of 0 or 1 arity correctly`` () =
     <@ Map[(System.Tuple.Create(1), System.ValueTuple.Create(), System.Tuple.Create(1, 2)), System.ValueTuple.Create(2)] @>
     |> decompile =! "new Map<Tuple<int> * ValueTuple * (int * int), ValueTuple<int>>([((Tuple.Create(1), ValueTuple.Create(), Tuple.Create(1, 2)), ValueTuple.Create(2))])"
+[<Fact>]
+let ``Pretty-print Choices`` () =
+    <@ ResizeArray[Choice1Of2 1], ResizeArray[Choice2Of3 2], ResizeArray[Choice3Of4 3] @>
+    |> decompile =! "(new ResizeArray<Choice<int, obj>>([Choice1Of2(1)]), new ResizeArray<Choice<obj, int, obj>>([Choice2Of3(2)]), new ResizeArray<Choice<obj, obj, int, obj>>([Choice3Of4(3)]))"
+[<Fact>]
+let ``Pretty-print Handlers`` () =
+    <@ ResizeArray<Handler<int>>() @>
+    |> decompile =! "new ResizeArray<Handler<int>>()"
