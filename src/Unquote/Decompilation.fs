@@ -205,7 +205,7 @@ let decompile expr =
                 |> String.concat "; "
 
             let maybePipe = if isAnon then "|" else ""
-            sprintf "{%s %s %s}" maybePipe body maybePipe
+            sprintf "%s{%s %s %s}" (if isAnon && ty.IsValueType then "struct" else "") maybePipe body maybePipe
 
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.

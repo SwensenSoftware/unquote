@@ -305,7 +305,15 @@ let sprintSig (outerTy:Type) =
                 cleanName, arrSig
             | _ ->
                 failwith ("failed to parse type name: " + ty.FullName)
-
+        let rec getAnonRecordInfo(ty:Type) =
+            if FSharpType.IsRecord ty && ty.Name.Contains "AnonymousType" && ty.GetCustomAttributes(typeof<System.Runtime.CompilerServices.CompilerGeneratedAttribute>, false).Length > 0 then
+                Some (ty.IsValueType, FSharpType.GetRecordFields ty)
+            elif ty.IsArray then ty.GetElementType() |> getAnonRecordInfo
+            else None
+        match getAnonRecordInfo ty with
+        | Some (isStruct, recordFields) ->
+            (if isStruct then "struct{| " else "{| ") + (recordFields |> Array.map (fun r -> sprintf "%s: %s" (sourceNameFromString r.Name) (sprintSig 1 r.PropertyType)) |> String.concat "; ") + " |}" + arrSig
+        | None ->
         match ty.GetGenericArgumentsArrayInclusive() with
         | args when args.Length = 0 ->
             (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
