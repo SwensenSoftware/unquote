@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    ".NETCoreApp,Version=v5.0": {
+    "net8.0": {
       "Expecto": {
         "type": "Direct",
         "requested": "[9.0.2, )",
@@ -26,7 +26,7 @@
       "unquote": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "4.7.2"
+          "FSharp.Core": "[4.7.2, )"
         }
       }
     }

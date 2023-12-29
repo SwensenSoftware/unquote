@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    ".NETCoreApp,Version=v5.0": {
+    "net8.0": {
       "coverlet.collector": {
         "type": "Direct",
         "requested": "[1.3.0, )",
@@ -1097,7 +1097,7 @@
       "unquote": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "4.7.2"
+          "FSharp.Core": "[4.7.2, )"
         }
       }
     }
