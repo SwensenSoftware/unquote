@@ -75,10 +75,10 @@ let ``simple let binding`` () =
 [<Fact>]
 let ``PropertyGet: instance Item getter with single arg`` () =
     let table = System.Collections.Generic.Dictionary<int,int>() |> toTypedExprValue
-    decompile <@ (%table).[0] @> =! "seq [].[0]" //might want to fix up dict value sourceing later
+    decompile <@ (%table).[0] @> =! "seq [].[0]" //might want to fix up dict value sourcing later
 
 [<Fact>]
-let ``PropertyGet: named instace getter with single arg`` () =
+let ``PropertyGet: named instance getter with single arg`` () =
     decompile <@ "asdf".Chars(0) @> =! "\"asdf\".Chars(0)"
 
 [<Fact>]
