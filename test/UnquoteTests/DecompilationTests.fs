@@ -1486,22 +1486,22 @@ let ``type and module name collision: Module Function`` () =
 
 [<Fact>]
 let ``Pretty-print ResizeArray and ValueOption`` () =
-    <@ ResizeArray<int ValueOption> 2 @>
+    <@ new ResizeArray<voption<int>>(2) @>
     |> decompile =! "new ResizeArray<voption<int>>(2)"
 
 [<Fact>]
 let ``Pretty-print Set and Result`` () =
-    <@ Set [Ok 1; Error 2; Ok 3] @>
+    <@ new Set<Result<int, int>>([Ok 1; Error 2; Ok 3]) @>
     |> decompile =! "new Set<Result<int, int>>([Ok(1); Error(2); Ok(3)])"
 
 [<Fact>]
 let ``Pretty-print ValueTuples`` () =
-    <@ Map [struct(1, 2), struct(1, 2, 3)], struct(1, 2, 3, 4) @>
+    <@ (new Map<struct(int * int), struct(int * int * int)>([(struct(1, 2), struct(1, 2, 3))]), struct(1, 2, 3, 4)) @>
     |> decompile =! "(new Map<struct(int * int), struct(int * int * int)>([(struct(1, 2), struct(1, 2, 3))]), struct(1, 2, 3, 4))"
 
 [<Fact>]
 let ``decompile Tuples and ValueTuples of 0 or 1 arity correctly`` () =
-    <@ Map[(System.Tuple.Create(1), System.ValueTuple.Create(), System.Tuple.Create(1, 2)), System.ValueTuple.Create(2)] @>
+    <@ Map[(Tuple.Create(1), ValueTuple.Create(), Tuple.Create(1, 2)), ValueTuple.Create(2)] @>
     |> decompile =! "new Map<Tuple<int> * ValueTuple * (int * int), ValueTuple<int>>([((Tuple.Create(1), ValueTuple.Create(), Tuple.Create(1, 2)), ValueTuple.Create(2))])"
 
 [<Fact>]
