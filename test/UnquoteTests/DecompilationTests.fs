@@ -1526,10 +1526,10 @@ let ``Struct anonymous records`` () =
 
 [<Fact>]
 let ``Anonymous record arrays`` () =
-    <@ ResizeArray[[|{| A = 1 |}; {| A = 4 |}|]] @>
+    <@ new ResizeArray<{| A: int |}[]>([[|{| A = 1 |}; {| A = 4 |}|]]) @>
     |> decompile =! "new ResizeArray<{| A: int |}[]>([[|{| A = 1 |}; {| A = 4 |}|]])"
 
 [<Fact>]
 let ``Struct anonymous record arrays`` () =
-    <@ ResizeArray[[|struct {| A = 1 |}; {| A = 4 |}|]] @>
+    <@ new ResizeArray<struct {| A: int |}[]>([[|struct {| A = 1 |}; struct {| A = 4 |}|]]) @>
     |> decompile =! "new ResizeArray<struct {| A: int |}[]>([[|struct {| A = 1 |}; struct {| A = 4 |}|]])"
