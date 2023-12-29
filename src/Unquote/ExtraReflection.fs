@@ -256,44 +256,44 @@ let sprintSig (outerTy:Type) =
     //list of F# type abbrs: http://207.46.16.248/en-us/library/ee353649.aspx
     ///Get the type abbr name or short name from the "clean" name
     let displayName = function
-        | "System.Object"   -> "obj"
-        | "System.String"   -> "string"
-        | "System.Char"     -> "char"
-        | "System.Boolean"  -> "bool"
-        | "System.Decimal"  -> "decimal"
+        | "System.Object"  -> "obj"
+        | "System.String"  -> "string"
+        | "System.Char"    -> "char"
+        | "System.Boolean" -> "bool"
+        | "System.Decimal" -> "decimal"
 
-        | "System.Int16"    -> "int16"
-        | "System.Int32"    -> "int"//int32
-        | "System.Int64"    -> "int64"
+        | "System.Int16"   -> "int16"
+        | "System.Int32"   -> "int"//int32
+        | "System.Int64"   -> "int64"
 
-        | "System.UInt16"   -> "uint16"
-        | "System.UInt32"   -> "uint32"
-        | "System.UInt64"   -> "uint64"
+        | "System.UInt16"  -> "uint16"
+        | "System.UInt32"  -> "uint32"
+        | "System.UInt64"  -> "uint64"
 
-        | "System.Single"   -> "float32"//single
-        | "System.Double"   -> "float"//double
+        | "System.Single"  -> "float32"//single
+        | "System.Double"  -> "float"//double
 
-        | "System.Byte"     -> "byte"//uint8
-        | "System.SByte"    -> "sbyte"//int8
+        | "System.Byte"    -> "byte"//uint8
+        | "System.SByte"   -> "sbyte"//int8
 
-        | "System.IntPtr"   -> "nativeint"
-        | "System.UIntPtr"  -> "unativeint"
+        | "System.IntPtr"  -> "nativeint"
+        | "System.UIntPtr" -> "unativeint"
 
-        | "System.Numerics.BigInteger"  -> "bigint"
-        | "Microsoft.FSharp.Core.Unit"  -> "unit"
-        | "Microsoft.FSharp.Math.BigRational"   -> "BigNum"
-        | "Microsoft.FSharp.Core.FSharpChoice"     -> "Choice"
-        | "Microsoft.FSharp.Core.FSharpRef"     -> "ref"
-        | "Microsoft.FSharp.Core.FSharpResult"     -> "Result"
-        | "Microsoft.FSharp.Core.FSharpOption"  -> "option"
-        | "Microsoft.FSharp.Core.FSharpValueOption"  -> "voption"
+        | "System.Numerics.BigInteger" -> "bigint"
+        | "Microsoft.FSharp.Core.Unit" -> "unit"
+        | "Microsoft.FSharp.Math.BigRational"  -> "BigNum"
+        | "Microsoft.FSharp.Core.FSharpChoice" -> "Choice"
+        | "Microsoft.FSharp.Core.FSharpRef"    -> "ref"
+        | "Microsoft.FSharp.Core.FSharpResult" -> "Result"
+        | "Microsoft.FSharp.Core.FSharpOption" -> "option"
+        | "Microsoft.FSharp.Core.FSharpValueOption" -> "voption"
         | "Microsoft.FSharp.Control.FSharpHandler"  -> "Handler"
         | "Microsoft.FSharp.Collections.FSharpList" -> "list"
         | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
         | "Microsoft.FSharp.Collections.FSharpSet"  -> "Set"
         | "System.Collections.Generic.IEnumerable"  -> "seq"
-        | "System.Collections.Generic.List"  -> "ResizeArray"
-        | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] }-> name //short name
+        | "System.Collections.Generic.List" -> "ResizeArray"
+        | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] } -> name //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
     let rec sprintSig context (ty:Type) =
@@ -314,17 +314,17 @@ let sprintSig (outerTy:Type) =
         | Some (isStruct, recordFields) ->
             (if isStruct then "struct{| " else "{| ") + (recordFields |> Array.map (fun r -> sprintf "%s: %s" (sourceNameFromString r.Name) (sprintSig 1 r.PropertyType)) |> String.concat "; ") + " |}" + arrSig
         | None ->
-        match ty.GetGenericArgumentsArrayInclusive() with
-        | args when args.Length = 0 ->
-            (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
-        | args when cleanName = "System.Tuple" && args.Length >= 2 ->
-            (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
-        | args when cleanName = "System.ValueTuple" && args.Length >= 2 ->
-            "struct" + (applyParens 0 (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
-        | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
-            (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
-        | args ->
-            sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
+            match ty.GetGenericArgumentsArrayInclusive() with
+            | args when args.Length = 0 ->
+                (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+            | args when cleanName = "System.Tuple" && args.Length >= 2 ->
+                (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+            | args when cleanName = "System.ValueTuple" && args.Length >= 2 ->
+                "struct" + (applyParens 0 (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+            | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
+                (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
+            | args ->
+                sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
 
     sprintSig 0 outerTy
 
