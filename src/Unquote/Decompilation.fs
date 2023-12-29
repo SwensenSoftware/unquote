@@ -108,7 +108,7 @@ let decompile expr =
             applyParens OP.TypeTest (sprintf "%s :? %s" (decompile (OP.TypeTest,OP.Left) lhs) (ER.sprintSig ty))
         | EP.NumericLiteral(literalValue, suffix) ->
             literalValue + suffix
-        | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && mi.Name = "UnboxGeneric" -> //i.e. :?>
+        | P.Call(None, mi, target::[]) when mi.DeclaringType.Name = "IntrinsicFunctions" && (mi.Name = "UnboxGeneric" || mi.Name = "UnboxFast") -> //i.e. :?>
             let ty = mi.GetGenericArguments().[0]
             applyParens OP.DynamicCast (sprintf "%s :?> %s" (decompile (OP.DynamicCast,OP.Left) target) (ER.sprintSig ty))
         | P.Call(None, mi, target::args) when mi.DeclaringType.Name = "IntrinsicFunctions" -> //e.g. GetChar, GetArray, GetArray2D
