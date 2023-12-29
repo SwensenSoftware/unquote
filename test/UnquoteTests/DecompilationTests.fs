@@ -1516,12 +1516,12 @@ let ``Pretty-print Handlers`` () =
 
 [<Fact>]
 let ``Anonymous records`` () =
-    <@ ResizeArray[{| A = 1; B = 2 |}; {|B = 3; A = 4|}] @>
+    <@ new ResizeArray<{| A: int; B: int |}>([{| A = 1; B = 2 |}; {|B = 3; A = 4|}]) @>
     |> decompile =! "new ResizeArray<{| A: int; B: int |}>([{| A = 1; B = 2 |}; let B = 3 in {| A = 4; B = B |}])"
 
 [<Fact>]
 let ``Struct anonymous records`` () =
-    <@ ResizeArray[struct {| A = 1; B = 2 |}; {|B = 3; A = 4|}] @>
+    <@ new ResizeArray<struct {| A: int; B: int |}>([struct {| A = 1; B = 2 |}; {|B = 3; A = 4|}]) @>
     |> decompile =! "new ResizeArray<struct {| A: int; B: int |}>([struct {| A = 1; B = 2 |}; let B = 3 in struct {| A = 4; B = B |}])"
 
 [<Fact>]
