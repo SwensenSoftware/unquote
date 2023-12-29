@@ -188,7 +188,7 @@ let decompile expr =
                 x.ToString("o", System.Globalization.CultureInfo.InvariantCulture)
             | _ -> sprintf "%A" o
         | P.NewStructTuple(args) -> // Must come before P.NewTuple
-            args |> decompileTupledArgs |> sprintf "struct(%s)" //what is precedence? 10?
+            args |> decompileTupledArgs |> sprintf "struct (%s)" //what is precedence? 10?
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
@@ -205,7 +205,7 @@ let decompile expr =
                 |> String.concat "; "
 
             let maybePipe = if isAnon then "|" else ""
-            sprintf "%s{%s %s %s}" (if isAnon && ty.IsValueType then "struct" else "") maybePipe body maybePipe
+            sprintf "%s{%s %s %s}" (if isAnon && ty.IsValueType then "struct " else "") maybePipe body maybePipe
 
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.

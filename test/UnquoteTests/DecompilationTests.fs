@@ -1497,7 +1497,7 @@ let ``Pretty-print Set and Result`` () =
 [<Fact>]
 let ``Pretty-print ValueTuples`` () =
     <@ (new Map<struct(int * int), struct(int * int * int)>([(struct(1, 2), struct(1, 2, 3))]), struct(1, 2, 3, 4)) @>
-    |> decompile =! "(new Map<struct(int * int), struct(int * int * int)>([(struct(1, 2), struct(1, 2, 3))]), struct(1, 2, 3, 4))"
+    |> decompile =! "(new Map<struct (int * int), struct (int * int * int)>([(struct (1, 2), struct (1, 2, 3))]), struct (1, 2, 3, 4))"
 
 [<Fact>]
 let ``decompile Tuples and ValueTuples of 0 or 1 arity correctly`` () =
@@ -1522,7 +1522,7 @@ let ``Anonymous records`` () =
 [<Fact>]
 let ``Struct anonymous records`` () =
     <@ ResizeArray[struct {| A = 1; B = 2 |}; {|B = 3; A = 4|}] @>
-    |> decompile =! "new ResizeArray<struct{| A: int; B: int |}>([struct{| A = 1; B = 2 |}; let B = 3 in struct{| A = 4; B = B |}])"
+    |> decompile =! "new ResizeArray<struct {| A: int; B: int |}>([struct {| A = 1; B = 2 |}; let B = 3 in struct {| A = 4; B = B |}])"
 
 [<Fact>]
 let ``Anonymous record arrays`` () =
@@ -1532,4 +1532,4 @@ let ``Anonymous record arrays`` () =
 [<Fact>]
 let ``Struct anonymous record arrays`` () =
     <@ ResizeArray[[|struct {| A = 1 |}; {| A = 4 |}|]] @>
-    |> decompile =! "new ResizeArray<struct{| A: int |}[]>([[|struct{| A = 1 |}; struct{| A = 4 |}|]])"
+    |> decompile =! "new ResizeArray<struct {| A: int |}[]>([[|struct {| A = 1 |}; struct {| A = 4 |}|]])"

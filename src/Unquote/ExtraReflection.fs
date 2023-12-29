@@ -312,7 +312,7 @@ let sprintSig (outerTy:Type) =
             else None
         match getAnonRecordInfo ty with
         | Some (isStruct, recordFields) ->
-            (if isStruct then "struct{| " else "{| ") + (recordFields |> Array.map (fun r -> sprintf "%s: %s" (sourceNameFromString r.Name) (sprintSig 1 r.PropertyType)) |> String.concat "; ") + " |}" + arrSig
+            (if isStruct then "struct {| " else "{| ") + (recordFields |> Array.map (fun r -> sprintf "%s: %s" (sourceNameFromString r.Name) (sprintSig 1 r.PropertyType)) |> String.concat "; ") + " |}" + arrSig
         | None ->
             match ty.GetGenericArgumentsArrayInclusive() with
             | args when args.Length = 0 ->
@@ -320,7 +320,7 @@ let sprintSig (outerTy:Type) =
             | args when cleanName = "System.Tuple" && args.Length >= 2 ->
                 (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
             | args when cleanName = "System.ValueTuple" && args.Length >= 2 ->
-                "struct" + (applyParens 0 (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+                "struct " + (applyParens 0 (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
             | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
                 (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
             | args ->
