@@ -1463,58 +1463,72 @@ type SomeCollidedName =
 module SomeCollidedName =
     let a = 2
     let b x = x
+
 [<Fact>]
 let ``type and module name collision: Type Property`` () =
     <@ SomeCollidedName.A @>
     |> decompile =! "SomeCollidedName.A"
+
 [<Fact>]
 let ``type and module name collision: Module Value`` () =
     <@ SomeCollidedName.a @>
     |> decompile =! "SomeCollidedName.a"
+
 [<Fact>]
 let ``type and module name collision: Type Method`` () =
     <@ SomeCollidedName.B @>
     |> decompile =! "SomeCollidedName.B"
+
 [<Fact>]
 let ``type and module name collision: Module Function`` () =
     <@ SomeCollidedName.b @>
     |> decompile =! "SomeCollidedName.b"
+
 [<Fact>]
 let ``Pretty-print ResizeArray and ValueOption`` () =
     <@ ResizeArray<int ValueOption> 2 @>
     |> decompile =! "new ResizeArray<voption<int>>(2)"
+
 [<Fact>]
 let ``Pretty-print Set and Result`` () =
     <@ Set [Ok 1; Error 2; Ok 3] @>
     |> decompile =! "new Set<Result<int, int>>([Ok(1); Error(2); Ok(3)])"
+
 [<Fact>]
 let ``Pretty-print ValueTuples`` () =
     <@ Map [struct(1, 2), struct(1, 2, 3)], struct(1, 2, 3, 4) @>
     |> decompile =! "(new Map<struct(int * int), struct(int * int * int)>([(struct(1, 2), struct(1, 2, 3))]), struct(1, 2, 3, 4))"
+
 [<Fact>]
 let ``decompile Tuples and ValueTuples of 0 or 1 arity correctly`` () =
     <@ Map[(System.Tuple.Create(1), System.ValueTuple.Create(), System.Tuple.Create(1, 2)), System.ValueTuple.Create(2)] @>
     |> decompile =! "new Map<Tuple<int> * ValueTuple * (int * int), ValueTuple<int>>([((Tuple.Create(1), ValueTuple.Create(), Tuple.Create(1, 2)), ValueTuple.Create(2))])"
+
 [<Fact>]
 let ``Pretty-print Choices`` () =
     <@ ResizeArray[Choice1Of2 1], ResizeArray[Choice2Of3 2], ResizeArray[Choice3Of4 3] @>
     |> decompile =! "(new ResizeArray<Choice<int, obj>>([Choice1Of2(1)]), new ResizeArray<Choice<obj, int, obj>>([Choice2Of3(2)]), new ResizeArray<Choice<obj, obj, int, obj>>([Choice3Of4(3)]))"
 [<Fact>]
+
 let ``Pretty-print Handlers`` () =
     <@ ResizeArray<Handler<int>>() @>
     |> decompile =! "new ResizeArray<Handler<int>>()"
+
 [<Fact>]
 let ``Anonymous records`` () =
     <@ ResizeArray[{| A = 1; B = 2 |}; {|B = 3; A = 4|}] @>
     |> decompile =! "new ResizeArray<{| A: int; B: int |}>([{| A = 1; B = 2 |}; let B = 3 in {| A = 4; B = B |}])"
+
 [<Fact>]
 let ``Struct anonymous records`` () =
     <@ ResizeArray[struct {| A = 1; B = 2 |}; {|B = 3; A = 4|}] @>
     |> decompile =! "new ResizeArray<struct{| A: int; B: int |}>([struct{| A = 1; B = 2 |}; let B = 3 in struct{| A = 4; B = B |}])"
+
 [<Fact>]
 let ``Anonymous record arrays`` () =
     <@ ResizeArray[[|{| A = 1 |}; {| A = 4 |}|]] @>
     |> decompile =! "new ResizeArray<{| A: int |}[]>([[|{| A = 1 |}; {| A = 4 |}|]])"
+
 [<Fact>]
 let ``Struct anonymous record arrays`` () =
     <@ ResizeArray[[|struct {| A = 1 |}; {| A = 4 |}|]] @>
