@@ -195,6 +195,7 @@ let decompile expr =
             args |> decompileSequencedArgs |> sprintf "[|%s|]"
         | P.NewRecord(ty,args) ->
             let isAnon =
+                FSharpType.IsRecord ty &&
                 ty.FullName.Contains("AnonymousType") &&
                 ty.GetCustomAttributes(typeof<System.Runtime.CompilerServices.CompilerGeneratedAttribute>, false).Length > 0
 
