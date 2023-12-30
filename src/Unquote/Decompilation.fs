@@ -41,7 +41,7 @@ let decompile expr =
                     if ER.isOpenModule pi.DeclaringType then
                         sprintf "%s" pi.Name
                     else
-                        sprintf "%s.%s" pi.DeclaringType.Name pi.Name
+                        sprintf "%s.%s" (ER.sourceName pi.DeclaringType) pi.Name
 
                 if args.Length = 0 then sprintedName
                 else applyParens OP.MethodCall (sprintf "%s(%s)" sprintedName (decompileTupledArgs args))
@@ -187,12 +187,15 @@ let decompile expr =
             | :? DateTimeOffset as x ->
                 x.ToString("o", System.Globalization.CultureInfo.InvariantCulture)
             | _ -> sprintf "%A" o
+        | P.NewStructTuple(args) -> // Must come before P.NewTuple
+            args |> decompileTupledArgs |> sprintf "struct (%s)" //what is precedence? 10?
         | P.NewTuple(args) -> //tuples have at least two elements
             args |> decompileTupledArgs |> sprintf "(%s)" //what is precedence? 10?
         | P.NewArray(_,args) ->
             args |> decompileSequencedArgs |> sprintf "[|%s|]"
         | P.NewRecord(ty,args) ->
             let isAnon =
+                FSharpType.IsRecord ty &&
                 ty.FullName.Contains("AnonymousType") &&
                 ty.GetCustomAttributes(typeof<System.Runtime.CompilerServices.CompilerGeneratedAttribute>, false).Length > 0
 
@@ -203,7 +206,7 @@ let decompile expr =
                 |> String.concat "; "
 
             let maybePipe = if isAnon then "|" else ""
-            sprintf "{%s %s %s}" maybePipe body maybePipe
+            sprintf "%s{%s %s %s}" (if isAnon && ty.IsValueType then "struct " else "") maybePipe body maybePipe
 
         //list union cases more complex than normal union cases since need to consider
         //both cons infix operator and literal list constructions.

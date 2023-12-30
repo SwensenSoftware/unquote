@@ -233,7 +233,17 @@ let sourceName (mi:MemberInfo) =
                 else
                     None
             | _ -> None)
-    |> (function | Some(sourceName) -> sourceName | None -> mi.Name)
+    |> function
+    | Some sourceName -> sourceName
+    | None ->
+        match mi with
+        // https://github.com/fsharp/fslang-design/blob/main/FSharp-4.1/FS-1019-implicitly-add-the-module-suffix.md
+        | :? Type as t when FSharpType.IsModule t && t.Name.EndsWith "Module" ->
+            // There is a type collision. Assume that the module and the type names overlapped causing an implicit 'Module' suffix to be added.
+            match t.Assembly.GetType(t.FullName.Substring(0, t.FullName.Length - 6)) with
+            | null -> mi.Name
+            | _ -> t.Name.Substring(0, t.Name.Length - 6)
+        | _ -> mi.Name
     |> sourceNameFromString //issue 11: active pattern function names need to be surrounded by parens
 
 let inline private applyParensForPrecInContext context prec s = if prec > context then s else sprintf "(%s)" s
@@ -246,38 +256,44 @@ let sprintSig (outerTy:Type) =
     //list of F# type abbrs: http://207.46.16.248/en-us/library/ee353649.aspx
     ///Get the type abbr name or short name from the "clean" name
     let displayName = function
-        | "System.Object"   -> "obj"
-        | "System.String"   -> "string"
-        | "System.Char"     -> "char"
-        | "System.Boolean"  -> "bool"
-        | "System.Decimal"  -> "decimal"
+        | "System.Object"  -> "obj"
+        | "System.String"  -> "string"
+        | "System.Char"    -> "char"
+        | "System.Boolean" -> "bool"
+        | "System.Decimal" -> "decimal"
 
-        | "System.Int16"    -> "int16"
-        | "System.Int32"    -> "int"//int32
-        | "System.Int64"    -> "int64"
+        | "System.Int16"   -> "int16"
+        | "System.Int32"   -> "int"//int32
+        | "System.Int64"   -> "int64"
 
-        | "System.UInt16"   -> "uint16"
-        | "System.UInt32"   -> "uint32"
-        | "System.UInt64"   -> "uint64"
+        | "System.UInt16"  -> "uint16"
+        | "System.UInt32"  -> "uint32"
+        | "System.UInt64"  -> "uint64"
 
-        | "System.Single"   -> "float32"//single
-        | "System.Double"   -> "float"//double
+        | "System.Single"  -> "float32"//single
+        | "System.Double"  -> "float"//double
 
-        | "System.Byte"     -> "byte"//uint8
-        | "System.SByte"    -> "sbyte"//int8
+        | "System.Byte"    -> "byte"//uint8
+        | "System.SByte"   -> "sbyte"//int8
 
-        | "System.IntPtr"   -> "nativeint"
-        | "System.UIntPtr"  -> "unativeint"
+        | "System.IntPtr"  -> "nativeint"
+        | "System.UIntPtr" -> "unativeint"
 
-        | "System.Numerics.BigInteger"  -> "bigint"
-        | "Microsoft.FSharp.Core.Unit"  -> "unit"
-        | "Microsoft.FSharp.Math.BigRational"   -> "BigNum"
-        | "Microsoft.FSharp.Core.FSharpRef"     -> "ref"
-        | "Microsoft.FSharp.Core.FSharpOption"  -> "option"
+        | "System.Numerics.BigInteger" -> "bigint"
+        | "Microsoft.FSharp.Core.Unit" -> "unit"
+        | "Microsoft.FSharp.Math.BigRational"  -> "BigNum"
+        | "Microsoft.FSharp.Core.FSharpChoice" -> "Choice"
+        | "Microsoft.FSharp.Core.FSharpRef"    -> "ref"
+        | "Microsoft.FSharp.Core.FSharpResult" -> "Result"
+        | "Microsoft.FSharp.Core.FSharpOption" -> "option"
+        | "Microsoft.FSharp.Core.FSharpValueOption" -> "voption"
+        | "Microsoft.FSharp.Control.FSharpHandler"  -> "Handler"
         | "Microsoft.FSharp.Collections.FSharpList" -> "list"
         | "Microsoft.FSharp.Collections.FSharpMap"  -> "Map"
+        | "Microsoft.FSharp.Collections.FSharpSet"  -> "Set"
         | "System.Collections.Generic.IEnumerable"  -> "seq"
-        | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] }-> name //short name
+        | "System.Collections.Generic.List" -> "ResizeArray"
+        | Regex.Compiled.Match @"[\.\+]?([^\.\+]*)$" { GroupValues=[name] } -> name //short name
         | cleanName -> failwith "failed to lookup type display name from it's \"clean\" name: " + cleanName
 
     let rec sprintSig context (ty:Type) =
@@ -289,16 +305,26 @@ let sprintSig (outerTy:Type) =
                 cleanName, arrSig
             | _ ->
                 failwith ("failed to parse type name: " + ty.FullName)
-
-        match ty.GetGenericArgumentsArrayInclusive() with
-        | args when args.Length = 0 ->
-            (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
-        | args when cleanName = "System.Tuple" ->
-            (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
-        | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
-            (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
-        | args ->
-            sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
+        let rec getAnonRecordInfo(ty:Type) =
+            if FSharpType.IsRecord ty && ty.Name.Contains "AnonymousType" && ty.GetCustomAttributes(typeof<System.Runtime.CompilerServices.CompilerGeneratedAttribute>, false).Length > 0 then
+                Some (ty.IsValueType, FSharpType.GetRecordFields ty)
+            elif ty.IsArray then ty.GetElementType() |> getAnonRecordInfo
+            else None
+        match getAnonRecordInfo ty with
+        | Some (isStruct, recordFields) ->
+            (if isStruct then "struct {| " else "{| ") + (recordFields |> Array.map (fun r -> sprintf "%s: %s" (sourceNameFromString r.Name) (sprintSig 1 r.PropertyType)) |> String.concat "; ") + " |}" + arrSig
+        | None ->
+            match ty.GetGenericArgumentsArrayInclusive() with
+            | args when args.Length = 0 ->
+                (if outerTy.IsGenericTypeDefinition then "'" else "") + (displayName cleanName) + arrSig
+            | args when cleanName = "System.Tuple" && args.Length >= 2 ->
+                (applyParens (if arrSig.Length > 0 then 0 else 3) (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+            | args when cleanName = "System.ValueTuple" && args.Length >= 2 ->
+                "struct " + (applyParens 0 (sprintf "%s" (args |> Array.map (sprintSig 3) |> String.concat " * "))) +  arrSig
+            | [|lhs;rhs|] when cleanName = "Microsoft.FSharp.Core.FSharpFunc" -> //right assoc, binding not as strong as tuples
+                (applyParens (if arrSig.Length > 0 then 0 else 2) (sprintf "%s -> %s" (sprintSig 2 lhs) (sprintSig 1 rhs))) + arrSig
+            | args ->
+                sprintf "%s<%s>%s" (displayName cleanName) (args |> Array.map (sprintSig 1) |> String.concat ", ") arrSig
 
     sprintSig 0 outerTy
 
