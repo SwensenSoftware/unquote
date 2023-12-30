@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Unquote</id>
-    <version>6.1.0</version>
+    <version>7.0.0</version>
     <authors>Stephen Swensen</authors>
     <owners>Stephen Swensen</owners>
     <icon>images/logo.png</icon>
@@ -19,7 +19,7 @@ Unquote integrates configuration-free with all exception-based unit testing fram
 In addition to its unit testing features, Unquote includes operators for evaluating, decompiling, and incrementally reducing quoted expressions.</description>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="FSharp.Core" version="4.7.2"></dependency>
+        <dependency id="FSharp.Core" version="8.0.100"></dependency>
       </group>
     </dependencies>
     <releaseNotes>https://github.com/SwensenSoftware/unquote/wiki/ReleaseNotes</releaseNotes>
