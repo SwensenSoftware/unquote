@@ -1506,7 +1506,7 @@ let ``decompile Tuples and ValueTuples of 0 or 1 arity correctly`` () =
 
 [<Fact>]
 let ``Pretty-print Choices`` () =
-    <@ ResizeArray[Choice1Of2 1], ResizeArray[Choice2Of3 2], ResizeArray[Choice3Of4 3] @>
+    <@ (ResizeArray[Choice1Of2 1], ResizeArray[Choice2Of3 2], ResizeArray[Choice3Of4 3]) @>
     |> decompile =! "(new ResizeArray<Choice<int, obj>>([Choice1Of2(1)]), new ResizeArray<Choice<obj, int, obj>>([Choice2Of3(2)]), new ResizeArray<Choice<obj, obj, int, obj>>([Choice3Of4(3)]))"
 [<Fact>]
 
