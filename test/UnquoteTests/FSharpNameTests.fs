@@ -56,8 +56,12 @@ let ``array of generic type`` () =
     typeof<list<int>[]>.FSharpName =! "list<int>[]";
 
 [<Fact>]
-let ``tuple array is parenthisized`` () =
-    typeof<(int * int)[]>.FSharpName =! "(int * int)[]";
+let ``tuple array is parenthesized`` () =
+    typeof<(int * int)[]>.FSharpName =! "(int * int)[]"
+
+[<Fact>]
+let ``struct tuple array is parenthesized`` () =
+    typeof<struct (int * int)[]>.FSharpName =! "struct (int * int)[]";
 
 [<Fact>]
 let ``fsharp funcs`` () =
