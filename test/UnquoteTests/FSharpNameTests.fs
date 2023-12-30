@@ -61,7 +61,31 @@ let ``tuple array is parenthesized`` () =
 
 [<Fact>]
 let ``struct tuple array is parenthesized`` () =
-    typeof<struct (int * int)[]>.FSharpName =! "struct (int * int)[]";
+    typeof<struct (int * int)[]>.FSharpName =! "struct (int * int)[]"
+
+[<Fact>]
+let ``anon record`` () =
+    typeof<{| A: int; B: string |}>.FSharpName =! "{| A: int; B: string |}"
+
+[<Fact>]
+let ``anon record nested`` () =
+    typeof<{| A: int; B: {| C: float |} |}>.FSharpName =! "{| A: int; B: {| C: float |} |}"
+
+[<Fact>]
+let ``anon record nested array`` () =
+    typeof<{| A: int; B: {| C: float |}[] |}[]>.FSharpName =! "{| A: int; B: {| C: float |}[] |}[]"
+
+[<Fact>]
+let ``struct anon record`` () =
+    typeof<struct {| A: int; B: string |}>.FSharpName =! "struct {| A: int; B: string |}"
+
+[<Fact>]
+let ``struct anon record nested`` () =
+    typeof<struct {| A: int; B: struct {| C: float |} |}>.FSharpName =! "struct {| A: int; B: struct {| C: float |} |}"
+
+[<Fact>]
+let ``struct anon record nested array`` () =
+    typeof<struct {| A: int; B: struct {| C: float |}[] |}[]>.FSharpName =! "struct {| A: int; B: struct {| C: float |}[] |}[]"
 
 [<Fact>]
 let ``fsharp funcs`` () =
