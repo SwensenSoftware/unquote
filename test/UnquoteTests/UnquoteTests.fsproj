@@ -8,14 +8,14 @@
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="EvaluationTests.fs" />
-    <Compile Include="DynamicOperatorsEvaluationTests.fs" />
-    <Compile Include="CheckedDynamicOperatorsEvaluationTests.fs" />
-    <Compile Include="FSharpNameTests.fs" />
-    <Compile Include="DecompilationTests.fs" />
-    <Compile Include="ReductionTests.fs" />
     <Compile Include="AssertionOperatorsTests.fs" />
+    <Compile Include="CheckedDynamicOperatorsEvaluationTests.fs" />
     <Compile Include="CustomExceptionSerializationTests.fs" />
+    <Compile Include="DecompilationTests.fs" />
+    <Compile Include="DynamicOperatorsEvaluationTests.fs" />
+    <Compile Include="EvaluationTests.fs" />
+    <Compile Include="FSharpNameTests.fs" />
+    <Compile Include="ReductionTests.fs" />
     <Compile Include="UnquotedExpressionTests.fs" />
   </ItemGroup>
   <ItemGroup>
