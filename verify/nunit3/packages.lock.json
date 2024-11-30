@@ -85,7 +85,10 @@
         "contentHash": "COC1aiAJjCoA5GBF+QKL2uLqEBew4JsCkQmoHKbN3TlOZKa2fKLz5CpiRQKDz0RsAOEGsVKqOD5bomsXq/4STQ=="
       },
       "unquote": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[6.0.0, )"
+        }
       }
     }
   }

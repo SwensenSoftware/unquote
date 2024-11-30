@@ -1020,7 +1020,10 @@
         }
       },
       "unquote": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[6.0.0, )"
+        }
       }
     }
   }

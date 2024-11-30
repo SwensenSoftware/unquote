@@ -9,7 +9,10 @@
         "contentHash": "ZOVZ/o+jI3ormTZOa28Wh0tSRoyle1f7lKFcUN61sPiXI7eDZu8eSveFybgTeyIEyW0ujjp31cp7GOglDgsNEg=="
       },
       "unquote": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[6.0.0, )"
+        }
       }
     }
   }
