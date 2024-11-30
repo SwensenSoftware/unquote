@@ -26,6 +26,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="../../src/Unquote/Unquote.fsproj" />
-    <PackageReference Update="FSharp.Core" Version="8.0.200" />
+    <PackageReference Update="FSharp.Core" Version="8.0.100" />
   </ItemGroup>
 </Project>
